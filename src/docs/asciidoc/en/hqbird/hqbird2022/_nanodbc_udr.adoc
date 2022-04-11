@@ -1,0 +1,1753 @@
+[[_hqbird_nanodbc_udr]]
+= NANODBC-UDR -- working with ODBC Data Sources
+
+Starting from version 2.5, Firebird DBMS has the ability to work with external data through
+the `EXECUTE STATEMENT .. ON EXTERNAL DATA SOURCE` statement. Unfortunately, working with external data sources
+is limited only to Firebird databases.
+
+To be able to work with other DBMS, UDR nanodbc was developed. Fully open source library licensed under the
+MIT license and free to use. It is written in C++.
+Source code is available at https://github.com/mnf71/udr-nanodbc
+
+The library is based on a thin C ++ wrapper around the native C ODBC API https://github.com/nanodbc/nanodbc
+
+== Install UDR nanodbc
+
+To be able to use UDR nanodbc, it must be registered in your database.
+To do this, you need to execute the [path]_plugin/UDR/nanodbc_install.sql_ script.
+
+== How it works?
+
+UDR nanodbc is based on the free library nanodbc, therefore, for a complete understanding,
+we recommend that you study the API of this library in its source codes and documentation
+(see https://github.com/mnf71/udr-nanodbc).
+
+When working with library objects, so-called descriptors (pointers to nanodbc objects) are used.
+Pointers are described by a domain defined as:
+
+[source,sql]
+----
+CREATE DOMAIN TY$POINTER AS
+CHAR(8) CHARACTER SET OCTETS;
+----
+
+in Firebird 4.0 it can be described in the following way
+
+[source,sql]
+----
+CREATE DOMAIN TY$POINTER AS BINARY(8);
+----
+
+After finishing work with the object, the pointer to it must be released using the `release_()` functions,
+which are located in the corresponding PSQL packages.
+Which package to use depends on the type of object you want to free the pointer to.
+
+In HQbird, it is impossible to create a function that does not return a result, therefore, for C++ functions with
+a `void` return type, UDR functions return the type described by the `TY$NANO_BLANK` domain.
+It makes no sense to analyze the result of such functions. Domain `TY$NANO_BLANK` is described as:
+
+[source,sql]
+----
+CREATE DOMAIN TY$NANO_BLANK AS SMALLINT;
+----
+
+Before you start working with the UDR, you need to initialize the nanodbc library.
+This is done by calling the `nano$udr.initialize()` function. And upon completion of the work, call
+finalization function `nano$udr.finalize()`. It is recommended to call `nano$udr.initialize()` function in the
+`ON CONNECT` trigger, and `nano$udr.finalize()` function in the `ON DISCONNECT` trigger.
+
+== Description of PSQL packages from UDR-nanodbc
+
+=== `NANO$UDR` package
+
+The header of this package looks like this:
+
+[source,sql]
+----
+CREATE OR ALTER PACKAGE NANO$UDR
+AS
+BEGIN
+
+  FUNCTION initialize RETURNS TY$NANO_BLANK;
+  FUNCTION finalize RETURNS TY$NANO_BLANK;
+  FUNCTION expunge RETURNS TY$NANO_BLANK;
+
+  FUNCTION locale(
+      set_locale VARCHAR(20) CHARACTER SET NONE DEFAULT NULL /* NULL - Get */
+    ) RETURNS CHARACTER SET NONE VARCHAR(20);
+
+  FUNCTION error_message RETURNS VARCHAR(512) CHARACTER SET UTF8;
+
+END
+----
+
+The `NANO$UDR` package contains functions for initializing and finalizing UDRs.
+
+The `initialize()` function initializes the nanodbc UDR. It is recommended to call this function in the `ON CONNECT` trigger.
+It must be called before the first call to any other function from the nanodbc UDR.
+
+The `finalize()` function terminates the nanodbc UDR. After calling it, it is impossible to work with UDR nanodbc.
+When called, the function automatically releases all previously allocated resources.
+It is recommended to call this function in the `ON DISCONNECT` trigger.
+
+The `expunge()` function automatically releases all previously allocated resources (connections, transactions, prepared statements, cursors).
+
+The `locale()` function returns or sets the default encoding for connections.
+If the `set_locale` parameter is specified, then a new encoding will be set, otherwise the function will return
+the value of the current encoding. This is necessary to transform transmitted and received strings,
+before and after exchanging with an ODBC source. The default encoding is cp1251.
+
+If initially the connection to the database is established with UTF8 encoding, then you can set utf8,
+according to the names of iconv. If the encoding is NONE, then it is better to convert to your language encoding
+using the `convert_[var]char()` functions.
+
+The `error_message()` function returns the text of the last error.
+
+=== `NANO$CONN` package
+
+The header of this package looks like this:
+
+[source,sql]
+----
+CREATE OR ALTER PACKAGE NANO$CONN
+AS
+BEGIN
+
+  /*  Note:
+        CHARACTER SET UTF8
+        attr VARCHAR(512) CHARACTER SET UTF8 DEFAULT NULL
+        ...
+        CHARACTER SET WIN1251
+        attr VARCHAR(2048) CHARACTER SET WIN1251 DEFAULT NULL
+   */
+
+  FUNCTION connection(
+      attr VARCHAR(512) CHARACTER SET UTF8 DEFAULT NULL,
+      user_ VARCHAR(63) CHARACTER SET UTF8 DEFAULT NULL,
+      pass VARCHAR(63) CHARACTER SET UTF8 DEFAULT NULL,
+      timeout INTEGER NOT NULL DEFAULT 0
+    ) RETURNS TY$POINTER;
+
+  FUNCTION valid(conn TY$POINTER NOT NULL) RETURNS BOOLEAN;
+
+  FUNCTION release_(conn TY$POINTER NOT NULL) RETURNS TY$POINTER;
+  FUNCTION expunge(conn ty$pointer NOT NULL) RETURNS TY$NANO_BLANK;
+
+  FUNCTION allocate(conn ty$pointer NOT NULL) RETURNS TY$NANO_BLANK;
+  FUNCTION deallocate(conn ty$pointer NOT NULL) RETURNS TY$NANO_BLANK;
+
+  FUNCTION txn_read_uncommitted RETURNS SMALLINT;
+  FUNCTION txn_read_committed RETURNS SMALLINT;
+  FUNCTION txn_repeatable_read RETURNS SMALLINT;
+  FUNCTION txn_serializable RETURNS SMALLINT;
+
+  FUNCTION isolation_level(
+      conn TY$POINTER NOT NULL,
+      level_ SMALLINT DEFAULT NULL /* NULL - get usage */
+    ) RETURNS SMALLINT;
+
+  FUNCTION connect_(
+      conn TY$POINTER NOT NULL,
+      attr VARCHAR(512) CHARACTER SET UTF8 NOT NULL,
+      user_ VARCHAR(63) CHARACTER SET UTF8 DEFAULT NULL,
+      pass VARCHAR(63) CHARACTER SET UTF8 DEFAULT NULL,
+      timeout INTEGER NOT NULL DEFAULT 0
+    ) RETURNS TY$NANO_BLANK;
+
+  FUNCTION connected(conn TY$POINTER NOT NULL) RETURNS BOOLEAN;
+
+  FUNCTION disconnect_(conn ty$pointer NOT NULL) RETURNS TY$NANO_BLANK;
+
+  FUNCTION transactions(conn TY$POINTER NOT NULL) RETURNS INTEGER;
+
+  FUNCTION get_info(conn TY$POINTER NOT NULL, info_type SMALLINT NOT NULL)
+    RETURNS VARCHAR(256) CHARACTER SET UTF8;
+
+  FUNCTION dbms_name(conn ty$pointer NOT NULL) RETURNS VARCHAR(128) CHARACTER SET UTF8;
+  FUNCTION dbms_version(conn ty$pointer NOT NULL) RETURNS VARCHAR(128) CHARACTER SET UTF8;
+  FUNCTION driver_name(conn TY$POINTER NOT NULL) RETURNS VARCHAR(128) CHARACTER SET UTF8;
+  FUNCTION database_name(conn TY$POINTER NOT NULL) RETURNS VARCHAR(128) CHARACTER SET UTF8;
+  FUNCTION catalog_name(conn TY$POINTER NOT NULL) RETURNS VARCHAR(128) CHARACTER SET UTF8;
+
+END
+----
+
+The `NANO$CONN` package contains functions for setting up an ODBC data source and getting some connection information.
+
+The `connection()` function establishes a connection to an ODBC data source.
+If more than one parameter is not specified, the function will return a pointer to the "connection" object.
+The actual connection to the ODBC data source can be made later using the `connect_()` function.
+Function parameters:
+
+-  `attr` specifies the connection string or the so-called DSN;
+-  `user_` specifies the username;
+-  `pass` sets the password;
+-  `timeout` specifies the idle timeout.
+
+The `valid()` function returns whether the connection object pointer is valid.
+
+The `release_()` function releases the connection pointer and all associated resources (transactions, prepared statements, cursors).
+
+The `expunge()` function releases all resources associated with the connection (transactions, prepared statements, cursors).
+
+The `allocate()` function allows you to allocate descriptors on demand for setting the environment and ODBC attributes prior to establishing a connection to the database. Typically, the user does not need to make this call explicitly.
+
+The `deallocate()` function frees the connection handles.
+
+The `txn_read_uncommitted()` function returns the numeric constant required to set the transaction isolation level to READ UNCOMMITTED.
+
+The `txn_read_committed()` function returns the numeric constant required to set the transaction isolation level to READ COMMITTED.
+
+The `txn_repeatable_read()` function returns a numeric constant required to set the isolation level of the REPEATABLE READ transaction.
+
+The `txn_serializable()` function returns the numeric constant required to set the transaction isolation level to SERIALIZABLE.
+
+The `isolation_level()` function sets the isolation level for new transactions. Function parameters:
+
+-  `conn` - pointer to the connection object;
+-  `attr` specifies the connection string or the so-called DSN;
+-  `user_` specifies the username;
+-  `pass` sets the password;
+-  `timeout` specifies the idle timeout.
+
+The `connected()` function returns whether a database connection has been established for
+the given pointer to the connection object.
+
+The `disconnect_()` function disconnects from the database. A pointer to the connection
+object is passed as a parameter.
+
+The `transactions()` function returns the number of active transactions for a given connection.
+
+The `get_info()` function returns various information about the driver or data source.
+This low-level function is the ODBC analogue of the `SQLGetInfo` function.
+It is not recommended use it directly. Function parameters:
+
+- `conn` - pointer to the connection object;
+- `info_type` - the type of information returned. Numeric constants with return types can be found at https://github.com/microsoft/ODBC-Specification/blob/master/Windows/inc/sql.h
+
+The `dbms_name()` function returns the name of the DBMS to which the connection was made.
+
+The `dbms_version()` function returns the version of the DBMS to which the connection was made.
+
+The `driver_name()` function returns the name of the driver.
+
+The `database_name()` function returns the name of the database to which the connection was made.
+
+The `catalog_name()` function returns the name of the database catalog to which the connection was made.
+
+=== `NANO$TNX` package
+
+The header of this package looks like this:
+
+[source,sql]
+----
+CREATE OR ALTER PACKAGE NANO$TNX
+AS
+BEGIN
+
+  FUNCTION transaction_(conn TY$POINTER NOT NULL) RETURNS TY$POINTER;
+
+  FUNCTION valid(tnx TY$POINTER NOT NULL) RETURNS BOOLEAN;
+
+  FUNCTION release_(tnx ty$pointer NOT NULL) RETURNS TY$POINTER;
+
+  FUNCTION connection(tnx TY$POINTER NOT NULL) RETURNS TY$POINTER;
+
+  FUNCTION commit_(tnx TY$POINTER NOT NULL) RETURNS TY$NANO_BLANK;
+
+  FUNCTION rollback_(tnx TY$POINTER NOT NULL) RETURNS TY$NANO_BLANK;
+
+END
+----
+
+The `NANO$TNX` package contains functions for explicitly managing transactions.
+
+The `transaction _()` function disables the automatic confirmation of the transaction and
+starts a new transaction with the isolation level specified in the
+`NANO$CONN.isolation_level()` function. The function returns a pointer to a new transaction.
+
+The `valid()` function returns whether the pointer to the transaction object is valid.
+
+The `release_()` function releases the pointer to the transaction object.
+When the pointer is freed, the uncommitted transaction is rolled back and the driver returns
+to the automatic transaction confirmation mode.
+
+The `connection()` function returns a pointer to the connection for which the transaction
+was started.
+
+The `commit_()` function confirms the transaction.
+
+The `rollback_()` function rolls back the transaction.
+
+=== `NANO$STMT` package
+
+The header of this package looks like this:
+
+[source,sql]
+----
+CREATE OR ALTER PACKAGE NANO$STMT
+AS
+BEGIN
+
+  FUNCTION statement_(
+      conn TY$POINTER DEFAULT NULL,
+      query VARCHAR(8191) CHARACTER SET UTF8 DEFAULT NULL,
+      scrollable BOOLEAN DEFAULT NULL /* NULL - default ODBC driver */,
+      timeout INTEGER NOT NULL DEFAULT 0
+    ) RETURNS TY$POINTER;
+
+  FUNCTION valid(stmt TY$POINTER NOT NULL) RETURNS BOOLEAN;
+
+  FUNCTION release_(stmt TY$POINTER NOT NULL) RETURNS TY$POINTER;
+
+  FUNCTION connected(stmt TY$POINTER NOT NULL) RETURNS BOOLEAN;
+  FUNCTION connection(stmt TY$POINTER NOT NULL) RETURNS TY$POINTER;
+
+  FUNCTION open_(
+      stmt TY$POINTER NOT NULL,
+      conn TY$POINTER NOT NULL
+    ) RETURNS TY$NANO_BLANK;
+
+  FUNCTION close_(stmt TY$POINTER NOT NULL) RETURNS TY$NANO_BLANK;
+
+  FUNCTION cancel(stmt TY$POINTER NOT NULL) RETURNS TY$NANO_BLANK;
+
+  FUNCTION closed(stmt TY$POINTER NOT NULL) RETURNS BOOLEAN;
+
+  FUNCTION prepare_direct(
+      stmt TY$POINTER NOT NULL,
+      conn TY$POINTER NOT NULL,
+      query VARCHAR(8191) CHARACTER SET UTF8 NOT NULL,
+      scrollable BOOLEAN DEFAULT NULL /* NULL - default ODBC driver */,
+      timeout INTEGER NOT NULL DEFAULT 0
+    ) RETURNS TY$NANO_BLANK;
+
+  FUNCTION prepare_(
+      stmt TY$POINTER NOT NULL,
+      query VARCHAR(8191) CHARACTER SET UTF8 NOT NULL,
+      scrollable BOOLEAN DEFAULT NULL /* NULL - default ODBC driver */,
+      timeout INTEGER NOT NULL DEFAULT 0
+    ) RETURNS TY$NANO_BLANK;
+
+  FUNCTION scrollable(
+      stmt TY$POINTER NOT NULL,
+      usage_ BOOLEAN DEFAULT NULL /* NULL - get usage */
+    ) RETURNS BOOLEAN;
+
+  FUNCTION timeout(
+      stmt TY$POINTER NOT NULL,
+      timeout INTEGER NOT NULL DEFAULT 0
+    ) RETURNS TY$NANO_BLANK;
+
+  FUNCTION execute_direct(
+      stmt TY$POINTER NOT NULL,
+      conn TY$POINTER NOT NULL,
+      query VARCHAR(8191) CHARACTER SET UTF8 NOT NULL,
+      scrollable BOOLEAN DEFAULT NULL /* NULL - default ODBC driver */,
+      batch_operations INTEGER NOT NULL DEFAULT 1,
+      timeout INTEGER NOT NULL DEFAULT 0
+    ) RETURNS TY$POINTER;
+
+  FUNCTION just_execute_direct(
+      stmt TY$POINTER NOT NULL,
+      conn TY$POINTER NOT NULL,
+      query VARCHAR(8191) CHARACTER SET UTF8 NOT NULL,
+      batch_operations INTEGER NOT NULL DEFAULT 1,
+      timeout INTEGER NOT NULL DEFAULT 0
+    ) RETURNS TY$NANO_BLANK;
+
+  FUNCTION execute_(
+      stmt TY$POINTER NOT NULL,
+      batch_operations INTEGER NOT NULL DEFAULT 1,
+      timeout INTEGER NOT NULL DEFAULT 0
+    ) RETURNS TY$POINTER;
+
+  FUNCTION just_execute(
+      stmt TY$POINTER NOT NULL,
+      batch_operations INTEGER NOT NULL DEFAULT 1,
+      timeout INTEGER NOT NULL DEFAULT 0
+    ) RETURNS TY$NANO_BLANK;
+
+  FUNCTION procedure_columns(
+      stmt TY$POINTER NOT NULL,
+      catalog_ VARCHAR(128) CHARACTER SET UTF8 NOT NULL,
+      schema_ VARCHAR(128) CHARACTER SET UTF8 NOT NULL,
+      procedure_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL,
+      column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS TY$POINTER;
+
+  FUNCTION affected_rows(stmt TY$POINTER NOT NULL) RETURNS INTEGER;
+  FUNCTION columns(stmt TY$POINTER NOT NULL) RETURNS SMALLINT;
+  FUNCTION parameters(stmt TY$POINTER NOT NULL) RETURNS SMALLINT;
+  FUNCTION parameter_size(stmt TY$POINTER NOT NULL, parameter_index SMALLINT NOT NULL)
+    RETURNS INTEGER;
+
+  ------------------------------------------------------------------------------
+
+  FUNCTION bind_smallint(
+      stmt TY$POINTER NOT NULL,
+      parameter_index SMALLINT NOT NULL,
+      value_ SMALLINT
+    ) RETURNS TY$NANO_BLANK;
+
+  FUNCTION bind_integer(
+      stmt TY$POINTER NOT NULL,
+      parameter_index SMALLINT NOT NULL,
+      value_ INTEGER
+    ) RETURNS TY$NANO_BLANK;
+
+/*
+  FUNCTION bind_bigint(
+      stmt TY$POINTER NOT NULL,
+      parameter_index SMALLINT NOT NULL,
+      value_ BIGINT
+    ) RETURNS TY$NANO_BLANK;
+*/
+
+  FUNCTION bind_float(
+      stmt TY$POINTER NOT NULL,
+      parameter_index SMALLINT NOT NULL,
+      value_ FLOAT
+    ) RETURNS TY$NANO_BLANK;
+
+  FUNCTION bind_double(
+      stmt TY$POINTER NOT NULL,
+      parameter_index SMALLINT NOT NULL,
+      value_ DOUBLE PRECISION
+    ) RETURNS TY$NANO_BLANK;
+
+  FUNCTION bind_varchar(
+      stmt TY$POINTER NOT NULL,
+      parameter_index SMALLINT NOT NULL,
+      value_ VARCHAR(32765) CHARACTER SET NONE,
+      param_size SMALLINT NOT NULL DEFAULT 0
+    ) RETURNS TY$NANO_BLANK;
+
+  FUNCTION bind_char(
+      stmt TY$POINTER NOT NULL,
+      parameter_index SMALLINT NOT NULL,
+      value_ CHAR(32767) CHARACTER SET NONE,
+      param_size SMALLINT NOT NULL DEFAULT 0
+    ) RETURNS TY$NANO_BLANK;
+
+  FUNCTION bind_u8_varchar(
+      stmt TY$POINTER NOT NULL,
+      parameter_index SMALLINT NOT NULL,
+      value_ VARCHAR(8191) CHARACTER SET UTF8,
+      param_size SMALLINT NOT NULL DEFAULT 0
+    ) RETURNS TY$NANO_BLANK;
+
+  FUNCTION bind_u8_char(
+      stmt TY$POINTER NOT NULL,
+      parameter_index SMALLINT NOT NULL,
+      value_ CHAR(8191) CHARACTER SET UTF8,
+      param_size SMALLINT NOT NULL DEFAULT 0
+    ) RETURNS TY$NANO_BLANK;
+
+  FUNCTION bind_blob(
+      stmt TY$POINTER NOT NULL,
+      parameter_index SMALLINT NOT NULL,
+      value_ BLOB
+    ) RETURNS TY$NANO_BLANK;
+
+  FUNCTION bind_boolean(
+      stmt TY$POINTER NOT NULL,
+      parameter_index SMALLINT NOT NULL,
+      value_ BOOLEAN
+    ) RETURNS TY$NANO_BLANK;
+
+  FUNCTION bind_date(
+      stmt TY$POINTER NOT NULL,
+      parameter_index SMALLINT NOT NULL,
+      value_ DATE
+    ) RETURNS TY$NANO_BLANK;
+
+/*
+  FUNCTION bind_time(
+      stmt TY$POINTER NOT NULL,
+      parameter_index SMALLINT NOT NULL,
+      value_ TIME
+    ) RETURNS TY$NANO_BLANK
+    EXTERNAL NAME 'nano!stmt_bind'
+    ENGINE UDR;
+*/
+
+  FUNCTION bind_timestamp(
+      stmt TY$POINTER NOT NULL,
+      parameter_index SMALLINT NOT NULL,
+      value_ TIMESTAMP
+    ) RETURNS TY$NANO_BLANK;
+
+  FUNCTION bind_null(
+      stmt TY$POINTER NOT NULL,
+      parameter_index SMALLINT NOT NULL,
+      batch_size INTEGER NOT NULL DEFAULT 1 -- <> 1 call nulls all batch
+    ) RETURNS TY$NANO_BLANK;
+
+  FUNCTION convert_varchar(
+      value_ VARCHAR(32765) CHARACTER SET NONE,
+      from_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      to_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      convert_size SMALLINT NOT NULL DEFAULT 0
+    ) RETURNS VARCHAR(32765) CHARACTER SET NONE;
+
+  FUNCTION convert_char(
+      value_ CHAR(32767) CHARACTER SET NONE,
+      from_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      to_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      convert_size SMALLINT NOT NULL DEFAULT 0
+    ) RETURNS CHAR(32767) CHARACTER SET NONE;
+
+  FUNCTION clear_bindings(stmt TY$POINTER NOT NULL) RETURNS TY$NANO_BLANK;
+
+  ------------------------------------------------------------------------------
+
+  FUNCTION describe_parameter(
+      stmt TY$POINTER NOT NULL,
+      idx SMALLINT NOT NULL,
+      type_ SMALLINT NOT NULL,
+      size_ INTEGER NOT NULL,
+      scale_ SMALLINT NOT NULL DEFAULT 0
+    ) RETURNS TY$NANO_BLANK;
+
+  FUNCTION describe_parameters(stmt TY$POINTER NOT NULL) RETURNS TY$NANO_BLANK;
+
+  FUNCTION reset_parameters(stmt TY$POINTER NOT NULL, timeout INTEGER NOT NULL DEFAULT 0)
+    RETURNS TY$NANO_BLANK;
+
+END
+----
+
+The `NANO$STMT` package contains functions for working with SQL queries.
+
+The `statement_()` function creates and returns a pointer to an SQL query object.
+Parameters:
+
+- `conn` - pointer to the connection object;
+- `query` - the text of the SQL query;
+- `scrollable` - whether the cursor is scrollable (if, of course, the operator returns a cursor),
+if not set (NULL value), then the default behavior of the ODBC driver is used;
+- `timeout` - SQL statement timeout.
+
+If no parameter is specified, then it returns a pointer to the newly created SQL query object,
+without binding to the connection. You can later associate this pointer with a connection
+and set other query properties.
+
+The `valid()` function returns whether the pointer to the SQL query object is valid.
+
+The `release_()` function releases the pointer to the SQL query object.
+
+The `connected()` function returns whether the request is attached to a connection.
+
+The `connection()` function is a pointer to the bound connection.
+
+The `open_()` function opens a connection and binds it to the request.
+Parameters:
+
+- `stmt` - pointer to SQL query;
+- `conn` - connection pointer.
+
+The `close_()` function closes a previously opened request and clears all resources allocated
+by the request.
+
+The `cancel()` function cancels the execution of the request.
+
+The `closed()` function returns whether the request is closed.
+
+The `prepare_direct()` function prepares an SQL statement and binds it to the specified
+connection. Parameters:
+
+- `stmt` - a pointer to the statement;
+- `conn` - connection pointer;
+- `query` - the text of the SQL query;
+- `scrollable` - whether the cursor is scrollable (if, of course, the operator returns a cursor),
+if not set (NULL value), then the default behavior of the ODBC driver is used;
+- `timeout` - SQL statement timeout.
+
+The `prepare_()` function prepares the SQL query.
+Parameters:
+
+- `stmt` - a pointer to the statement;
+- `query` - the text of the SQL query;
+- `scrollable` - whether the cursor is scrollable (if, of course, the operator returns a cursor),
+if not set (NULL value), then the default behavior of the ODBC driver is used;
+- `timeout` - SQL statement timeout.
+
+The `scrollable_()` function returns or sets whether the cursor is scrollable.
+Parameters:
+
+- `stmt` - a pointer to the statement;
+- `usage_` - whether the cursor is scrollable (if, of course, the operator returns a cursor),
+if not set (NULL value), then it returns the current value of this flag.
+
+The `timeout()` function sets the timeout for the SQL query.
+
+The `execute_direct()` function prepares and executes an SQL statement.
+The function returns a pointer to a data set (cursor), which can be processed using
+the functions of the `NANO$RSLT` package. Parameters:
+
+- `stmt` - a pointer to the statement;
+- `conn` - connection pointer;
+- `query` - the text of the SQL query;
+- `scrollable` - whether the cursor is scrollable (if, of course, the operator returns a cursor),
+if not set (NULL value), then the default behavior of the ODBC driver is used;
+- `batch_operations` - the number of batch operations. The default is 1;
+- `timeout` - SQL statement timeout.
+
+The `just_execute_direct()` function prepares and executes an SQL statement.
+The function is designed to execute SQL statements that do not return data (do not open
+a cursor).
+Parameters:
+
+- `stmt` - a pointer to the statement;
+- `conn` - connection pointer;
+- `query` - the text of the SQL query;
+- `batch_operations` - the number of batch operations. The default is 1;
+- `timeout` - SQL statement timeout.
+
+
+The `execute_()` function executes the prepared SQL statement. The function returns a pointer to a data set (cursor), which can be processed using the functions of the `NANO$RSLT` package. Parameters:
+
+- `stmt` - a pointer to a prepared statement;
+- `batch_operations` - the number of batch operations. By default, NANO $ STMT is 1;
+- `timeout` - SQL statement timeout.
+
+
+The `just_execute()` function executes the prepared SQL statement. The function is designed to execute SQL statements that do not return data (do not open a cursor). Parameters:
+
+- `stmt` - a pointer to a prepared statement;
+- `batch_operations` - the number of batch operations. The default is 1;
+- `timeout` - SQL statement timeout.
+
+The `procedure_columns()` function -- returns the description of the output field of the stored procedure as a `nano$rslt` dataset. Function parameters:
+
+- `stmt` - a pointer to the statement;
+- `catalog_` - the name of the catalog to which the SP belongs;
+- `schema_` - the name of the schema in which the SP is located;
+- `procedure_` - the name of the stored procedure;
+- `column_` - the name of the output column of the SP.
+
+The `affected_rows()` function returns the number of rows affected by the SQL statement.
+This function can be called after the statement is executed.
+
+The `columns()` function returns the number of columns returned by the SQL query.
+
+The `parameters()` function returns the number of SQL query parameters.
+This function can be called only after preparing the SQL query.
+
+The `parameter_size()` function returns the size of the parameter in bytes.
+
+- `stmt` - a pointer to a prepared statement;
+- `parameter_index` - parameter index.
+
+Functions of the `bind_<type> ...` family bind a value to a parameter if the DBMS supports
+batch operations see. `execute()` parameter `batch_operations`, then the number of transmitted
+values is not limited, within reasonable limits. Otherwise, only the first set of values entere
+d is transmitted. The binding itself occurs already when you call `execute()`.
+
+The `bind_smallint()` function binds a `SMALLINT` value to an SQL parameter.
+
+- `stmt` - a pointer to a prepared statement;
+- `parameter_index` - parameter index;
+- `value_` - parameter value.
+
+The `bind_integer()` function binds an `INTEGER` value to a SQL parameter.
+
+- `stmt` - a pointer to a prepared statement;
+- `parameter_index` - parameter index;
+- `value_` - parameter value.
+
+The `bind_bigint()` function binds a `BIGINT` value to a SQL parameter.
+
+- `stmt` - a pointer to a prepared statement;
+- `parameter_index` - parameter index;
+- `value_` - parameter value.
+
+The `bind_float()` function binds a `FLOAT` value to an SQL parameter.
+
+- `stmt` - a pointer to a prepared statement;
+- `parameter_index` - parameter index;
+- `value_` - parameter value.
+
+The `bind_double()` function binds a `DOUBLE PRECISION` value to an SQL parameter.
+
+- `stmt` - a pointer to a prepared statement;
+- `parameter_index` - parameter index;
+- `value_` - parameter value.
+
+The `bind_varchar()` function binds a `VARCHAR` value to a SQL parameter.
+Used for single-byte encodings.
+
+- `stmt` - a pointer to a prepared statement;
+- `parameter_index` - parameter index;
+- `value_` - parameter value;
+- `param_size` - the size of the parameter (string).
+
+The `bind_char()` function binds a `CHAR` value to a SQL parameter.
+Used for single-byte encodings.
+
+- `stmt` - a pointer to a prepared statement;
+- `parameter_index` - parameter index;
+- `value_` - parameter value;
+- `param_size` - the size of the parameter (string).
+
+The `bind_u8_varchar()` function binds a `VARCHAR` value to a SQL parameter.
+Used for UTF8 encoded strings.
+
+- `stmt` - a pointer to a prepared statement;
+- `parameter_index` - parameter index;
+- `value_` - parameter value;
+- `param_size` - the size of the parameter (string).
+
+The `bind_u8_char()` function binds a `VARCHAR` value to a SQL parameter.
+Used for UTF8 encoded strings.
+
+- `stmt` - a pointer to a prepared statement;
+- `parameter_index` - parameter index;
+- `value_` - parameter value;
+- `param_size` - the size of the parameter (string).
+
+The `bind_blob()` function binds a `BLOB` value to an SQL parameter.
+
+- `stmt` - a pointer to a prepared statement;
+- `parameter_index` - parameter index;
+- `value_` - parameter value.
+
+The `bind_boolean()` function binds a `BOOLEAN` value to an SQL parameter.
+
+- `stmt` - a pointer to a prepared statement;
+- `parameter_index` - parameter index;
+- `value_` - parameter value.
+
+The `bind_date()` function binds a `DATE` value to a SQL parameter.
+
+- `stmt` - a pointer to a prepared statement;
+- `parameter_index` - parameter index;
+- `value_` - parameter value.
+
+The `bind_time()` function binds a `TIME` value to an SQL parameter.
+
+- `stmt` - a pointer to a prepared statement;
+- `parameter_index` - parameter index;
+- `value_` - parameter value.
+
+[NOTE]
+====
+Using `bind_time()` loses milliseconds unlike `bind_timestamp()`.
+====
+
+The `bind_timestamp()` function binds a `TIMESTAMP` value to a SQL parameter.
+
+- `stmt` - a pointer to a prepared statement;
+- `parameter_index` - parameter index;
+- `value_` - parameter value.
+
+The `bind_null()` function binds a NULL value to an SQL parameter.
+It is not fundamentally necessary to assign a NULL value directly to a single value,
+unless it follows from the processing logic. You can also bind NULL by calling the corresponding
+function `bind _...` if NULL is passed to it.
+
+- `stmt` - a pointer to a prepared statement;
+- `parameter_index` - parameter index;
+- `batch_size` - batch size (default 1). Allows you to set the NULL value for the parameter
+with the specified index, in several elements of the package at once.
+
+The `convert_varchar()` function converts a `VARCHAR` value to a different encoding.
+Parameters:
+
+- `value_` - string value;
+- `from_` - encoding from which to recode the string;
+- `to_` - encoding into which you want to recode the string;
+- `convert_size` - sets the size of the input buffer for conversion (for speed), for UTF8,
+for example, the number of characters should be * 4. The size of the output buffer is
+always equal to the size of the returns declaration (you can create your own functions),
+the size change depends on where and from where it is converted string value:
+single-byte encoding to multibyte - possibly increasing relative to convert_size and
+vice versa - decreasing if multibyte encoding is converted to single-byte. The result is
+always truncated according to the size of the received parameter.
+
+This is a helper function for converting strings to the desired encoding, since the other ODBC side may not always respond in the correct encoding.
+
+The `convert_char()` function converts a `CHAR` value to a different encoding.
+Parameters:
+
+- `value_` - string value;
+- `from_` - encoding from which to recode the string;
+- `to_` - encoding into which you want to recode the string;
+- `convert_size` - sets the size of the input buffer for conversion (for speed), for UTF8,
+for example, the number of characters should be * 4. The size of the output buffer is
+always equal to the size of the returns declaration (you can create your own functions), the
+size change depends on where and from where it is converted string value: single-byte encoding
+to multibyte - possibly increasing relative to convert_size and vice versa - decreasing
+if multibyte encoding is converted to single-byte. The result is always truncated according
+to the size of the received parameter.
+
+This is a helper function for converting strings to the desired encoding, since the other
+ODBC side may not always respond in the correct encoding.
+
+The `clear_bindings ()` function clears the current bindings for parameters. This function
+call is required when reusing a prepared statement with new values.
+
+The `describe_parameter()` function fills a buffer for describing the parameter, that is,
+it allows you to specify the type, size and scale of the parameter.
+
+- `stmt` - a pointer to a prepared request;
+- `idx` - parameter index;
+- `type_` - parameter type;
+- `size_` - size (for strings);
+- `scale_` - scale.
+
+The `describe_parameters()` function sends this parameter description buffer to ODBC,
+actually describes the parameters.
+
+The `reset_parameters()` function resets the parameter information of a prepared query.
+
+
+=== `NANO$RSLT` package
+
+The header of this package looks like this:
+
+[source,sql]
+----
+CREATE OR ALTER PACKAGE NANO$RSLT
+AS
+BEGIN
+
+  FUNCTION valid(rslt TY$POINTER NOT NULL) RETURNS BOOLEAN;
+
+  FUNCTION release_(rslt TY$POINTER NOT NULL) RETURNS TY$POINTER;
+
+  FUNCTION connection(rslt TY$POINTER NOT NULL) RETURNS TY$POINTER;
+
+  FUNCTION rowset_size(rslt TY$POINTER NOT NULL) RETURNS INTEGER;
+  FUNCTION affected_rows(rslt TY$POINTER NOT NULL) RETURNS INTEGER;
+  FUNCTION has_affected_rows(rslt TY$POINTER NOT NULL) RETURNS BOOLEAN;
+  FUNCTION rows_(rslt TY$POINTER NOT NULL) RETURNS INTEGER;
+  FUNCTION columns(rslt TY$POINTER NOT NULL) RETURNS SMALLINT;
+
+  ------------------------------------------------------------------------------
+
+  FUNCTION first_(rslt TY$POINTER NOT NULL) RETURNS BOOLEAN;
+  FUNCTION last_(rslt TY$POINTER NOT NULL) RETURNS BOOLEAN;
+  FUNCTION next_(rslt TY$POINTER NOT NULL) RETURNS BOOLEAN;
+  FUNCTION prior_(rslt TY$POINTER NOT NULL) RETURNS BOOLEAN;
+  FUNCTION move(rslt TY$POINTER NOT NULL, row_ INTEGER NOT NULL) RETURNS BOOLEAN;
+  FUNCTION skip_(rslt TY$POINTER NOT NULL, row_ INTEGER NOT NULL) RETURNS BOOLEAN;
+  FUNCTION position_(rslt TY$POINTER NOT NULL) RETURNS INTEGER;
+  FUNCTION at_end(rslt TY$POINTER NOT NULL) RETURNS BOOLEAN;
+
+  ------------------------------------------------------------------------------
+
+  FUNCTION get_smallint(
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS SMALLINT;
+
+  FUNCTION get_integer(
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS INTEGER;
+
+/*
+  FUNCTION get_bigint(
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS BIGINT;
+*/
+
+  FUNCTION get_float(
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS FLOAT;
+
+  FUNCTION get_double(
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS DOUBLE PRECISION;
+
+  FUNCTION get_varchar_s(
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS VARCHAR(64) CHARACTER SET NONE;
+
+  FUNCTION get_varchar(
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS VARCHAR(256) CHARACTER SET NONE;
+
+  FUNCTION get_varchar_l(
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS VARCHAR(1024) CHARACTER SET NONE;
+
+  FUNCTION get_varchar_xl (
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS VARCHAR(8192) CHARACTER SET NONE;
+
+  FUNCTION get_varchar_xxl (
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS VARCHAR(32765) CHARACTER SET NONE;
+
+  FUNCTION get_char_s (
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS CHAR(64) CHARACTER SET NONE;
+
+  FUNCTION get_char (
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS CHAR(256) CHARACTER SET NONE;
+
+  FUNCTION get_char_l (
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS CHAR(1024) CHARACTER SET NONE;
+
+  FUNCTION get_char_xl(
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS CHAR(8192) CHARACTER SET NONE;
+
+  FUNCTION get_char_xxl(
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS CHAR(32767) CHARACTER SET NONE;
+
+  FUNCTION get_u8_varchar(
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS VARCHAR(64) CHARACTER SET UTF8;
+
+  FUNCTION get_u8_varchar_l(
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS VARCHAR(256) CHARACTER SET UTF8;
+
+  FUNCTION get_u8_varchar_xl(
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS VARCHAR(2048) CHARACTER SET UTF8;
+
+  FUNCTION get_u8_varchar_xxl(
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS VARCHAR(8191) CHARACTER SET UTF8;
+
+  FUNCTION get_u8_char(
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS CHAR(64) CHARACTER SET UTF8;
+
+  FUNCTION get_u8_char_l(
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS CHAR(256) CHARACTER SET UTF8;
+
+  FUNCTION get_u8_char_xl(
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS CHAR(2048) CHARACTER SET UTF8;
+
+  FUNCTION get_u8_char_xxl(
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS CHAR(8191) CHARACTER SET UTF8;
+
+  FUNCTION get_blob(
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS BLOB;
+
+  FUNCTION get_boolean(
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS BOOLEAN;
+
+  FUNCTION get_date(
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS DATE;
+
+/*
+  FUNCTION get_time(
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS TIME;
+*/
+
+  FUNCTION get_timestamp(
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL
+    ) RETURNS TIMESTAMP;
+
+  FUNCTION convert_varchar_s(
+      value_ VARCHAR(64) CHARACTER SET NONE,
+      from_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      to_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      convert_size SMALLINT NOT NULL DEFAULT 0
+    ) RETURNS VARCHAR(64) CHARACTER SET NONE;
+
+  FUNCTION convert_varchar(
+      value_ VARCHAR(256) CHARACTER SET NONE,
+      from_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      to_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      convert_size SMALLINT NOT NULL DEFAULT 0
+    ) RETURNS VARCHAR(256) CHARACTER SET NONE;
+
+  FUNCTION convert_varchar_l(
+      value_ VARCHAR(1024) CHARACTER SET NONE,
+      from_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      to_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      convert_size SMALLINT NOT NULL DEFAULT 0
+    ) RETURNS VARCHAR(1024) CHARACTER SET NONE;
+
+  FUNCTION convert_varchar_xl(
+      value_ VARCHAR(8192) CHARACTER SET NONE,
+      from_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      to_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      convert_size SMALLINT NOT NULL DEFAULT 0
+    ) RETURNS VARCHAR(8192) CHARACTER SET NONE;
+
+  FUNCTION convert_varchar_xxl(
+      value_ VARCHAR(32765) CHARACTER SET NONE,
+      from_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      to_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      convert_size SMALLINT NOT NULL DEFAULT 0
+    ) RETURNS VARCHAR(32765) CHARACTER SET NONE;
+
+  FUNCTION convert_char_s(
+      value_ CHAR(64) CHARACTER SET NONE,
+      from_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      to_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      convert_size SMALLINT NOT NULL DEFAULT 0
+    ) RETURNS CHAR(64) CHARACTER SET NONE;
+
+  FUNCTION convert_char(
+      value_ CHAR(256) CHARACTER SET NONE,
+      from_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      to_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      convert_size SMALLINT NOT NULL DEFAULT 0
+    ) RETURNS CHAR(256) CHARACTER SET NONE;
+
+  FUNCTION convert_char_l(
+      value_ CHAR(1024) CHARACTER SET NONE,
+      from_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      to_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      convert_size SMALLINT NOT NULL DEFAULT 0
+    ) RETURNS CHAR(1024) CHARACTER SET NONE;
+
+  FUNCTION convert_char_xl(
+      value_ CHAR(8192) CHARACTER SET NONE,
+      from_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      to_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      convert_size SMALLINT NOT NULL DEFAULT 0
+    ) RETURNS CHAR(8192) CHARACTER SET NONE;
+
+  FUNCTION convert_char_xxl(
+      value_ CHAR(32767) CHARACTER SET NONE,
+      from_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      to_ VARCHAR(20) CHARACTER SET NONE NOT NULL,
+      convert_size SMALLINT NOT NULL DEFAULT 0
+    ) RETURNS CHAR(32767) CHARACTER SET NONE;
+
+  ------------------------------------------------------------------------------
+
+  FUNCTION unbind(rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL)
+    RETURNS TY$NANO_BLANK;
+
+  FUNCTION is_null(rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL)
+    RETURNS BOOLEAN;
+
+  FUNCTION is_bound( -- now hiding exception out of range
+      rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL)
+    RETURNS BOOLEAN;
+
+  FUNCTION column_(rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL)
+    RETURNS SMALLINT;
+
+  FUNCTION column_name(rslt TY$POINTER NOT NULL, index_ SMALLINT NOT NULL)
+    RETURNS VARCHAR(63) CHARACTER SET UTF8;
+
+  FUNCTION column_size(rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL)
+    RETURNS INTEGER;
+
+  FUNCTION column_decimal_digits(rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL)
+    RETURNS INTEGER;
+
+  FUNCTION column_datatype(rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL)
+    RETURNS INTEGER;
+
+  FUNCTION column_datatype_name(rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL)
+    RETURNS VARCHAR(63) CHARACTER SET UTF8;
+
+  FUNCTION column_c_datatype(rslt TY$POINTER NOT NULL, column_ VARCHAR(63) CHARACTER SET UTF8 NOT NULL)
+    RETURNS INTEGER;
+
+  FUNCTION next_result(rslt TY$POINTER NOT NULL) RETURNS BOOLEAN;
+
+  ------------------------------------------------------------------------------
+
+  FUNCTION has_data(rslt TY$POINTER NOT NULL) RETURNS BOOLEAN;
+
+END
+----
+
+The `NANO$RSLT` package contains functions for working with a dataset returned by an SQL query.
+
+The `valid()` function returns whether the pointer to the dataset is valid.
+
+The `release_()` function releases the pointer to the dataset.
+
+The `connection()` function returns a pointer to a database connection.
+
+The `rowset_size()` function returns the size of the dataset (how many active cursors are
+in the dataset).
+
+The `affected_rows()` function returns the number of rows affected by the statement
+(fetched in the cursor).
+
+The `has_affected_rows()` function returns whether at least one row is affected by the statement.
+
+The `rows_()` function returns the number of records in the open cursor.
+
+The `columns()` function returns the number of columns in the current cursor.
+
+The `first_()` function moves the current cursor to the first record.
+Works only for bidirectional (scrollable cursors). Returns true if the operation is successful.
+
+The `last_()` function moves the current cursor to the last record.
+Works only for bidirectional (scrollable cursors). Returns true if the operation is successful.
+
+The `next_()` function moves the current cursor to the next record.
+Returns true if the operation is successful.
+
+The `prior_()` function moves the current cursor to the previous record. Works only
+for bidirectional (scrollable cursors). Returns true if the operation is successful.
+
+The `move()` function moves the current cursor to the specified record.
+Works only for bidirectional (scrollable cursors). Returns true if the operation is successful.
+
+- `rslt` - a pointer to a prepared dataset;
+- `row_` - record number.
+
+The `skip_()` function moves the current cursor by the specified number of records.
+Works only for bidirectional (scrollable cursors). Returns true if the operation is successful.
+
+- `rslt` - a pointer to a prepared dataset;
+- `row_` - how many records to skip.
+
+The `position_()` function returns the current position of the cursor.
+
+The `at_end()` function returns whether the cursor has reached the last record.
+
+The `get_smallint()` function returns the value of the `SMALLINT` column.
+
+- `rslt` - a pointer to a prepared dataset;
+- `column_` - the name of the column or its number `0..n-1`.
+
+The `get_integer()` function returns the value of an `INTEGER` column.
+
+- `rslt` - a pointer to a prepared dataset;
+- `column_` - the name of the column or its number `0..n-1`.
+
+The `get_bigint()` function returns the value of a `BIGINT` column.
+
+- `rslt` - a pointer to a prepared dataset;
+- `column_` - the name of the column or its number `0..n-1`.
+
+The `get_float()` function returns the value of a `FLOAT` column.
+
+- `rslt` - a pointer to a prepared dataset;
+- `column_` - the name of the column or its number `0..n-1`.
+
+The `get_double()` function returns the value of a `DOUBLE PRECISION` column.
+
+- `rslt` - a pointer to a prepared dataset;
+- `column_` - the name of the column or its number `0..n-1`.
+
+The `get_varchar()` function returns the value of column `VARCHAR (256) CHARACTER SET NONE`.
+The function is intended for single-byte encodings.
+
+- `rslt` - a pointer to a prepared dataset;
+- `column_` - the name of the column or its number `0..n-1`.
+
+There is a whole family of these suffixed functions. The maximum size of the returned
+string changes depending on the suffix:
+
+- `_s` - VARCHAR (64) CHARACTER SET NONE;
+- `_l` - VARCHAR (1024) CHARACTER SET NONE;
+- `_xl` - VARCHAR (8192) CHARACTER SET NONE;
+- `_xxl` - VARCHAR (32765) CHARACTER SET NONE.
+
+The data retrieval speed depends on the maximum row size. So filling the buffer for a
+`VARCHAR (32765)` string is several times slower than for a `VARCHAR (256)` string,
+so you need to choose the size of a smaller value if you don't need a larger one.
+
+The `get_char()` function returns the value of column `CHAR (256) CHARACTER SET NONE`.
+The function is intended for single-byte encodings.
+
+- `rslt` - a pointer to a prepared dataset;
+- `column_` - the name of the column or its number `0..n-1`.
+
+There is a whole family of these suffixed functions. The maximum size of the returned
+string changes depending on the suffix:
+
+- `_s` - CHAR (64) CHARACTER SET NONE;
+- `_l` - CHAR (1024) CHARACTER SET NONE;
+- `_xl` - CHAR (8192) CHARACTER SET NONE;
+- `_xxl` - CHAR (32767) CHARACTER SET NONE.
+
+The data retrieval speed depends on the maximum row size. So filling the buffer for the
+`CHAR (32767)` string is several times slower than for the `CHAR (256)` string, so you need to choose the size of a smaller value if you don't need a larger one.
+
+The `get_u8_varchar()` function returns the value of column `VARCHAR (64) CHARACTER SET UTF8`.
+
+- `rslt` - a pointer to a prepared dataset;
+- `column_` - the name of the column or its number `0..n-1`.
+
+There is a whole family of these suffixed functions.
+The maximum size of the returned string changes depending on the suffix:
+
+- `_l` - VARCHAR (256) CHARACTER SET UTF8;
+- `_xl` - VARCHAR (2048) CHARACTER SET UTF8;
+- `_xxl` - VARCHAR (8191) CHARACTER SET UTF8.
+
+The `get_u8_char(`) function returns the value of column `CHAR (64) CHARACTER SET UTF8`.
+
+- `rslt` - a pointer to a prepared dataset;
+- `column_` - the name of the column or its number `0..n-1`.
+
+There is a whole family of these suffixed functions. The maximum size of the returned string changes depending on the suffix:
+
+- `_l` - CHAR (256) CHARACTER SET UTF8;
+- `_xl` - CHAR (2048) CHARACTER SET UTF8;
+- `_xxl` - CHAR (8191) CHARACTER SET UTF8.
+
+The `get_blob()` function returns the value of a `BLOB` column.
+
+- `rslt` - a pointer to a prepared dataset;
+- `column_` - the name of the column or its number `0..n-1`.
+
+The `get_boolean()` function returns the value of a `BOOLEAN` column.
+
+- `rslt` - a pointer to a prepared dataset;
+- `column_` - the name of the column or its number `0..n-1`.
+
+The `get_date()` function returns the value of a `DATE` column.
+
+- `rslt` - a pointer to a prepared dataset;
+- `column_` - the name of the column or its number `0..n-1`.
+
+The `get_time()` function returns the value of a `TIME` column.
+
+- `rslt` - a pointer to a prepared dataset;
+- `column_` - the name of the column or its number `0..n-1`.
+
+The `get_timestamp()` function returns the value of a `TIMESTAMP` column.
+
+- `rslt` - a pointer to a prepared dataset;
+- `column_` - the name of the column or its number `0..n-1`.
+
+The `convert_varchar()` function converts a `VARCHAR` value to a different encoding.
+Parameters:
+
+- `value_` - string value;
+- `from_` - encoding from which to recode the string;
+- `to_` - encoding into which you want to recode the string;
+- `convert_size` - sets the size of the input buffer for conversion.
+See `nano$stmt.convert_[var]char`.
+
+There is a whole family of these suffixed functions. The maximum size of the returned
+string changes depending on the suffix:
+
+- `_s` - VARCHAR (64) CHARACTER SET NONE;
+- `_l` - VARCHAR (1024) CHARACTER SET NONE;
+- `_xl` - VARCHAR (8192) CHARACTER SET NONE;
+- `_xxl` - VARCHAR (32765) CHARACTER SET NONE.
+
+The `convert_char()` function converts a `CHAR` value to a different encoding.
+Parameters:
+
+- `value_` - string value;
+- `from_` - encoding from which to recode the string;
+- `to_` - encoding into which you want to recode the string;
+- `convert_size` - set the size of the input buffer for conversion.
+See `nano$stmt.convert_[var]char`.
+
+There is a whole family of these suffixed functions.
+The maximum size of the returned string changes depending on the suffix:
+
+- `_s` - CHAR (64) CHARACTER SET NONE;
+- `_l` - CHAR (1024) CHARACTER SET NONE;
+- `_xl` - CHAR (8192) CHARACTER SET NONE;
+- `_xxl` - CHAR (32765) CHARACTER SET NONE.
+
+The `unbind()` function unbinds a buffer from a given column.
+The peculiarity of transferring large data types in some ODBC implementations.
+
+- `rslt` - a pointer to a prepared dataset;
+- `column_` - the name of the column or its number `0..n-1`.
+
+The `is_null()` function returns whether the value of a column is null.
+
+- `rslt` - a pointer to a prepared dataset;
+- `column_` - the name of the column or its number `0..n-1`.
+
+The `is_bound()` function checks if a buffer of values for a given column is bound.
+
+- `rslt` - a pointer to a prepared dataset;
+- `column_` - the name of the column or its number `0..n-1`.
+
+The `column_()` function returns the number of a column by its name.
+
+- `rslt` - a pointer to a prepared dataset;
+- `column_` is the name of the column.
+
+The `column_name()` function returns the name of a column by its index.
+
+- `rslt` - a pointer to a prepared dataset;
+- `index_` - column number `0..n-1`.
+
+The `column_size()` function returns the size of a column.
+For string fields, the number of characters.
+
+The `column_decimal_digits()` function returns the precision for numeric types.
+
+- `rslt` - a pointer to a prepared dataset;
+- `column_` - the name of the column or its number `0..n-1`.
+
+The `column_datatype()` function returns the type of the column.
+
+- `rslt` - a pointer to a prepared dataset;
+- `column_` - the name of the column or its number `0..n-1`.
+
+The `column_datatype_name()` function returns the name of the column type.
+
+- `rslt` - a pointer to a prepared dataset;
+- `column_` - the name of the column or its number `0..n-1`.
+
+The `column_c_datatype()` function returns the type of the column as encoded in ODBC constants.
+
+- `rslt` - a pointer to a prepared dataset;
+- `column_` - the name of the column or its number `0..n-1`.
+
+The `next_result()` function switches to the next data set.
+
+- `rslt` - a pointer to a prepared dataset.
+
+The `has_data()` function returns whether there is data in a dataset.
+
+- `rslt` - a pointer to a prepared dataset.
+
+=== `NANO$FUNC` package
+
+The header of this package looks like this:
+
+[source,sql]
+----
+CREATE OR ALTER PACKAGE NANO$FUNC
+AS
+BEGIN
+
+  /*  Note:
+        Result cursor by default ODBC driver (NANODBC implementation),
+        scrollable into NANO$STMT
+   */
+
+  FUNCTION execute_conn(
+      conn TY$POINTER NOT NULL,
+      query VARCHAR(8191) CHARACTER SET UTF8 NOT NULL,
+      batch_operations INTEGER NOT NULL DEFAULT 1,
+      timeout INTEGER NOT NULL DEFAULT 0
+    ) RETURNS TY$POINTER;
+
+  FUNCTION just_execute_conn(
+      conn TY$POINTER NOT NULL,
+      query VARCHAR(8191) CHARACTER SET UTF8 NOT NULL,
+      batch_operations INTEGER NOT NULL DEFAULT 1,
+      timeout INTEGER NOT NULL DEFAULT 0
+    ) RETURNS TY$NANO_BLANK;
+
+  FUNCTION execute_stmt(
+      stmt TY$POINTER NOT NULL, batch_operations INTEGER NOT NULL DEFAULT 1
+    ) RETURNS TY$POINTER;
+
+  FUNCTION just_execute_stmt(
+      stmt TY$POINTER NOT NULL, batch_operations INTEGER NOT NULL DEFAULT 1
+    ) RETURNS TY$NANO_BLANK;
+
+  FUNCTION transact_stmt(
+      stmt TY$POINTER NOT NULL, batch_operations INTEGER NOT NULL DEFAULT 1
+    ) RETURNS TY$POINTER;
+
+  FUNCTION just_transact_stmt(
+      stmt TY$POINTER NOT NULL, batch_operations INTEGER NOT NULL DEFAULT 1
+    ) RETURNS TY$NANO_BLANK;
+
+  FUNCTION prepare_stmt(
+      stmt TY$POINTER NOT NULL,
+      query VARCHAR(8191) CHARACTER SET UTF8 NOT NULL,
+      timeout INTEGER NOT NULL DEFAULT 0
+    ) RETURNS TY$NANO_BLANK;
+
+END
+----
+
+The `NANO$FUNC` package contains functions for working with SQL queries. This package
+is a lightweight version of the `NANO$STMT` package. The peculiarity is that the
+functions performed have inherited the behavior of NANODBC without changes and their
+own modifications of the UDR in terms of the exchange of parameters and values.
+Possible direction of use: performing ODBC connection settings through executing SQL
+commands (`just_execute` ...), if supported, event logging, etc. simple operations.
+
+The `execute_conn()` function prepares and executes an SQL statement.
+The function returns a pointer to a data set (cursor), which can be processed using the functions of the `NANO$RSLT` package. Parameters:
+
+- `conn` - connection pointer;
+- `query` - the text of the SQL query;
+- `batch_operations` - the number of batch operations. The default is 1;
+- `timeout` - SQL statement timeout.
+
+The `just_execute_conn()` function prepares and executes the SQL statement.
+The function is designed to execute SQL statements that do not return data (do not open
+a cursor). A pointer to the SQL query object is not created. Parameters:
+
+- `conn` - connection pointer;
+- `query` - the text of the SQL query;
+- `batch_operations` - the number of batch operations. The default is 1;
+- `timeout` - SQL statement timeout.
+
+The `execute_stmt()` function executes the prepared SQL statement. The function returns
+a pointer to a data set (cursor), which can be processed using the functions of the
+`NANO$RSLT` package. Parameters:
+
+- `stmt` - a pointer to a prepared statement;
+- `batch_operations` - the number of batch operations. The default is 1.
+
+The `transact_stmt()` function - executes a previously prepared SQL statement, starting and ending its own (autonomous) transaction. The function returns a pointer to a data set (cursor), which can be processed using the functions of the `NANO$RSLT` package. Parameters:
+
+- `stmt` - a pointer to a prepared statement;
+- `batch_operations` - the number of batch operations. The default is 1.
+
+Function `just_transact_stmt()` - executes a previously prepared SQL statement, starting
+and ending its own (autonomous) transaction. The function is designed to execute SQL
+statements that do not return data (do not open a cursor). Parameters:
+
+- `stmt` - a pointer to a prepared statement;
+- `batch_operations` - the number of batch operations. The default is 1.
+
+The `prepare_stmt()` function prepares the SQL query. Parameters:
+
+- `stmt` - a pointer to the statement;
+- `query` - the text of the SQL query;
+- `timeout` - SQL statement timeout.
+
+== Examples
+
+=== Fetching data from a Postgresql table
+
+This example fetches from a Postgresql database. The block text is provided with
+comments to understand what is happening.
+
+[source,sql]
+----
+EXECUTE BLOCK
+RETURNS (
+  id bigint,
+  name VARCHAR(1024) CHARACTER SET UTF8
+)
+AS
+  DECLARE conn_str varchar(512) CHARACTER SET UTF8;
+  declare variable sql_txt VARCHAR(8191) CHARACTER SET UTF8;
+  DECLARE conn ty$pointer;
+  DECLARE stmt ty$pointer;
+  DECLARE rs ty$pointer;
+  DECLARE tnx ty$pointer;
+BEGIN
+  conn_str = 'DRIVER={PostgreSQL ODBC Driver(UNICODE)};SERVER=localhost;DATABASE=test;UID=postgres;PASSWORD=mypassword';
+  sql_txt = 'select * from t1';
+
+  -- initialize nanodbc
+  -- this function can be called in the ON CONNECT trigger
+  nano$udr.initialize();
+
+  BEGIN
+    -- connect to ODBC data source
+    conn = nano$conn.connection(conn_str);
+    WHEN EXCEPTION nano$nanodbc_error DO
+    BEGIN
+      -- if the connection was unsuccessful
+      -- call the function to terminate nanodbc
+      -- instead of an explicit call in the script, this function can be called
+      -- in the ON DISCONNECT trigger
+      nano$udr.finalize();
+      -- rethrow exception
+      EXCEPTION;
+    END
+  END
+
+  BEGIN
+    -- allocate a pointer to an SQL statement
+    stmt = nano$stmt.statement_(conn);
+    -- prepare query
+    nano$stmt.prepare_(stmt, sql_txt);
+    -- execute query
+    -- function returns a pointer to a dataset
+    rs = nano$stmt.execute_(stmt);
+    -- while there are records in the cursor, move forward along it
+    while (nano$rslt.next_(rs)) do
+    begin
+      -- for each column, depending on its type, it is necessary to call
+      -- the corresponding function or function with the type to which
+      -- the initial column can be converted
+      id = nano$rslt.get_integer(rs, 'id');
+      -- note, since we are working with UTF8, the function is called with u8
+      name = nano$rslt.get_u8_char_l(rs, 'name');
+      suspend;
+    end
+
+    -- release the previously allocated resource
+    /*
+    rs = nano$rslt.release_(rs);
+    stmt = nano$stmt.release_(stmt);
+    */
+    -- the above functions can be omitted, since calling
+    -- nano$conn.release_ will automatically release all resources
+    -- bound to the connection
+    conn = nano$conn.release_(conn);
+    -- call the function to terminate nanodbc
+    -- instead of an explicit call in the script, this function can be called
+    -- in the ON DISCONNECT trigger
+    nano$udr.finalize();
+
+    WHEN EXCEPTION nano$invalid_resource,
+         EXCEPTION nano$nanodbc_error,
+         EXCEPTION nano$binding_error
+    DO
+    BEGIN
+      -- if an error occurs
+      -- release previously allocated resources
+      /*
+      rs = nano$rslt.release_(rs);
+      stmt = nano$stmt.release_(stmt);
+      */
+      -- the above functions can be omitted, since calling
+      -- nano$conn.release_ will automatically release all resources
+      -- bound to the connection
+      conn = nano$conn.release_(conn);
+      -- call the function to terminate nanodbc
+      -- instead of an explicit call in the script, this function can be called
+      -- in the ON DISCONNECT trigger
+      nano$udr.finalize();
+      -- rethrow exception
+      EXCEPTION;
+    END
+  END
+END
+----
+
+=== Inserting data into a Postgresql table
+
+This example inserts a new row into a table. The block text is provided with comments to understand what is happening.
+
+[source,sql]
+----
+EXECUTE BLOCK
+RETURNS (
+  aff_rows integer
+)
+AS
+  DECLARE conn_str varchar(512) CHARACTER SET UTF8;
+  declare variable sql_txt VARCHAR(8191) CHARACTER SET UTF8;
+  DECLARE conn ty$pointer;
+  DECLARE stmt ty$pointer;
+  DECLARE tnx ty$pointer;
+BEGIN
+  conn_str = 'DRIVER={PostgreSQL ODBC Driver(UNICODE)};SERVER=localhost;DATABASE=test;UID=postgres;PASSWORD=mypassword';
+  sql_txt = 'insert into t1(id, name) values(?, ?)';
+
+  -- initialize nanodbc
+  -- this function can be called in the ON CONNECT trigger
+  nano$udr.initialize();
+
+  BEGIN
+    -- connect to ODBC data source
+    conn = nano$conn.connection(conn_str);
+    WHEN EXCEPTION nano$nanodbc_error DO
+    BEGIN
+      -- if the connection was unsuccessful
+      -- call the function to terminate nanodbc
+      -- instead of an explicit call in the script, this function can be called
+      -- in the ON DISCONNECT trigger
+      nano$udr.finalize();
+      EXCEPTION;
+    END
+  END
+
+  BEGIN
+    -- allocate a pointer to an SQL statement
+    stmt = nano$stmt.statement_(conn);
+    -- prepare query
+    nano$stmt.prepare_(stmt, sql_txt);
+    -- set query parameters
+    -- index starts from 0!
+    nano$stmt.bind_integer(stmt, 0, 4);
+    nano$stmt.bind_u8_varchar(stmt, 1, 'Row 4', 4 * 20);
+    -- execute INSERT statement
+    nano$stmt.just_execute(stmt);
+    -- get the number of affected rows
+    aff_rows = nano$stmt.affected_rows(stmt);
+    -- release the previously allocated resource
+    conn = nano$conn.release_(conn);
+    -- call the function to terminate nanodbc
+    -- instead of an explicit call in the script, this function can be called
+    -- in the ON DISCONNECT trigger
+    nano$udr.finalize();
+
+    WHEN EXCEPTION nano$invalid_resource,
+         EXCEPTION nano$nanodbc_error,
+         EXCEPTION nano$binding_error
+    DO
+    BEGIN
+      -- release the previously allocated resource
+      conn = nano$conn.release_(conn);
+      -- call the function to terminate nanodbc
+      -- instead of an explicit call in the script, this function can be called
+      -- in the ON DISCONNECT trigger
+      nano$udr.finalize();
+      EXCEPTION;
+    END
+  END
+
+  suspend;
+END
+----
+
+=== Batch insert into a Postgresql table
+
+If the DBMS and ODBC driver support batch execution of queries, then batch operations can be used.
+
+[source,sql]
+----
+EXECUTE BLOCK
+AS
+  DECLARE conn_str varchar(512) CHARACTER SET UTF8;
+  declare variable sql_txt VARCHAR(8191) CHARACTER SET UTF8;
+  DECLARE conn ty$pointer;
+  DECLARE stmt ty$pointer;
+  DECLARE tnx ty$pointer;
+BEGIN
+  conn_str = 'DRIVER={PostgreSQL ODBC Driver(UNICODE)};SERVER=localhost;DATABASE=test;UID=postgres;PASSWORD=mypassword';
+  sql_txt = 'insert into t1(id, name) values(?, ?)';
+
+  -- initialize nanodbc
+  -- this function can be called in the ON CONNECT trigger
+  nano$udr.initialize();
+
+  BEGIN
+    -- connect to ODBC data source
+    conn = nano$conn.connection(conn_str);
+    WHEN EXCEPTION nano$nanodbc_error DO
+    BEGIN
+      -- if the connection was unsuccessful
+      -- call the function to terminate nanodbc
+      -- instead of an explicit call in the script, this function can be called
+      -- in the ON DISCONNECT trigger
+      nano$udr.finalize();
+      EXCEPTION;
+    END
+  END
+
+  BEGIN
+    -- allocate a pointer to an SQL statement
+    stmt = nano$stmt.statement_(conn);
+    -- prepare query
+    nano$stmt.prepare_(stmt, sql_txt);
+    -- set query parameters
+    -- index starts from 0!
+    -- first row
+    nano$stmt.bind_integer(stmt, 0, 5);
+    nano$stmt.bind_u8_varchar(stmt, 1, 'Row 5', 4 * 20);
+    -- second row
+    nano$stmt.bind_integer(stmt, 0, 6);
+    nano$stmt.bind_u8_varchar(stmt, 1, 'Row 6', 4 * 20);
+    -- execute an INSERT statement with a batch size of 2
+    nano$stmt.just_execute(stmt, 2);
+    -- release the previously allocated resource
+    conn = nano$conn.release_(conn);
+    -- call the function to terminate nanodbc
+    -- instead of an explicit call in the script, this function can be called
+    -- in the ON DISCONNECT trigger
+    nano$udr.finalize();
+
+    WHEN EXCEPTION nano$invalid_resource,
+         EXCEPTION nano$nanodbc_error,
+         EXCEPTION nano$binding_error
+    DO
+    BEGIN
+      -- release the previously allocated resource
+      conn = nano$conn.release_(conn);
+      -- call the function to terminate nanodbc
+      -- instead of an explicit call in the script, this function can be called
+      -- in the ON DISCONNECT trigger
+      nano$udr.finalize();
+      EXCEPTION;
+    END
+  END
+END
+----
+
+=== Using transaction
+
+[source,sql]
+----
+EXECUTE BLOCK
+AS
+  DECLARE conn_str varchar(512) CHARACTER SET UTF8;
+  DECLARE sql_txt VARCHAR(8191) CHARACTER SET UTF8;
+  DECLARE sql_txt2 VARCHAR(8191) CHARACTER SET UTF8;
+  DECLARE conn ty$pointer;
+  DECLARE stmt ty$pointer;
+  DECLARE stmt2 ty$pointer;
+  DECLARE tnx ty$pointer;
+BEGIN
+  conn_str = 'DRIVER={PostgreSQL ODBC Driver(UNICODE)};SERVER=localhost;DATABASE=test;UID=postgres;PASSWORD=mypassword';
+  sql_txt = 'insert into t1(id, name) values(?, ?)';
+  sql_txt2 = 'insert into t2(id, name) values(?, ?)';
+
+  -- initialize nanodbc
+  -- this function can be called in the ON CONNECT triggerре
+  nano$udr.initialize();
+
+  BEGIN
+    -- connect to ODBC data source
+    conn = nano$conn.connection(conn_str);
+    WHEN EXCEPTION nano$nanodbc_error DO
+    BEGIN
+      -- if the connection was unsuccessful
+      -- call the function to terminate nanodbc
+      -- instead of an explicit call in the script, this function can be called
+      -- in the ON DISCONNECT trigger
+      nano$udr.finalize();
+      EXCEPTION;
+    END
+  END
+
+  BEGIN
+    -- prepare first SQL query
+    stmt = nano$stmt.statement_(conn);
+    nano$stmt.prepare_(stmt, sql_txt);
+    -- prepare second SQL query
+    stmt2 = nano$stmt.statement_(conn);
+    nano$stmt.prepare_(stmt2, sql_txt2);
+    -- start transaction
+    tnx = nano$tnx.transaction_(conn);
+    -- execute first statement within the transaction
+    nano$stmt.bind_integer(stmt, 0, 8);
+    nano$stmt.bind_u8_varchar(stmt, 1, 'Row 8', 4 * 20);
+    nano$stmt.just_execute(stmt);
+    -- execute second statement within the transaction
+    nano$stmt.bind_integer(stmt2, 0, 1);
+    nano$stmt.bind_u8_varchar(stmt2, 1, 'Row 1', 4 * 20);
+    nano$stmt.just_execute(stmt2);
+    -- commit transaction
+    nano$tnx.commit_(tnx);
+
+    -- release the previously allocated resource
+    conn = nano$conn.release_(conn);
+    -- call the function to terminate nanodbc
+    -- instead of an explicit call in the script, this function can be called
+    -- in the ON DISCONNECT trigger
+    nano$udr.finalize();
+
+    WHEN EXCEPTION nano$invalid_resource,
+         EXCEPTION nano$nanodbc_error,
+         EXCEPTION nano$binding_error
+    DO
+    BEGIN
+      -- release the previously allocated resource
+      -- in case of an error, the unconfirmed transaction will be rolled back automatically
+      conn = nano$conn.release_(conn);
+      -- call the function to terminate nanodbc
+      -- instead of an explicit call in the script, this function can be called
+      -- in the ON DISCONNECT trigger
+      nano$udr.finalize();
+      EXCEPTION;
+    END
+  END
+END
+----

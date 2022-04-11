@@ -1,0 +1,1 @@
+gradlew asciidocPdf --baseName=hqbird --docId=hqbird2022

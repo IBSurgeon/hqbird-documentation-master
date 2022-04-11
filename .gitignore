@@ -1,0 +1,21 @@
+lib/*
+!lib/_readme_libs.txt
+
+tools/*
+!tools/_readme_tools.txt
+!tools/get_tools_linux.sh
+
+dist/
+inter/
+
+*.xml~
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
+
+# Ignore IntelliJ project info
+.idea/
+# IntelliJ build output of buildSrc
+/buildSrc/out/

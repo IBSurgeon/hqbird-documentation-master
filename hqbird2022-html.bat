@@ -1,0 +1,1 @@
+gradlew asciidocHtml --baseName=hqbird --docId=hqbird2022
