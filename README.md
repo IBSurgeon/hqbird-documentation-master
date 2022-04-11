@@ -1,4 +1,4 @@
-Firebird documentation
+HQbird documentation
 ----------------------
 
 After checking out the firebird-documentation repository, and if your
