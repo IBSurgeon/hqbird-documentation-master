@@ -223,7 +223,7 @@ image::2.1.17.png[]
 
 == Installing HQbird Administrator on Windows
 
-To install HQBird Administrator, download the distribution package from ￹httpslink:https:/ib-aid.com/en/hqbird/[http://ib-aid.com/en/hqbird/], or from your account at http://deploy.ib-aid.com/[http://deploy.ib-aid.com].
+To install HQBird Administrator, download the distribution package from link: https://ib-aid.com/en/hqbird/[https://ib-aid.com/en/hqbird/], or from your account at http://deploy.ib-aid.com/[http://deploy.ib-aid.com].
 
 The name of HQbird Administrator package is [path]_HQbirdAdminNNNN.exe_ (it is in the zip archive).
 
@@ -260,13 +260,13 @@ Then, go to the Bin folder and then use the *Run As Administrator* option to run
 the batch file with the architecture you need.
 
 * For Firebird 2.5 – run [path]_install-superclassic.bat_.
-* For Firebird 3.0 – set parameter `ServerMode=Super` and run [path]_install_service.bat_.
+* For Firebird 3.0 and higher – set parameter `ServerMode=Super` and run [path]_install_service.bat_.
 
 Of course, you can choose the SuperServer for 2.5 or Classic architecture for 3.0 if you know what you need.
 
 As a result of running the command file, Firebird of the selected architecture will be installed and run as a service.
 
-You can make sure the Firebird service is installed and running in the *Services* snap-in (rub [path]_services.msc_ in command prompt):
+You can make sure the Firebird service is installed and running in the *Services* snap-in ([path]_services.msc_ in command prompt):
 
 .Firebird Service.
 image::2.2.3.png[]
