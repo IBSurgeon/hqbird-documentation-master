@@ -179,23 +179,6 @@ image::3.2.6.png[]
 
 In general, there is no need to edit Firebird server details after the registration, until you are not reinstalling Firebird – but in this case we recommend reinstalling HQBird too.
 
-=== Server: Auto updates
-
-image::3.2.7.png[]
-
- Auto update is an important job which notifies you that newer version of HQbird FBDataGuard is available and suggests to update the software.
-
-It provides an alert regarding available updates and appropriate download link.
-Default time to run this job is 22-00 everyday (for information).
-
-In the configuration dialog of auto-updates you can disable auto check or set another time for it.
-
-image::3.2.8.png[]
-
-In fact there is a small confusion here: auto update does not perform automatic update of HQbird, it just checks for the new versions periodically, and optionally download it.
-
-The upgrade is initiated by the administrator.
-
 === Server: Replication Log
 
 image::3.2.11.png[]
