@@ -17,7 +17,6 @@ plugins {
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 extensions.create(AsciidoctorPdfThemesExtension.NAME, AsciidoctorPdfThemesExtension, project)
@@ -28,6 +27,10 @@ pdfThemes {
         themeDir = file('src/theme/firebird-pdf')
         themeName = 'firebird'
     }
+}
+
+asciidoctorj {
+    version = '2.5.7'
 }
 
 docConfig {
@@ -59,6 +62,11 @@ def asciidocHtml = tasks.register('asciidocHtml', FbAsciidocHtmlTask) {
             }
         }
     }
+    forkOptions {
+        if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
+            jvmArgs "--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED"
+        }
+    }
 }
 
 def asciidocPdf = tasks.register('asciidocPdf', FbAsciidocPdfTask) {
@@ -71,8 +79,13 @@ def asciidocPdf = tasks.register('asciidocPdf', FbAsciidocPdfTask) {
     asciidoctorj {
         modules {
             pdf {
-                version '1.5.4'
+                version '2.3.3'
             }
+        }
+    }
+    forkOptions {
+        if (JavaVersion.current() > JavaVersion.VERSION_1_8) {
+            jvmArgs "--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED"
         }
     }
 }
@@ -109,6 +122,11 @@ def asciidocDocbook = tasks.register('asciidocDocbook', AsciidocToDocbook) {
                     duplicatesStrategy DuplicatesStrategy.EXCLUDE
                 }
             }
+        }
+    }
+    forkOptions {
+        if (JavaVersion.current() > JavaVersion.VERSION_1_8) {
+            jvmArgs "--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED"
         }
     }
 }
