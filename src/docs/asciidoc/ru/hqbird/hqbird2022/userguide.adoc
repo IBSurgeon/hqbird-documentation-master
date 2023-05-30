@@ -1,5 +1,5 @@
 = Руководство пользователя HQbird 2022
-1.11, by 11.04.2022
+1.12, by 30.05.2023
 :doctype: book
 :sectnums:
 :sectanchors:
@@ -41,6 +41,8 @@ include::_ocr_udr.adoc[leveloffset=1]
 include::_lk_json_udr.adoc[leveloffset=1]
 
 include::_nanodbc_udr.adoc[leveloffset=1]
+
+include::_http_client_udr.adoc[leveloffset=1]
 
 include::_fbstreaming.adoc[leveloffset=1]
 
