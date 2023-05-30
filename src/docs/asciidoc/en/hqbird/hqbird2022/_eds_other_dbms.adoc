@@ -25,17 +25,17 @@ Now you can try to execute the simplest query on the MySQL database
 execute block
 returns (i integer)
 as
- declare dsn_mysql varchar(128);
+  declare dsn_mysql varchar(128);
 begin
- dsn_mysql = ':mysql:host=localhost;port=3306;database=employees;user=root';
+  dsn_mysql = ':mysql:host=localhost;port=3306;database=employees;user=root';
 
-for
- execute statement 'select 1'
- on external dsn_mysql
- as user null password 'sa'
- into i
- do
- suspend;
+  for
+    execute statement 'select 1'
+    on external dsn_mysql
+    as user null password 'sa'
+    into i
+  do
+    suspend;
 end
 ----
 
@@ -164,10 +164,10 @@ begin
       order by birth_date desc 
       limit 5
     }'
-   on external dsn_mysql
-   as user null password 'sa'
-   into
-     emp_no, birth_date, first_name, last_name, gender, hire_date
+    on external dsn_mysql
+    as user null password 'sa'
+    into
+      emp_no, birth_date, first_name, last_name, gender, hire_date
   do
     suspend;
 end
