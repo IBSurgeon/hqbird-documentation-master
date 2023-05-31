@@ -1,3 +1,5 @@
+:imagesdir: images
+
 [[_hqbird_config]]
 = Jobs, monitoring and maintenance configuration in FBDataGuard
 
@@ -6,7 +8,7 @@ Please follow these steps:
 . Make sure that you have Firebird 2.5.5 or later (Firebird 2.1 is also supported with some limitation), and it is working;
 . HQbird FBDataGuard service is installed and running
 +
-.. You can check it using Services applet in Control Panel (right-click on "`My Computer`", choose "`Manage`", then "`Services and Applications`", "`Services`" and find in the list "`FBDataGuard Agent`"
+.. You can check it using Services applet in Control Panel (right-click on "`My Computer`", choose "`Manage`", then "`Services and Applications`", "`Services`" and find in the list "`FBDataGuard Agent`")
 .. At Linux you can check it with command `ps aux | grep dataguard`.
 . Make sure the FBDataGuard port is accessible (8082) and it is not blocked by firewall or any other antivirus tools. If necessary, adjust port in FBDataGuard configuration file (see <<_hqbird_config_fbdataguard_port,Web-console port>>).
 
@@ -117,8 +119,7 @@ In the next sections we will consider each job and its configuration.
 
 === Firebird server registration
 
-To register auto-discovered server, you need to click at btn:[Add Firebird
-engine to monitoring>>] and then adjust auto-discovered settings.
+To register auto-discovered server, you need to click at btn:[Add Firebird engine to monitoring>>] and then adjust auto-discovered settings.
 
 [NOTE]
 ====
@@ -294,12 +295,14 @@ image::3.2.10.png[]
 
 === Firebird database registration
 
-To register database in FBDataGuard, you need to click at the symbol "`Settings`" in the right corner of "`Databases`" (there will be a hint "`Add database to monitoring`") and fill the following form:
+The list of databases monitored by FBDataGuard is in the "`Databases`" section.
+
+image::3.1.5-0.png[]
+
+To register database in FBDataGuard, you need to click at the symbol "`Plus`" in the right corner of "`Databases`" (there will be a hint "`Add database`") and fill the following form:
 
 .Add database to monitoring.
 image::3.1.5.png[]
-
-
 
 * "`*Database nick name*`" is for your convenience, it is used to refer this database in alerts and email messages.
 * "`*DB alias*`" is a database alias from [path]_aliases.conf_ or in [path]_databases.conf_. If you specify both "`DB Alias`" and "`Path to database`", "`DB Alias`" will be used.
@@ -433,7 +436,7 @@ As you can see at configuration dialog screenshot, there are fields to enable/di
 During the development of HQbird we had in mind certain recovery scenario, and this scenario implies that the key goal of database protection is to minimize potential losses of data.
 If we have healthy backup, recovery can be concentrated on saving the most recent data (just entered into the database), and it greatly decreases the time of overall outage.
 
-As you will see below, "`Database: Verified Backup`" is not just a wrapper for standard gbak functionality and scheduler, this is a smart job which has many built-in rules to prevent problems with backups and provide suitable interface for backups management.
+As you will see below, "`Database: Verified Backup`" is not just a wrapper for standard `gbak` functionality and scheduler, this is a smart job which has many built-in rules to prevent problems with backups and provide suitable interface for backups management.
 
 [IMPORTANT]
 ====
@@ -787,7 +790,7 @@ If you don't have FTP installed on the target server with Windows, install Filez
 [NOTE]
 ====
 Replication segments will be uploaded to the subdirectory specified in the "`Upload to folder`".
-By default, this is [path]_/dababase0/${db.id}_, where [replaceable]``db.id`` is the identifier of the database inside the DataGuard.
+By default, this is [path]_/database0/${db.id}_, where [replaceable]``db.id`` is the identifier of the database inside the DataGuard.
 The replica about this [replaceable]``db.id`` does not know anything, so you need to register it manually in "`Unpack to directory`" (see <<_hqbird_config_cloud_backup_receiver,File  Receiver>>).
 ====
 
@@ -1093,8 +1096,8 @@ These values specify the paths to FBDataGuard configuration and output folder --
 === Adjusting web-console port
 
 One of the most frequently asked questions is how to adjust port for web-console application (by default it is 8082), It can be done by changing port setting in file [path]_%config%\agent\agent.properties_ ([var]``%config%`` is [path]_C:\HQbirdData\config_ or [path]_/opt/hqbird/conf_).
-----
 
+----
 server.port = 8082  #change it
 ----
 
@@ -1103,8 +1106,8 @@ server.port = 8082  #change it
 === How to change password for Admin user
 
 You can specify its password in the file [path]_access.properties_ (in [path]_C:\HQbirdData\config_ or [path]_/opt/hqbird/conf_)
-----
 
+----
 access.login=admin
 
 access.password=youradminpasswordforhqbird
@@ -1115,8 +1118,8 @@ After setting the password, restart FBDataGuard, and new password will be encryp
 === Guest user for HQbird FBDataGuard
 
 There is read-only user to access HQbird FBDataGuard, with the name guest.
-----
 
+----
 access.guest-login=guest
 
 access.guest-password=yournewpassword

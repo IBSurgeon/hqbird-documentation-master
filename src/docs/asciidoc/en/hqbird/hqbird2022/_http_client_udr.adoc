@@ -12,15 +12,10 @@ Versions for Windows and Linux are available: for Windows we have ready-to-use b
 
 == Installing the HTTP Client UDR
 
-To install HTTP Client UDR you need:
+The HQBird installation package for Windows installs the UDR Http Client if the appropriate option has been selected.
+Under Linux, you are encouraged to build the library yourself from source.
 
-. Unpack zip archive with dynamic libraries to `plugins/udr` directory
-. Execute the `sql/http_client_install.sql` script to register procedures and functions in the database.
-
-You can download builds for Windows OS using the links:
-
-* https://github.com/IBSurgeon/http_client_udr/releases/download/1.0/HttpClientUdr_Win_x64.zip[HttpClientUdr_Win_x64.zip]
-* https://github.com/IBSurgeon/http_client_udr/releases/download/1.0/HttpClientUdr_Win_x86.zip[HttpClientUdr_Win_x86.zip]
+In order for your database to be able to use the Http Client UDR library, you need to run the SQL registration script in it, which is located in [file]`{$fbroot}/plugins/udr/sql/http_client_install.sql`.
 
 == Build on Linux
 
