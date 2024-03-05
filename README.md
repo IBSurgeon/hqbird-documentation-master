@@ -46,13 +46,13 @@ output lines: if it says BUILD SUCCESSFUL there, everything's fine.
 The `docbookHtml` and `docbookPdf` tasks are available to build documentation
 that has not been migrated to AsciiDoc. However, if you feel the need to build
 those documents, it might be an indication they need to be migrated. Please
-ask for guidance or help on the firebird-docs mailing list.
+ask for guidance or help on the [firebird-devel list](https://groups.google.com/g/firebird-devel).
 
 If you have any questions, *first* get the Docbuilding Howto at:
 
   https://www.firebirdsql.org/en/reference-manuals/
 
 If your question isn't answered there, post a message to the Firebird
-docwriters' list. You can use this page to subscribe:
+Development list. You can use this page to subscribe:
 
-  https://lists.sourceforge.net/lists/listinfo/firebird-docs
+  https://groups.google.com/g/firebird-devel

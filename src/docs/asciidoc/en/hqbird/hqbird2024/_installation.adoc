@@ -1,0 +1,519 @@
+[[_hqbird_install]]
+= Installation of HQbird
+
+
+HQbird contains 2 parts: Server and Admin.
+Let's consider how to install them.
+
+== Installing HQbird Server on Windows
+
+HQbird Server 2024 includes Firebird 2.5, 3.0, 4.0 and 5.0 with replication, multi-thread support and other enhancements as part of its installer, so Firebird must be installed as part of HQbird.
+It is mandatory to install Firebird bundled with HQbird Server installer, if you plan to use replication (it also requires HQbird Enterprise license, full or trial) and other enhancements.
+
+Optionally you can choose HQbird Standard, which will not install Firebird, so you can use previously installed Firebird – in this case, make sure that installed version is compatible (2.5.x, 3.0.x, 4.0.x).
+
+Please note, that only Firebird 2.5, 3.0, 4.0 and 5.0 are fully supported in HQbird, the old Firebird versions are supported partially.
+We offer the comprehensive https://ib-aid.com/en/firebird-database-migration/[Firebird migration service] with guaranteed
+and fast result to migrate Firebird to the latest version.
+
+=== Silent installation on Windows
+
+The fastest way to install HQbird is to use the silent installation command.
+
+In the example below we will install HQbird Enterprise with Firebird 4.0 into `c:\HQbird`, configuration will be `c:\HQbirdData\config`, output in `c:\HQbirdData\output`.
+
+----
+HQBirdServer2022.exe /VERYSILENT /SP- /TYPE="hqbird40x64" /DIR="C:\HQbird2022"
+/CONFIGDIR=C:\HQBirdData\config /OUTPUTDIR=C:\HQBirdData\output
+----
+
+The following parameters are mandatory to perform the silent installation:
+
+* `/VERYSILENT /SP` - options to perform the silent installation
+* `/TYPE` – what HQbird version should be installed. If you are doing silent upgrade, make sure the version is the same as it was installed previously.
++
+** "HQBird25x64" - "HQbird Enterprise (with Firebird 2.5 x64)";
+** "HQBird30x64" - "HQbird Enterprise (with Firebird 3.0 x64)";
+** "HQBird40x64" - "HQbird Enterprise (with Firebird 4.0 x64)".
+* `/DIR` - where to install HQBird. If you are doing silent upgrade, make sure the version is the same as it was installed previously.
+* `/CONFIGDIR` – where to store configuration data for HQbird.
+* `/OUTPUTDIR` – where to store output data (default location for backups, performance reports, etc).
+
+Optional parameters for the silent installation of HQbird:
+
+* `/fbport=3050` - port for Firebird to be installed with HQbird Enterprise
+* `/LOG=C:\temp\HQBirdServerSetup.log` - where to store installation log
+* DataGuard parameters:
+** `/DGPORT=8082` – port for web interface of HQbird (FBDataGuard)
+** `/DGLOGIN=admin` – login for web interface of HQbird (FBDataGuard)
+** `/DGPASSWORD=strong password` – password for web interface of HQbird (FBDataGuard)
+* Automatic registration parameters:
+** `/REGEMAIL=youremail@company.com` - email to perform the automatic registration of HQBird
+** `/REGPASS=yourpassword` – password from IBSurgeon Deploy Center account to register HQbird
+** `/REGTYPE=S|E|T` == Standard, Enterprise, Trial – license type, must be specified if you need to register HQbird during the installation
+* Оffline registration (incompatible with REG **)
+** `/REGUIK=<uik filename>`
+** `/REGUNLOCK=<unlock filename>`
+
+Must be set in pairs, both are required!
+
+`/REGUIK="z:\HQBird\test\uik" /REGUNLOCK="z:\HQBird\test\unl"`
+
+* Email alerts parameters:
+** `/EAHOST=smtp.company.com` – SMTP server for email alerts
+** `/EAPORT=25` – SMTP port for email alerts
+** `/EALOGIN=support` – SMTP login to send email alerts
+** `/EAPASSWORD=psw` – SMTP password to send email alerts
+** `/EATO=support@email.to` – where to send email alerts
+** `/EAFROM=someemaildg@company.com` – from address
+** `/EAENABLED=true` – enable or disable email alerts
+** `/EADEFALT=true` – send a copy of email alerts to IBSurgeon Control Center
+
+* Built-in FTP server parameters:
+** `/FTPENABLED=true` – enable or disable FTP server
+** `/FTPPORT=8721` - FTP port
+** `/FTPLOGIN=admin2` - FTP login
+** `FTPPASSWORD=strong password2` - FTP password
+
+Please note, that in a case of error, for example, if you are trying to run silent installation to install HQbird to the location which is different from the current location, the error message window will popup and installation will be canceled.
+
+<<<
+
+== Installing HQbird Server for Windows using the installer
+
+Download HQbird from https://ib-aid.com/en/download-hqbird
+
+The distribution package of HQbird server is the same for the 32-bit and 64-bit versions of the Firebird engine.
+
+Make sure that HQbird installer is signed with valid IBSurgeon certificate («iBase LLC») and run it:
+
+.Confirmation to start the installation process
+image::2.1.1.png[]
+
+The HQbird Server Side installation wizard will be launched after that and it will take you through several steps, such as agreeing to the license agreement and selecting the installation folder.
+
+.Licence agreement
+image::2.1.2.png[]
+
+At first, the installer will ask you where to install HQbird:
+
+.Where to install HQbird
+image::2.1.3.png[]
+
+We recommend to use the default location [path]_c:\HQbird_, but you can use any suitable location.
+
+After that, you should select folders for storing configuration files, backup copies of databases, statistics and HQbird log files:
+
+.Select folders for HQbird configuration and log files
+image::2.1.4.png[]
+
+By default, the installation wizard offers to create folders for configuration and log files in [path]_C:\HQbirdData_.
+
+[NOTE]
+====
+Usually, we recommend selecting a disk with a large amount of free space for this purpose, but you can configure it later.
+====
+
+If configuration files already exist in the selected location, the installation wizard will display the corresponding warning:
+
+.Warning about existing configuration files
+image::2.1.5.png[]
+
+We recommend the automatic upgrade, so default answer should be Yes.
+
+However, you can choose to create fresh configuration of HQbird, and click No – it this case the installer will warn you that existing configuration files will be moved:
+
+.Confirmation of backup
+image::2.1.6.png[]
+
+In case of choosing Cancel, you need to specify the different location for the configuration and output/backup files.
+
+After you confirm it, the folder with the existing configuration files will be renamed and the installation will continue.
+
+After that, you will see the installation step where you can select components to be installed:
+
+.Select components from HQbird Server Side to be installed
+image::2.1.7.png[]
+
+We recommend that you install HQbird Enterprise, which contains all HQbird components and Firebird, to avoid further configuration.
+All HQbird modules are installed in the inactive mode and do not affect the operation of the Firebird server until they are configured or used.
+
+If you select to install HQbird Enterprise (i.e., with Firebird), it will install Firebird in the subfolder of HQbird installation, by default: 
+
+- `C:\HQBird\Firebird25` 
+- `C:\HQBird\Firebird30` 
+- `C:\HQBird\Firebird40`
+- `C:\HQBird\Firebird50`
+
+Then, the installation wizard will ask to specify the port for Firebird engine installed with HQbird:
+
+.Specify port for Firebird server
+image::2.1.8.png[]
+
+By default, the port is 3050.
+If the port will be occupied by another running Firebird, the installation wizard will warn you and make to choose another port.
+Or, you can stop and uninstall another Firebird service.
+
+Then, you will be asked to specify the port for HQbird FBDataGuard (web interface to manage HQbird):
+
+.Specify port, login and password for HQbird FBDataGuard
+image::2.1.9.png[]
+
+We recommend to keep 8082, but sometimes this port can be occupied, so you can change it.
+
+Default password: *strong password*
+
+.Setup FTP Server settings
+image::2.1.10.png[]
+
+After that, the installer will ask about email settings to be used to send email alerts:
+
+.Email alerts settings
+image::2.1.11.png[]
+
+
+[NOTE]
+====
+You can skip this step: all email alerts can be set later in web interface.
+====
+
+
+Then, you can specify the folder name and location in Windows menu:
+
+.Choose Windows Start menu folder.
+image::2.1.12.png[]
+
+At the next step the installer will offer you to pre-configure HQbird to be used as master or replica server:
+
+.Pre-configuration for replication.
+image::2.1.13.png[]
+
+You can skip this step, this configuration can be done later.
+
+The final step is a summary of components to be installed and their paths:
+
+.Click Install to complete the installation.
+image::2.1.14.png[]
+
+After that you have to activate HQbird (see <<_hqbird_install_activate,How to Activate HQbird>>) and proceed to configure the HQbird components.
+
+At the end of installation process, you will be asked about next steps:
+
+.Post-installation steps.
+image::2.1.15.png[]
+
+<<<
+
+== Installing HQbird Administrator on Windows
+
+To install HQBird Administrator, download the distribution package from link: https://ib-aid.com/en/hqbird/[https://ib-aid.com/en/hqbird/], or from your account at http://deploy.ib-aid.com/[http://deploy.ib-aid.com].
+
+The name of HQbird Administrator package is [path]_HQbirdAdminNNNN.exe_ (it is in the zip archive).
+
+Run the installation wizard and follow the standard installation steps: digital signature check, license, then select the installation folder:
+
+.Select where to install HQbird Admin.
+image::2.2.1.png[]
+
+Select tools to install after that.
+We recommend that you install all tools.
+
+.Select tools to install.
+image::2.2.2.png[]
+
+Follow the instructions after that.
+After the installation is over, you will be offered to launch the activation wizard.
+If you are installing HQbird Admin on the same computer where HQbird Server was already installed, the license will be automatically detected by HQbird Admin tools.
+
+=== How to install community version of Firebird on Windows
+
+The easiest way is to install Firebird bundled with HQbird – just choose the desired version during the installation.
+However, sometimes it is necessary to use HQbird with a community version of Firebird.
+
+[NOTE]
+====
+Please note – to enable replication and performance features in HQbird Enterprise you need to install Firebird bundled with HQbird ServerSide.
+====
+
+To install Firebird separately, download the Firebird zip archive from http://www.firebirdsql.org/[www.firebirdsql.org]
+
+Unpack the archive file to a suitable location (for instance, [path]_C:\Firebird25_), after that copy the optimized configuration file [path]_firebird.conf_ (see <<_hqbird_config_optimize,Optimized Configurations>> below) to this folder.
+
+Then, go to the Bin folder and then use the *Run As Administrator* option to run
+the batch file with the architecture you need.
+
+* For Firebird 2.5 – run [path]_install-superclassic.bat_.
+* For Firebird 3.0 and higher – set parameter `ServerMode=Super` and run [path]_install_service.bat_.
+
+Of course, you can choose the SuperServer for 2.5 or Classic architecture for 3.0 if you know what you need.
+
+As a result of running the command file, Firebird of the selected architecture will be installed and run as a service.
+
+You can make sure the Firebird service is installed and running in the *Services* snap-in ([path]_services.msc_ in command prompt):
+
+.Firebird Service.
+image::2.2.3.png[]
+
+In this example, Firebird is installed in the folder [path]_H:\Firebird\Firebird-2.5.5.26928-0_x64_ and running as a service with the SuperClassic architecture.
+
+<<<
+
+== Installing HQbird Server on Linux
+
+To install HQbird Server Side on Linux, you need to download HQbird ServerSide for Linux with integrated Firebird
+from https://ib-aid.com/download/hqbird/hqbird2022linux.zip[this location]: https://ib-aid.com/en/hqbird-installation/
+
+This archive contains 3 files:
+
+* _install_fb25_hqbird2022.sh_
+* _install_fb30_hqbird2022.sh_
+* _install_fb40_hqbird2022.sh_
+
+You must be root or sudoer to install HQbird on Linux!
+
+**General prerequisites**: install *java version 1.8* before installing HQbird! We recommend OpenJDK, but Oracle`'s Java is also fine.
+
+=== Installation of HQbird with Firebird 2.5 on Linux
+
+. Uninstall all previously installed Firebird versions before running this installer. Make sure you don't have Firebird installed from repositories!
+. Apply execution rights to the installation package:
++
+----
+
+chmod +x install_fb25_hqbird2022.sh
+----
+. Run installation script [path]_install_fb25_hqbird2022.sh_. It will install Firebird into [path]_/opt/firebird_ and HQbird into [path]_/opt/hqbird_
+. By default, Firebird 2.5 is installed as Classic. We recommend to install it as SuperClassic – for this run script [path]_/opt/firebird/bin/changeMultiConnectMode.sh_ and choose *thread*
+
+Next steps:
+
+. Please note that Firebird 2.5 will be installed with SYSDBA/masterkey
+. You can stop/start Firebird 2.5 with command `service firebird stop` or ``service firebird start``. Check is it running with command `ps aux | grep firebird`
+. You can stop/start HQbird with command `service hqbird stop` or `service hqbird start`. Check is it running with command `ps aux | grep dataguard`
+. Run browser, and log in to HQbird FBDataGuard **http://serverurl:8082**, with user/password = *admin/strong password*
+. Choose "`I have HQbird Enterprise`" and register HQbird with the email and password you have received from IBSurgeon Deploy Center.
+. If necessary, follow steps to setup -- or see the appropriate chapter of this Guide.
+
+
+=== Installation of HQbird with Firebird 3.0 on Linux
+
+__Prerequisites__: make sure you have *libtommath*, *libncurses5-dev* and *ICU* installed (there will be an appropriate error message if they are not installed).
+
+. Uninstall all previously installed Firebird versions before running this installer
+. Apply execution rights to the installation package:
++
+----
+
+chmod +x install_fb30_hqbird2022.sh
+----
+. Run installation script [path]_install_fb30_hqbird2022.sh_. It will install Firebird into [path]_/opt/firebird_ and HQbird into [path]_/opt/hqbird_
+. By default, Firebird 3.0 is installed as SuperServer. Keep it.
+. Firebird 3.0 will be installed with SYSDBA/masterkey
+
+Next steps:
+
+. You can stop/start Firebird 3.0 with command `service firebird-superserver stop` or
+`service firebird-superserver start`. Check is it running with command `ps aux | grep firebird`
+. You can stop/start HQbird with command `service hqbird stop` or `service hqbird start`. Check is it running with command `ps aux | grep dataguard`
+. Run browser, and log in to HQbird FBDataGuard **http://serverurl:8082**, with user/password = *admin/strong password*
+. Choose "`I have HQbird Enterprise`" and register HQbird with the email and password you have received from IBSurgeon Deploy Center.
+. If necessary, follow steps to setup -- or see the appropriate chapter of this Guide.
+
+
+=== Installation of HQbird with Firebird 4.0 on Linux
+
+__Prerequisites__: make sure you have *libtommath* and *ICU* installed (there will be an appropriate error message if they are not installed).
+
+. Uninstall all previously installed Firebird versions before running this installer
+. Apply execution rights to the installation package:
++
+----
+
+chmod +x install_fb40_hqbird2022.sh
+----
+. Run installation script [path]_install_fb40_hqbird2022.sh_. It will install Firebird into [path]_/opt/firebird_ and HQbird into [path]_/opt/hqbird_
+. By default, Firebird 4.0 is installed as SuperServer. Keep it.
+. Firebird 4.0 will be installed with SYSDBA/masterkey
+
+Next steps:
+
+. You can stop/start Firebird 4.0 with command `service firebird-superserver stop` or
+`service firebird-superserver start`. Check is it running with command `ps aux | grep firebird`
+. You can stop/start HQbird with command `service hqbird stop` or `service hqbird start`. Check is it running with command `ps aux | grep dataguard`
+. Run browser, and log in to HQbird FBDataGuard **http://serverurl:8082**, with user/password = *admin/strong password*
+. Choose "`I have HQbird Enterprise`" and register HQbird with the email and password you have received from IBSurgeon Deploy Center.
+. If necessary, follow steps to setup -- or see the appropriate chapter of this Guide.
+
+
+=== Installation of HQbird Standard on Linux
+
+If you have a license of HQbird Standard, or if you don`'t want to change the existing Firebird installation, please run the following command:
+----
+
+install_fb4_hqbird2022.sh –-nofirebird
+----
+
+It will install HQbird without Firebird binaries.
+
+[NOTE]
+====
+Please note, that advanced features (replication, multi-thread support, encryption, authentication) require HQbird Enterprise with Firebird binaries!
+====
+
+=== Firewall settings
+
+Firebird is installed on port **3050**, HQbird web interface is listening on port **8082**, and licensing interface is listening on **8765**.
+
+These ports can be changed in [path]_/opt/firebird/firebird.conf_ (RemoteServicePort), [path]_/opt/hqbird/conf/network.properties_ (server.port) and [path]_/opt/hqbird/conf/license.properties_ (serverlicense.port).
+
+Make sure to allow these ports in your firewall configuration.
+
+.Attention!
+[IMPORTANT]
+====
+After upgrade, make sure that there is only the one copy of HQbird is running! If there are 2 copies, stop them (``service hqbird stop`` for the first and `kill [replaceable]``<process-number>``` for the second instances) and start it again.
+====
+
+<<<
+
+[[_hqbird_update]]
+== Upgrade existing HQbird version
+
+HQbird installer on Windows (from v 2018R2) and on Linux (from v 2018R3) supports automatic upgrade of the configuration of already installed HQbird version 2017R2 and later.
+
+If HQbird installer will notice the previous version of HQbird, it will ask you to confirm the upgrade, and in case of the positive answer, it will stop Firebird, HQbird and upgrade their files.
+
+.Warning about upgrade.
+image::2.4.1.png[]
+
+
+.Warning about restart of currently running HQbird FBDataGuard.
+image::2.4.2.png[]
+
+The configuration will be retained -- it means that [path]_firebird.conf_, [path]_aliases.conf_, [path]_securityX.fdb_, and HQbird configuration files will not be deleted (HQbird configuration files will be upgraded to the new configuration version).
+
+The upgrade does not change the Windows service settings for Firebird and HQbird – it means that if you have changed "`Run As`" properties of the service, they will be retained.
+
+[NOTE]
+====
+After upgrade on Linux Firebird and HQbird must be started manually!
+====
+
+[IMPORTANT]
+====
+After upgrading HQbird, open the web-console and choose in the right upper corner: "`Refresh HQbird web-console`".
+It is necessary to clean the cache of JavaScript part of the application.
+
+image::2.4.3.png[]
+
+====
+
+Please note -- if you are installing HQbird 2022 over the old version of HQbird on Windows, the dialog with installation options will be shown as disabled, because we cannot automatically upgrade from 2.5 to 3.0 or 4.0, and installer can only upgrade the same components.
+If you need a different installation, remove old version of HQbird from the computer prior installing 2022.
+
+.An example of the disabled components selection dialog in case of upgrade.
+image::2.4.4.png[]
+
+<<<
+
+== Registration of HQbird
+
+[[_hqbird_install_activate]]
+=== How to activate HQbird
+
+To activate HQbird, you can either use a separate utility included in the server and administrator packages for Windows, or use the registration mechanism embedded into the HQBird Firebird DataGuard web interface (for Windows and Linux), or run any tool from the administrator software and use the built-in activation wizard.
+
+The activation wizard looks and works the same in the tools and in the activation tool.
+It is enough to perform activation once on any computer that can connect to the server where HQbird ServerSide is installed.
+
+You can launch the registration utility from the *Start* menu (IBSurgeon\HQbird Firebird Admin\HQbird):
+
+.HQBird registration helper.
+image::2.5.1.png[]
+
+If you click the *Register* button (or Re-Register for repeated registration), you will see the activation wizard:
+
+.HQBird activation window.
+image::2.5.2.png[]
+
+After that, specify the *IP address* or the *computer name* of the server HQbird is installed on in the upper input field and click **Connect to HQbird
+                    Server**.
+If you started registration utility on the same computer with HQbird Server, it will be "`localhost`", otherwise -- some remote address.
+
+Then enter your registration data.
+If you have a license, enter your e-mail address and password that you used to register with the IBSurgeon Deploy Center and click **Activate**.
+
+[NOTE]
+====
+If you have no license, choose Trial license, specify your e-mail address and click **Activate**.
+You will be automatically registered and the password will be sent to your e-mail address.
+====
+
+Right after you click **Activate**, the registration wizard will try to connect to the IBSurgeon Deploy Center () and obtain a license.
+If it succeeds, you will see the corresponding message.
+If there are any problems, you will see the error message.
+
+If you forget the password, click the *Forgot
+                    password...* button and it will open the browser with the password recovery form.
+
+If you need to purchase a new or additional license or renew your subscription, click *Purchase.*
+
+Click *Close this window* after the registration is over.
+
+==== Internet Activation via a Client Computer
+
+If the server with HQbird Server does not have access to the Internet, you can still activate it via the Internet: you can install HQbird Administrator on any client computer with Windows that has both access to the Internet and access to the HQbird Server and perform activation.
+
+image::2.5.3.png[]
+
+Run HQbird Register tool and enter there: IP address of your server (or, server name -- for example, mylinuxserver), email and license, and click Activate:
+
+.HQBird activation window.
+image::2.5.4.png[]
+
+
+=== Offline Activation
+
+If the server and all client computers have no access to the Internet, you should use offline activation.
+To do it, click Offline activation tab and follow instructions there.
+In case of any troubles please contact.
+
+<<<
+
+=== Activation in web interface
+
+.Activation in web interface.
+image::2.5.5.png[]
+
+<<<
+
+[[_hqbird_config_optimize]]
+== Configuring firebird.conf for the best performance
+
+HQbird includes set of optimized configuration files for all Firebird versions from 1.5 to 4.0 – they are located in [path]_HQBird\Configurations_.
+
+If you did not perform a justified tuning of [path]_firebird.conf_ or you are using default [path]_firebird.conf_, consider to use one of the optimized files from this collection.
+
+There are three variants of Firebird configuration files for every Firebird architecture: balanced, read-intensive and write intensive.
+We always recommend to start with balanced [path]_firebird.conf_.
+Then we recommend to measure actual ratio between reads and writes using HQbird MonLogger tool (tab "`Aggregated
+Performance Statistics`"). In 90% of cases there are much more reads than writes, so the next step is to try read-optimized firebird configuration file.
+
+Firebird configuration greatly depends on the hardware, so if you want to tune Firebird properly, please also read "`http://ib-aid.com/en/articles/firebird-hardware-guide/[Firebird
+                    Hardware Guide]`", it will help you to understand what parameters must be tuned.
+
+For the deep tuning of high-load Firebird databases IBSurgeon offers Firebird Database Optimization Service: https://ib-aid.com/en/firebird-interbase-performance-optimization-service/
+
+Also, HQbird FBDataGuard analyses the database health and sends alerts with intelligent suggestions to increase specific parameters in [path]_firebird.conf_, like TempCacheLimit or LockHashSlots.
+
+.Attention!
+[IMPORTANT]
+====
+If you have specified many page buffers in the header of your database and installed SuperClassic or Classic, it can affect Firebird performance.
+To avoid the potential problem, set page buffers in the header of your database to 0, it will ensure that the value from [path]_firebird.conf_ will be used:
+
+----
+
+gfix –buff 0 –user SYSDBA –pass masterkey disk:\path\database.fdb
+----
+====

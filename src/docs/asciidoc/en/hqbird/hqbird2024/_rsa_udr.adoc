@@ -1,0 +1,192 @@
+[[_hqbird_rsa_udr]]
+= RSA-UDR -- security functions to sign documents and verify signatures
+
+
+HQbird Enterprise includes RSA-UDR which contains the set of useful security functions.
+These functions can be useful to protect documents (stored as varchars, BLOBS and even external files) with digital signature.
+
+.Important
+[IMPORTANT]
+====
+This RSA-UDR is not required if using Firebird 4.0, as these functions are built-in.
+====
+
+.Please note!
+[NOTE]
+====
+To use RSA-UDR functions, you need to register them in your database with an appropriate SQL script.
+The script is available in [path]_plugin/UDR/crypto.sql_
+====
+
+Let's consider functions from this library and examples their usage.
+
+[cols="1,1", options="header"]
+|===
+| Function Name
+| Description
+
+
+|BIN2HEX
+|Convert binary representation to HEX
+
+|BIN2HEXB
+|Convert BLOB binary representation to HEX
+
+|CRC32
+|Calculate checksum
+
+|CRC32B
+|Calculate BLOB checksum
+
+|DECODE_BASE64
+|Decode to Base64
+
+|DECODE_BASE64B
+|Decode BLOB to Base64
+
+|ENCODE_BASE64
+|Encode to Base64
+
+|ENCODE_BASE64B
+|Encode BLOB to Base64
+
+|HEX2BIN
+|Convert HEX to binary
+
+|HEX2BINB
+|Convert NEX BLOB to binary
+
+|MD5
+|Calculate MD5 hash sum
+
+|MD5B
+|Calculate BLOB MD5 hash sum
+
+|RSA_PUBLIC_KEY
+|Generate public key
+
+|RSA_PRIVATE_KEY
+|Generate private key
+
+|RSA_SIGN
+|Sign object
+
+|RSA_VERIFY
+|Verify the signature
+
+|SHA1
+|Calculate SHA
+
+|SHA1B
+|Calculate SHA for BLOB
+
+|SHA256
+|Calculate SHA256
+
+|SHA256B
+|Calculate SHA256 for BLOB
+|===
+
+Let's consider the simplified example how to use these functions to sign some document and verify the signature.
+
+For simplicity, we will put the document, private key, public key, digest (hash sum of the document) and signature will be in the same table, in the single column:
+
+----
+
+ SQL> show table TBL;
+
+ DOC BLOB segment 80, subtype BINARY Nullable
+ DIGEST VARCHAR(32) CHARACTER SET OCTETS Nullable
+ SALTLEN INTEGER Nullable
+ PRIVATE_KEY VARCHAR(2048) CHARACTER SET OCTETS Nullable
+ SIGN VARCHAR(1024) CHARACTER SET OCTETS Nullable
+ PUBLIC_KEY VARCHAR(512) CHARACTER SET OCTETS Nullable
+ BAD_SIGN VARCHAR(1024) CHARACTER SET OCTETS Nullable
+----
+
+Then, let's go through the example:
+
+----
+
+ -- First, we will connect to the database:
+
+ C:\HQbird\Firebird30>isql localhost:c:\temp\rsatest.fdb -user SYSDBA -pass masterkey
+ Database: localhost:c:\temp\rsatest.fdb, User: SYSDBA
+
+ -- and then we will check that functions are registered
+ SQL> show functions;
+ Global functions
+
+ Function Name Invalid Dependency, Type
+ ================================= ======= =====================================
+ RSA_PRIVATE_KEY
+ RSA_PUBLIC_KEY
+ RSA_SIGN
+ RSA_VERIFY
+ SHA256
+
+
+ -- clean the test table
+ SQL>delete from tbl
+ SQL>commit;
+
+ -- generate private key and write
+ -- it into table TBL (normally, the private will be kept in the - secret place)
+
+ SQL>insert into tbl(PRIVATE_KEY) values(rsa_private_key(1024));
+
+ -- generate public key
+ SQL>update tbl set PUBLIC_KEY = rsa_public_key(PRIVATE_KEY);
+
+ -- create BLOB document
+ SQL>update TBL set DOC='testtesttest';
+
+ -- and calculate its digest
+ SQL>update tbl set digest = sha256(doc);
+
+ –- sign document and remember its signature
+ SQL>update tbl set sign = rsa_sign(digest, PRIVATE_KEY, 8);
+
+ -- check the signature
+ SQL> select RSA_VERIFY(SIGN, DIGEST, PUBLIC_KEY, SALTLEN) from tbl;
+
+ RSA_VERIFY
+ ==========
+ <true>
+ -- as you can see, signature is valid
+
+ –- change the document (BLOB)
+ SQL> update TBL set DOC='testtesttest222';
+
+ -- recalculate its digest
+ SQL> update tbl set digest = sha256(doc);
+
+ -- check signature
+ SQL> select rsa_verify(sign, digest, PUBLIC_KEY, 8) from tbl;
+
+ RSA_VERIFY
+ ==========
+ <false>
+ -- we can see that protected document was changed
+----
+
+Examples of BIN2HEX and HEX2BIN functions
+
+----
+
+ SQL> set list;
+ SQL> select bin2hex('Test string') from rdb$database;
+
+ BIN2HEX 5465737420737472696E67
+
+ SQL> select cast (hex2bin('5465737420737472696E67') as varchar(32))
+ CON> from rdb$database;
+
+ CAST     Test string
+----
+
+== How to use RSA-UDR security and conversion functions
+
+In general, RSA-UDR functions allow to seal electronic documents of all types (DOC, PDF, XML, JPG, PNG, etc), and then detect unauthorized changes.
+
+Conversion functions make easy BIN->HEX and HEX->BIN conversions, as well as Base64 encoding and decoding.

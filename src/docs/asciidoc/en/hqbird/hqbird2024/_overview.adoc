@@ -1,0 +1,223 @@
+= Overview of HQbird
+
+== What is HQbird
+
+HQbird is an advanced distribution of Firebird for enterprises, with the following list of features:
+
+* Native one-to-many replication (2.5, 3.0, 4.0)
++
+** Replicates databases with 1500+ connections
+** Asynchronous replication with 10 seconds delay
+** Synchronous replication
+** No triggers or other changes in schema required, DDL support, online re-initialization
+* multi-thread backup, restore, and sweep;
+* support for encryption;
+* pool of execute on external connections;
+* cached prepared statements;
+* optimized configurations;
+* backups automation, including cloud backups;
+* database health monitoring;
+* automatic performance and transactions reports;
+* advanced transactions and queries monitoring (Trace, MON$ and FBScanner);
+* database structure analysis;
+* recovery toolset and database development GUI.
+
+Also HQbird includes a performance self-test to measure Firebird performance on the specific hardware and OS configuration.
+
+HQBird contains 2 parts: Server and Admin.
+The Server part has versions for Windows and Linux, and the administration part works on Windows only.
+
+There are 3 editions of HQbird: Standard, Professional and Enterprise.
+
+<<<
+
+== What's new in HQbird 2022
+
+HQbird 2022 is a major new release that adds support for Firebird 4 and adds a number of significant features:
+
+. Performance improvements:
+* Optimizer improvements for automatic recognition of implicit INNER join (transform LEFT JOIN to INNER JOIN if queries are equivalent)
+* Temporary blob caching to speed up blob operations up to 15% and prevent abnormal database growth
+* `blob_append` function for faster blob concatenation, blob operations up to 18x faster
+* Multithreaded restore in Firebird 4 HQbird 2022
+. Streaming changes to the database:
+* Each change (such as INSERT, UPDATE or DELETE) for each table can be sent outside the database by a commit event
+* Ability to send changes as JSON via RabbitMQ and similar software
+. A set of additional UDRs:
+* Text recognition (OCR) inside the database in queries, stored procedures and triggers, with support for dictionaries.
+* UDR for working with JSON (construction and parsing)
+* Split UDR to quickly split a string by delimiter
+* UDR for working with external data sources via ODBC
+. The most complete performance monitoring, based on MON$ and trace data, makes it easy to identify performance problems, from long transactions to slow or too frequent requests.
+
+In addition, HQbird 2022 still offers advanced replication functionality, external connection pooling, prepared statements pool, and other features necessary when working with large databases under critical load.
+
+<<<
+
+== Feature matrix
+
+Below there is the feature matrix for HQbird editions.
+
+[cols="3,1,1,1", frame="all"]
+|===
+.2+h| Features 3+h| Editions
+h| Standard h| Professional h| Enterprise
+
+|Optimized configurations
+|X
+|X
+|X
+
+|Backups
+|X
+|X
+|X
+
+|Automatic Performance Reports
+|X
+|X
+|X
+
+|SQL queries tracking
+|X
+|X
+|X
+
+|Transactions tracking
+|X
+|X
+|X
+
+|Database structure analysis
+|X
+|X
+|X
+
+|Performance self-test suite
+|
+|X
+|X
+
+|SQL development, design&debugging
+|
+|X
+|X
+
+|Recovery
+|
+|
+|X
+
+|Replication and high availability
+|
+|
+|X
+
+|Pool of Execute On External statements
+|
+|
+|X
+
+|Cached prepared statements
+|
+|
+|X
+
+|Multi-thread backup, sweep, restore
+|
+|
+|X
+
+|Encryption support
+|
+|
+|X
+
+|Enhanced authentication and security features
+|
+|
+|X
+|===
+
+It is possible to single out components in the HQbird modules that are responsible for certain operations (such as backup, monitoring, database repair).
+
+The table below shows how features are distributed among the HQbird modules:
+
+[cols="1,1,3", frame="all", options="header"]
+|===
+| Features
+| Modules
+| Description
+
+
+|**Backup** (automated verified and incremental backup)
+|FBDataGuard
+|FBDataGuard runs on the server side and performs all kinds of
+    backup
+
+|**Optimized Configurations**
+                                (balanced, read-intensive and write-intensive)
+|FBDataGuard, a collection of optimized configurations
+|The optimized configuration file can be customized on the basis
+    of recommendations from FBDataGuard
+
+|**Performance Test Suite** (hardware
+                                score)
+|Performance Test Suite
+|The test measures the hardware performance
+
+|**Monitoring SQL Queries** (MON$, TraceAPI and FBScanner)
+|Performance Monitor, MON$Logger, FBScanner
+|Three different monitoring methods are used in different
+    scenarios
+
+|**Health Monitoring** (online validation, database health check, log analysis)
+|FBDataGuard
+|Everything is carried out on the server. FBDataGuard sends
+    notifications by e-mail.
+
+|**Transaction Tracking** (dynamic analysis of transaction markers)
+|FBDataGuard, Transaction Monitor, MON$Logger
+|FBDataGuard tracks problems with transactions, Transaction
+    Monitor and MON$Logger show the dynamics of changes and the current
+    status of active transactions.
+
+|**Database Structure Analysis** (table and index sizes, fragmentation, versioning, etc.)
+|Database Analyst
+|Database Analyst analyses the database structure in detail and
+    shows warnings and recommendations.
+
+|**SQL Development & Debugging**
+                                (a GUI tool for developing databases and queries)
+|SQL Studio
+|SQL Studio is a powerful tool for developing and debugging
+    database objects and SQL queries.
+
+|**Recovery** (database recovery,
+                                backup recovery, record undeleting)
+|FirstAID, FBDataGuard, IBBackupSurgeon, IBUndelete
+|FirstAID repairs databases when they get corrupted, FBDataGuard
+   stores important metadata thus increasing the chances of successful
+   repairs, IBBackupSurgeon exports data from corrupted backup copies.
+   IBUndelete can undo records deletion.
+
+|**High Availability**
+                                (replication)
+2+|The HQbird Enterprise edition includes
+   replication and high availability tools.
+
+|**Performance improvements (pool of Execute On External and Cached prepared)**
+2+|HQbird Enterprise includes performance improvements.
+
+|**Multi-thread backup, sweep, restore**
+|HQbird Enterprise
+|
+
+|**Encryption support**
+|HQbird Enterprise
+|
+
+|**Enhanced authentication and security features**
+|HQbird Enterprise
+|
+|===
