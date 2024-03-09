@@ -10,7 +10,7 @@ Let's consider how to install them.
 HQbird Server 2024 includes Firebird 2.5, 3.0, 4.0 and 5.0 with replication, multi-thread support and other enhancements as part of its installer, so Firebird must be installed as part of HQbird.
 It is mandatory to install Firebird bundled with HQbird Server installer, if you plan to use replication (it also requires HQbird Enterprise license, full or trial) and other enhancements.
 
-Optionally you can choose HQbird Standard, which will not install Firebird, so you can use previously installed Firebird – in this case, make sure that installed version is compatible (2.5.x, 3.0.x, 4.0.x).
+Optionally you can choose HQbird Standard, which will not install Firebird, so you can use previously installed Firebird – in this case, make sure that installed version is compatible (2.5.x, 3.0.x, 4.0.x, 5.0.x).
 
 Please note, that only Firebird 2.5, 3.0, 4.0 and 5.0 are fully supported in HQbird, the old Firebird versions are supported partially.
 We offer the comprehensive https://ib-aid.com/en/firebird-database-migration/[Firebird migration service] with guaranteed
@@ -100,14 +100,14 @@ At first, the installer will ask you where to install HQbird:
 .Where to install HQbird
 image::2.1.3.png[]
 
-We recommend to use the default location [path]_c:\HQbird_, but you can use any suitable location.
+We recommend to use the default location `c:\HQbird`, but you can use any suitable location.
 
 After that, you should select folders for storing configuration files, backup copies of databases, statistics and HQbird log files:
 
 .Select folders for HQbird configuration and log files
 image::2.1.4.png[]
 
-By default, the installation wizard offers to create folders for configuration and log files in [path]_C:\HQbirdData_.
+By default, the installation wizard offers to create folders for configuration and log files in `C:\HQbirdData`.
 
 [NOTE]
 ====

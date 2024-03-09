@@ -1,0 +1,192 @@
+[[_hqbird_fbstreaming]]
+= Firebird Streaming
+
+The Firebird Streaming project is a set of libraries for parsing Firebird replication logs after being
+processed by the `fb_repl_print` utility.For each event in the log, you can write your own handler by
+inheriting the `SegmentProcessEventListener` interface.
+
+The source code of project can be downloaded at https://github.com/sim1984/fbstreaming
+
+This library can be used to notify about events through the queue system, or to write your own replicator in other DBMS.
+
+The release can be downloaded from the link https://github.com/sim1984/fbstreaming/releases/download/v1.0/release.zip
+
+The `journals/incoming` folder contains replication logs after being processed by the `fb_repl_print` utility.
+
+The `journals/outgoing` folder some output files that are the output of one of the plugins.
+
+The `journals/segments.journal` file is a file in which the file names of the processed segments are written.Used by some plugins.
+
+JAR files containing plugins are located in the `plugins` folder.The example contains the following plugins:
+
+* converting replication segments to JSON format
+* sending the associated DML statement data (in JSON format) to the RabbitMQ queue on a transaction confirmation event
+* writing DML statements to SQL files. Recording occurs on the event of a transaction confirmation.
+
+For configuration, the `config.properties` file is used, which must be located next to the `fbstreaming-1.0.jar` file.
+Properties in the config file:
+
+* `pluginClassName` -- fully qualified plugin class name
+* `incomingFolder` -- folder with input logs (replication segments)
+* `outgoingFolder` -- folder with plugin results (used by JSON and SQL plugins)
+* `journalFileName` -- file with processed replication segments (used by SQL and RabbitMQ plugins)
+* `segmentFileNameMask` -- mask for input files (replication segments)
+* `segmentFileCharset` -- encoding of replication segments
+* `includeTables` -- regular expression for filtering tables (if not specified, all tables are processed)
+* `rabbit.host` -- host for RabbitMQ plugin
+* `rabbit.queueName` -- the name of the queue for the RabbitMQ plugin
+
+To be able to process a replication segment, it must be processed with the `fb_repl_print` utility using the
+following command:
+
+[source]
+----
+fb_repl_print -d -b <archive_journal_file> > <journal_file_for_streaming>
+----
+
+.Example
+[source]
+----
+fb_repl_print -d -b f:\fbdata\archives\examples.fdb.arch-000000010 > f:\journals\incoming\examples.fdb.arch-000000010.txt
+----
+
+To start the handler of received files, enter the command:
+
+[source]
+----
+java -jar fbstreaming-1.0.jar
+----
+
+<<<
+
+[[_hqbird_fbstreaming_json]]
+== Json plugin description
+
+Full name of plugin `com.hqbird.fbstreaming.plugin.json.JsonStreamPlugin`.
+
+The `JsonStreamPlugin` plugin reads replication segment files and stores DML statement data over tables in JSON format.
+A JSON data file is created for each replication segment file. JSON files are saved in the folder specified in the `outgoingFolder` parameter.
+
+The JSON file has the following format:
+
+[source,json]
+----
+[
+  {
+    "transactionNumber": 409036118,
+    "statements": [
+      {
+        "tableName": "CLBULLETS",
+        "statementType": "INSERT",
+        "keyValues": {
+          "NUMBULL": 156803509
+        },
+        "newFieldValues": {
+          "CLAGE": 45,
+          "REPL$GRPID": 15,
+          "PROFID": 990000090,
+          "SENDSTATUS": 0,
+          "POL": 1,
+          "FILIAL": 15,
+          "BDATE": "1976-05-03",
+          "CLINICID": 38,
+          "PRIMLIST": 1,
+          "MODIFYDATE": "16-AUG-2021 23:50:14.2480",
+          "DGOPEN": 14438,
+          "DATEOPEN": "16-AUG-2021",
+          "TREATCODE": 156802708,
+          "PCODE": 150002994,
+          "ISSUEDATE": "16-AUG-2021",
+          "DISABILITYID": 150050614,
+          "DCODEOPEN": 150000278,
+          "NUMBULL": 156443509
+        },
+        "oldFieldValues": {}
+      }
+    ]
+  }
+]
+----
+
+The JSON file at the top level is an array of transactions. For each transaction, its number is stored in the `transactionNumber` key.
+An array with a description of all DML statements on tables produced within this transaction is stored in the `statements` key.
+The following data is saved for each DML statement:
+
+* `tableName` -- the name of the table on which the operation is performed;
+* `statementType` -- the type of the statement (`INSERT`, `UPDATE`, `DELETE`);
+* `keyValues` -- values of key fields;
+* `newFieldValues` -- new field values;
+* `oldFieldValues` -- old field values.
+
+Example configuration file `config.properties`:
+
+[source]
+----
+pluginClassName=com.hqbird.fbstreaming.plugin.json.JsonStreamPlugin
+incomingFolder=./journals/incoming
+outgoingFolder=./journals/outgoing/json
+segmentFileNameMask=.*txt
+segmentFileCharset=windows-1251
+includeTables=CLBULLETS|CLREFDET
+----
+
+<<<
+
+== Sql plugin description
+
+Full name of plugin `com.hqbird.fbstreaming.plugin.sql.SqlStreamPlugin`.
+
+The `SqlStreamPlugin` reads the replication segment files and saves them to files with DML statements as SQL.
+For each transaction from the replication segment, a file with SQL statements is created.
+SQL files are saved in the folder specified in the `outgoingFolder` parameter.
+
+The file stores script DML statements separated by semicolons ";".BLOB of subtype TEXT is converted to character literal,
+if subtype is BINARY, then it is converted to binary literal in hexadecimal notation.Attention, for BLOBs longer
+than 65535 bytes, an error script will be generated.This is planned to be fixed in the future.
+
+Example configuration file `config.properties`:
+
+[source]
+----
+pluginClassName=com.hqbird.fbstreaming.plugin.sql.SqlStreamPlugin
+incomingFolder=./journals/incoming
+outgoingFolder=./journals/outgoing/sql
+journalFileName=./journals/segments.journal
+segmentFileNameMask=.*txt
+segmentFileCharset=windows-1251
+includeTables=CLBULLETS|CLREFDET
+----
+
+<<<
+
+== Rabbitmq plugin description
+
+Full name of plugin `com.hqbird.fbstreaming.plugin.rabbitmq.RabbitMQStreamPlugin`.
+
+The `RabbitMQStreamPlugin` plugin reads replication segment files and stores DML statement data over tables in JSON format.
+When a transaction commit event is detected, JSON data is sent to the RabbitMQ queue.
+The JSON message format is similar to the one described above.
+
+Example configuration file `config.properties`:
+
+[source]
+----
+pluginClassName=com.hqbird.fbstreaming.plugin.rabbitmq.RabbitMQStreamPlugin
+incomingFolder=./journals/incoming
+journalFileName=./journals/segments.journal
+segmentFileNameMask=.*txt
+segmentFileCharset=windows-1251
+includeTables=CLBULLETS|CLREFDET
+rabbit.host=localhost
+rabbit.queueName=hello
+----
+
+The delivery contains the simplest example of a client that reads a message from the RabbitMQ queue:
+`RabbitMQReceiver-1.0.jar`.
+
+The client is launched with the command:
+
+[source]
+----
+java -jar RabbitMQReceiver-1.0.jar
+----
