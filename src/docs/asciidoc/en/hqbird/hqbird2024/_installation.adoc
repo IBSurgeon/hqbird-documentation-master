@@ -8,6 +8,7 @@ Let's consider how to install them.
 == Installing HQbird Server on Windows
 
 HQbird Server 2024 includes Firebird 2.5, 3.0, 4.0 and 5.0 with replication, multi-thread support and other enhancements as part of its installer, so Firebird must be installed as part of HQbird.
+
 It is mandatory to install Firebird bundled with HQbird Server installer, if you plan to use replication (it also requires HQbird Enterprise license, full or trial) and other enhancements.
 
 Optionally you can choose HQbird Standard, which will not install Firebird, so you can use previously installed Firebird – in this case, make sure that installed version is compatible (2.5.x, 3.0.x, 4.0.x, 5.0.x).
@@ -34,7 +35,8 @@ The following parameters are mandatory to perform the silent installation:
 +
 ** "HQBird25x64" - "HQbird Enterprise (with Firebird 2.5 x64)";
 ** "HQBird30x64" - "HQbird Enterprise (with Firebird 3.0 x64)";
-** "HQBird40x64" - "HQbird Enterprise (with Firebird 4.0 x64)".
+** "HQBird40x64" - "HQbird Enterprise (with Firebird 4.0 x64)";
+** "HQBird50x64" - "HQbird Enterprise (with Firebird 5.0 x64)".
 * `/DIR` - where to install HQBird. If you are doing silent upgrade, make sure the version is the same as it was installed previously.
 * `/CONFIGDIR` – where to store configuration data for HQbird.
 * `/OUTPUTDIR` – where to store output data (default location for backups, performance reports, etc).
@@ -47,10 +49,12 @@ Optional parameters for the silent installation of HQbird:
 ** `/DGPORT=8082` – port for web interface of HQbird (FBDataGuard)
 ** `/DGLOGIN=admin` – login for web interface of HQbird (FBDataGuard)
 ** `/DGPASSWORD=strong password` – password for web interface of HQbird (FBDataGuard)
+** `/DISSVC` - disable all installed services (use function IsDisableServices)
+** `/DISMONSVC` - disable installed services except DG (use function IsDisableMonServices)
 * Automatic registration parameters:
 ** `/REGEMAIL=youremail@company.com` - email to perform the automatic registration of HQBird
 ** `/REGPASS=yourpassword` – password from IBSurgeon Deploy Center account to register HQbird
-** `/REGTYPE=S|E|T` == Standard, Enterprise, Trial – license type, must be specified if you need to register HQbird during the installation
+** `/REGTYPE=R|M|T` == Replica, Master, Trial – license type, must be specified if you need to register HQbird during the installation
 * Оffline registration (incompatible with REG **)
 ** `/REGUIK=<uik filename>`
 ** `/REGUNLOCK=<unlock filename>`
@@ -135,24 +139,24 @@ After that, you will see the installation step where you can select components t
 .Select components from HQbird Server Side to be installed
 image::2.1.7.png[]
 
-We recommend that you install HQbird Enterprise, which contains all HQbird components and Firebird, to avoid further configuration.
+We recommend that you install all HQbird components and Firebird, to avoid further configuration.
 All HQbird modules are installed in the inactive mode and do not affect the operation of the Firebird server until they are configured or used.
 
-If you select to install HQbird Enterprise (i.e., with Firebird), it will install Firebird in the subfolder of HQbird installation, by default: 
+If you choose to install HQbird Enterprise (i.e. with Firebird), by default each version of Firebird will be installed in a subfolder of the HQbird installation. By default for each version of Firebird:
 
 - `C:\HQBird\Firebird25` 
 - `C:\HQBird\Firebird30` 
 - `C:\HQBird\Firebird40`
 - `C:\HQBird\Firebird50`
 
-Then, the installation wizard will ask to specify the port for Firebird engine installed with HQbird:
+The installation wizard will then ask you to specify the port for each version of Firebird installed alongside HQbird:
 
-.Specify port for Firebird server
+.Specify port for each Firebird servers
 image::2.1.8.png[]
 
-By default, the port is 3050.
-If the port will be occupied by another running Firebird, the installation wizard will warn you and make to choose another port.
-Or, you can stop and uninstall another Firebird service.
+If the port is occupied by another running Firebird, the installation wizard will warn you and prompt you to select a different port. Or you can stop and remove another Firebird service.
+
+Here you can select services that will start automatically when the system starts.
 
 Then, you will be asked to specify the port for HQbird FBDataGuard (web interface to manage HQbird):
 
