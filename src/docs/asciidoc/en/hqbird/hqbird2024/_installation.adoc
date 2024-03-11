@@ -144,10 +144,10 @@ All HQbird modules are installed in the inactive mode and do not affect the oper
 
 If you choose to install HQbird with Firebird, by default each version of Firebird will be installed in a subfolder of the HQbird installation. By default for each version of Firebird:
 
-- `C:\HQBird\Firebird25` 
-- `C:\HQBird\Firebird30` 
-- `C:\HQBird\Firebird40`
-- `C:\HQBird\Firebird50`
+- `C:\HQbird\Firebird25` 
+- `C:\HQbird\Firebird30` 
+- `C:\HQbird\Firebird40`
+- `C:\HQbird\Firebird50`
 
 The installation wizard will then ask you to specify the port for each version of Firebird installed alongside HQbird:
 
@@ -214,7 +214,7 @@ image::2.1.15.png[]
 
 == Installing HQbird Administrator on Windows
 
-To install HQBird Administrator, download the distribution package from link: https://ib-aid.com/en/hqbird/[https://ib-aid.com/en/hqbird/], or from your account at http://deploy.ib-aid.com/[http://deploy.ib-aid.com].
+To install HQbird Administrator, download the distribution package from link: https://ib-aid.com/en/hqbird/[https://ib-aid.com/en/hqbird/], or from your account at http://deploy.ib-aid.com/[http://deploy.ib-aid.com].
 
 The name of HQbird Administrator package is [path]_HQbirdAdminNNNN.exe_ (it is in the zip archive).
 
@@ -472,12 +472,12 @@ It is enough to perform activation once on any computer that can connect to the 
 
 You can launch the registration utility from the *Start* menu (IBSurgeon\HQbird Firebird Admin\HQbird):
 
-.HQBird registration helper.
+.HQbird registration helper.
 image::2.5.1.png[]
 
 If you click the *Register* button (or Re-Register for repeated registration), you will see the activation wizard:
 
-.HQBird activation window.
+.HQbird activation window.
 image::2.5.2.png[]
 
 After that, specify the *IP address* or the *computer name* of the server HQbird is installed on in the upper input field and click **Connect to HQbird Server**.
@@ -510,7 +510,7 @@ image::2.5.3.png[]
 
 Run HQbird Register tool and enter there: IP address of your server (or, server name -- for example, mylinuxserver), email and license, and click Activate:
 
-.HQBird activation window.
+.HQbird activation window.
 image::2.5.4.png[]
 
 
@@ -532,7 +532,7 @@ image::2.5.5.png[]
 [[_hqbird_config_optimize]]
 == Configuring firebird.conf for the best performance
 
-HQbird includes set of optimized configuration files for all Firebird versions from 1.5 to 5.0 – they are located in `HQBird\Configurations`.
+HQbird includes set of optimized configuration files for all Firebird versions from 1.5 to 5.0 – they are located in `HQbird\Configurations`.
 
 If you did not perform a justified tuning of `firebird.conf` or you are using default `firebird.conf`, consider to use one of the optimized files from this collection.
 
