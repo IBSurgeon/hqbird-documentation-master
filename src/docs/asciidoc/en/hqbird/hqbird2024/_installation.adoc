@@ -453,7 +453,7 @@ image::2.4.3.png[]
 ====
 
 Please note -- if you are installing HQbird 2024 over the old version of HQbird on Windows, the dialog with installation options will be shown as disabled, because we cannot automatically upgrade from 2.5 to 3.0, 4.0 or 5.0, and installer can only upgrade the same components.
-If you need a different installation, remove old version of HQbird from the computer prior installing 2022.
+If you need a different installation, remove old version of HQbird from the computer prior installing 2024.
 
 .An example of the disabled components selection dialog in case of upgrade.
 image::2.4.4.png[]
