@@ -1,17 +1,17 @@
 [[_hqbird_split_udr]]
-= SPLIT-UDR -- procedures to splitting lines by separator
+= SPLIT-UDR -- procedures to splitting strings by separator
 
-HQbird Enterprise includes SPLIT-UDR which contains the set of useful stored procedures.
-These procedures can be useful to splitting string  (stored as varchars or BLOBS) by separator.
+HQbird includes SPLIT-UDR which contains the set of useful stored procedures.
+These procedures can be useful to splitting string  (stored as VARCHAR or BLOB) by separator.
 
 .Please note!
 [NOTE]
 ====
 To use SPLIT-UDR functions, you need to register them in your database with an appropriate SQL script.
-The script is available in [path]_plugin/UDR/split-udr.sql_
+The script is available in `plugin/UDR/split-udr.sql`
 ====
 
-For convenience, procedures for splitting text by separator are packed in the SPLIT_UTILS package.
+For convenience, procedures for splitting text by separator are packed in the `SPLIT_UTILS` package.
 
 Let's consider procedures from this library and examples their usage.
 
@@ -20,36 +20,36 @@ Let's consider procedures from this library and examples their usage.
 | Procedure Name
 | Description
 
-| SPLIT_BOOLEAN
-| Splits the string at the delimiter and returns a set of BOOLEAN values.
+| `SPLIT_BOOLEAN`
+| Splits the string at the delimiter and returns a set of `BOOLEAN` values.
 
-| SPLIT_SMALLINT
-| Splits the string at the delimiter and returns a set of SMALLINT values.
+| `SPLIT_SMALLINT`
+| Splits the string at the delimiter and returns a set of `SMALLINT` values.
 
-| SPLIT_INT
-| Splits the string at the delimiter and returns a set of INTEGER values.
+| `SPLIT_INT`
+| Splits the string at the delimiter and returns a set of `INTEGER` values.
 
-| SPLIT_BIGINT
-| Splits the string at the delimiter and returns a set of BIGINT values.
+| `SPLIT_BIGINT`
+| Splits the string at the delimiter and returns a set of `BIGINT` values.
 
-| SPLIT_STR
-| Splits the string at the delimiter and returns a set of VARCHAR(8191) values.
+| `SPLIT_STR`
+| Splits the string at the delimiter and returns a set of `VARCHAR(8191)` values.
 
-| SPLIT_DATE
-| Splits the string at the delimiter and returns a set of DATE values.
+| `SPLIT_DATE`
+| Splits the string at the delimiter and returns a set of `DATE` values.
 
-| SPLIT_TIME
-| Splits the string at the delimiter and returns a set of TIME values.
+| `SPLIT_TIME`
+| Splits the string at the delimiter and returns a set of `TIME` values.
 
-| SPLIT_TIMESTAMP
-| Splits the string at the delimiter and returns a set of TIMESTAMP values.
+| `SPLIT_TIMESTAMP`
+| Splits the string at the delimiter and returns a set of `TIMESTAMP` values.
 
-| SPLIT_DOUBLE
-| Splits the string at the delimiter and returns a set of DOUBLE PRECISION values.
+| `SPLIT_DOUBLE`
+| Splits the string at the delimiter and returns a set of `DOUBLE PRECISION` values.
 
 |===
 
-The first argument of these procedures is a BLOB with subtype TEXT, the second is a string of type VARCHAR (10).
+The first argument of these procedures is a `BLOB` with subtype `TEXT`, the second is a string of type `VARCHAR(10)`.
 The output type depends on the name of the procedure.
 
 Let's look at simple examples of how to use these procedures.
@@ -74,7 +74,7 @@ SQL> select out_int from SPLIT_UTILS.split_int('1,2,3,4,5', ',');
            5
 ----
 
-In addition, SplitUDR also contains procedures for splitting text into tokens
+In addition, SPLIT-UDR also contains procedures for splitting text into tokens
 (the text is split into several separators). These procedures are declared as follows:
 
 [source,sql]
@@ -96,8 +96,8 @@ EXTERNAL NAME 'splitudr!strtok_s' ENGINE UDR;
 
 Input parameters:
 
-* IN_TXT - input text of type BLOB SUB_TYPE TEXT or VARCHAR (8191)
-* IN_SEPARATORS - a list of separators (a string with separator symbols), if not specified, then separators are used " \n\r\t,.?!:;/\|<>[]{}()@#$%^&*-+='"~`"
+* `IN_TXT` - input text of type `BLOB SUB_TYPE TEXT` or `VARCHAR (8191)`
+* `IN_SEPARATORS` - a list of separators (a string with separator symbols), if not specified, then separators are used " \n\r\t,.?!:;/\|<>[]{}()@#$%^&*-+='"~`"
 
 Example:
 
@@ -106,6 +106,6 @@ Example:
   SELECT
     w.WORD
   FROM DOCS
-  LEFT JOIN SPLIT_WORDS(DOCS.CONTENT) w
+  LEFT JOIN SPLIT_WORDS(DOCS.CONTENT) w ON TRUE
   WHERE DOCS.DOC_ID = 4
 ----

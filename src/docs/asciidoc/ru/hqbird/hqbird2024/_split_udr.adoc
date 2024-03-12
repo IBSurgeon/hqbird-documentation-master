@@ -1,58 +1,58 @@
 [[_hqbird_split_udr]]
-= SPLIT-UDR -- procedures to splitting lines by separator
+= SPLIT-UDR -- процедуры разбиения строк по разделителю
 
-HQbird Enterprise includes SPLIT-UDR which contains the set of useful stored procedures.
-These procedures can be useful to splitting string  (stored as varchars or BLOBS) by separator.
+HQbird включает в себя SPLIT-UDR, который содержит набор полезных хранимых процедур.
+Эти процедуры могут быть полезны для разделения строки (хранящейся в виде VARCHAR или BLOB) по разделителю.
 
-.Please note!
+.Замечание
 [NOTE]
 ====
-To use SPLIT-UDR functions, you need to register them in your database with an appropriate SQL script.
-The script is available in [path]_plugin/UDR/split-udr.sql_
+Чтобы использовать функции SPLIT-UDR, вам необходимо зарегистрировать их в вашей базе данных с помощью соответствующего SQL скрипта.
+Скрипт расположен в `plugin/UDR/split-udr.sql`
 ====
 
-For convenience, procedures for splitting text by separator are packed in the SPLIT_UTILS package.
+Для удобства процедуры разделения текста по разделителю упакованы в пакет `SPLIT_UTILS`.
 
-Let's consider procedures from this library and examples their usage.
+Рассмотрим процедуры из этой библиотеки и примеры их использования.
 
 [cols="1,1", options="header"]
 |===
-| Procedure Name
-| Description
+| Имя процедуры
+| Описание
 
-| SPLIT_BOOLEAN
-| Splits the string at the delimiter and returns a set of BOOLEAN values.
+| `SPLIT_BOOLEAN`
+| Разбивает строку по разделителю и возвращает `BOOLEAN` значения.
 
-| SPLIT_SMALLINT
-| Splits the string at the delimiter and returns a set of SMALLINT values.
+| `SPLIT_SMALLINT`
+| Разбивает строку по разделителю и возвращает `SMALLINT` значения.
 
-| SPLIT_INT
-| Splits the string at the delimiter and returns a set of INTEGER values.
+| `SPLIT_INT`
+| Разбивает строку по разделителю и возвращает `INTEGER` значения.
 
-| SPLIT_BIGINT
-| Splits the string at the delimiter and returns a set of BIGINT values.
+| `SPLIT_BIGINT`
+| Разбивает строку по разделителю и возвращает `BIGINT` значения.
 
-| SPLIT_STR
-| Splits the string at the delimiter and returns a set of VARCHAR(8191) values.
+| `SPLIT_STR`
+| Разбивает строку по разделителю и возвращает `VARCHAR(8191)` значения.
 
-| SPLIT_DATE
-| Splits the string at the delimiter and returns a set of DATE values.
+| `SPLIT_DATE`
+| Разбивает строку по разделителю и возвращает `DATE` значения.
 
-| SPLIT_TIME
-| Splits the string at the delimiter and returns a set of TIME values.
+| `SPLIT_TIME`
+| Разбивает строку по разделителю и возвращает `TIME` значения.
 
-| SPLIT_TIMESTAMP
-| Splits the string at the delimiter and returns a set of TIMESTAMP values.
+| `SPLIT_TIMESTAMP`
+| Разбивает строку по разделителю и возвращает `TIMESTAMP` значения.
 
-| SPLIT_DOUBLE
-| Splits the string at the delimiter and returns a set of DOUBLE PRECISION values.
+| `SPLIT_DOUBLE`
+| Разбивает строку по разделителю и возвращает `DOUBLE PRECISION` значения.
 
 |===
 
-The first argument of these procedures is a BLOB with subtype TEXT, the second is a string of type VARCHAR (10).
-The output type depends on the name of the procedure.
+Первый аргумент этих процедур — это `BLOB` с подтипом `TEXT`, второй — строка типа `VARCHAR(10)`.
+Тип выходного значения зависит от имени процедуры.
 
-Let's look at simple examples of how to use these procedures.
+Рассмотрим простые примеры использования этих процедур.
 
 ----
 SQL> select cast(out_str as varchar(10)) from SPLIT_UTILS.split_str('abc##defg##aa', '##');
@@ -74,8 +74,7 @@ SQL> select out_int from SPLIT_UTILS.split_int('1,2,3,4,5', ',');
            5
 ----
 
-In addition, SplitUDR also contains procedures for splitting text into tokens
-(the text is split into several separators). These procedures are declared as follows:
+Кроме того, SPLIT-UDR также содержит процедуры разделения текста на токены (текст разбивается по нескольким разделителям). Эти процедуры объявляются следующим образом:
 
 [source,sql]
 ----
@@ -94,18 +93,18 @@ RETURNS (
 EXTERNAL NAME 'splitudr!strtok_s' ENGINE UDR;
 ----
 
-Input parameters:
+Входные параметры:
 
-* IN_TXT - input text of type BLOB SUB_TYPE TEXT or VARCHAR (8191)
-* IN_SEPARATORS - a list of separators (a string with separator symbols), if not specified, then separators are used " \n\r\t,.?!:;/\|<>[]{}()@#$%^&*-+='"~`"
+* `IN_TXT` - входной текст типа `BLOB SUB_TYPE TEXT` или `VARCHAR (8191)`
+* `IN_SEPARATORS` - список разделителей (строка с символами-разделителями), если не указан, то используются разделители " \n\r\t,.?!:;/\|<>[]{}()@#$%^&*-+='"~`"
 
-Example:
+Пример:
 
 [source,sql]
 ----
   SELECT
     w.WORD
   FROM DOCS
-  LEFT JOIN SPLIT_WORDS(DOCS.CONTENT) w
+  LEFT JOIN SPLIT_WORDS(DOCS.CONTENT) w ON TRUE
   WHERE DOCS.DOC_ID = 4
 ----

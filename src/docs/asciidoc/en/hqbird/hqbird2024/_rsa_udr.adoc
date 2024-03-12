@@ -1,21 +1,20 @@
 [[_hqbird_rsa_udr]]
 = RSA-UDR -- security functions to sign documents and verify signatures
 
-
-HQbird Enterprise includes RSA-UDR which contains the set of useful security functions.
-These functions can be useful to protect documents (stored as varchars, BLOBS and even external files) with digital signature.
+HQbird includes RSA-UDR which contains the set of useful security functions.
+These functions can be useful to protect documents (stored as VARCHARs, BLOBs and even external files) with digital signature.
 
 .Important
 [IMPORTANT]
 ====
-This RSA-UDR is not required if using Firebird 4.0, as these functions are built-in.
+This RSA-UDR is not required if using Firebird 4.0 and higher, as these functions are built-in.
 ====
 
 .Please note!
 [NOTE]
 ====
 To use RSA-UDR functions, you need to register them in your database with an appropriate SQL script.
-The script is available in [path]_plugin/UDR/crypto.sql_
+The script is available in `plugin/UDR/crypto.sql`
 ====
 
 Let's consider functions from this library and examples their usage.
@@ -39,10 +38,10 @@ Let's consider functions from this library and examples their usage.
 |Calculate BLOB checksum
 
 |DECODE_BASE64
-|Decode to Base64
+|Decode from Base64
 
 |DECODE_BASE64B
-|Decode BLOB to Base64
+|Decode BLOB from Base64
 
 |ENCODE_BASE64
 |Encode to Base64
