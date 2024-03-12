@@ -1,19 +1,18 @@
 [[_hqbird_lk_json_udr]]
 = LK-JSON-UDR -- building and parsing JSON
 
-HQbird Enterprise includes UDR library udr-lkJSON for building and parsing JSON on the server side.
+HQbird includes UDR library udr-lkJSON for building and parsing JSON on the server side.
 The library is distributed open source under the MIT license and is free to use.
 It is written in Free Pascal.
-Source code is available at https://github.com/mnf71/udr-lkJSON
+Source code is available at https://github.com/mnf71/udr-lkJSON[]
 
 == Install UDR lkJSON
 
 To use the UDR lkJSON library, you need to register it in your database.
-To do this, run one of the scripts
-[path]_plugin/UDR/udrJSON.sql_ or [path]_plugin/UDR/udrJSON-utf8.sql_, depending on the encoding of your database
+To do this, run one of the scripts `plugin/UDR/udrJSON.sql` or `plugin/UDR/udrJSON-utf8.sql`, depending on the encoding of your database
 (the first will work for any single-byte encoding).
 
-After installing the UDR, it can be verified using the https://github.com/mnf71/udr-lkJSON/blob/main/verify.sql script.
+After installing the UDR, it can be verified using the https://github.com/mnf71/udr-lkJSON/blob/main/verify.sql[] script.
 
 The script calls a function to parse the JSON and build it back into a string.
 If the original JSON is the same as the newly assembled JSON, then everything is in order.
@@ -29,10 +28,10 @@ Verification occurs for two sets (procedure + function):
 
 The udr-lkJSON library is based on the free lkJSON library for generating and parsing JSON.
 Therefore, in order to have a good idea of how to work with UDR-lkJSON, it is advisable to familiarize yourself with the
-lkjson library (see https://sourceforge.net/projects/lkjson/).
+lkjson library (see https://sourceforge.net/projects/lkjson/[]).
 
-When parsing JSON, some elements can be simple types that exist in Firebird (INTEGER, DOUBLE PRECISION,
-VARCHAR (N), BOOLEAN), and some complex ones are objects and arrays. Complex objects are returned as a pointer to
+When parsing JSON, some elements can be simple types that exist in Firebird (`INTEGER`, `DOUBLE PRECISION`,
+`VARCHAR (N)`, `BOOLEAN`), and some complex ones are objects and arrays. Complex objects are returned as a pointer to
 an internal object from the lkJSON library. The pointer maps to the `TY$POINTER` domain. This domain is defined as follows:
 
 [source,sql]

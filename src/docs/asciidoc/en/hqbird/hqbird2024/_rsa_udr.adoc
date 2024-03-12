@@ -169,7 +169,7 @@ Then, let's go through the example:
  -- we can see that protected document was changed
 ----
 
-Examples of BIN2HEX and HEX2BIN functions
+Examples of `BIN2HEX` and `HEX2BIN` functions
 
 ----
 

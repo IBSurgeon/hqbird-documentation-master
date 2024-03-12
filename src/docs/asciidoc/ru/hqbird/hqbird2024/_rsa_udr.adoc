@@ -129,47 +129,47 @@ RSA-UDR не требуется при использовании Firebird 4.0 �
  SQL>delete from tbl
  SQL>commit;
 
- -- generate private key and write
- -- it into table TBL (normally, the private will be kept in the - secret place)
+ -- генерируем приватный ключ и записываем
+ -- записываем его в таблицу TBL (обычно приватный ключ хранится в секретном месте)
 
  SQL>insert into tbl(PRIVATE_KEY) values(rsa_private_key(1024));
 
- -- generate public key
+ -- генерируем публичный ключ
  SQL>update tbl set PUBLIC_KEY = rsa_public_key(PRIVATE_KEY);
 
- -- create BLOB document
+ -- создаём BLOB документ
  SQL>update TBL set DOC='testtesttest';
 
- -- and calculate its digest
+ -- и вычисляем его дайджест
  SQL>update tbl set digest = sha256(doc);
 
- –- sign document and remember its signature
+ –- подписываем документ и сохраняем его подпись
  SQL>update tbl set sign = rsa_sign(digest, PRIVATE_KEY, 8);
 
- -- check the signature
+ -- проверка подписи
  SQL> select RSA_VERIFY(SIGN, DIGEST, PUBLIC_KEY, SALTLEN) from tbl;
 
  RSA_VERIFY
  ==========
  <true>
- -- as you can see, signature is valid
+ -- как видите подпись действительна
 
- –- change the document (BLOB)
+ –- изменяем документ (BLOB)
  SQL> update TBL set DOC='testtesttest222';
 
- -- recalculate its digest
+ -- перевычисляем его дайджест
  SQL> update tbl set digest = sha256(doc);
 
- -- check signature
+ -- проверяем подпись
  SQL> select rsa_verify(sign, digest, PUBLIC_KEY, 8) from tbl;
 
  RSA_VERIFY
  ==========
  <false>
- -- we can see that protected document was changed
+ -- мы видим что защищённый документ был изменён
 ----
 
-Examples of BIN2HEX and HEX2BIN functions
+Примеры использования функций `BIN2HEX` и `HEX2BIN`
 
 ----
 
@@ -184,8 +184,8 @@ Examples of BIN2HEX and HEX2BIN functions
  CAST     Test string
 ----
 
-== How to use RSA-UDR security and conversion functions
+== Как использовать функции безопасности и преобразования RSA-UDR
 
-In general, RSA-UDR functions allow to seal electronic documents of all types (DOC, PDF, XML, JPG, PNG, etc), and then detect unauthorized changes.
+В основном функции RSA-UDR позволяют подписывать электронные документы всех типов (DOC, PDF, XML, JPG, PNG и т. д.), а затем обнаруживать несанкционированные изменения.
 
-Conversion functions make easy BIN->HEX and HEX->BIN conversions, as well as Base64 encoding and decoding.
+Функции преобразования упрощают преобразования BIN->HEX и HEX->BIN, а также кодирование и декодирование Base64.
