@@ -55,7 +55,7 @@ BEGIN
        (jsBase, jsNumber, jsString, jsBoolean, jsNull, jsList, jsObject);
         0       1         2         3          4       5       6
   */
-  FUNCTION Dispose(Self TY$POINTER) RETURNS SMALLINT; /* 0 - succes */
+  FUNCTION Dispose(Self TY$POINTER) RETURNS SMALLINT; /* 0 - success */
 
   FUNCTION Field(Self TY$POINTER, Name VARCHAR(128) CHARACTER SET NONE /* = Idx */) RETURNS TY$POINTER;
 
@@ -873,7 +873,7 @@ from parse_peoples_json( '[{"id": 1, "name": "John"}, {"id": 2, "name": null}]' 
 в некоторых случаях может быть возвращено не корректное значение (как в случае с `js$obj.GetIntegerByName`), 
 в других приведёт к ошибке преобразования типа.
 
-Обратите внимание, функции вроде `js$obj.GetIntegerByName` или `js$obj.GetSrtingByName` не могут вернуть значение `NULL`.
+Обратите внимание, функции вроде `js$obj.GetIntegerByName` или `js$obj.GetStringByName` не могут вернуть значение `NULL`.
 Для распознавания значения `NULL`, вам надо проверять тип поля функцией `js$base.selftypename`.
 
 Как и в случае со сборкой JSON не забывайте освобождать указатель на JSON верхнего уровня, а также делать это в блоке обработки исключений
@@ -1011,7 +1011,7 @@ BEGIN
         EXCEPTION E_CUSTOM_ERROR 'Invalid JSON format. Field "departments" must be list';
       SUSPEND;
       -- обходим этот список и рекурсивно вызываем для него процедуру извлечения
-      -- информации о каждом подраздении
+      -- информации о каждом подразделении
       FOR
         SELECT
             INFO.DEPT_NO,
