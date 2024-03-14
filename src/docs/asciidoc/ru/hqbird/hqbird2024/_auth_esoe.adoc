@@ -1,118 +1,110 @@
 [[_hqbird_auth_esoe]]
-= Authentication plugin for Execute Statement On External
+= Authentication plugin for EXECUTE STATEMENT ON EXTERNAL
 
-Firebird has a convenient mechanism of cross-database queries: Execute Statement On External (ESOE). For example, the typical ESOE can look like this:
+В Firebird есть удобный механизм запросов к другим базам данных: `EXECUTE STATEMENT ON EXTERNAL` (ESOE). Например, типовой ESOE может выглядеть так:
+
 [source,sql]
 ----
-
 EXECUTE STATEMENT 'SELECT * FROM RDB$DATABASE'
 ON EXTERNAL 'server:db1' AS USER 'MYUSER' PASSWORD 'mypassword'
 ----
 
-As you can see, the statement contains username and password in the open form, which is not secure: for example, if ESOE is called from the stored procedure code, connected users can see the password.
+Как видите, оператор содержит имя пользователя и пароль в открытом виде, что небезопасно: например, если ESOE вызывается из кода хранимой процедуры, подключенные пользователи смогут увидеть пароль.
 
-The HQbird Enterprise includes an authentication plugin for ESOE allows to establish trusted relationships between Firebird servers and perform the authentication of ESOE without a password:
+HQbird включает плагин аутентификации для ESOE, позволяющий устанавливать доверительные отношения между серверами Firebird и выполнять аутентификацию ESOE без пароля:
+
 [source,sql]
 ----
-
 EXECUTE STATEMENT 'SELECT * FROM RDB$DATABASE'
 ON EXTERNAL 'server:db1' AS USER 'MYUSER';
 ----
 
-Let's consider how to install and configure HQbird Authentication plugin for ESOE.
+Рассмотрим, как установить и настроить плагин HQbird Authentication для ESOE.
 
-== Installation of authentication plugin for ESOE
+== Установка плагина аутентификации для ESOE
 
-=== Authentication plugin files
-
-
+=== Файлы плагина аутентификации
 
 * Windows
 +
-** [path]_plugins\cluster.dll_
-** [path]_clusterkeygen.exe_
+** `plugins\cluster.dll`
+** `clusterkeygen.exe`
 * Linux
 +
-** [path]_plugins\libcluster.so_
-** [path]_bin\ClusterKeygen_ # executable
+** `plugins\libcluster.so`
+** `bin\ClusterKeygen` # executable
 
-
-.Please note!
+.Обратите внимание!
 [NOTE]
 ====
-The plugin files are already included into HQbird Enterprise, so you don't need to copy them.
-There are different files for 32 and 64 bit versions of Firebird.
+Файлы плагина уже включены в HQbird, поэтому копировать их не нужно.
 ====
 
-=== Configuration
+=== Конфигурация
 
-==== In firebird.conf
+==== В firebird.conf
 
-First of all, it is necessary to add plugin name (Cluster) to the [parameter]``AuthServer`` and [parameter]``AuthClient`` parameters in [path]_firebird.conf_ on all servers which will trust each other:
+Прежде всего, необходимо добавить имя плагина (Cluster) в параметры `AuthServer` и `AuthClient` в `firebird.conf` на всех серверах, которые будут доверять друг другу:
 
 ----
-
 AuthServer = Srp, Legacy_Auth, Cluster
 AuthClient = Srp, Srp256, Legacy_Auth, Cluster
 ----
 
-==== Keyfile
+==== Файл ключа
 
-Then, it is necessary to generate keyfile for the plugin.
-This key should be placed to the all Firebird servers which should trust to each other.
+Затем необходимо сгенерировать файл ключа для плагина.
+Этот ключ должен быть размещен на всех серверах Firebird, которые должны доверять друг другу.
 
-In order to generate keyfile [path]_cluster.conf_ run the following command:
+Чтобы сгенерировать файл ключа cluster.conf, выполните следующую команду:
 
 ----
-
 C:\HQbird\Firebird30>clusterkeygen.exe > cluster.conf
 ----
 
-
-
-As a result, the key file [path]_cluster.conf_ will be generated.
-It contains 2048 digits key, something like this:
+В результате будет сгенерирован файл ключа `cluster.conf`.
+Он содержит 2048-значный ключ, примерно такой:
 
 image::9.1.png[]
 
-Then, we need to copy the key file to the all Firebird servers with trusted relationships to the [path]_plugins_ folder.
-Key, created on Windows, can be used on Linux, and vice versa.
+Затем нам нужно скопировать файл ключа на все серверы Firebird с доверенными отношениями в папку `plugins`.
+Ключ, созданный в Windows, можно использовать в Linux и наоборот.
 
-.Please note!
+.Обратите внимание!
 [NOTE]
 ====
-The keyfile name should be exactly [path]_cluster.conf_.
-It should be located in [path]_plugins_ folder of Firebird.
+Имя файла ключа должно быть именно `cluster.conf`.
+Он должен расположен в папке `plugins` Firebird.
 ====
 
-==== Mapping
+==== Отображение
 
-In order to use authentication plugin inside the particular database, it is necessary to create mapping between users of cluster plugin and regular Firebird users.
+Чтобы использовать плагин аутентификации внутри конкретной базы данных, необходимо создать отображение (mapping) между пользователями плагина Cluster и обычными пользователями Firebird.
 
-For example, if we run the following ESOE
+Например, если мы запустим следующую запрос ESOE
+
 [source,sql]
 ----
-
 EXECUTE STATEMENT 'SELECT * FROM RDB$DATABASE'
 ON EXTERNAL 'server:db1' AS USER 'MYUSER';
 ----
-we need to map user MYUSER to the actual user in the destination database db1.
-Let's assume we have a user MYUSER2 in the destination database, in this case we need to create the following command in the destination database db1:
+нам нужно сопоставить пользователя `MYUSER` с реальным пользователем в целевой базе данных `db1`.
 
+Предположим, у нас есть пользователь `MYUSER2` в целевой базе данных. В этом случае нам нужно выполнить следующую команду в целевой базе данных `db1`:
+
+[source,sql]
+----
+CREATE MAPPING usr_mapping_cluster1 USING PLUGIN CLUSTER
+FROM USER MYUSER TO user MYUSER2;
 ----
 
-SQL> CREATE MAPPING usr_mapping_cluster1 USING PLUGIN CLUSTER
-CON> FROM USER MYUSER TO user MYUSER2;
-SQL> commit;
-----
+В результате в `db1` будет создано отображение `usr_mapping_cluster1` для сопоставления пользователя `MYUSER` с `MYUSER2`.
 
-As a result, the mapping `usr_mapping_cluster1` will be created in db1, to map user MYUSER to MYUSER2.
-
-.Please note!
+.Обратите внимание!
 [NOTE]
 ====
-The both users should exist, even if they have the same name.
-Otherwise there will be the following error:
+Оба пользователя должны существовать, даже если у них одинаковое имя.
+В противном случае будет следующая ошибка:
 
 ----
 Execute statement error at attach:
@@ -122,11 +114,10 @@ administrator to set up a Firebird login.
 ----
 ====
 
-You can create as many mapping as you need.
-Existing mapping can be found in the table RDB$AUTH_MAPPING with the following query:
+Вы можете создать столько отображений, сколько вам нужно.
+Существующее отображения можно найти в таблице `RDB$AUTH_MAPPING` с помощью следующего запроса:
 
 ----
-
  SQL> select rdb$map_name, rdb$map_from, rdb$map_to from RDB$AUTH_MAPPING
  CON> where RDB$MAP_PLUGIN ='CLUSTER';
 
@@ -135,20 +126,19 @@ Existing mapping can be found in the table RDB$AUTH_MAPPING with the following q
  USR_MAPPING_CLUSTER1            MYUSER		MYUSER2
 ----
 
-==== Global mappings
+==== Глобальные отображения
 
-It is possible to create mapping between users for all databases on the server -- in this case the following command should be used:
+Можно создать отображение между пользователями для всех баз данных на сервере -- в этом случае следует использовать следующий запрос:
+
 [source,sql]
 ----
-
 CREATE GLOBAL MAPPING global_usr_mapping_cluster1 USING PLUGIN CLUSTER
 FROM USER MYUSER TO user MYUSER2;
 ----
 
-In this case, mappings will be stored in security database, to see them use the following query:
+В этом случае отображения будут храниться в базе данных безопасности, чтобы увидеть их, используйте следующий запрос:
 
 ----
-
  SQL> select SEC$MAP_NAME, SEC$MAP_USING, SEC$MAP_FROM, SEC$MAP_TO
  CON> from SEC$GLOBAL_AUTH_MAPPING  where SEC$MAP_PLUGIN ='CLUSTER';
 
@@ -157,12 +147,12 @@ In this case, mappings will be stored in security database, to see them use the 
  GLOBAL_USR_MAPPING_CLUSTER1  P                MYUSER         MYUSER2
 ----
 
-==== Role mappings
+==== Отображение ролей
 
-In order to map user to the role in the destination database, it is necessary to create 2 mappings:
+Чтобы сопоставить пользователя с ролью в целевой базе данных, необходимо создать 2 отображения:
+
 [source,sql]
 ----
-
 CREATE MAPPING USR_CLUSTER9 USING PLUGIN CLUSTER
 FROM USER MUSER TO ROLE RDB$ADMIN;
 
@@ -170,12 +160,12 @@ CREATE MAPPING USR_CLUSTER_X USING PLUGIN CLUSTER
 FROM ANY USER TO USER MYUSER;
 ----
 
-=== How to test
+=== Как протестировать
 
-The following query can be used to test the work of the authentication plugin for ESOE:
+Следующий запрос можно использовать для проверки работы плагина аутентификации для ESOE:
+
 [source,sql]
 ----
-
 execute block
 returns (
     CUSER varchar(255),
@@ -191,4 +181,4 @@ begin
 end
 ----
 
-As a result, this query will return username, connection id and user role from the destination database db1.
+В результате этот запрос вернет имя пользователя, идентификатор соединения и роль пользователя из целевой базы данных `db1`.

@@ -1,20 +1,20 @@
 [[_hqbird_auth_esoe]]
-= Authentication plugin for Execute Statement On External
+= Authentication plugin for EXECUTE STATEMENT ON EXTERNAL
 
-Firebird has a convenient mechanism of cross-database queries: Execute Statement On External (ESOE). For example, the typical ESOE can look like this:
+Firebird has a convenient mechanism of cross-database queries: `EXECUTE STATEMENT ON EXTERNAL` (ESOE). For example, the typical ESOE can look like this:
+
 [source,sql]
 ----
-
 EXECUTE STATEMENT 'SELECT * FROM RDB$DATABASE'
 ON EXTERNAL 'server:db1' AS USER 'MYUSER' PASSWORD 'mypassword'
 ----
 
 As you can see, the statement contains username and password in the open form, which is not secure: for example, if ESOE is called from the stored procedure code, connected users can see the password.
 
-The HQbird Enterprise includes an authentication plugin for ESOE allows to establish trusted relationships between Firebird servers and perform the authentication of ESOE without a password:
+The HQbird includes an authentication plugin for ESOE allows to establish trusted relationships between Firebird servers and perform the authentication of ESOE without a password:
+
 [source,sql]
 ----
-
 EXECUTE STATEMENT 'SELECT * FROM RDB$DATABASE'
 ON EXTERNAL 'server:db1' AS USER 'MYUSER';
 ----
@@ -25,33 +25,29 @@ Let's consider how to install and configure HQbird Authentication plugin for ESO
 
 === Authentication plugin files
 
-
-
 * Windows
 +
-** [path]_plugins\cluster.dll_
-** [path]_clusterkeygen.exe_
+** `plugins\cluster.dll`
+** `clusterkeygen.exe`
 * Linux
 +
-** [path]_plugins\libcluster.so_
-** [path]_bin\ClusterKeygen_ # executable
+** `plugins\libcluster.so`
+** `bin\ClusterKeygen` # executable
 
 
 .Please note!
 [NOTE]
 ====
-The plugin files are already included into HQbird Enterprise, so you don't need to copy them.
-There are different files for 32 and 64 bit versions of Firebird.
+The plugin files are already included into HQbird, so you don't need to copy them.
 ====
 
 === Configuration
 
 ==== In firebird.conf
 
-First of all, it is necessary to add plugin name (Cluster) to the [parameter]``AuthServer`` and [parameter]``AuthClient`` parameters in [path]_firebird.conf_ on all servers which will trust each other:
+First of all, it is necessary to add plugin name (Cluster) to the `AuthServer` and `AuthClient` parameters in `firebird.conf` on all servers which will trust each other:
 
 ----
-
 AuthServer = Srp, Legacy_Auth, Cluster
 AuthClient = Srp, Srp256, Legacy_Auth, Cluster
 ----
@@ -61,28 +57,25 @@ AuthClient = Srp, Srp256, Legacy_Auth, Cluster
 Then, it is necessary to generate keyfile for the plugin.
 This key should be placed to the all Firebird servers which should trust to each other.
 
-In order to generate keyfile [path]_cluster.conf_ run the following command:
+In order to generate keyfile `cluster.conf` run the following command:
 
 ----
-
 C:\HQbird\Firebird30>clusterkeygen.exe > cluster.conf
 ----
 
-
-
-As a result, the key file [path]_cluster.conf_ will be generated.
+As a result, the key file `cluster.conf` will be generated.
 It contains 2048 digits key, something like this:
 
 image::9.1.png[]
 
-Then, we need to copy the key file to the all Firebird servers with trusted relationships to the [path]_plugins_ folder.
+Then, we need to copy the key file to the all Firebird servers with trusted relationships to the `plugins` folder.
 Key, created on Windows, can be used on Linux, and vice versa.
 
 .Please note!
 [NOTE]
 ====
-The keyfile name should be exactly [path]_cluster.conf_.
-It should be located in [path]_plugins_ folder of Firebird.
+The keyfile name should be exactly `cluster.conf`.
+It should be located in `plugins` folder of Firebird.
 ====
 
 ==== Mapping
@@ -90,23 +83,23 @@ It should be located in [path]_plugins_ folder of Firebird.
 In order to use authentication plugin inside the particular database, it is necessary to create mapping between users of cluster plugin and regular Firebird users.
 
 For example, if we run the following ESOE
+
 [source,sql]
 ----
-
 EXECUTE STATEMENT 'SELECT * FROM RDB$DATABASE'
 ON EXTERNAL 'server:db1' AS USER 'MYUSER';
 ----
-we need to map user MYUSER to the actual user in the destination database db1.
-Let's assume we have a user MYUSER2 in the destination database, in this case we need to create the following command in the destination database db1:
+we need to map user `MYUSER` to the actual user in the destination database `db1`.
 
+Let's assume we have a user `MYUSER2` in the destination database, in this case we need to create the following command in the destination database `db1`:
+
+[source,sql]
+----
+CREATE MAPPING usr_mapping_cluster1 USING PLUGIN CLUSTER
+FROM USER MYUSER TO user MYUSER2;
 ----
 
-SQL> CREATE MAPPING usr_mapping_cluster1 USING PLUGIN CLUSTER
-CON> FROM USER MYUSER TO user MYUSER2;
-SQL> commit;
-----
-
-As a result, the mapping `usr_mapping_cluster1` will be created in db1, to map user MYUSER to MYUSER2.
+As a result, the mapping `usr_mapping_cluster1` will be created in `db1`, to map user `MYUSER` to `MYUSER2`.
 
 .Please note!
 [NOTE]
@@ -123,10 +116,9 @@ administrator to set up a Firebird login.
 ====
 
 You can create as many mapping as you need.
-Existing mapping can be found in the table RDB$AUTH_MAPPING with the following query:
+Existing mapping can be found in the table `RDB$AUTH_MAPPING` with the following query:
 
 ----
-
  SQL> select rdb$map_name, rdb$map_from, rdb$map_to from RDB$AUTH_MAPPING
  CON> where RDB$MAP_PLUGIN ='CLUSTER';
 
@@ -138,9 +130,9 @@ Existing mapping can be found in the table RDB$AUTH_MAPPING with the following q
 ==== Global mappings
 
 It is possible to create mapping between users for all databases on the server -- in this case the following command should be used:
+
 [source,sql]
 ----
-
 CREATE GLOBAL MAPPING global_usr_mapping_cluster1 USING PLUGIN CLUSTER
 FROM USER MYUSER TO user MYUSER2;
 ----
@@ -148,7 +140,6 @@ FROM USER MYUSER TO user MYUSER2;
 In this case, mappings will be stored in security database, to see them use the following query:
 
 ----
-
  SQL> select SEC$MAP_NAME, SEC$MAP_USING, SEC$MAP_FROM, SEC$MAP_TO
  CON> from SEC$GLOBAL_AUTH_MAPPING  where SEC$MAP_PLUGIN ='CLUSTER';
 
@@ -160,9 +151,9 @@ In this case, mappings will be stored in security database, to see them use the 
 ==== Role mappings
 
 In order to map user to the role in the destination database, it is necessary to create 2 mappings:
+
 [source,sql]
 ----
-
 CREATE MAPPING USR_CLUSTER9 USING PLUGIN CLUSTER
 FROM USER MUSER TO ROLE RDB$ADMIN;
 
@@ -173,9 +164,9 @@ FROM ANY USER TO USER MYUSER;
 === How to test
 
 The following query can be used to test the work of the authentication plugin for ESOE:
+
 [source,sql]
 ----
-
 execute block
 returns (
     CUSER varchar(255),
@@ -191,4 +182,4 @@ begin
 end
 ----
 
-As a result, this query will return username, connection id and user role from the destination database db1.
+As a result, this query will return username, connection id and user role from the destination database `db1`.
