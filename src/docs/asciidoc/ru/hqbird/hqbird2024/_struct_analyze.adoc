@@ -1,27 +1,26 @@
 [[_hqbird_struct_analyze]]
-= Database structure analysis
+= Анализ структуры базы данных
 
-== Overview of Firebird database structure
+== Обзор структуры базы данных Firebird
 
-The first thing we have to say about the structure of Firebird database is that it represents a set of pages of strictly defined size: 4096, 8192, 16384 (previous versions of Firebird supported page sizes 1024 and 2048).
+Первое, что следует сказать о структуре базы данных Firebird, это то, что она представляет собой набор страниц строго определенного размера: 4096, 8192, 16384 или 32768 (начиная с Firebird 4.0).
 
-Pages can be of different types, each of which serves its certain purpose.
+Страницы могут быть разных типов, каждая из которых служит определенной цели.
 
-Pages of the same type don't go strictly one by one -- they can be easily mixed, allocated in file in the order they were created by server when extending or creating databases.
+Страницы одного типа не идут строго одна за другой -- они могут быть перемешаны, и размещены в файле в том порядке, в котором они были созданы сервером при расширении или создании базы данных.
 
 image::5.1.1.png[]
 
-.Page types
+.Типы страниц
 [cols="1,1,1", options="header"]
 |===
-| Page Type
+| Тип страницы
 | ID
-| Description
+| Описание
 
 |**pag_undefined**
 |0
-|Undefined – If a page has this page type, it is most likely
-                            empty
+|Undefined - Если страница имеет этот тип страницы, скорее всего, она пуста.
 
 |**pag_header**
 |1
@@ -66,24 +65,25 @@ image::5.1.1.png[]
 
 <<<
 
-== How to analyze database structure with HQbird Database Analyst (IBAnalyst)
+== Как анализировать структуру базы данных с помощью HQbird Database Analyst (IBAnalyst)
 
-*IBAnalyst* is a tool that assists a user to analyze in detail Firebird database statistics and identify possible problems with database performance, maintenance and how an application interacts with the database.
-IBAnalyst graphically displays Firebird database statistics in a user-friendly way and highlights the following problems:
+*IBAnalyst* — это инструмент, который помогает пользователю детально анализировать статистику базы данных Firebird и выявлять возможные проблемы с производительностью базы данных, ее обслуживанием и взаимодействием приложения с базой данных.
 
-* tables and BLOBs fragmentation,
-* record versioning,
-* garbage collection,
-* indices effectiveness, etc
+IBAnalyst графически отображает статистику базы данных Firebird в удобной для пользователя форме и выявляет следующие проблемы:
 
-Moreover, IBAnalyst can automatically make intelligent suggestions about improving database performance and database maintenance.
+* фрагментирование таблиц и BLOB,
+* версии записей,
+* сборка мусора,
+* эффективность индексов
 
-IBAnalyst can get statistics from the live production databases through Services API (recommended), or analyze text output of `gstat -a -r ...` commands.
-Statistics from the peak load periods can give a lot of information about actual performance problems in production databases.
+Более того, IBAnalyst может автоматически вносить разумные предложения по улучшению производительности и обслуживанию базы данных.
 
-Main features of IBAnalyst are listed below:
+IBAnalyst может получать статистику из действующих производственных баз данных через Services API (рекомендуется) или анализировать текстовый вывод команд `gstat -a -r ...`.
+Статистика в периоды пиковой нагрузки может дать много информации о реальных проблемах с производительностью в производственных базах данных.
 
-* Retrieving database statistics via Service API and from [app]``gstat`` output.
+Основные возможности IBAnalyst перечислены ниже:
+
+* Retrieving database statistics via Service API and from `gstat` output.
 * Summary of all actual and possible problems in database
 * Colored grid representation of tables, indices and table->indices, which highlights fragmented tables, poor indices and so on.
 * Automatic expertise of database statistics provides recommendations and "`how-to`" for the following things:
@@ -102,15 +102,15 @@ Main features of IBAnalyst are listed below:
 
 ==== Right time, right place
 
-It sounds strange, but just taking statistics via [app]``gstat`` or Services API is not enough.
+It sounds strange, but just taking statistics via `gstat` or Services API is not enough.
 Statistics must be taken at the right moment to show how applications affect data and transactions in database.
 Worst time to take statistics is
 
 Right after restore
 
-After backup (``gbak –b db.gdb``) without –g switch is made
+After backup (`gbak –b db.gdb`) without –g switch is made
 
-After manual sweep (``gfix –sweep``)
+After manual sweep (`gfix –sweep`)
 
 It is also correct that during work there can be moments where database is in correct state, for example, when applications make less database load than usual (users at launch, dinner or its by specific business process times).
 
@@ -133,16 +133,16 @@ This can be seen only if you setup regular statistics saving.
 The best setup is to get hourly transaction statistics.
 This can be done by running
 
+[source,bash]
 ----
-
-gstat –h db.gdb>db_stat_<time>.txt
+gstat –h db.gdb > db_stat_<time>.txt
 ----
 
 where
 
 * `db.gdb` is your database name,
-* `db_stat_[replaceable]``<time>``.txt` is text file where statistics will be saved,
-* [replaceable]``<time>`` -- current date and time when statistics was taken.
+* `db_stat_<time>.txt` is text file where statistics will be saved,
+* `<time>` -- current date and time when statistics was taken.
 
 Also you can schedule to gather database statistics with HQbird FBDataGuard, job "`Database: Statistics`".
 
@@ -154,15 +154,15 @@ Next, divide this interval minimally to 4 (8, 16 and so on). Now information sys
 
 For example, if performance problem happens each 3 hours, you need to take
 
+[source,bash]
 ----
-
 gstat –h db.gdb
 ----
 
 statistics each 30-45 minutes, and
 
+[source,bash]
 ----
-
 gstat –a –r db.gdb –user SYSDBA –pass masterkey
 ----
 
@@ -176,7 +176,7 @@ If your application explicitly uses transactions and uses them well, i.e.
 you know what is `read read_committed` and when to use it, your snapshot transactions lasts no longer than needed, and transactions are being active minimal duration of time, you can tune sweep interval or set it off, and then only care about how many updates application(s) makes and what tables need to be less updated or cared about updates.
 
 What does this mean, you can ask? We'll give example of some system, where performance problems happened each morning for 20-30 minutes.
-That was very sufficient for [path]_morning_ applications, and could not last longer.
+That was very sufficient for `morning` applications, and could not last longer.
 
 Database admin was asked correct questions, and here is the picture:
 
@@ -185,8 +185,7 @@ Daily work was divided by sections -- analytic works in the morning, than data i
 The last work on database at the end of day was lot of updates, and updates of those tables which analytic used in the morning.
 So, there were a lot of garbage versions, which started to be collected by application, running in the morning.
 
-And, the answer to that problem was found simple -- to run `gfix
-                        –sweep` at the end of the day.
+And, the answer to that problem was found simple -- to run `gfix –sweep` at the end of the day.
 
 Sweep reads all tables in database and tries to collect all garbage versions for committed and rolled back transactions.
 After sweeping database became clear nearly it comes after restore.
@@ -208,7 +207,7 @@ And again, example:
 Some system installed for ~15 users.
 Periodically performance is so bad, that DBA needs to restart server.
 After server restart everything works fine for some time, then performance gets bad again.
-Statistics showed that average daily transactions is about ``75,000``, and there are active transactions running from the start of day to the moment when performance getting down.
+Statistics showed that average daily transactions is about `75,000`, and there are active transactions running from the start of day to the moment when performance getting down.
 
 Unfortunately, applications were written with BDE and with no transactions using at all; i.e.
 all transaction handling was automatic and used by BDE itself.
@@ -247,36 +246,25 @@ For description of visible problems (marked *red* or **yellow**) see column hint
 |Name of analyzed database.
 
 |**Creation date**
-|Database creation date. When it was created by CREATE
-                                    DATABASE statement or restore (gbak -c/-r).
+|Database creation date. When it was created by `CREATE DATABASE` statement or restore (`gbak -c` or `gbak -r`).
 
 |**Statistics date**
-|When statistics was taken -- statistics file date or Services
-                                    API call date (now).
+|When statistics was taken -- statistics file date or Services API call date (now).
 
 |**Page size**
-|Page size is the physical parameter of database. The best
-                                    page size is 4096 or 8192 bytes. Other page sizes (less than
-                                    4096) marked as red. For better performance restore database
-                                    from backup using 4K or 8K page size. (Note: Firebird __2.0+ can use 16K page
-                                    size__).
+|Page size is the physical parameter of database. The best page size is 4096 or 8192 bytes. Other page sizes (less than 4096) marked as red. For better performance restore database from backup using 4K or 8K page size. (Note: Firebird __2.0+ can use 16K page size__).
 
 |**Forced Write**
-|It shows the mode of changed pages writing: synchronized or
-                                    asynchronized -- appropriate setting is ON or OFF. OFF is not
-                                    recommended, because server crush, power failure or other
-                                    problems can cause database corruption.
+|It shows the mode of changed pages writing: synchronized or asynchronized -- appropriate setting is ON or OFF. OFF is not recommended, because server crush, power failure or other problems can cause database corruption.
 
 |**Dialect**
 |Current database dialect.
 
 |**Sweep interval**
-|Current sweep interval value. Marked yellow if it is not 0,
-                                    and marked red if Sweep Gap greater than Sweep interval.
+|Current sweep interval value. Marked yellow if it is not 0, and marked red if Sweep Gap greater than Sweep interval.
 
 |**On Disk Structure**
-|ODS. It is a database physical format. See hint to know ODS
-                                    number for particular IB/FB versions
+|ODS. It is a database physical format. See hint to know ODS number for particular IB/FB versions
 
 |**Transaction block**
 |
@@ -306,72 +294,43 @@ Id of oldest still active transaction.
 |Newest available transaction id
 
 |**Sweep gap (snapshot – oldest)**
-|For ODS 10.x databases. Difference between Oldest Snapshot
-                                    and Oldest Interesting transaction. If it is greater than sweep
-                                    interval, and sweep interval is > 0, Firebird tries to run
-                                    sweep, and it can slowdown performance.
+|For ODS 10.x databases. Difference between Oldest Snapshot and Oldest Interesting transaction. If it is greater than sweep interval, and sweep interval is > 0, Firebird tries to run sweep, and it can slowdown performance.
 
 |**Snapshot gap (active – oldest)**
-|Difference between Oldest Active and Oldest transaction. Same
-                                    as previous sweep gap.
+|Difference between Oldest Active and Oldest transaction. Same as previous sweep gap.
 
 |**TIP size**
-|Transaction Inventory Page size, in pages and kilobytes. TIP
-                                    holds transaction state for every transaction was started from
-                                    database creation (or restore). It is computed as Next
-                                    transaction div 4 (bytes).
+|Transaction Inventory Page size, in pages and kilobytes. TIP holds transaction state for every transaction was started from database creation (or restore). It is computed as Next transaction div 4 (bytes).
 
 |**Snapshot TIP Size**
-|Size of Transaction Inventory Pages that needed for snapshot
-                                    transactions. Indicates how much memory will take each snapshot
-                                    transaction to check concurrent transactions state.
+|Size of Transaction Inventory Pages that needed for snapshot transactions. Indicates how much memory will take each snapshot transaction to check concurrent transactions state.
 
 |**Active transactions**
-|Currently active (on the moment when statistics was taken
-                                    from database) transaction count (Next – Oldest Active). Maybe
-                                    incorrect, because it can be one active transaction and lot of
-                                    ahead transactions committed. Anyway, active transactions
-                                    prevent garbage collection.
+|Currently active (on the moment when statistics was taken from database) transaction count (Next – Oldest Active). Maybe incorrect, because it can be one active transaction and lot of ahead transactions committed. Anyway, active transactions prevent garbage collection.
 
 |**Transactions per day**
-|Simply divides Next transaction by days' count between
-                                    database creation date and date statistics taken. Shows average
-                                    transaction per day, and useless if it is not production
-                                    database. Transaction warnings mostly based on average
-                                    transactions per day count.
+|Simply divides Next transaction by days' count between database creation date and date statistics taken. Shows average transaction per day, and useless if it is not production database. Transaction warnings mostly based on average transactions per day count.
 
 |**Data versions percent**
-|Percent of record versions in database. Also total records
-                                    size and versions size for all tables is shown, and total index
-                                    size. Row is not shown when statistics does not contain record
-                                    count information (``gstat -a`` without -r option).
-                                    Note that there can be lot of other data (transaction inventory
-                                    pages, empty pages and so on) in your database.
+|Percent of record versions in database. Also total records size and versions size for all tables is shown, and total index size. Row is not shown when statistics does not contain record count information (`gstat -a` without `-r` option). Note that there can be lot of other data (transaction inventory pages, empty pages and so on) in your database.
 
 |**Table/Index lists **(also reported in recommendations)
 |
 
 |**Fragmented Tables**
-|Here you can view tables (with data > 200 kilobytes) that
-                                    have average fill less than 60% (File/Options/Table average
-                                    fill).
+|Here you can view tables (with data > 200 kilobytes) that have average fill less than 60% (File/Options/Table average fill).
 
 |**Versioned Tables**
-|List of tables that have Versions greater than Records, set
-                                    in Options/Tables.
+|List of tables that have Versions greater than Records, set in Options/Tables.
 
 |**Tables fragmented with blobs**
-|List of tables that have blob fields with data size less than
-                                    database page size.
+|List of tables that have blob fields with data size less than database page size.
 
 |**Massive deletes/updates**
-|List of tables that had lot of data deleted/updated by one
-                                    delete/update statement.
+|List of tables that had lot of data deleted/updated by one delete/update statement.
 
 |**Very big tables**
-|Tables that are close to technical InterBase limit (36
-                                    gigabytes per table). You will see warning beforehand problem
-                                    can occur.
+|Tables that are close to technical InterBase limit (36 gigabytes per table). You will see warning beforehand problem can occur.
 
 |**Deep Indices**
 |Indices with depth more than 3 (Options/Index)
@@ -380,33 +339,25 @@ Id of oldest still active transaction.
 |Indices with big MaxDup and TotalDup values
 
 |**Broken or incomplete indices**
-|Indices with key count less than record count. This can
-                                    happen when index is broken or when statistics is taken during
-                                    index creation or re-activation.
+|Indices with key count less than record count. This can happen when index is broken or when statistics is taken during index creation or re-activation.
 
 |**Useless Indices**
-|Indices with Unique column = 1. May be deleted or
-                                    deactivated, because they are useless for index search or sort
-                                    operations.
+|Indices with Unique column = 1. May be deleted or deactivated, because they are useless for index search or sort operations.
 
 |**Tables with no records**
-|List of tables with Records = 0. This can be by design
-                                    (temporary tables), or they can be just forgotten by database
-                                    developer.
+|List of tables with Records = 0. This can be by design (temporary tables), or they can be just forgotten by database developer.
 |===
 
 image::5.2.1.png[]
 
 
-Summary page shows a lot of information, but the most valuable is transactions state (__please read description of possible transactions
-                    states in IBAnalyst help, it is available by clicking F1 or in menu
-                    Help__).
+Summary page shows a lot of information, but the most valuable is transactions state (__please read description of possible transactions states in IBAnalyst help, it is available by clicking F1 or in menu Help__).
 
 At this screenshot you can see that some transaction is active for a long time, "`60% of daily average`".
 IBAnalyst marks such transaction's state by red, because this transaction may prevent accumulated versions to be considered as garbage by server, and so, to be garbage collected.
 This is a possible reason of slowness: the more versions exist for some record, the more time it will takes to read it.
 
-In order to find this long-running transaction you can use MON$Logger module of FBScanner, or perform direct query of MON$ tables.
+In order to find this long-running transaction you can use MON$Logger module of FBScanner, or perform direct query of `MON$` tables.
 Then, to find out which tables were affected by long running transactions (tables with a lot of record versions) you need to go to "`Tables`" view of IBAnalyst.
 
 === Tables view
@@ -415,9 +366,7 @@ View *Tables* contains the information about all database tables.
 It represents important statistical information about each table.
 All table warnings are marked (see details below).
 
-You can see the following columns (Columns *Records,
-                    RecLength, VerLen, Versions, Max Vers* are visible only if statistics was generated with `gstat -r` or with "`Include record/rec
-                    versions`" checkbox enabled):
+You can see the following columns (Columns *Records, RecLength, VerLen, Versions, Max Vers* are visible only if statistics was generated with `gstat -r` or with "`Include record/rec versions`" checkbox enabled):
 
 [cols="1,1", options="header"]
 |===
@@ -426,79 +375,43 @@ You can see the following columns (Columns *Records,
 
 
 |**Records**
-|Record count. Marked pink if table fragmented by blob fields
-                                    which data is less than database page size. Hint shows real
-                                    table fragmentation and average records if there were no blob
-                                    fields. Such fragmentation can cause bad performance for big
-                                    table joins or natural scans.
+|Record count. Marked pink if table fragmented by blob fields which data is less than database page size. Hint shows real table fragmentation and average records if there were no blob fields. Such fragmentation can cause bad performance for big table joins or natural scans.
 
 |**RecLength**
-|Average record length. Depends on record data, especially on
-                                    char/varchar columns data. Min physical record length is 17
-                                    bytes (record header + all fields are null), max – as declared
-                                    in table. Statistics show this data without record header count,
-                                    in this case RecLength can be 0 (if nearly all records are
-                                    deleted)
+|Average record length. Depends on record data, especially on char/varchar columns data. Min physical record length is 17 bytes (record header + all fields are null), max – as declared in table. Statistics show this data without record header count, in this case RecLength can be 0 (if nearly all records are deleted)
 
 |**VerLen**
-|Average record version length. If it is close to RecLength,
-                                    almost all record is being updated. If VerLen is 40-80% and not
-                                    greater of RecLength, then Versions are mostly updates. If
-                                    VerLen greater than 80-90% of RecLength, than maybe Versions are
-                                    mostly deletes, or update is made by char/varchar columns with
-                                    new, greater data. Marked *yellow* if it's size is greater than specified %
-                                    (Options/Record/Version size) of average record size.
+|Average record version length. If it is close to RecLength, almost all record is being updated. If VerLen is 40-80% and not greater of RecLength, then Versions are mostly updates. If VerLen greater than 80-90% of RecLength, than maybe Versions are mostly deletes, or update is made by char/varchar columns with new, greater data. Marked *yellow* if it's size is greater than specified % (Options/Record/Version size) of average record size.
 
 |**Versions**
-|Current record version count. More versions slowdown table
-                                    reads. Also lot of versions means that there is no garbage
-                                    collection performed or records are not read by anyone. Marked *red* if version count is
-                                    greater than Records. (Options/Record Versions).
+|Current record version count. More versions slowdown table reads. Also lot of versions means that there is no garbage collection performed or records are not read by anyone. Marked *red* if version count is greater than Records. (Options/Record Versions).
 
 |**Max Vers**
-|Max record versions for one particular record. Marked blue
-                                    when it is equal to 1 and Versions is non-zero. It means that
-                                    there were massive update/delete operation. See Options, Table,
-                                    Massive deletes updates option.
+|Max record versions for one particular record. Marked blue when it is equal to 1 and Versions is non-zero. It means that there were massive update/delete operation. See Options, Table, Massive deletes updates option.
 
 |**Data Pages**
 |Allocated data pages
 
 |**Size, Mb**
-|``DataPages * Page Size``, in megabytes. I.e. this
-                                    is total table size, records + versions. Graph shows percentage
-                                    of that table from the whole data size.
+|`DataPages * Page Size`, in megabytes. I.e. this is total table size, records + versions. Graph shows percentage of that table from the whole data size.
 
 |**Idx Size, Mb**
-|Sum of all indices size for that table. Graph shows
-                                    percentage of that value to total size of all indices.
+|Sum of all indices size for that table. Graph shows percentage of that value to total size of all indices.
 
 |**Slots**
-|Count of links to data pages. Empty links are Slots-Data
-                                    Pages. Doesn't affect disk space or performance.
+|Count of links to data pages. Empty links are Slots-Data Pages. Doesn't affect disk space or performance.
 
 |**Average Fill**
-|Average data page fill %. Can be computed as ``(DataPages
-                                        * Page_Size)/ Records * RecLength``. Low page fill
-                                    means that table is "fragmented". Frequent updates/deletes can
-                                    fragment data pages. Marked red if average fill rate is less
-                                    than 60% (go to Options/Average Fill to adjust it). Marked
-                                    yellow if it is an artifact of high table fragmentation when
-                                    it's record is too small (11-13 bytes).
+|Average data page fill %. Can be computed as `(DataPages * Page_Size)/ Records * RecLength`. Low page fill means that table is "fragmented". Frequent updates/deletes can fragment data pages. Marked red if average fill rate is less than 60% (go to Options/Average Fill to adjust it). Marked yellow if it is an artifact of high table fragmentation when it's record is too small (11-13 bytes).
 
 |**Real Fill**
-|Because we found that Average Fill, calculated by [app]``gstat``, sometimes gives wrong
-                                    results (at least for tables with small blobs), we placed here
-                                    calculated column, that counts average fill not by data pages,
-                                    but by records+versions, including record header.
+|Because we found that Average Fill, calculated by `gstat`, sometimes gives wrong results (at least for tables with small blobs), we placed here calculated column, that counts average fill not by data pages, but by records+versions, including record header.
 
 |**20%, 40%, 60% and 100% fill**
-|Shows page count having corresponding fill rate. Can be
-                                    turned on/off in Options dialog
+|Shows page count having corresponding fill rate. Can be turned on/off in Options dialog
 
 |**Total %**
-|How big is that table plus it's indices in %, related to
-                                    other tables.
+|How big is that table plus it's indices in %, related to other tables.
 |===
 
 image::5.2.2.png[]
@@ -511,7 +424,7 @@ Especially we are interested tables with many record versions – many record ve
 Usually it is necessary to change update and delete algorithms to get rid of many record versions.
 
 Row Versions show total versions count for particular table, and row Max Vers shows maximum versions reached by some record.
-For example, if you look at table SITE, there are 40611 records, total versions are 76142, but one record has 501 versions.
+For example, if you look at table `SITE`, there are 40611 records, total versions are 76142, but one record has 501 versions.
 Reading and parsing such packet from disk takes more time, so, reading this record is slower than reading others.
 
 This picture also shows a lot of tables where data was deleted.
@@ -529,14 +442,7 @@ You can estimate the effectiveness of indices with the following parameters (pro
 
 
 |**Depth**
-|Index depth is the page count that engine reads from disk to
-                                    walk from index root to record pointer. Optimal index depth is 3
-                                    or less. When Depth is 4 and higher, it is recommended to
-                                    increase database page size (backup, then restore with
-                                    -page_size option). This column will be marked red if index
-                                    depth is greater than 3 (Options/Index/Index Depth). More
-                                    chances to exceed optimal depth have indices built on long
-                                    char/varchar columns.
+|Index depth is the page count that engine reads from disk to walk from index root to record pointer. Optimal index depth is 3 or less. When Depth is 4 and higher, it is recommended to increase database page size (backup, then restore with `-page_size` option). This column will be marked red if index depth is greater than 3 (Options/Index/Index Depth). More chances to exceed optimal depth have indices built on long char/varchar columns.
 
 |**Keys**
 |Index key count. Usually equals to Records. If Keys is bigger
@@ -546,73 +452,47 @@ You can estimate the effectiveness of indices with the following parameters (pro
                                     are not changed during updates.
 
 |**KeyLen**
-|Average index key length. The less KeyLen, the more equal or
-                                    similar (postfix) values (keys) stored in index.
+|Average index key length. The less KeyLen, the more equal or similar (postfix) values (keys) stored in index.
 
 |**Max Dup**
-|Maximum duplicates count for particular key value. Some old [app]``gstat`` versions show no more than
-                                    32767 or 65535 -- this bug is fixed in latest Firebird versions.
-                                    Marked *red* if duplicates count
-                                    is 30% of all keys. (Options/Index/Lot of key
-                                    duplicates).
+|Maximum duplicates count for particular key value. Some old `gstat` versions show no more than 32767 or 65535 -- this bug is fixed in latest Firebird versions. Marked *red* if duplicates count is 30% of all keys. (Options/Index/Lot of key duplicates).
 
 |**Total Dup**
-|
-
-The overall count of keys with the same values.
-Some old [app]``gstat`` versions show no more than 32767 or 65535 -- this bug is fixed in latest Firebird versions.
+|The overall count of keys with the same values.
+Some old `gstat` versions show no more than 32767 or 65535 -- this bug is fixed in latest Firebird versions.
 
 The closer this value to Keys count, the less effective will be searching using this index, especially when search is made using more than one index.
 Total Dup value can be counted as Keys minus unique keys count (index statistics is nonlinear).
 
 Marked *yellow* if `1/(Keys – TotalDup)` greater than 0.01, and red if in addition MaxDup is marked red too.
-This constant (0.01) is used by optimizer (see sources in [path]_opt.c_/[path]_opt.cpp_) as usable index selectivity border.
+This constant (0.01) is used by optimizer (see sources in `opt.cpp`) as usable index selectivity border.
 Optimizer will still use that index if none other index with better selectivity exists for some condition.
 
 |**Uniques**
-|Count of different key values. Primary and unique key indices
-                                    will show same value as in Keys column. Useful to understand how
-                                    many different values stored in index -- is it useful or not.
-                                    Index is useless if Unique column shows 1 (marked
-                                    yellow).
+|Count of different key values. Primary and unique key indices will show same value as in Keys column. Useful to understand how many different values stored in index -- is it useful or not. Index is useless if Unique column shows 1 (marked yellow).
 
 |**Selectivity**
-|Information from ``rdb$indises.rdb$statistics``, only
-                                    visible if "`load table/index metadata`" was On. If
-                                    selectivity stored in database differs from computed
-                                    selectivity, *yellow* warning
-                                    shown (less than 20% difference) or *red* (higher than 20% difference). *Blue* warning is shown when index is
-                                    empty but it's selectivity is not 0. Selectivity of inactive
-                                    indices are ignored.
+|Information from `rdb$indises.rdb$statistics`, only visible if "`load table/index metadata`" was On. If selectivity stored in database differs from computed selectivity, *yellow* warning shown (less than 20% difference) or *red* (higher than 20% difference). *Blue* warning is shown when index is empty but it's selectivity is not 0. Selectivity of inactive indices are ignored.
 
 |**Size, Mb**
-|Index size in megabytes. Gap show percentage of that index
-                                    size related to total size of all indices.
+|Index size in megabytes. Gap show percentage of that index size related to total size of all indices.
 
 |**Average Fill**
-|Average index pages fill rate, in %. Marked *red* if average fill rate is less than
-                                    50% (go to Options/Average Index Fill to adjust it). Fragmented
-                                    index results more page reads as usual, and it's Depth can be
-                                    higher. Can be fixed by alter index inactive/active, if it is
-                                    not index created by primary, unique or foreign key
-                                    constraints.
+|Average index pages fill rate, in %. Marked *red* if average fill rate is less than 50% (go to Options/Average Index Fill to adjust it). Fragmented index results more page reads as usual, and it's Depth can be higher. Can be fixed by alter index inactive/active, if it is not index created by primary, unique or foreign key constraints.
 
 |**Leafs**
-|Leaf page count (pages with keys and record
-                                    pointers).
+|Leaf page count (pages with keys and record pointers).
 
 |**20%, 40%, 60% and 100% fill**
-|Shows page count having corresponding fill rate. Can be
-                                    turned on/off in Options dialog
+|Shows page count having corresponding fill rate. Can be turned on/off in Options dialog
 |===
 
 image::5.2.3.png[]
 
 
 Some production databases can have indices with the only key value indexed.
-This can happen because database was developed "`to be extended in the
-                    future`", or, someone just experimented with the indices during development or tests.
-You can see these indices as "`Useless`" in IBAnalyst: I_NUMBER, etc, built on the column that has only one value for all rows.
+This can happen because database was developed "`to be extended in the future`", or, someone just experimented with the indices during development or tests.
+You can see these indices as "`Useless`" in IBAnalyst: `I_NUMBER`, etc, built on the column that has only one value for all rows.
 These indices are really useless, because
 
 * Optimizer may use this index if you specify "`where field =...`". Since field contains only one value, using index will cause useless reading of index pages from disk to memory, and consume memory (and time) when server will prepare which rows to show for that query.
