@@ -83,38 +83,35 @@ IBAnalyst может получать статистику из действую
 
 Основные возможности IBAnalyst перечислены ниже:
 
-* Retrieving database statistics via Service API and from `gstat` output.
-* Summary of all actual and possible problems in database
-* Colored grid representation of tables, indices and table->indices, which highlights fragmented tables, poor indices and so on.
-* Automatic expertise of database statistics provides recommendations and "`how-to`" for the following things:
-** Optimal database page size
-** Transactions state and gap between critical transactions
-** Different database flags
-** Index Depth
-** Index Key Duplicates
-** Fragmented Tables
-** Record Versions
-** Very Big Tables
-* and more...
+* Получение статистики базы данных через Service API и из вывода `gstat`.
+* Сводка всех актуальных и возможных проблем в базе данных
+* Цветная сетка для представления таблиц, индексов и таблиц->индексов, которая выделяет фрагментированные таблицы, плохие индексы и т. д.
+* Автоматическая экспертиза статистики базы данных предоставляет рекомендации и инструкции по следующим вопросам:
+** Оптимальный размер страницы базы данных
+** Состояние транзакций и критический разрыв между транзакциями.
+** Различные флаги базы данных
+** Глубина индекса
+** Дубликаты ключей индекса
+** Фрагментированные таблицы
+** Версии записи
+** Очень большие таблицы
+* и другое
 
+=== Как правильно получать статистику из базы данных Firebird
 
-=== How to get statistics from Firebird database in right way
+==== Правильное время и место
 
-==== Right time, right place
+Звучит странно, но просто взять статистику через gstat или Services API недостаточно. Статистику необходимо собирать в нужный момент, чтобы показать, как приложения влияют на данные и транзакции в базе данных.
 
-It sounds strange, but just taking statistics via `gstat` or Services API is not enough.
-Statistics must be taken at the right moment to show how applications affect data and transactions in database.
-Worst time to take statistics is
+Худшее время для сбора статистики
 
-Right after restore
+* Сразу после восстановления
+* После снятия резервной копии (`gbak –b db.gdb`) без указания переключателя `–g`
+* После ручного sweep (`gfix –sweep`)
 
-After backup (`gbak –b db.gdb`) without –g switch is made
+Также верно, что во время работы могут быть моменты, когда база данных находится в правильном состоянии, например, когда приложения нагружают базу данных меньше, чем обычно (пользователи обедают, ужинают или в определенное время бизнес-процесса).
 
-After manual sweep (`gfix –sweep`)
-
-It is also correct that during work there can be moments where database is in correct state, for example, when applications make less database load than usual (users at launch, dinner or its by specific business process times).
-
-How to catch when there is something wrong in database?
+Как обнаружить, что в базе данных что-то не так?
 
 Yes, your applications can be designed so perfect that they will always work with transactions and data correctly, not making sweep gaps, lot of active transactions, long running snapshots and so on.
 Usually it does not happen.

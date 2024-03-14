@@ -96,20 +96,17 @@ Main features of IBAnalyst are listed below:
 ** Very Big Tables
 * and more...
 
-
 === How to get statistics from Firebird database in right way
 
 ==== Right time, right place
 
-It sounds strange, but just taking statistics via `gstat` or Services API is not enough.
-Statistics must be taken at the right moment to show how applications affect data and transactions in database.
+It sounds strange, but just taking statistics via `gstat` or Services API is not enough. Statistics must be taken at the right moment to show how applications affect data and transactions in database.
+
 Worst time to take statistics is
 
-Right after restore
-
-After backup (`gbak –b db.gdb`) without –g switch is made
-
-After manual sweep (`gfix –sweep`)
+* Right after restore
+* After backup (`gbak –b db.gdb`) without `–g` switch is made
+* After manual sweep (`gfix –sweep`)
 
 It is also correct that during work there can be moments where database is in correct state, for example, when applications make less database load than usual (users at launch, dinner or its by specific business process times).
 
@@ -232,8 +229,6 @@ Usually full statistics of database contains hundreds of Kbytes and it is not ea
 
 Below is the description of database objects and parameters that you may see in Summary.
 For description of visible problems (marked *red* or **yellow**) see column hints or Recommendations output.
-
-
 
 [cols="1,1", options="header"]
 |===
@@ -444,11 +439,7 @@ You can estimate the effectiveness of indices with the following parameters (pro
 |Index depth is the page count that engine reads from disk to walk from index root to record pointer. Optimal index depth is 3 or less. When Depth is 4 and higher, it is recommended to increase database page size (backup, then restore with `-page_size` option). This column will be marked red if index depth is greater than 3 (Options/Index/Index Depth). More chances to exceed optimal depth have indices built on long char/varchar columns.
 
 |**Keys**
-|Index key count. Usually equals to Records. If Keys is bigger
-                                    than Records and Versions count is greater than 0 it means that
-                                    concrete field value was changed in those record versions. If
-                                    Table.RecVersions is bigger than Keys, than this index field(s)
-                                    are not changed during updates.
+|Index key count. Usually equals to Records. If Keys is bigger than Records and Versions count is greater than 0 it means that concrete field value was changed in those record versions. If Table.RecVersions is bigger than Keys, than this index field(s) are not changed during updates.
 
 |**KeyLen**
 |Average index key length. The less KeyLen, the more equal or similar (postfix) values (keys) stored in index.
