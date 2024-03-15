@@ -3,19 +3,19 @@
 
 == Pool of external connections
 
-HQbird 2018 supports a pool of external connections for Firebird 2.5 and (from 2018R3) in Firebird 3.
-Firebird 4.0 standard build supports external connection pooling out of the box.
-This pool allows running parallel EXECUTE ON EXTERNAL statements to external Firebird databases.
+HQbird supports a pool of external connections for Firebird 2.5 and Firebird 3. The standard build of Firebird 4.0 and higher supports the creation of external connection pools out of the box.
+
+An external connection pool allows execute `EXECUTE ON EXTERNAL` statements with less overhead in reconnecting to the external database.
 
 [NOTE]
 ====
 Please note -- this pool is allocated per Firebird instance.
 ====
 
-The feature is managed in the [path]_firebird.conf_:
+The feature is managed in the `firebird.conf`:
+
 [source]
 ----
-
 # ============================
 # Settings of External Connections Pool
 # ============================
@@ -45,7 +45,6 @@ The following commands exist to manage pool:
 +
 [source]
 ----
-
 ALTER EXTERNAL CONNECTIONS POOL SET SIZE N
 ----
 +
@@ -53,14 +52,12 @@ Example -- this command sets the size of a pool to 190 connections.
 +
 [source,sql]
 ----
-
 ALTER EXTERNAL CONNECTIONS POOL SET SIZE 190
 ----
 * changes the lifetime of the pooled connection
 +
 [source]
 ----
-
 ALTER EXTERNAL CONNECTIONS POOL
 SET LIFETIME N {SECOND | MINUTE | HOUR}
 ----
@@ -69,29 +66,26 @@ Example -- this command limits the lifetime of a connection in the pool to 1 hou
 +
 [source,sql]
 ----
-
 ALTER EXTERNAL CONNECTIONS POOL SET LIFETIME 1 HOUR
 ----
 * clear all pooled connections
 +
 [source,sql]
 ----
-
 ALTER EXTERNAL CONNECTIONS POOL CLEAR ALL
 ----
 * clear the oldest connection in the pool
 +
 [source,sql]
 ----
-
 ALTER EXTERNAL CONNECTIONS POOL CLEAR OLDEST
 ----
 
 To get information about pool status, new context variables were introduced.
 The following example demonstrates their usage
+
 [source,sql]
 ----
-
 SELECT
   CAST(RDB$GET_CONTEXT('SYSTEM', 'EXT_CONN_POOL_SIZE') AS INT) AS POOL_SIZE,
   CAST(RDB$GET_CONTEXT('SYSTEM', 'EXT_CONN_POOL_IDLE_COUNT') AS INT) AS POOL_IDLE,
@@ -104,10 +98,12 @@ FROM RDB$DATABASE;
 
 == Cached prepared statements
 
-HQbird 2018 has the feature to improve the performance of Firebird (version 3+ only!) engine in case of the many
-frequent and fast SQL queries: server-side cache of prepared SQL statements.
+HQbird has the feature to improve the performance of Firebird (versions 4.0 and 5.0) engine in case of the many
+frequent and fast SQL queries: server-side cache of prepared SQL statements. Starting with Firebird 5.0, this feature is available in the standard out-of-the-box build.
 
-This feature can be enabled in [path]_firebird.conf_ with the parameter [parameter]``DSQLCacheSize``:
+=== Cached prepared statements in Firebird 3.0 and 4.0
+
+This feature can be enabled in `firebird.conf` with the parameter `DSQLCacheSize`:
 
 [source]
 ----
@@ -132,20 +128,42 @@ We recommend to carefully enable it: start with values like 4, 8, 16, to find th
 Please note: enabling cache of prepared statements increases the memory usage.
 ====
 
+=== Cached prepared statements in Firebird 5.0
+
+In Firebird 5.0, the prepared statement cache was redesigned and included in the `"vanilla"` build.
+
+The cache of prepared statements is controlled by the `MaxStatementCacheSize` parameter in `firebird.conf`.
+
+----
+# ----------------------------
+# Maximum statement cache size
+#
+# The maximum amount of RAM used to cache unused DSQL compiled statements.
+# If set to 0 (zero), statement cache is disabled.
+#
+# Per-database configurable.
+#
+# Type: integer
+#
+#MaxStatementCacheSize = 2M
+----
+
+By default, the prepared statement cache is enabled. To disable it, you need to set the `MaxStatementCacheSize` parameter to 0.
+
 <<<
 
 == TempSpaceLogThreshold: monitoring of big sorting queries and BLOBs
 
-HQbird Enterprise has a new parameter in [path]_firebird.conf_ in Firebird 2.5, Firebird 3.0 and Firebird 4.0:
+HQbird has a new parameter in `firebird.conf` in Firebird 2.5, Firebird 3.0, Firebird 4.0 and Firebird 5.0:
 
 [source]
 ----
 TempSpaceLogThreshold=1000000000 #bytes
 ----
 
-When Firebird sees this parameter, it starts to log to [path]_firebird.log_ queries which produce large sortings: queries with GROUP BY, ORDER BY, etc.
+When Firebird sees this parameter, it starts to log to `firebird.log` queries which produce large sortings: queries with `GROUP BY`, `ORDER BY`, etc.
 
-When such query creates the sorting file which exceeds the specified threshold, the following message will appear in [path]_firebird.log_:
+When such query creates the sorting file which exceeds the specified threshold, the following message will appear in `firebird.log`:
 
 ----
 SRV-DB1	Wed Nov 28 21:55:36 2018
@@ -155,13 +173,13 @@ SRV-DB1	Wed Nov 28 21:55:36 2018
 	       from rdb$types a,rdb$types b, rdb$types c  order by 1)
 ----
 
-*Total size* -- the total size of sorting file
+*Total size*:: the total size of sorting file
 
-*Cached* -- the part of sorting which had fit into temporary space (specified by [parameter]``TempCacheLimit`` parameter)
+*Cached*:: the part of sorting which had fit into temporary space (specified by `TempCacheLimit` parameter)
 
-*On disk* -- the part of sorting which was stored to the temporary file, which can be cached in the OS memory, or stored on disk (in the folder specified by [parameter]``TempDirectories`` parameter, or in the default temp folder)
+*On disk*:: the part of sorting which was stored to the temporary file, which can be cached in the OS memory, or stored on disk (in the folder specified by `TempDirectories` parameter, or in the default temp folder)
 
-For very big BLOBs the following message will appear in the [path]_firebird.log_
+For very big BLOBs the following message will appear in the `firebird.log`
 
 ----
 SRV-DB1	Tue Nov 27 17:35:39 2018
@@ -169,18 +187,18 @@ SRV-DB1	Tue Nov 27 17:35:39 2018
 	Total size: 500377437, cached: 0 bytes, on disk: 501219328 bytes.
 ----
 
-Use [parameter]``TempSpaceLogThreshold`` to find the non-optimized queries with big sortings and big BLOBs.
-In Firebird 3.0, it also will report large hash sortings.
+Use `TempSpaceLogThreshold` to find the non-optimized queries with big sortings and big BLOBs.
+Starting with Firebird 3.0 it will also report large hash tables (those caused by HASH JOINs).
 
-If you encounter such queries, optimize them either with redesign of SQL query itself, or try to enable parameter [parameter]``SortDataStorageThreshold``.
+If you encounter such queries, optimize them either with redesign of SQL query itself, or try to enable parameter `SortDataStorageThreshold`.
 
 <<<
 
 == SortDataStorageThreshold: REFETCH instead SORT for wide record sets
 
-HQbird Enterprise supports the new REFETCH optimization method. The standard build of Firebird 4.0 supports this optimization algorithm out of the box.
+HQbird supports the new REFETCH optimization method. The standard build of Firebird 4.0 supports this optimization algorithm out of the box.
 
-HQbird Enterprise has a new parameter [parameter]``SortDataStorageThreshold`` in [path]_firebird.conf_ (Firebird 3.0+):
+HQbird has a new parameter `SortDataStorageThreshold` in `firebird.conf` (Firebird 3.0+):
 
 [source]
 ----
@@ -239,23 +257,22 @@ It is not recommended to set `SortDataStorageThreshold` less than 2048 bytes.
 [[_hqbird_performance_multi_threaded]]
 == Multi-thread sweep, backup, restore
 
-In HQbird 2020+, the possibility of multi-threaded execution of sweep, backup and restore has appeared, which speeds up
+In HQbird, the possibility of multi-threaded execution of sweep, backup and restore has appeared, which speeds up
 their work from 2x to 6 times (depending on the specific database). Multi-threaded operations work in HQbird
 Firebird 2.5 and 3.0 (starting from builds 2.5.9.27143 and 3.0.5.3.31717 respectively),
 in any architectures -- Classic, SuperClassic, SuperServer.
 
 To enable multi-threaded execution, the `gfix` and `gbak` command-line utilities
-have the `–par _n_` option, where _n_ is the number of threads that will be involved in a particular operation.
+have the `–par _n_` option, where `n` is the number of threads that will be involved in a particular operation.
 In practice, choosing the number n should be correlated with the number of available processor cores.
 
 For example
-
 
 * `gfix –sweep database –par 8 ...`
 * `gbak –b database backup –par 8 ...`
 * `gbak –c backup database –par 8 ...`
 
-Also, to control the number of threads and set their default number in [path]_firebird.conf_, two new parameters
+Also, to control the number of threads and set their default number in `firebird.conf`, two new parameters
 are introduced that affect only sweep and restore, but not backup:
 
 ----
@@ -276,7 +293,7 @@ Example: if you set `MaxParallelWorkers = 10`, then you can
 That is, no more than 10 threads will be used in total.
 In case of exceeding (for example, if you set 6 threads for sweep and 6 threads for restore), for a process that exceeds the limit, the message "`No enough free worker attachments`" will be displayed).
 
-Thus, to enable the multi-threaded capabilities of sweep and restore, you must set the `MaxParallelWorkers` parameter in [path]_firebird.conf_
+Thus, to enable the multi-threaded capabilities of sweep and restore, you must set the `MaxParallelWorkers` parameter in `firebird.conf`
 
 ----
 MaxParallelWorkers = 64
@@ -334,11 +351,11 @@ However, there is a risk of connecting other applications from SYSDBA or the own
 .Notes
 [NOTE]
 ====
-* The new parameters in [path]_firebird.conf_ only affect sweep and restore, to simplify administration and eliminate
+* The new parameters in `firebird.conf` only affect sweep and restore, to simplify administration and eliminate
 ambiguity, it is recommended that you always explicitly specify the `–par n` parameter
 for `gfix` and `gbak` if you need to perform multi-threaded sweep, restore, and backup operations.
 For example, if you set `ParallelWorkers = 4` and do not specify `–par n`, then sweep and restore will use 4
-threads by default, and backup will use 1 thread, because it does not use the values from [path]_firebird.conf_ neither
+threads by default, and backup will use 1 thread, because it does not use the values from `firebird.conf` neither
 locally nor with `–se`.
 * The performance improvement does not necessarily depend on the number of processor cores and their compliance
 with the set value `–par n`. It depends on the number of cores, the Firebird architecture, and the disk subsystem
@@ -433,7 +450,7 @@ and prevent database growth due to the creation of many temporary BLOBs when usi
 
 [example]
 ====
-Let's say you need to build JSON on the server side. We have a PSQL package JSON_UTILS with a set of functions for converting primitive data types to JSON notation.
+Let's say you need to build JSON on the server side. We have a PSQL package `JSON_UTILS` with a set of functions for converting primitive data types to JSON notation.
 Then the JSON building using the `BLOB_APPEND` function will look like this:
 
 [source,sql]
@@ -502,7 +519,7 @@ A similar example using the usual concatenation operator `||` is an order of mag
 [[_hqbird_performance_left_to_inner]]
 == Transform LEFT joins into INNER
 
-HQbird Enterprise allow transform LEFT joins into INNER ones if the WHERE condition violates the outer join rules.
+HQbird allow transform `LEFT` joins into `INNER` ones if the `WHERE` condition violates the outer join rules.
 
 Example:
 
