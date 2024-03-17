@@ -191,20 +191,30 @@ SRV-DB1	Tue Nov 27 17:35:39 2018
 
 <<<
 
-== SortDataStorageThreshold: REFETCH instead SORT for wide record sets
+== SortDataStorageThreshold: REFETCH вместо SORT для широких наборов данных
 
-HQbird supports the new REFETCH optimization method. The standard build of Firebird 4.0 supports this optimization algorithm out of the box.
+HQbird поддерживает новый метод оптимизации REFETCH. Стандартная сборка Firebird версии 4.0 и выше поддерживает этот алгоритм оптимизации "`из коробки`".
 
-HQbird has a new parameter `SortDataStorageThreshold` in `firebird.conf` (Firebird 3.0+):
+В HQbird появился новый параметр `SortDataStorageThreshold` в `firebird.conf` (Firebird 3.0+):
 
 [source]
 ----
 SortDataStorageThreshold=16384 # bytes
 ----
 
-If the size of the record, returned by SQL query, will be more than specified threshold, Firebird will use the different approach for sorting record sets: REFETCH instead of SORT.
+[NOTE]
+====
+Начиная с версии 4.0 этот параметр был переименован в `InlineSortThreshold`.
 
-For example, we have the following query
+[source]
+----
+InlineSortThreshold=16384 # bytes
+----
+====
+
+Если размер записи, возвращаемой SQL-запросом, будет больше указанного порога, Firebird будет использовать другой подход для сортировки наборов записей: REFETCH вместо SORT.
+
+Например, у нас есть следующий запрос
 
 [source]
 ----
@@ -216,7 +226,7 @@ join tmain on tdetl.pid=tmain.id
 order by tdetl.name_detl
 ----
 
-with the following execution plan:
+со следующим планом выполнения:
 
 ----
 Select Expression
@@ -229,10 +239,9 @@ Select Expression
                         -> Index "FK_TABLE1_1" Range Scan (full match)
 ----
 
-In this case, the size of each record to be sorted is 32860+36 bytes.
-It can lead to the very big sort files, which will be written to the disk, and the overall query can slow.
+В этом случае размер каждой сортируемой записи составляет 32860+36 байт. Это может привести к созданию очень больших файлов сортировки, которые будут записаны на диск, и выполнение запроса может замедлиться.
 
-With parameter `SortDataStorageThreshold=16384`, Firebird will use plan REFETCH, where only key is sorted, and data are read from the database:
+С параметром `SortDataStorageThreshold=16384` или `InlineSortThreshold=16384` Firebird будет использовать метод доступа REFETCH, гв котором сортируется только ключ, а данные перечитываются из базы данных:
 
 ----
 Select Expression
@@ -241,12 +250,12 @@ Select Expression
             -> Nested Loop Join (inner)
 ----
 
-This approach can significantly (2-5 times) speed up queries with very wide sorted record sets (usually, heavy reports).
+Такой подход позволяет существенно (в 2-5 раз) ускорить запросы с сортировкой очень широких наборов записей (обычно это тяжелые отчеты).
 
-.Please note!
+.Обратите внимание!
 [NOTE]
 ====
-It is not recommended to set `SortDataStorageThreshold` less than 2048 bytes.
+Не рекомендуется устанавливать `SortDataStorageThreshold` (`InlineSortThreshold`) меньше чем 2048 байт.
 ====
 
 <<<
