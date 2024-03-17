@@ -261,25 +261,19 @@ Select Expression
 <<<
 
 [[_hqbird_performance_multi_threaded]]
-== Multi-thread sweep, backup, restore
+== Многопоточные sweep, backup, restore
 
-In HQbird, the possibility of multi-threaded execution of sweep, backup and restore has appeared, which speeds up
-their work from 2x to 6 times (depending on the specific database). Multi-threaded operations work in HQbird
-Firebird 2.5 and 3.0 (starting from builds 2.5.9.27143 and 3.0.5.3.31717 respectively),
-in any architectures -- Classic, SuperClassic, SuperServer.
+В HQbird появилась возможность многопоточного выполнения очистки, резервного копирования и восстановления, что ускоряет их работу от 2х до 6 раз (в зависимости от конкретной базы). Многопоточные операции работают в HQbird для Firebird 2.5, 3.0 и 4.0 на любых архитектурах — Classic, SuperClassic, SuperServer. Для Firebird 5.0 многопоточные операции доступны в "`ванильной`" версии из коробки.
 
-To enable multi-threaded execution, the `gfix` and `gbak` command-line utilities
-have the `–par _n_` option, where `n` is the number of threads that will be involved in a particular operation.
-In practice, choosing the number n should be correlated with the number of available processor cores.
+Чтобы включить многопоточное выполнение, утилиты командной строки `gfix` и `gbak` имеют параметр `–par _n_`, где `n` -- количество потоков, которые будут задействованы в конкретной операции. На практике выбор числа n следует соотносить с количеством доступных ядер процессора.
 
-For example
+Примеры:
 
 * `gfix –sweep database –par 8 ...`
 * `gbak –b database backup –par 8 ...`
 * `gbak –c backup database –par 8 ...`
 
-Also, to control the number of threads and set their default number in `firebird.conf`, two new parameters
-are introduced that affect only sweep and restore, but not backup:
+Кроме того, чтобы ограничивать количество рабочих потоков и устанавливать их число по умолчанию, в `firebird.conf` введены два новых параметра, которые влияют только на sweep и restore, но не на резервное копирование:
 
 ----
 # ============================
@@ -291,23 +285,23 @@ are introduced that affect only sweep and restore, but not backup:
 MaxParallelWorkers = 64
 ----
 
-Example: if you set `MaxParallelWorkers = 10`, then you can
+Пример: если вы установите `MaxParallelWorkers = 10`, вы сможете выполнять
 
 * run `gfix –sweep database –par 10`
 * run `gfix –sweep database –par 5` and `gbak –c –par 5 ...`
 
-That is, no more than 10 threads will be used in total.
-In case of exceeding (for example, if you set 6 threads for sweep and 6 threads for restore), for a process that exceeds the limit, the message "`No enough free worker attachments`" will be displayed).
+То есть всего будет использовано не более 10 потоков.
+В случае превышения (например, если вы установили 6 потоков на sweep и 6 потоков на restore), для процесса, превышающего лимит, будет выведено сообщение "`No enough free worker attachments`").
 
-Thus, to enable the multi-threaded capabilities of sweep and restore, you must set the `MaxParallelWorkers` parameter in `firebird.conf`
+Таким образом, чтобы включить многопоточные возможности`sweep и restore, вы должны установить параметр `MaxParallelWorkers` в `firebird.conf`.
 
 ----
 MaxParallelWorkers = 64
 ----
 
-and then restart Firebird.
+и перезапустить Firebird.
 
-The `ParallelWorkers` sets the number of threads used by sweep and restore by default if the `–par _n_` option is not specified.
+`ParallelWorkers` по умолчанию устанавливает количество потоков, используемых для sweep и restore, если не указана опция `–par _n_`.
 
 ----
 #  Default number of parallel workers for the single task. Per-process.
@@ -317,23 +311,22 @@ The `ParallelWorkers` sets the number of threads used by sweep and restore by de
 ParallelWorkers = 1
 ----
 
-For example, if `ParallelWorkers = 8`, then starting
+Например, если `ParallelWorkers = 8`, то запуск
 
 ----
 gfix –sweep
 ----
 
-without the `–par _n_` option will use 8 threads to execute sweep in parallel.
+без опции `-par _n_` будет использоваться 8 потоков для параллельного выполнения sweep.
 
 [IMPORTANT]
 ====
-For restore, filling tables from backup is always performed in one thread, and only creating indexes is parallelized.
-Thus, the acceleration for restore depends on the number of indexes in the database and their size.
-Also, the `ParallelWorkers` parameter automatically affects the creation of indexes performed by the `CREATE INDEX` and `ALTER INDEX ... ACTIVE` operations.
+До Firebird 5.0 в HQbird при восстановлении заполнение таблиц из резервной копии всегда выполняется в одном потоке, а распараллеливается только создание индексов. Таким образом, ускорение восстановления зависит от количества индексов в базе данных и их размера. Также параметр `ParallelWorkers` автоматически влияет на создание индексов, выполняемых операциями `CREATE INDEX` и `ALTER INDEX... ACTIVE`.
+
+Начиная с Firebird 5.0 заполнение таблиц при восстановлении тоже используется параллелизм.
 ====
 
-As mentioned above, these options do not affect backup.
-The multi-threading of backup is regulated only by the `–par _n_` parameter in the command line:
+Как упоминалось выше, эти параметры не влияют на резервное копирование. Многопоточность резервного копирования регулируется только параметром `–par _n_` в командной строке:
 
 * `gbak –b –par 6 ...`
 * `gbak –b –par 8 –se ...`
@@ -341,31 +334,23 @@ The multi-threading of backup is regulated only by the `–par _n_` parameter in
 
 [IMPORTANT]
 ====
-If the database is in shutdown single state, when only 1 connection is allowed to the database, then in version 2.5 both sweep and backup with `–par _2_` or more will produce an error several seconds after starting:
+Если база данных находится в состоянии single shutdown, когда к базе данных разрешено только 1 соединение, то в версии 2.5 sweep, и резервное копирование с `-par _2_` или более будут вызывать ошибку через несколько секунд после запуска:
 
 * sweep -- connection lost to database
-* backup -- ERROR: database ... shutdown (via xnet protocol, a line with this message will not be displayed in the backup log)
+* backup -- ERROR: database ... shutdown (по протоколу xnet строка с этим сообщением не будет отображаться в журнале резервного копирования)
 
-This is due to the fact that for these operations an appropriate number of database connections is required, more than 1.
+Это связано с тем, что для этих операций требуется соответствующее количество подключений к базе данных, более 1.
 
-In 3.0, only backup will throw an error "`ERROR: database ... shutdown`", sweep will work.
+В 3.0 только резервное копирование выдает ошибку "`ERROR: database ... shutdown`", sweep будет работать
 
-Multi-threaded restore, Firebird 2.5, 3.0 and 4.0, creates the database in shutdown multi mode, so such errors do not occur.
-However, there is a risk of connecting other applications from SYSDBA or the owner to the database in the restore process.
+Многопоточное восстановление Firebird 2.5, 3.0, 4.0 и 5.0 создает базу данных в режиме shutdown multi, поэтому такие ошибки не возникают. Однако существует риск подключения к базе данных в процессе восстановления других приложений от `SYSDBA` или владельца.
 ====
 
 .Notes
 [NOTE]
 ====
-* The new parameters in `firebird.conf` only affect sweep and restore, to simplify administration and eliminate
-ambiguity, it is recommended that you always explicitly specify the `–par n` parameter
-for `gfix` and `gbak` if you need to perform multi-threaded sweep, restore, and backup operations.
-For example, if you set `ParallelWorkers = 4` and do not specify `–par n`, then sweep and restore will use 4
-threads by default, and backup will use 1 thread, because it does not use the values from `firebird.conf` neither
-locally nor with `–se`.
-* The performance improvement does not necessarily depend on the number of processor cores and their compliance
-with the set value `–par n`. It depends on the number of cores, the Firebird architecture, and the disk subsystem
-performance (IOPS). Therefore, the optimal value `–par n` for your system must be selected experimentally.
+* Новые параметры в `firebird.conf` влияют только на очистку и восстановление. Чтобы упростить администрирование и устранить двусмысленность, рекомендуется всегда явно указывать параметр `-par n` для `gfix` и `gbak`, если вам нужно выполнять многопоточные операции sweep, восстановления и резервного копирования. Например, если вы установите `ParallelWorkers = 4` и не укажете `-par n`, то sweep и восстановление будут использовать 4 потока по умолчанию, а резервное копирование будет использовать 1 поток, поскольку не использует значения из `firebird.conf` ни локально, ни с помощью `-se`.
+* Прирост производительности не обязательно зависит от количества ядер процессора и их соответствия заданному значению `–par n`. Это зависит от количества ядер, архитектуры Firebird и производительности дисковой подсистемы (IOPS). Поэтому оптимальное значение `–par n` для вашей системы необходимо подобрать экспериментально.
 ====
 
 <<<
@@ -373,10 +358,9 @@ performance (IOPS). Therefore, the optimal value `–par n` for your system must
 [[_hqbird_blob_append]]
 == BLOB_APPEND function
 
-Regular operator `||` (concatenation) with BLOB arguments creates temporary BLOB per every pair of args
-with BLOB. This could lead to the excessive memory consumption and growth of database file. The `BLOB_APPEND` function is designed to concatenate BLOBs without creating intermediate BLOBs.
+Обычный оператор `||` (конкатенация) с аргументами BLOB создает временный BLOB для каждой пары аргументов с BLOB. Это может привести к чрезмерному потреблению памяти и увеличению размера файла базы данных. Функция `BLOB_APPEND` предназначена для объединения BLOB-объектов без создания промежуточных BLOB-объектов.
 
-In order to achieve this, the result BLOB is left open for writing instead of been closed immediately after it is filled with data. I.e. such blob could be appended as many times as required. Engine marks such blob with new internal flag `BLB_close_on_read` and closes it automatically when necessary.
+Результирующий BLOB-объект функции `BLOB_APPEND` остается открытым для записи, а не закрывается сразу после заполнения данными. Т.е. в такой BLOB можно добавлять столько раз, сколько необходимо. Движок помечает такой объект новым внутренним флагом `BLB_close_on_read` и автоматически закрывает его при необходимости.
 
 *Available in*: DSQL, PSQL.
 
@@ -388,40 +372,38 @@ BLOB_APPEND(<blob> [, <value1>, ... <valueN]>
 .Parameters of BLOB_APPEND function
 [cols="1,2", options="header"]
 |===
-| Parameter
-| Description
+| Параметр
+| Описание
 
 | blob
-| BLOB or NULL.
+| BLOB или NULL.
 
 | value
-| Any type of value.
+| Значение любого типа.
 |===
 
 
-*Return type*: BLOB, temporary, not closed (i.e. open for writting), marked by flag
+*Return type*: временный не закрытый BLOB (т.е. открытый для записи), помеченный флагом
 `BLB_close_on_read`.
 
-Input Arguments:
+Входные аргументы:
 
-* The first argument is BLOB or NULL. The following options are possible:
-** NULL:  creates new temporary blob, not closed, with flag `BLB_close_on_read`
-** permanent BLOB (from table) or temporary already closed BLOB:
-will create a new empty unclosed BLOB with the flag `BLB_close_on_read` and the contents of the first BLOB will be added to it
-** temporary unclosed BLOB with the `BLB_close_on_read` flag: it will be used further
-* other arguments can be of any type. The following behavior is defined for them:
-** NULL ignored
-** non-BLOBs are converted to string (as usual) and appended to the content of the result
-** BLOBs, if necessary, are transliterated to the character set of the first argument and their contents are appended to the result
+* Первый аргумент BLOB или `NULL`. Возможны следующие варианты:
+** `NULL`:  создаётся новый временный не закрытый BLOB с флагом `BLB_close_on_read`
+** постоянный BLOB (из таблицы) или временный уже закрытый BLOB:
+создаст новый пустой незакрытый BLOB с флагом `BLB_close_on_read` и к нему будет добавлено содержимое первого BLOB
+** временный незакрытый BLOB с флагом `BLB_close_on_read`: будет использоваться далее
+* остальные аргументы могут быть любого типа. Для них определено следующее поведение:
+** `NULL` игнорируется
+** не-BLOB будут преобразованы в строку и добавлены к содержимому результата
+** BLOB, при необходимости транслитерируются в набор символов первого аргумента, а их содержимое добавляется к результату.
 
-The `BLOB_APPEND` function returns a temporary unclosed BLOB with the` BLB_close_on_read` flag.
-This is either a new BLOB or the same as in the first argument. Thus, a series of operations like `blob = BLOB_APPEND (blob, ...)` will result in the creation of at most one BLOB
-(unless you try to add a BLOB to itself).
-This BLOB will be automatically closed by the engine when the client tries to read it, assign it to a table, or use it in other expressions that require reading the content.
+Функция BLOB_APPEND возвращает временный незакрытый BLOB с флагом BLB_close_on_read. Это либо новый BLOB, либо тот же самый, что и в первом аргументе. Таким образом, серия операций типа `blob = BLOB_APPEND (blob, ...)` приведет к созданию не более одного BLOB (если вы не попытаетесь добавить BLOB к самому себе).
+Этот BLOB-объект будет автоматически закрыт механизмом, когда клиент попытается прочитать его, назначить таблице или использовать в других выражениях, требующих чтения содержимого.
 
 [NOTE]
 ====
-Testing a BLOB for NULL value using the `IS [NOT] NULL` operator does not read it, and therefore a temporary BLOB with the` BLB_close_on_read` flag will not be closed during such test.
+Проверка BLOB-объекта на наличие значения `NULL` с использованием оператора `IS [NOT] NULL` не приводит к его чтению, поэтому временный BLOB-объект с флагом `BLB_close_on_read` не будет закрыт во время такой проверки.
 ====
 
 [source,sql]
@@ -430,17 +412,17 @@ execute block
 returns (b blob sub_type text)
 as
 begin
-  -- will create a new temporary not closed BLOB
-  -- and will write to it the string from the 2nd argument
+  -- создаёт временный незакрытый BLOB
+  -- и запишет в него строку из второго аргумента
   b = blob_append(null, 'Hello ');
-  -- adds two strings to the temporary BLOB without closing it
+  -- добавляет две строки во временный BLOB без его закрытия
   b = blob_append(b, 'World', '!');
-  -- comparing a BLOB with a string will close it, because for this you need to read the BLOB
+  -- сравнение BLOB со строкой закроет его, потому что для этого вам нужно прочитать BLOB
   if (b = 'Hello World!') then
   begin
   -- ...
   end
-  -- will create a temporary closed BLOB by adding a string to it
+  -- создаст временный закрытый BLOB, добавив к нему строку
   b = b || 'Close';
   suspend;
 end
@@ -449,15 +431,13 @@ end
 
 [TIP]
 ====
-Use the `LIST` and` BLOB_APPEND` functions to concatenate BLOBs. This will save memory consumption, disk I/O,
-and prevent database growth due to the creation of many temporary BLOBs when using concatenation operators.
+Используйте функции `LIST` и `BLOB_APPEND` для объединения BLOB. Это позволит сэкономить потребление памяти, дисковый ввод-вывод и предотвратить рост базы данных из-за создания множества временных BLOB-объектов при использовании операторов конкатенации.
 ====
 
 
 [example]
 ====
-Let's say you need to build JSON on the server side. We have a PSQL package `JSON_UTILS` with a set of functions for converting primitive data types to JSON notation.
-Then the JSON building using the `BLOB_APPEND` function will look like this:
+Допустим, вам нужно собрать JSON на стороне сервера. У нас есть PSQL пакет `JSON_UTILS` с набором функций для преобразования примитивных типов данных в нотацию JSON. Тогда построение JSON с использованием функции `BLOB_APPEND` будет выглядеть так:
 
 [source,sql]
 ----
@@ -517,17 +497,17 @@ BEGIN
 END
 ----
 
-A similar example using the usual concatenation operator `||` is an order of magnitude slower and does 1000 times more disk writes.
+Аналогичный пример с использованием обычного оператора конкатенации `||` на порядок медленнее и выполняет в 1000 раз больше операций записи на диск.
 ====
 
 <<<
 
 [[_hqbird_performance_left_to_inner]]
-== Transform LEFT joins into INNER
+== Преобразование LEFT joins в INNER
 
-HQbird allow transform `LEFT` joins into `INNER` ones if the `WHERE` condition violates the outer join rules.
+HQbird позволяет преобразовывать `LEFT JOIN` в `INNER JOIN`, если условие `WHERE` нарушает правила внешнего соединения.
 
-Example:
+Пример:
 
 [source,sql]
 ----
@@ -536,15 +516,13 @@ FROM T1 LEFT JOIN T2 ON T1.ID = T2.ID
 WHERE T2.FIELD1 = 0
 ----
 
-In this case the condition `T2.FIELD1 = 0` effectively removes all the "fake NULL" rows of T2, so the result is the same
-as for the `INNER JOIN`. However, the optimizer is forced to use the T1->T2 join order while T2->T1 could also be
-considered. It makes sense to detect this case during join processing and internally replace `LEFT` with `INNER` before optimization starts.
+В этом случае условие `T2.FIELD1 = 0` эффективно удаляет все "`поддельные NULL`" строки `T2`, поэтому результат тот же, что и для `INNER JOIN`. Однако оптимизатор вынужден использовать порядок соединения T1->T2, хотя мог бы также рассмотреть T2->T1. Имеет смысл обнаружить этот случай во время обработки соединения и заменить `LEFT` на `INNER` перед началом оптимизации.
 
-This is primarily intended to improve "ad hoc" and machine-generated (e.g. ORM) queries.
+В первую очередь это предназначено для улучшения автоматически генерируемых (например, ORM) запросов.
 
 [NOTE]
 ====
-This optimization will not be enabled if a NULL value is checked, for example
+Эта оптимизация не будет включена, если фильтруется значение `NULL`, например
 
 [source,sql]
 ----
@@ -553,7 +531,7 @@ FROM T1 LEFT JOIN T2 ON T1.ID = T2.ID
 WHERE T2.ID IS NULL
 ----
 
-or
+или
 
 ----
 SELECT *

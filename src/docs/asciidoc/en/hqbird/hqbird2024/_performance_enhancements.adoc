@@ -267,14 +267,9 @@ It is not recommended to set `SortDataStorageThreshold` (`InlineSortThreshold`) 
 [[_hqbird_performance_multi_threaded]]
 == Multi-thread sweep, backup, restore
 
-In HQbird, the possibility of multi-threaded execution of sweep, backup and restore has appeared, which speeds up
-their work from 2x to 6 times (depending on the specific database). Multi-threaded operations work in HQbird
-Firebird 2.5 and 3.0 (starting from builds 2.5.9.27143 and 3.0.5.3.31717 respectively),
-in any architectures -- Classic, SuperClassic, SuperServer.
+In HQbird, the possibility of multi-threaded execution of sweep, backup and restore has appeared, which speeds up their work from 2x to 6 times (depending on the specific database). Multi-threaded operations work in HQbird for Firebird 2.5, 3.0 and 4.0, in any architectures -- Classic, SuperClassic, SuperServer. For Firebird 5.0, multi-threaded operations are available in the "vanilla" version out of the box.
 
-To enable multi-threaded execution, the `gfix` and `gbak` command-line utilities
-have the `–par _n_` option, where `n` is the number of threads that will be involved in a particular operation.
-In practice, choosing the number n should be correlated with the number of available processor cores.
+To enable multi-threaded execution, the `gfix` and `gbak` command-line utilities have the `–par _n_` option, where `n` is the number of threads that will be involved in a particular operation. In practice, choosing the number n should be correlated with the number of available processor cores.
 
 For example
 
