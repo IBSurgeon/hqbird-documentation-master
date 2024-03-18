@@ -1,103 +1,103 @@
 [[_hqbird_config]]
-= Jobs, monitoring and maintenance configuration in FBDataGuard
+= Настройка заданий, мониторинга и обслуживания в FBDataGuard
 
-Please follow these steps:
+Пожалуйста, выполните следующие шаги:
 
-. Make sure that you have Firebird 2.5.5 or later (Firebird 2.1 is also supported with some limitation), and it is working;
-. HQbird FBDataGuard service is installed and running
+. Убедитесь что у вас установлен Firebird 2.5.5 или новее, и он работает;
+. Служба HQbird FBDataGuard установлена и запущена
 +
-.. You can check it using Services applet in Control Panel (right-click on "`My Computer`", choose "`Manage`", then "`Services and Applications`", "`Services`" and find in the list "`FBDataGuard Agent`"
-.. At Linux you can check it with command `ps aux | grep dataguard`.
-. Make sure the FBDataGuard port is accessible (8082) and it is not blocked by firewall or any other antivirus tools. If necessary, adjust port in FBDataGuard configuration file (see <<_hqbird_config_fbdataguard_port,Web-console port>>).
+.. Проверить это можно с помощью апплета "`Службы`" в Панели управления (щелкните правой кнопкой мыши "`Мой компьютер`", выберите "`Управление`", затем "`Службы и приложения`", "`Службы`" и найдите в списке "`Agent FBDataGuard`"
+.. В Linux вы можете проверить это с помощью команды `ps aux | grep dataguard`.
+. Убедитесь, что порт FBDataGuard доступен (8082) и не заблокирован брандмауэром или другими антивирусными инструментами. При необходимости настройте порт в файле конфигурации FBDataGuard (см. <<_hqbird_config_fbdataguard_port,Web-console port>>).
 
 
-== Launch web-console
+== Запуск веб-консоли
 
-To open web-console type in your browser or use IP address of your server with installed HQbird ServerSide.
+Чтобы открыть веб-консоль, введите в браузере `http://localhost:8082` или используйте IP-адрес вашего сервера с установленным HQbird ServerSide.
 
-Or you can choose in "`Start`" menu IBSurgeon\HQbird Server Side\Firebird DataGuard\"Launch the DataGuard web console for localhost".
+Или вы можете выбрать в меню "`Пуск`" menu:IBSurgeon[FBDataGuard].
 
-=== Supported browsers
+=== Поддерживаемые браузеры
 
-FBDataGuard web interface works correctly with Firefox, Chrome, Safari and Internet Explorer 11.
+Веб-интерфейс FBDataGuard корректно работает с Firefox, Chrome, Safari, Microsoft Edge и Internet Explorer 11.
 
-=== Error message regarding webs-site certificate
+=== Сообщение об ошибке сертификата веб-сайта
 
-If you have configured FBDataGuard to use https, the browser will indicate that this web-site () is not safe, and it will recommend leaving web-site.
-This message is caused by the default security certificate for FBDataGuard web-console.
+Если вы настроили FBDataGuard на использование https, браузер укажет, что этот сайт небезопасен, и предложит покинуть сайт. Это сообщение вызвано сертификатом безопасности по умолчанию для веб-консоли FBDataGuard.
 
-Please ignore this message and click to open FBDataGuard web-console.
+Пожалуйста, проигнорируйте это сообщение и нажмите открыть веб-консоль FBDataGuard.
 
-It will ask you for username and password (login dialog can be different for Firefox, Safari or Chrome).
+Он запросит у вас имя пользователя и пароль (диалог входа в систему может отличаться для Firefox, Safari или Chrome).
 
-.Enter username and password for FBDataGuard web-console.
+.Ввод логина и пароля для веб-консоли FBDataGuard.
 image::3.1.1.png[]
 
 
-.Attention!
+.Внимание!
 [IMPORTANT]
 ====
-Default username/password for HQbird FBDataGuard is "**admin"/"strong password**" (without quotes).
+По умолчанию пользователь/пароль для HQbird FBDataGuard -- "**admin"/"strong password**" (без кавычек).
 ====
 
-=== Auto discovery feature of FBDataGuard
+=== Функция автоматического обнаружения FBDataGuard
 
-At the first launch FBDataGuard will check computer for installed Firebird servers.
-FBDataGuard for Windows search registry for Firebird records, FBDataGuard for Linux checks default locations of Firebird installations.
+При первом запуске FBDataGuard проверит компьютер на наличие установленных серверов Firebird. FBDataGuard для Windows ищет в реестре записи Firebird, FBDataGuard для Linux проверяет местоположения по умолчанию для установок Firebird.
 
-FBDataGuard will show the list of all Firebird copies installed, but only the one instance of Firebird can be monitored by FBDataGuard.
-Choose it by clicking btn:[Add Firebird engine to monitoring >>]
+FBDataGuard покажет список всех установленных копий Firebird, но FBDataGuard может отслеживать только один экземпляр Firebird.
+Выберите его, нажав btn:[Add Firebird engine to monitoring >>]
 
-If you don't see Firebird instance in auto discovery list, you can choose btn:[Add custom >>] and configure instance parameters manually.
+Если вы не видите экземпляр Firebird в списке автоматического обнаружения, вы можете выбрать btn:[Add custom >>] и настроить параметры экземпляра вручную.
 
-.Auto discovery feature of HQbird.
+.Функция автоматического обнаружения HQbird.
 image::3.1.2.png[]
 
 <<<
 
-== Overview of web-console.
+== Обзор веб-консоли.
 
-=== Parts of web-console.
+=== Части веб-консоли.
 
 image::3.2.1.png[]
 
- FBDataGuard Web-console contains 5 tabs (in the left side of the screen, usually they are collapsed):
+Веб-консоль FBDataGuard содержит 7 вкладок (в левой части экрана, обычно они свернуты):
 
-* _Dashboard_ – it is the main tab where administrator can configure HQbird FBDataGuard and see server and databases statuses.
-* _Alerts_ – contains the full list of alerts, generated by FBDataGuard.
-* _Registration_ – license and registration/activation information.
-* _Graphs gallery_ – performance graphs.
-* _Performance_ – performance monitoring settings and performance reports.
+* _Dashboard_ -- это основная вкладка, где администратор может настроить HQbird FBDataGuard и просмотреть статусы сервера и баз данных.
+* _Alerts_ -- содержит полный список оповещений, созданных FBDataGuard.
+* _FTP active sessions_ -- отображать информацию об активных FTP-сессиях.
+* _Registration_ -- информация о лицензии и регистрации/активации.
+* _Graphs gallery_ -- графики производительности.
+* _Performance_ -- настройки мониторинга производительности и отчеты о производительности.
+* _Speed test_ -- тест скорости
 
+=== Задачи
 
-=== Jobs
+Веб-консоль предназначена для удобной настройки действий (называемых **"`задачи`"**), которые выполняет HQbird FBDataGuard.
 
-Web-console is intended for easy configuration of activities (called **"`jobs`"**) which are fulfilled by HQbird FBDataGuard.
+Почти все задания FBDataGuard имеют две цели: первая — отслеживать некоторые значения и при необходимости выдавать оповещения, а вторая — сохранять исторические значения в журналах, чтобы позже можно было увидеть динамику важных параметров сервера Firebird и базы данных.
 
-Almost all FBDataGuard jobs have 2 purposes: the first is to monitor for some values and to raise alerts if necessary, and the second is to store historical values into logs, so later it's possible to see the dynamics of important parameters of Firebird server and database.
+В этом разделе мы рассмотрим общую настройку параметров заданий, а не анализ собранных логов.
 
-In this section we will consider general configuration of jobs parameters, but not an analysis of gathered logs.
+=== Виджет задачи
 
-=== Jobs widgets
+Общий подход следующий: каждое действие представляется "`виджетом`", который состоит из следующих частей:
 
-General approach is the following: each activity is represented by a "`widget`", which has the following parts:
-
-.Elements of FBDataGuard web-console widget.
+.Элементы виджета веб-консоли FBDataGuard.
 image::3.2.2.png[]
 
-Status -- it is indicated with color icon and name.
-Status of database is a summary of all included server-level jobs and databases' statuses, and, respectively, status of database is a summary of all database-level jobs.
+Статус -- обозначается цветным значком и названием.
+Статус базы данных представляет собой сводку всех включенных заданий уровня сервера и статусов баз данных, и, соответственно, статус базы данных представляет собой сводку всех заданий уровня базы данных.
 
-=== Status types
+=== Типы статусов
 
-*CRITICAL* means problems, *OK* means "`Everything is fine`", *WARNING* means some issues which require attention, MAJOR means major issue, *MINOR* – minor issue, *MALFUNCTION* means that jobs was not succeeded (something prevents its execution), *NOT_AVAILABLE* means that job is not available in this server or database version.
+*CRITICAL* означает проблемы, *OK* означает "`Все в порядке`", *WARNING* означает некоторые проблемы, требующие внимания, *MAJOR* означает серьезную проблему, *MINOR* – незначительная проблема, *MALFUNCTION* означает, что задание не удалось выполнить (что-то препятствует его выполнению), *NOT_AVAILABLE* означает, что задание недоступно в этой версии сервера или базы данных.
 
-*OFF* means that job is not active, *UNKNOWN* means that job is active but was not started yet, so actual results are unknown.
+*OFF* означает, что задание не активно, *UNKNOWN* означает, что задание активно, но еще не запущено, поэтому фактические результаты неизвестны.
 
-*Job name* indicates the name of activity.
+*Job name* -- имя задачи.
 
-* image:3.2.3.png[] Configuration button opens configuration dialog, which is individual for each job.
-* image:3.2.4.png[] Resolved is the link to flush the status to UNKNOWN and forgot errors which were discovered previously. The status will be updated according the current situation after the next execution of the job.
+* image:3.2.3.png[] Кнопка конфигурации открывает диалог настройки, индивидуальный для каждого задачи.
+* image:3.2.4.png[] Запускает задачу немедленно.
+* image:3.2.5.png[] Resolved -- это ссылка для сброса статуса на UNKNOWN и забывания ошибок, которые были обнаружены ранее. Статус будет обновлен в соответствии с текущей ситуацией после следующего выполнения задания.
 
 *Last run* shows the time after the last run of this job.
 
@@ -114,8 +114,7 @@ In the next sections we will consider each job and its configuration.
 
 === Firebird server registration
 
-To register auto-discovered server, you need to click at btn:[Add Firebird
-engine to monitoring>>] and then adjust auto-discovered settings.
+To register auto-discovered server, you need to click at btn:[Add Firebird engine to monitoring>>] and then adjust auto-discovered settings.
 
 [NOTE]
 ====
@@ -169,32 +168,15 @@ In general, there is no reason for deleting registered server, until you want co
 
 Server: Active server widget shows summarized status of all server-level jobs and statuses of monitored databases.
 
-image::3.2.5.png[]
+image::3.2.6.png[]
 
 **Server: Active server **also indicates Firebird currently running or not and shows detailed version of Firebird and HQbird.
 
 If you click on *configure* link, you will see the same dialog that we have used to register Firebird instance in FBDataGuard, and now it can be used for changing Firebird instance properties:
 
-image::3.2.6.png[]
-
-In general, there is no need to edit Firebird server details after the registration, until you are not reinstalling Firebird – but in this case we recommend reinstalling HQBird too.
-
-=== Server: Auto updates
-
 image::3.2.7.png[]
 
- Auto update is an important job which notifies you that newer version of HQbird FBDataGuard is available and suggests to update the software.
-
-It provides an alert regarding available updates and appropriate download link.
-Default time to run this job is 22-00 everyday (for information).
-
-In the configuration dialog of auto-updates you can disable auto check or set another time for it.
-
-image::3.2.8.png[]
-
-In fact there is a small confusion here: auto update does not perform automatic update of HQbird, it just checks for the new versions periodically, and optionally download it.
-
-The upgrade is initiated by the administrator.
+In general, there is no need to edit Firebird server details after the registration, until you are not reinstalling Firebird – but in this case we recommend reinstalling HQBird too.
 
 === Server: Replication Log
 
@@ -267,7 +249,7 @@ Using configuration dialog you can enable/disable this job, set period of checki
 
 image::3.2.19.png[]
 
-By default we use 200 Mb is a standard setting for Firebird installation.
+By default, we use 200 Mb is a standard setting for Firebird installation.
 
 If the size of your Firebird is larger, please consider clean-up of old logs and other unwanted artifacts, or increase parameter *Max
                     occupied* (in bytes) to prevent false alerts.
@@ -280,14 +262,14 @@ You can get idea where is your database and backup is actually located with comm
 
 === Server: HQbird Output Folder
 
-image::3.2.9.png[]
+image::3.2.8.png[]
 
 "`HQbird output folder`" monitoring is intended to watch space occupied by reports, logs, stats, metadata repository and other data, gathered and generated by HQbird – this folder by default is [path]_C:\HQbirdData\output_.
 
 For databases unattended for a long time (1-2 years) it is possible that FBDataGuard logs will occupy too much space and lack of space can lead to database outage.
 To prevent it for sure, "`HQbird output folder`" is watching for occupied space.
 
-By default "`HQbird output folder`" job is enabled.
+By default, "`HQbird output folder`" job is enabled.
 
 Also, if someone has ignored recommendations to put backups`' folders to the explicit locations, it is possible that database backup will be created inside Agent folder.
 In this case you'll see CRITICAL status immediately -- FBDataGuard will recognize and warn you regarding wrong configuration.
@@ -308,12 +290,14 @@ image::3.2.10.png[]
 
 === Firebird database registration
 
-To register database in FBDataGuard, you need to click at the symbol "`Settings`" in the right corner of "`Databases`" (there will be a hint "`Add database to monitoring`") and fill the following form:
+The list of databases monitored by FBDataGuard is in the "`Databases`" section.
+
+image::3.1.5-0.png[]
+
+To register database in FBDataGuard, you need to click at the symbol "`Plus`" in the right corner of "`Databases`" (there will be a hint "`Add database`") and fill the following form:
 
 .Add database to monitoring.
 image::3.1.5.png[]
-
-
 
 * "`*Database nick name*`" is for your convenience, it is used to refer this database in alerts and email messages.
 * "`*DB alias*`" is a database alias from [path]_aliases.conf_ or in [path]_databases.conf_. If you specify both "`DB Alias`" and "`Path to database`", "`DB Alias`" will be used.
@@ -447,7 +431,7 @@ As you can see at configuration dialog screenshot, there are fields to enable/di
 During the development of HQbird we had in mind certain recovery scenario, and this scenario implies that the key goal of database protection is to minimize potential losses of data.
 If we have healthy backup, recovery can be concentrated on saving the most recent data (just entered into the database), and it greatly decreases the time of overall outage.
 
-As you will see below, "`Database: Verified Backup`" is not just a wrapper for standard gbak functionality and scheduler, this is a smart job which has many built-in rules to prevent problems with backups and provide suitable interface for backups management.
+As you will see below, "`Database: Verified Backup`" is not just a wrapper for standard `gbak` functionality and scheduler, this is a smart job which has many built-in rules to prevent problems with backups and provide suitable interface for backups management.
 
 [IMPORTANT]
 ====
@@ -801,7 +785,7 @@ If you don't have FTP installed on the target server with Windows, install Filez
 [NOTE]
 ====
 Replication segments will be uploaded to the subdirectory specified in the "`Upload to folder`".
-By default, this is [path]_/dababase0/${db.id}_, where [replaceable]``db.id`` is the identifier of the database inside the DataGuard.
+By default, this is [path]_/database0/${db.id}_, where [replaceable]``db.id`` is the identifier of the database inside the DataGuard.
 The replica about this [replaceable]``db.id`` does not know anything, so you need to register it manually in "`Unpack to directory`" (see <<_hqbird_config_cloud_backup_receiver,File  Receiver>>).
 ====
 
@@ -1107,8 +1091,8 @@ These values specify the paths to FBDataGuard configuration and output folder --
 === Adjusting web-console port
 
 One of the most frequently asked questions is how to adjust port for web-console application (by default it is 8082), It can be done by changing port setting in file [path]_%config%\agent\agent.properties_ ([var]``%config%`` is [path]_C:\HQbirdData\config_ or [path]_/opt/hqbird/conf_).
-----
 
+----
 server.port = 8082  #change it
 ----
 
@@ -1117,8 +1101,8 @@ server.port = 8082  #change it
 === How to change password for Admin user
 
 You can specify its password in the file [path]_access.properties_ (in [path]_C:\HQbirdData\config_ or [path]_/opt/hqbird/conf_)
-----
 
+----
 access.login=admin
 
 access.password=youradminpasswordforhqbird
@@ -1129,8 +1113,8 @@ After setting the password, restart FBDataGuard, and new password will be encryp
 === Guest user for HQbird FBDataGuard
 
 There is read-only user to access HQbird FBDataGuard, with the name guest.
-----
 
+----
 access.guest-login=guest
 
 access.guest-password=yournewpassword
@@ -1340,4 +1324,3 @@ Be careful when setting fire times between mid-night and 1:00 AM - "`daylight
                     savings`" can cause a skip or a repeat depending on whether the time moves back or jumps forward.
 
 More information is here http://www.quartz-scheduler.org/docs/tutorials/crontrigger.html
-
