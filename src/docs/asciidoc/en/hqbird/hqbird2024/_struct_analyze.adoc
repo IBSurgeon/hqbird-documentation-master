@@ -112,22 +112,15 @@ It is also correct that during work there can be moments where database is in co
 
 How to catch when there is something wrong in database?
 
-Yes, your applications can be designed so perfect that they will always work with transactions and data correctly, not making sweep gaps, lot of active transactions, long running snapshots and so on.
-Usually it does not happen.
-At least because some developers test their applications running 2-3 simultaneous users at the same time, not more.
-Thus, when they set up written applications for 15 and more simultaneous users, database can behave unpredictably.
-Of course, multi-user mode can work Ok, because most of multi-user conflicts can be tested with 2-3 concurrently running applications.
-But, next, when more concurrent applications will run, garbage collection problems can come (at least). And this can be caught if you take statistics at the correct moments.
+Yes, your applications can be designed so perfect that they will always work with transactions and data correctly, not making sweep gaps, lot of active transactions, long running snapshots and so on. Usually it does not happen. At least because some developers test their applications running 2-3 simultaneous users at the same time, not more. Thus, when they set up written applications for 15 and more simultaneous users, database can behave unpredictably. Of course, multi-user mode can work Ok, because most of multi-user conflicts can be tested with 2-3 concurrently running applications. But, next, when more concurrent applications will run, garbage collection problems can come (at least). And this can be caught if you take statistics at the correct moments.
 
 ==== If you does not experience periodical performance problems
 
 This can happen when your applications are designed correctly, there is low database load, or your hardware is modern and very powerful (enough to handle well current user count and data).
 
-The most valuable information is transactions load and version accumulation.
-This can be seen only if you setup regular statistics saving.
+The most valuable information is transactions load and version accumulation. This can be seen only if you setup regular statistics saving.
 
-The best setup is to get hourly transaction statistics.
-This can be done by running
+The best setup is to get hourly transaction statistics. This can be done by running
 
 [source,bash]
 ----
@@ -144,9 +137,7 @@ Also you can schedule to gather database statistics with HQbird FBDataGuard, job
 
 ==== If you experience periodical performance problems
 
-These problems usually caused by automatic sweep run.
-First you need to determine time period between such a performance hits.
-Next, divide this interval minimally to 4 (8, 16 and so on). Now information systems have lot of concurrent users, and most of performance problems with not configured server and database happens 2 or 3 timers per day.
+These problems usually caused by automatic sweep run. First you need to determine time period between such a performance hits. Next, divide this interval minimally to 4 (8, 16 and so on). Now information systems have lot of concurrent users, and most of performance problems with not configured server and database happens 2 or 3 timers per day.
 
 For example, if performance problem happens each 3 hours, you need to take
 
@@ -163,28 +154,24 @@ gstat –a –r db.gdb –user SYSDBA –pass masterkey
 ----
 
 each 1-1.5 hour.
-The best is when you take `gstat –a –r` statistics right before forthcoming performance hit.
-It will show where real garbage is and how many obsolete record versions accumulated.
+
+The best is when you take `gstat –a –r` statistics right before forthcoming performance hit. It will show where real garbage is and how many obsolete record versions accumulated.
 
 ==== What to do with this statistics
 
-If your application explicitly uses transactions and uses them well, i.e.
-you know what is `read read_committed` and when to use it, your snapshot transactions lasts no longer than needed, and transactions are being active minimal duration of time, you can tune sweep interval or set it off, and then only care about how many updates application(s) makes and what tables need to be less updated or cared about updates.
+If your application explicitly uses transactions and uses them well, i.e. you know what is `read read_committed` and when to use it, your snapshot transactions lasts no longer than needed, and transactions are being active minimal duration of time, you can tune sweep interval or set it off, and then only care about how many updates application(s) makes and what tables need to be less updated or cared about updates.
 
-What does this mean, you can ask? We'll give example of some system, where performance problems happened each morning for 20-30 minutes.
-That was very sufficient for `morning` applications, and could not last longer.
+What does this mean, you can ask? We'll give example of some system, where performance problems happened each morning for 20-30 minutes. That was very sufficient for `morning` applications, and could not last longer.
 
 Database admin was asked correct questions, and here is the picture:
 
 Daily work was divided by sections -- analytic works in the morning, than data is inserted and edited by usual operators, and at the end of the day special procedures started gathering data, that would be used for analytic next day (at least).
 
-The last work on database at the end of day was lot of updates, and updates of those tables which analytic used in the morning.
-So, there were a lot of garbage versions, which started to be collected by application, running in the morning.
+The last work on database at the end of day was lot of updates, and updates of those tables which analytic used in the morning. So, there were a lot of garbage versions, which started to be collected by application, running in the morning.
 
 And, the answer to that problem was found simple -- to run `gfix –sweep` at the end of the day.
 
-Sweep reads all tables in database and tries to collect all garbage versions for committed and rolled back transactions.
-After sweeping database became clear nearly it comes after restore.
+Sweep reads all tables in database and tries to collect all garbage versions for committed and rolled back transactions. After sweeping database became clear nearly it comes after restore.
 
 And, "`morning problem`" has gone.
 
@@ -197,18 +184,11 @@ So, you need to understand statistics with lot of other factors:
 
 ==== When DBA can't do nothing
 
-Sadly to say, these situations happen.
-And again, example:
+Sadly to say, these situations happen. And again, example:
 
-Some system installed for ~15 users.
-Periodically performance is so bad, that DBA needs to restart server.
-After server restart everything works fine for some time, then performance gets bad again.
-Statistics showed that average daily transactions is about ``75,000``, and there are active transactions running from the start of day to the moment when performance getting down.
+Some system installed for ~15 users. Periodically performance is so bad, that DBA needs to restart server. After server restart everything works fine for some time, then performance gets bad again. Statistics showed that average daily transactions is about ``75,000``, and there are active transactions running from the start of day to the moment when performance getting down.
 
-Unfortunately, applications were written with BDE and with no transactions using at all; i.e.
-all transaction handling was automatic and used by BDE itself.
-This caused some transactions to stay active for a long time, and garbage (record versions) accumulated until DBA restarted server.
-After restart the automatic sweep will start, and the garbage will be collected (eliminated).
+Unfortunately, applications were written with BDE and with no transactions using at all; i.e. all transaction handling was automatic and used by BDE itself. This caused some transactions to stay active for a long time, and garbage (record versions) accumulated until DBA restarted server. After restart the automatic sweep will start, and the garbage will be collected (eliminated).
 
 All these was caused by applications, because they were tested only with 2-3 concurrent users, and when they became ~15, applications started to make very high load.
 
@@ -218,11 +198,10 @@ In this situation the only thing that can make performance better is to redesign
 
 ==== How IBAnalyst can help find problems in your Firebird database
 
-Let's walk through the key features of IBAnalyst.
-When you look at your database statistics in IBAnalyst first time, things can be not clear, especially if IBAnalyst shows lot of warnings by colored red and yellow cells at Summary, Tables and Index views.
-Let's consider several real statistics examples.
+Let's walk through the key features of IBAnalyst. When you look at your database statistics in IBAnalyst first time, things can be not clear, especially if IBAnalyst shows lot of warnings by colored red and yellow cells at Summary, Tables and Index views. Let's consider several real statistics examples.
 
 === Summary View
+
 
 Summary contains the most important information extracted from database statistics.
 Usually full statistics of database contains hundreds of Kbytes and it is not easy to recognize the important information.
@@ -235,7 +214,6 @@ For description of visible problems (marked *red* or **yellow**) see column hint
 | Object or parameter
 | Description
 
-
 |**Database name**
 |Name of analyzed database.
 
@@ -246,7 +224,7 @@ For description of visible problems (marked *red* or **yellow**) see column hint
 |When statistics was taken -- statistics file date or Services API call date (now).
 
 |**Page size**
-|Page size is the physical parameter of database. The best page size is 4096 or 8192 bytes. Other page sizes (less than 4096) marked as red. For better performance restore database from backup using 4K or 8K page size. (Note: Firebird __2.0+ can use 16K page size__).
+|Page size is a physical parameter of the database. In modern versions of Firebird, the page size can be 4096, 8192, or 16384 bytes (Firebird __4.0+ can use a 32 KB page size__). To improve performance, restore the database from a backup using a page size of 8 or 16 KB.
 
 |**Forced Write**
 |It shows the mode of changed pages writing: synchronized or asynchronized -- appropriate setting is ON or OFF. OFF is not recommended, because server crush, power failure or other problems can cause database corruption.

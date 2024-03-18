@@ -15,7 +15,7 @@ Versions for Windows and Linux are available: for Windows we have ready-to-use b
 The HQBird installation package for Windows installs the UDR Http Client if the appropriate option has been selected.
 Under Linux, you are encouraged to build the library yourself from source.
 
-In order for your database to be able to use the Http Client UDR library, you need to run the SQL registration script in it, which is located in [file]`{$fbroot}/plugins/udr/sql/http_client_install.sql`.
+In order for your database to be able to use the Http Client UDR library, you need to run the SQL registration script in it, which is located in `{$fbroot}/plugins/udr/sql/http_client_install.sql`.
 
 == Build on Linux
 

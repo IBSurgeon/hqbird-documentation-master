@@ -12,9 +12,9 @@
 
 toc::[]
 
-#include::_preface.adoc[leveloffset=1]
+include::_preface.adoc[leveloffset=1]
 
-#include::_overview.adoc[leveloffset=1]
+include::_overview.adoc[leveloffset=1]
 
 include::_installation.adoc[leveloffset=1]
 

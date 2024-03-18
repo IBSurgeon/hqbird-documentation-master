@@ -113,155 +113,128 @@ IBAnalyst может получать статистику из действую
 
 Как обнаружить, что в базе данных что-то не так?
 
-Yes, your applications can be designed so perfect that they will always work with transactions and data correctly, not making sweep gaps, lot of active transactions, long running snapshots and so on.
-Usually it does not happen.
-At least because some developers test their applications running 2-3 simultaneous users at the same time, not more.
-Thus, when they set up written applications for 15 and more simultaneous users, database can behave unpredictably.
-Of course, multi-user mode can work Ok, because most of multi-user conflicts can be tested with 2-3 concurrently running applications.
-But, next, when more concurrent applications will run, garbage collection problems can come (at least). And this can be caught if you take statistics at the correct moments.
+Да, ваши приложения могут быть спроектированы настолько идеально, что они всегда будут корректно работать с транзакциями и данными, не создавая sweep gap, большого количества активных транзакций, длительных снимков и так далее. Обычно этого не происходит. Хотя бы потому, что некоторые разработчики тестируют свои приложения под управлением 2-3 пользователей одновременно, не более. Таким образом, при настройке написанных приложений для 15 и более одновременных пользователей база данных может вести себя непредсказуемо. Конечно, многопользовательский режим может работать нормально, поскольку большинство многопользовательских конфликтов можно протестировать с помощью 2-3 одновременно работающих приложений. Но затем, когда будет запускаться больше одновременно работающих приложений, могут возникнуть проблемы со сборкой мусора (по крайней мере). И это можно поймать, если в правильные моменты снимать статистику.
 
-==== If you does not experience periodical performance problems
+==== Если у вас не возникают периодические проблемы с производительностью
 
-This can happen when your applications are designed correctly, there is low database load, or your hardware is modern and very powerful (enough to handle well current user count and data).
+Это может произойти, если ваши приложения спроектированы правильно, база данных не загружена или ваше оборудование современное и очень мощное (достаточно для хорошей обработки текущего количества пользователей и данных).
 
-The most valuable information is transactions load and version accumulation.
-This can be seen only if you setup regular statistics saving.
+Самая ценная информация -- это транзакционная нагрузка и накопление версий. Это можно увидеть, только если настроить регулярное сохранение статистики.
 
-The best setup is to get hourly transaction statistics.
-This can be done by running
+Лучшая настройка -- получать почасовую статистику транзакций. Это можно сделать, запустив
 
 [source,bash]
 ----
 gstat –h db.gdb > db_stat_<time>.txt
 ----
 
-where
+где
 
-* `db.gdb` is your database name,
-* `db_stat_<time>.txt` is text file where statistics will be saved,
-* `<time>` -- current date and time when statistics was taken.
+* `db.gdb` -- имя вашей базы данных,
+* `db_stat_<time>.txt` -- текстовый файл, в котором будет сохраняться статистика,
+* `<time>` -- текущая дата и время, когда была снята статистика.
 
-Also you can schedule to gather database statistics with HQbird FBDataGuard, job "`Database: Statistics`".
+Также вы можете запланировать сбор статистики базы данных с помощью HQbird FBDataGuard, задание "`Database: Statistics`".
 
-==== If you experience periodical performance problems
+==== Если у вас периодически возникают проблемы с производительностью
 
-These problems usually caused by automatic sweep run.
-First you need to determine time period between such a performance hits.
-Next, divide this interval minimally to 4 (8, 16 and so on). Now information systems have lot of concurrent users, and most of performance problems with not configured server and database happens 2 or 3 timers per day.
+Эти проблемы обычно вызваны автоматическим запуском sweep. Сначала вам нужно определить период времени между такими падениями производительности. Далее разделите этот интервал минимум на 4 (8, 16 и так далее). Сейчас в информационных системах много одновременно работающих пользователей, и большинство проблем с производительностью при ненастроенных сервере и базе данных происходят по 2 или 3 раза в день.
 
-For example, if performance problem happens each 3 hours, you need to take
+Например, если проблемы с производительностью возникают каждые 3 часа, вам необходимо собирать
 
 [source,bash]
 ----
 gstat –h db.gdb
 ----
 
-statistics each 30-45 minutes, and
+статистику каждые 30-45 минут, и
 
 [source,bash]
 ----
 gstat –a –r db.gdb –user SYSDBA –pass masterkey
 ----
 
-each 1-1.5 hour.
-The best is when you take `gstat –a –r` statistics right before forthcoming performance hit.
-It will show where real garbage is and how many obsolete record versions accumulated.
+каждые 1-1.5 часа.
 
-==== What to do with this statistics
+Лучше всего, когда вы соберёте статистику `gstat –a –r` прямо перед предстоящим падением производительности. Она покажет, где настоящий мусор и сколько скопилось устаревших версий записей.
 
-If your application explicitly uses transactions and uses them well, i.e.
-you know what is `read read_committed` and when to use it, your snapshot transactions lasts no longer than needed, and transactions are being active minimal duration of time, you can tune sweep interval or set it off, and then only care about how many updates application(s) makes and what tables need to be less updated or cared about updates.
+==== Что делать с этой статистикой?
 
-What does this mean, you can ask? We'll give example of some system, where performance problems happened each morning for 20-30 minutes.
-That was very sufficient for `morning` applications, and could not last longer.
+Если ваше приложение явно использует транзакции и использует их хорошо, т. е. вы знаете, что такое `read read_commit` и когда его использовать, ваши SNAPSHOT транзакции длятся не дольше, чем необходимо, и транзакции активны минимальный период времени, вы можете настроить sweep interval, или отключить его, а затем заботьтесь только о том, сколько обновлений делает приложение(я) и какие таблицы нужно меньше обновлять или заботиться об обновлениях.
 
-Database admin was asked correct questions, and here is the picture:
+Что это значит, спросите вы? Приведем пример некоторой системы, в которой каждое утро в течение 20-30 минут возникали проблемы с производительностью. Этого вполне обычно для "`утренних`" запусков приложений, и дольше оно не может продолжаться.
 
-Daily work was divided by sections -- analytic works in the morning, than data is inserted and edited by usual operators, and at the end of the day special procedures started gathering data, that would be used for analytic next day (at least).
+Администратору базы данных задали правильные вопросы, и вот картина:
 
-The last work on database at the end of day was lot of updates, and updates of those tables which analytic used in the morning.
-So, there were a lot of garbage versions, which started to be collected by application, running in the morning.
+Ежедневная работа была разделена на части: утром анализ данных, затем данные вставляются и редактируются обычными операторами, а в конце дня специальные процедуры начинают сбор данных, которые будут использоваться для аналитики на следующий день (как минимум).
 
-And, the answer to that problem was found simple -- to run `gfix –sweep` at the end of the day.
+Последняя работа над базой данных в конце дня заключалась в большом количестве обновлений, причем обновлений тех таблиц, которые аналитики использовали утром. Итак, появилось много мусорных версий, которые начало собирать приложение, работающее с утра.
 
-Sweep reads all tables in database and tries to collect all garbage versions for committed and rolled back transactions.
-After sweeping database became clear nearly it comes after restore.
+Решение это проблемы оказалось простым -- запускать `gfix –sweep` в конце дня.
 
-And, "`morning problem`" has gone.
+Sweep читает все таблицы в базе данных и пытается собрать в них все мусорные версии для зафиксированных и откаченных транзакций. После очистки базы данных стало ясно, почему улучшение происходит после восстановления.
 
-So, you need to understand statistics with lot of other factors:
+И "`утренняя проблема`" ушла.
 
-* how many concurrent users (average) work during the day
-* how long is the working day (8, 12, 16, 24 hours)
-* what kind of applications running at different day times, and how they affect data being used by other applications, running at the same time or next. I.e. you must understand business processes happening during the whole day and whole week.
+Итак, вам нужно понимать статистику с учетом множества других факторов:
+
+* сколько одновременно пользователей (в среднем) работает в течение дня
+* продолжительность рабочего дня (8, 12, 16, 24 часа)
+* какие приложения работают в разное время суток и как они влияют на данные, используемые другими приложениями, работающими в то же время или в последующее время. Т.е. вы должны понимать бизнес-процессы, происходящие в течение всего дня и всей недели.
 
 
-==== When DBA can't do nothing
+==== Когда DBA не может ничего сделать
 
-Sadly to say, these situations happen.
-And again, example:
+К сожалению, такие ситуации случаются. И снова пример:
 
-Some system installed for ~15 users.
-Periodically performance is so bad, that DBA needs to restart server.
-After server restart everything works fine for some time, then performance gets bad again.
-Statistics showed that average daily transactions is about `75,000`, and there are active transactions running from the start of day to the moment when performance getting down.
+Некоторая система установлена примерно для 15 пользователей. Периодически производительность настолько падает, что администратору базы данных приходится перезагружать сервер. После перезагрузки сервера какое-то время все работает нормально, затем производительность снова падает. Статистика показала, что среднее количество транзакций в день составляет около 75000, и есть активные транзакции, выполняемые с начала дня до момента падения производительности.
 
-Unfortunately, applications were written with BDE and with no transactions using at all; i.e.
-all transaction handling was automatic and used by BDE itself.
-This caused some transactions to stay active for a long time, and garbage (record versions) accumulated until DBA restarted server.
-After restart the automatic sweep will start, and the garbage will be collected (eliminated).
+К сожалению, приложения были написаны с использованием BDE и вообще без использования транзакций; то есть вся обработка транзакций была автоматической и использовалась самим BDE. Из-за этого некоторые транзакции оставались активными в течение длительного времени, а мусор (версии записей) накапливался до тех пор, пока администратор базы данных не перезапустил сервер. После перезапуска начнется автоматическая очистка, и мусор будет собран (устранен).
 
-All these was caused by applications, because they were tested only with 2-3 concurrent users, and when they became ~15, applications started to make very high load.
+Все это было вызвано приложениями, потому что они тестировались только с 2-3 одновременными пользователями, а когда их стало ~15, приложения начали очень сильно нагружаться.
 
-Need to say that in that configuration 70% of users were only reading data, and other 30% were inserting and updating some (!) data.
+Надо сказать, что в этой конфигурации 70% пользователей только читали данные, а остальные 30% вставляли и обновляли какие-то (!) данные.
 
-In this situation the only thing that can make performance better is to redesign transaction management in this application.
+В этой ситуации единственное, что может улучшить производительность, — это перепроектировать управление транзакциями в этом приложении.
 
-==== How IBAnalyst can help find problems in your Firebird database
+==== Как IBAnalyst может помочь найти проблемы в вашей базе данных Firebird
 
-Let's walk through the key features of IBAnalyst.
-When you look at your database statistics in IBAnalyst first time, things can be not clear, especially if IBAnalyst shows lot of warnings by colored red and yellow cells at Summary, Tables and Index views.
-Let's consider several real statistics examples.
+Давайте рассмотрим ключевые возможности IBAnalyst. Когда вы впервые просматриваете статистику своей базы данных в IBAnalyst, все может быть неясно, особенно если IBAnalyst показывает множество предупреждений в виде окрашенных в красный и желтый цвет ячеек в представлениях Summary, Tables и Index. Рассмотрим несколько примеров из реальной статистики.
 
 === Summary View
 
-Summary contains the most important information extracted from database statistics.
-Usually full statistics of database contains hundreds of Kbytes and it is not easy to recognize the important information.
+Summary содержит наиболее важную информацию, извлеченную из статистики базы данных. Обычно полная статистика базы данных содержит сотни Кбайт и распознать важную информацию непросто.
 
-Below is the description of database objects and parameters that you may see in Summary.
-For description of visible problems (marked *red* or **yellow**) see column hints or Recommendations output.
-
-
+Ниже приведено описание объектов и параметров базы данных, которые вы можете увидеть в разделе Summary. Описание видимых проблем (отмеченных *красным* или **желтым**) смотри в подсказках для столбцов или выводе рекомендаций.
 
 [cols="1,1", options="header"]
 |===
-| Object or parameter
-| Description
-
+| Объект или параметр
+| Описание
 
 |**Database name**
-|Name of analyzed database.
+|Имя анализируемой базы данных.
 
 |**Creation date**
-|Database creation date. When it was created by `CREATE DATABASE` statement or restore (`gbak -c` or `gbak -r`).
+|Дата создания базы данных. Когда она был создан оператором `CREATE DATABASE` или восстановлена (`gbak -c` или `gbak -r`).
 
 |**Statistics date**
-|When statistics was taken -- statistics file date or Services API call date (now).
+|Когда была получена статистика -- дата файла статистики или дата вызова service API (сейчас).
 
 |**Page size**
-|Page size is the physical parameter of database. The best page size is 4096 or 8192 bytes. Other page sizes (less than 4096) marked as red. For better performance restore database from backup using 4K or 8K page size. (Note: Firebird __2.0+ can use 16K page size__).
+|Размер страницы -- это физический параметр базы данных. В современных версиях Firebird размер страницы может быть 4096, 8192 или 16384 байта (Firebird __4.0+ может использовать размер страницы 32 КБ__). Для повышения производительности восстановите базу данных из резервной копии, используя размер страницы 8 или 16 КБ. 
 
 |**Forced Write**
-|It shows the mode of changed pages writing: synchronized or asynchronized -- appropriate setting is ON or OFF. OFF is not recommended, because server crush, power failure or other problems can cause database corruption.
+|Показывает режим записи измененных страниц: синхронизированный или асинхронный -- соответствующая настройка ON или OFF. OFF не рекомендуется, так как сбой сервера, сбой питания или другие проблемы могут привести к повреждению базы данных.
 
 |**Dialect**
-|Current database dialect.
+|Текущий диалект базы данных.
 
 |**Sweep interval**
-|Current sweep interval value. Marked yellow if it is not 0, and marked red if Sweep Gap greater than Sweep interval.
+|Текущее значение sweep interval. Отмечено желтым, если оно не равно 0, и отмечено красным, если sweep gap больше sweep interval.
 
 |**On Disk Structure**
-|ODS. It is a database physical format. See hint to know ODS number for particular IB/FB versions
+|ODS. Это физический формат базы данных. Смотри подсказку, чтобы узнать номер ODS для конкретных версий IB/FB.
 
 |**Transaction block**
 |
@@ -271,47 +244,47 @@ For description of visible problems (marked *red* or **yellow**) see column hint
 
 Oldest interesting transaction.
 
-The oldest transaction id that was rolled back, or in limbo.
+Идентификатор старейшей транзакции которая откачена или находится в состоянии limbo.
 
 |**Oldest snapshot**
 |
 
 Oldest snapshot transaction
 
-Id of transaction that was oldest active when currently oldest snapshot started.
+Идентификатор транзакции, которая была самой старой активной на момент запуска самого старого моментального снимка (snapshot).
 
 |**Oldest active**
 |
 
 Oldest active transaction
 
-Id of oldest still active transaction.
+Идентификатор самой старой все еще активной транзакции.
 
 |**Next transaction**
-|Newest available transaction id
+|Идентификатор следующей транзакции.
 
 |**Sweep gap (snapshot – oldest)**
-|For ODS 10.x databases. Difference between Oldest Snapshot and Oldest Interesting transaction. If it is greater than sweep interval, and sweep interval is > 0, Firebird tries to run sweep, and it can slowdown performance.
+|Для ODS 10.x. Разница между Oldest Snapshot и Oldest Interesting transaction. Если она больше sweep interval и sweep interval > 0, то Firebird попытается запустить sweep, и это может замедлить производительность.
 
 |**Snapshot gap (active – oldest)**
-|Difference between Oldest Active and Oldest transaction. Same as previous sweep gap.
+|Разница между Oldest Active и Oldest transaction. То же самое что и sweep gap.
 
 |**TIP size**
-|Transaction Inventory Page size, in pages and kilobytes. TIP holds transaction state for every transaction was started from database creation (or restore). It is computed as Next transaction div 4 (bytes).
+|Размер Transaction Inventory Pages, в страницах и килобайтах. TIP сохраняет состояние транзакции для каждой транзакции, запущенной с момента создания (или восстановления) базы данных. Он рассчитывается как Next transaction div 4 (байты).
 
 |**Snapshot TIP Size**
-|Size of Transaction Inventory Pages that needed for snapshot transactions. Indicates how much memory will take each snapshot transaction to check concurrent transactions state.
+|Размер Transaction Inventory Pages необходимых для snapshot транзакций. Отображает сколько памяти потребуется каждой snapshot транзакции для проверки состояния параллельных транзакций.
 
 |**Active transactions**
-|Currently active (on the moment when statistics was taken from database) transaction count (Next – Oldest Active). Maybe incorrect, because it can be one active transaction and lot of ahead transactions committed. Anyway, active transactions prevent garbage collection.
+|Количество активных транзакций (на момент взятия статистики из базы данных) `Next – Oldest Active`. Это неточная оценка, потому что может быть одна активная транзакция и множества завершённых после неё. В любом случае активные транзакции предотвращают сборку мусора.
 
 |**Transactions per day**
-|Simply divides Next transaction by days' count between database creation date and date statistics taken. Shows average transaction per day, and useless if it is not production database. Transaction warnings mostly based on average transactions per day count.
+|Просто делит Next transaction на количество дней между датой создания базы данных и датой сбора статистики. Показывает среднее количество транзакций в день. Это значение бесполезно, если это не рабочая база данных. Предупреждения о транзакциях в основном основаны на среднем количестве транзакций за день.
 
 |**Data versions percent**
-|Percent of record versions in database. Also total records size and versions size for all tables is shown, and total index size. Row is not shown when statistics does not contain record count information (`gstat -a` without `-r` option). Note that there can be lot of other data (transaction inventory pages, empty pages and so on) in your database.
+|Процент версий записей в базе данных. Также отображается общий размер записей и размер версий для всех таблиц, а также общий размер индексов. Строка не отображается, если статистика не содержит информации о количестве записей (`gstat -a` без опции `-r`). Обратите внимание, что в вашей базе данных может быть много других данных (transaction inventory pages, empty pages и т. д.).
 
-|**Table/Index lists **(also reported in recommendations)
+|**Table/Index lists **(также отображается в рекомендациях)
 |
 
 |**Fragmented Tables**

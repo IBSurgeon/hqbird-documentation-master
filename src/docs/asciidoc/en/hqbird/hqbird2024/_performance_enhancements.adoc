@@ -526,6 +526,11 @@ A similar example using the usual concatenation operator `||` is an order of mag
 
 HQbird allow transform `LEFT` joins into `INNER` ones if the `WHERE` condition violates the outer join rules.
 
+[NOTE]
+====
+Starting with Firebird 5.0, this functionality is available in the "`vanilla`" version of Firebird.
+====
+
 Example:
 
 [source,sql]
