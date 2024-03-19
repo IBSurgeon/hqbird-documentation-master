@@ -122,37 +122,37 @@ To register auto-discovered server, you need to click at btn:[Add Firebird engin
 
 [NOTE]
 ====
-Note: to use Windows Trusted Authentication (by default it's off), you need to be sure that libraries [path]_jaybird30.dll_ and [path]_fbclient.dll_ (from appropriate Firebird version) are in searchable Windows paths.
+Note: to use Windows Trusted Authentication (by default it's off), you need to be sure that libraries `jaybird30.dll` and `fbclient.dll` (from appropriate Firebird version) are in searchable Windows paths.
 ====
 
-When installing under Windows, if the option to automatically register the master/replica is selected, the server will be added automatically.
-In this case, you can skip this step.
-If the option to automatically register a replica is selected, then the database will be added in addition.
+When installing under Windows, if the option to automatically register the master/replica is selected, the server will be added automatically. In this case, you can skip this step.If the option to automatically register a replica is selected, then the database will be added in addition.
 
 Let's consider what can you see in the Server dialog (and, normally, you don't need to change them):
 
-* **Installed in**: Firebird installation folder
-* **Binary folder**: Firebird bin folder (for Firebird 3 on Windows Binary folder is the same as the installation folder)
-* **Log**: location of [path]_firebird.log_
-* **Configuration file**: location of [path]_firebird.conf_
-* **Aliases**: location of [path]_aliases.conf_ or, for Firebird 3, [path]_databases.conf_ ( *please change it manually, if needed* )
-* **Host**: name of the server, usually localhost
-* **Port**: network port for Firebird, according [path]_firebird.conf_ settings
-* **Use trusted auth**: use trusted authentication, by default it is off
-* **SYSDBA login**: name of SYSDBA user, usually it is SYSDBA
-* **SYSDBA password**: password for SYSDBA
-* **Output directory**: Folder where backups, statistics and gathered logs will be stored
+Installed in:: Firebird installation folder
+Binary folder:: Firebird bin folder (for Firebird 3 or higher on Windows Binary folder is the same as the installation folder)
+Log:: location of `firebird.log`
+Configuration file:: location of `firebird.conf`
+Aliases:: location of `aliases.conf` or, for Firebird 3, `databases.conf` ( *please change it manually, if needed* )
+Host:: name of the server, usually `localhost`
+Port:: network port for Firebird, according `firebird.conf` settings
+Use trusted auth:: use trusted authentication, by default it is off
+SYSDBA login:: name of SYSDBA user, usually it is SYSDBA
+SYSDBA password:: password for SYSDBA
+User for Services API::
+Password for Services API user::
+Server authentication plugin list::
+Output directory:: Folder where backups, statistics and gathered logs will be stored
 
 
 .Register server in HQbird FBDataGuard.
 image::3.1.3.png[]
 
-By default "`Output directory`" for Firebird server is [path]_${agent.default-directory}/${server.id}_, it corresponds to [path]_C:\HQbirdData_ in case of a default installation.
+By default "`Output directory`" for Firebird server is `${agent.default-directory}/${server.id}`, it corresponds to `C:\HQbirdData` in case of a default installation.
 
-It can be not very convenient, so we recommend pointing FBDataGuard output directory to more simple path, usually located at disk where backups are intended to be stored, for example [path]_F:\myserverdata_.
+It can be not very convenient, so we recommend pointing FBDataGuard output directory to more simple path, usually located at disk where backups are intended to be stored, for example `F:\myserverdata`.
 
-After clicking "`Register`" FBDataGuard will populate default configurations files and immediately start analysis of [path]_firebird.log_.
-It can take a while (for example, 1 minute for 100Mb [path]_firebird.log_). After that you will see initial web-console with registered Firebird server:
+After clicking "`Save`" FBDataGuard will populate default configurations files and immediately start analysis of `firebird.log`. It can take a while (for example, 1 minute for 100Mb `firebird.log`). After that you will see initial web-console with registered Firebird server:
 
 .HQbird FBDataGuard with registered Firebird server.
 image::3.1.4.png[]
@@ -196,7 +196,7 @@ image::3.2.12.png[]
 
 * Check period – how often to check [path]_replication.log_ for changes
 * Size to roll, bytes -- if [path]_replication.log_ will exceed will value, it will be renamed according date-time pattern
-* Date pattern for rolling – how to rename [path]_replication.log_
+* Date pattern for rolling -- how to rename [path]_replication.log_
 * Keep NN error messages: how many errors will be stored in the list of the recent errors.
 
 

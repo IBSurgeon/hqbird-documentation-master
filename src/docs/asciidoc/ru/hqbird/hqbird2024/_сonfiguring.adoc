@@ -99,58 +99,56 @@ image::3.2.2.png[]
 * image:3.2.4.png[] Запускает задачу немедленно.
 * image:3.2.5.png[] Resolved -- это ссылка для сброса статуса на UNKNOWN и забывания ошибок, которые были обнаружены ранее. Статус будет обновлен в соответствии с текущей ситуацией после следующего выполнения задания.
 
-*Last run* shows the time after the last run of this job.
+*Last run* показывает время после последнего запуска этого задания.
 
-*Period/Schedule to run* shows how often or when the job will be started.
+*Period/Schedule to run* показывает, как часто и когда будет запускаться задание.
 
-*More>>* is the link which opens the widget and shows more details and suggested action for administrator to resolve the situation.
+*More>>* -- это ссылка, которая открывает виджет и показывает более подробную информацию и предлагаемые действия администратору для разрешения ситуации.
 
-All jobs in FBDataGuard have default settings, which are very close to recommended values for the 80% of Firebird installations, so after initial configuration server and database will be protected at pretty good level comparing with default installation, however, we recommend additional configuration and tuning for every job.
-In the next sections we will consider each job and its configuration.
+Все задания в FBDataGuard имеют настройки по умолчанию, которые очень близки к рекомендуемым значениям для 80% установок Firebird, поэтому после первоначальной настройки сервер и база данных будут защищены на довольно хорошем уровне по сравнению с установкой по умолчанию, однако мы рекомендуем дополнительную настройку для каждой задачи. В следующих разделах мы рассмотрим каждое задание и его настройку.
 
 <<<
 
-== Firebird server configuration in FBDataGuard
+== Конфигурация сервера Firebird в FBDataGuard
 
-=== Firebird server registration
+=== Регистрация сервера Firebird
 
-To register auto-discovered server, you need to click at btn:[Add Firebird engine to monitoring>>] and then adjust auto-discovered settings.
+Чтобы зарегистрировать автоматически обнаруживаемый сервер, вам нужно нажать btn:[Add Firebird engine to monitoring>>] aа затем настроить параметры автоматического обнаружения.
 
 [NOTE]
 ====
-Note: to use Windows Trusted Authentication (by default it's off), you need to be sure that libraries [path]_jaybird30.dll_ and [path]_fbclient.dll_ (from appropriate Firebird version) are in searchable Windows paths.
+Примечание. Чтобы использовать доверенную аутентификацию Windows (по умолчанию она отключена), вам необходимо быть уверенным, что библиотеки `jaybird30.dll` и `fbclient.dll` (из соответствующей версии Firebird) находятся в доступных для поиска путях Windows.
 ====
 
-When installing under Windows, if the option to automatically register the master/replica is selected, the server will be added automatically.
-In this case, you can skip this step.
-If the option to automatically register a replica is selected, then the database will be added in addition.
+При установке под Windows, если выбрана опция автоматической регистрации master/replica, то сервер будет добавлен автоматически. В этом случае этот шаг можно пропустить. Если выбран вариант автоматической регистрации реплики, то база данных будет добавлена дополнительно.
 
-Let's consider what can you see in the Server dialog (and, normally, you don't need to change them):
+Давайте рассмотрим, что вы можете увидеть в диалоге Server (как правило, вам не нужно ничего менять):
 
-* **Installed in**: Firebird installation folder
-* **Binary folder**: Firebird bin folder (for Firebird 3 on Windows Binary folder is the same as the installation folder)
-* **Log**: location of [path]_firebird.log_
-* **Configuration file**: location of [path]_firebird.conf_
-* **Aliases**: location of [path]_aliases.conf_ or, for Firebird 3, [path]_databases.conf_ ( *please change it manually, if needed* )
-* **Host**: name of the server, usually localhost
-* **Port**: network port for Firebird, according [path]_firebird.conf_ settings
-* **Use trusted auth**: use trusted authentication, by default it is off
-* **SYSDBA login**: name of SYSDBA user, usually it is SYSDBA
-* **SYSDBA password**: password for SYSDBA
-* **Output directory**: Folder where backups, statistics and gathered logs will be stored
+Установлен в папке:: Папка установки Firebird
+Папка Bin для Firebird:: Папка исполняемых файлов Firebird (для Firebird 3 и выше в Windows она совпадает с папкой установки)
+Log:: расположение `firebird.log`
+Configuration file:: расположение `firebird.conf`
+Aliases:: расположение `aliases.conf` или для Firebird 3 и старше `databases.conf` ( *пожалуйста, измените его вручную, если необходимо* )
+Хост:: имя или IP-адрес сервера, обычно `localhost`
+Порт:: порт для Firebird, согласно настройке `firebird.conf`
+Использовать trusted auth:: use trusted authentication, by default it is off
+Логин:: имя пользователя (администратора), обычно это SYSDBA
+Пароль:: пароль пользователя (пароль SYSDBA)
+User for Services API:: имя пользователя для служб Firebird. Обычно совпадает с *Логин*.
+Password for Services API user:: пароль пользователя для служб Firebird.
+Server authentication plugin list:: список плагинов аутентификации.
+Папка результатов:: Папка, в которой будут храниться резервные копии, статистика и собранные журналы.
 
-
-.Register server in HQbird FBDataGuard.
+.Регистрация сервера в HQbird FBDataGuard.
 image::3.1.3.png[]
 
-By default "`Output directory`" for Firebird server is [path]_${agent.default-directory}/${server.id}_, it corresponds to [path]_C:\HQbirdData_ in case of a default installation.
+По умолчанию "`Папка результатов`" для сервера Firebird -- `${agent.default-directory}/${server.id}`, она соответствует `C:\HQbirdData` в случае установки по умолчанию.
 
-It can be not very convenient, so we recommend pointing FBDataGuard output directory to more simple path, usually located at disk where backups are intended to be stored, for example [path]_F:\myserverdata_.
+Это может быть не очень удобно, поэтому мы рекомендуем указать выходной каталог FBDataGuard по более простому пути, обычно расположенному на диске, где предполагается хранить резервные копии, например `F:\myserverdata`.
 
-After clicking "`Register`" FBDataGuard will populate default configurations files and immediately start analysis of [path]_firebird.log_.
-It can take a while (for example, 1 minute for 100Mb [path]_firebird.log_). After that you will see initial web-console with registered Firebird server:
+После нажатия кнопки "`Сохранить`" FBDataGuard заполнит файлы конфигурации по умолчанию и немедленно начнет анализ `firebird.log`. Это может занять некоторое время (например, 1 минута для `firebird.log` размером 100 МБ). После этого вы увидите начальную веб-консоль с зарегистрированным сервером Firebird:
 
-.HQbird FBDataGuard with registered Firebird server.
+.HQbird FBDataGuard с зарегистрированным сервером Firebird.
 image::3.1.4.png[]
 
 FBDataGuard shows alerts and statuses of monitored objects: if everything is fine, it shows green signs, otherwise there will be yellow or red notifications.

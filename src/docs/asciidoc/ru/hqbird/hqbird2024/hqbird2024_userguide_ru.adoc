@@ -1,5 +1,5 @@
 = Руководство пользователя HQbird 2024
-1.0, by 09.03.2024
+1.0, от 19.03.2024
 :doctype: book
 :sectnums:
 :sectanchors:
@@ -18,7 +18,7 @@ include::_overview.adoc[leveloffset=1]
 
 include::_installation.adoc[leveloffset=1]
 
-#include::_сonfiguring.adoc[leveloffset=1]
+include::_сonfiguring.adoc[leveloffset=1]
 
 #include::_enterprise_config.adoc[leveloffset=1]
 
