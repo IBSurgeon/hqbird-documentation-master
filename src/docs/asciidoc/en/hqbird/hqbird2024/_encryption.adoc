@@ -1,88 +1,73 @@
 [[_hqbird_encryption]]
 = Encryption support
 
-Since HQbird 2020, HQbird Enterprise includes the encryption plugin and provides support to work with encryption databases in web interface.
-This feature is supported only in HQBird Enterprise with Firebird 3.0.
+HQbird includes the encryption plugin and provides support to work with encryption databases in web interface. This feature is supported only in HQBird with Firebird 3.0 and higher.
 
 .Please note!
 [NOTE]
 ====
 The encryption plugin requires the separate license file, it is sent in the purchase email.
-====
 
-.Please note!
-[NOTE]
-====
-The encryption plugin can be purchased separately and used with community version of Firebird: https://ib-aid.com/download-demo-firebird-encryption-plugin
+The encryption plugin can be purchased separately and used with community version of Firebird: https://ib-aid.com/download-demo-firebird-encryption-plugin[]
 ====
 
 == OpenSSL files
 
-This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit.
-(http://www.openssl.org/)
+This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit (http://www.openssl.org/[]).
 
-HQbird Enterprise for Windows already includes necessary binary files from OpenSSL 1.1, in order to use encryption features on Linux it is necessary to install **OpenSSL 1.1**.
+HQbird for Windows already includes necessary binary files from OpenSSL 1.1, in order to use encryption features on Linux it is necessary to install **OpenSSL 1.1**.
 
-=== How to encrypt and decrypt Firebird database
+== How to encrypt and decrypt Firebird database
 
-In this short guide below, we will demonstrate the key features of the encryption: how to encrypt your Firebird database on the server, how to implement an encrypted client connection, and perform backup/restore of the encrypted database.
-The demo of FEPF is fully functional, with the only exception -- it is limited until December 30, 2019.
+In this short guide below, we will demonstrate the key features of the encryption: how to encrypt your Firebird database on the server, how to implement an encrypted client connection, and perform backup/restore of the encrypted database. The demo of FEPF is fully functional, with the only exception -- it is limited until December 30, 2019.
 
-==== Demo package with client applications examples
+=== Demo package with client applications examples
 
-Please download demo package with client applications examples from https://ib-aid.com/download/crypt/CryptTest.zip
+Please download demo package with client applications examples from https://ib-aid.com/download/crypt/CryptTest.zip[]
 
-==== Stage 1 -- Initial encryption of the database
+=== Stage 1 -- Initial encryption of the database
 
 At the point, we suppose that you have some database to be encrypted.
-Put unencrypted database to some path, for example, into [path]_c:\temp\employee30\employee.fdb_
+Put unencrypted database to some path, for example, into `c:\temp\employee30\employee.fdb`
 
-We suppose that all actions are made with 64-bit version of the Firebird 3.0.3+, in case of 32-bit version simply use the files from WinSrv32bit_ServerPart folder.
+We suppose that all actions are made with 64-bit version of the Firebird 3.0.3+, in case of 32-bit version simply use the files from `WinSrv32bit_ServerPart` folder.
 
-===== 1. Create the following alias in databases.conf
-
-
+. Create the following alias in `databases.conf`
++
 ----
-
 crypt = C:\Temp\EMPLOYEE30\EMPLOYEE30.FDB
 {
    KeyHolderPlugin = KeyHolder
 }
 ----
-
-Also, you can declare KeyHolder plugin for all databases at the server, for this add the following parameter to [path]_firebird.conf_:
-
++
+Also, you can declare `KeyHolder` plugin for all databases at the server, for this add the following parameter to `firebird.conf`:
++
 ----
-
 KeyHolderPlugin = KeyHolder
 ----
-or, simply copy [path]_firebird.conf_ at step 2 (see below).
++
+or, simply copy `firebird.conf` at step 2 (see below).
 
-===== 2. Check that the following files to server/plugins from the folderWinSrv64Bit_ServerPart\plugins
+. Check that the following files to `server/plugins` from the folder `WinSrv64Bit_ServerPart\plugins`
++
+* `DbCrypt.dll`
+* `DbCrypt.conf`
+* `KeyHolder.dll`
+* `KeyHolder.conf` -- this is the text file with keys, it is only for developer's usage, it should not be sent to end users!
 
+. Put the following files into Firebird root from the folder `WinSrv64Bit_ServerPart`
++
+* `fbcrypt.dll`
+* `libcrypto-1_1-x64.dll`
+* `libssl-1_1-x64.dll`
+* `gbak.exe`
+* `firebird.msg`
+* `firebird.conf` (optional, can be used as an example)
 
-
-* [path]_DbCrypt.dll_
-* [path]_DbCrypt.conf_
-* [path]_KeyHolder.dll_
-* [path]_KeyHolder.conf_ -- this is the text file with keys, it is only for developer's usage, it should not be sent to end users!
-
-
-===== 3. Put the following files into Firebird root from the folderWinSrv64Bit_ServerPart
-
-* [path]_fbcrypt.dll_
-* [path]_libcrypto-1_1-x64.dll_
-* [path]_libssl-1_1-x64.dll_
-* [path]_gbak.exe_
-* [path]_firebird.msg_
-* [path]_firebird.conf_ (optional, can be used as an example)
-
-
-===== 4. Connect to the unencrypted database with isql and encrypt thedatabase:
-
-
+. Connect to the unencrypted database with `isql` and encrypt the database:
++
 ----
-
 isql localhost:C:\Temp\EMPLOYEE30\EMPLOYEE30.FDB -user SYSDBA -pass masterkey
 SQL>alter database encrypt with dbcrypt key red;
 SQL> show database;
@@ -102,100 +87,88 @@ ODS = 12.0
 Database encrypted
 Default Character set: NONE
 ----
-
++
 Let's consider the encryption command:
++
 [source,sql]
 ----
-
 alter database encrypt with dbcrypt key red;
 ----
-
-Here, dbcrypt is the name of the encryption plugin, and red is the name of the key to being used.
-Keys are defined in [path]_KeyHolder.conf_ file.
-
++
+Here, `dbcrypt` is the name of the encryption plugin, and `red` is the name of the key to being used. Keys are defined in `KeyHolder.conf` file.
++
 Please note -- on Linux it is necessary to use quotes and case-sensitive plugin name:
++
 [source,sql]
 ----
-
 alter database encrypt with "DbCrypt" key Red;
 ----
 
-After that, the database is encrypted with server-side authentication: the keys are located in the file KeyHolder.conf.
+After that, the database is encrypted with server-side authentication: the keys are located in the file `KeyHolder.conf`.
 
 At the figure below you can see files we have on the server to enable the encryption, and what we need on the client side:
 
 [cols="1,1", options="header"]
 |===
 | On the server's side:
-| On the client's side (demo - CryptTest.exe) -
-                                            32bit
+| On the client's side (demo - `CryptTest.exe`) - 32bit
 
+|**Mandatory files:**
+|**Mandatory files:**
 
-|**Mandatory
-                                            files:**
-|**Mandatory
-                                            files:**
+|`plugins/dbcrypt.dll`
+|`fbclient.dll`
 
-|[path]_plugins/dbcrypt.dll_
-|[path]_fbclient.dll_
+|`plugins/keyholder.dll`
+|`fbcrypt.dll`
 
-|[path]_plugins/keyholder.dll_
-|[path]_fbcrypt.dll_
+|`DbCrypt.conf`
+|`libcrypto-1_1.dll`
 
-|[path]_DbCrypt.conf_
-|[path]_libcrypto-1_1.dll_
+|`libssl-1_1-x64.dll`
+|**Optional files:**
 
-|[path]_libssl-1_1-x64.dll_
-|**Optional
-                                            files:**
+|`libcrypto-1_1-x64.dll`
+|`firebird.conf`
 
-|[path]_libcrypto-1_1-x64.dll_
-|[path]_firebird.conf_
-
-|[path]_fbcrypt.dll_
+|`fbcrypt.dll`
 |
 
-|**Files for gbak with
-                                                encryption:**
+|**Files for gbak with encryption:**
 |
 
-|[path]_gbak.exe_
+|`gbak.exe`
 |
 
-|[path]_firebird.msg_
+|`firebird.msg`
 |
 
-|**Optional
-                                            files:**
+|**Optional files:**
 |
 
-|[path]_plugins/KeyHolder.conf_ (for
-                                            initial encryption in development mode)
+|`plugins/KeyHolder.conf` (for initial encryption in development mode)
 |
 
-|[path]_firebird.conf_ (contains
-                                            parameter to set encryption plugin)
+|`firebird.conf` (contains parameter to set encryption plugin)
 |
 |===
 
-==== Stage 2 -- Connect to the encrypted database with the clientapplication
+=== Stage 2 -- Connect to the encrypted database with the client application
 
 After the initial encryption, we suppose that the database will be copied to the customer environment, where access to it will be done only through the authorized application.
 
-To imitate such environment, we need to remove (or simply rename) the file with keys ([path]_KeyHolder.conf_) from the folder plugins.
+To imitate such environment, we need to remove (or simply rename) the file with keys (`KeyHolder.conf`) from the folder plugins.
 
-Without [path]_KeyHolder.conf_, the encryption plugin will require receiving the key from the connected application.
-The example of such application is included in the archive with demo plugin -- there is a compiled version and full sources for it on Delphi XE8.
+Without `KeyHolder.conf`, the encryption plugin will require receiving the key from the connected application. The example of such application is included in the archive with demo plugin -- there is a compiled version and full sources for it on Delphi XE8.
 
-The code to initialize encrypted connection is very simple -- before the usual connection, several calls should be done to send an appropriate key.
-After that, the client application works with Firebird as usual.
+The code to initialize encrypted connection is very simple -- before the usual connection, several calls should be done to send an appropriate key. After that, the client application works with Firebird as usual.
 
-Run the demo application to test the work with the encrypted database, it is in the folder [path]_CryptTest\EnhancedCryptTestClient\Win32\Debug_.
+Run the demo application to test the work with the encrypted database, it is in the folder `CryptTest\EnhancedCryptTestClient\Win32\Debug`.
 
 Do the following steps:
 
 . Specify database path or alias in "`1. Setup Login`". This database will be used in the next steps.
-. Specify the key name and value to be used. If you have previously used key RED, set `Key Name = RED` and copy the key value from the [path]_KeyHolder.conf_ file.
+. Specify the key name and value to be used. If you have previously used key RED, set `Key Name = RED` and copy the key value from the `KeyHolder.conf` file.
 . You can encrypt and decrypt database with the specified key. Please note -- encryption takes time, and it requires to have an active connection to the database
 . Click Execute query to test the connection to the encrypted database with the simple
 
@@ -208,97 +181,84 @@ image::8.1.png[]
 The test application can connect to the encrypted database only through TCP/IP, xnet is not supported.
 ====
 
-In the example of the client application, all database operations (connection, transaction start, transaction's commit, query start, etc) are made in the very straightforward way to demonstrate all steps of the operation against the encrypted database.
-You can use this code as an example for the implementing encryption in your applications.
+In the example of the client application, all database operations (connection, transaction start, transaction's commit, query start, etc) are made in the very straightforward way to demonstrate all steps of the operation against the encrypted database. You can use this code as an example for the implementing encryption in your applications.
 
 image::8.2.png[]
 
 
-==== Step 3: backup and restore of the encrypted database
+=== Stage 3 -- backup and restore of the encrypted database
 
-The full verified backup with [path]_gbak.exe_ is the primary backup method for Firebird databases.
-The standard Firebird distribution includes command line tool gbak.exe to perform it, however, it will not work with the encrypted database in the production mode (without keys on the server). After the encryption, only authorized applications can access an encrypted database, and standard [app]``gbak`` is not an authorized application.
+The full verified backup with `gbak.exe` is the primary backup method for Firebird databases. The standard Firebird distribution includes command line tool `gbak.exe` to perform it, however, it will not work with the encrypted database in the production mode (without keys on the server). After the encryption, only authorized applications can access an encrypted database, and standard `gbak` is not an authorized application.
 
-We all know how important backup and restore for the database health and performance, so, in order to perform backup and restore for the encrypted databases, we have developed [path]_gbak.exe_ with the encryption support, and included it into the FEPF.
+We all know how important backup and restore for the database health and performance, so, in order to perform backup and restore for the encrypted databases, we have developed `gbak.exe` with the encryption support, and included it into the FEPF.
 
-It is important to say, that this [path]_gbak.exe_ produces the encrypted backup file: it encrypts the backup with the same key as for the database encryption.
+It is important to say, that this `gbak.exe` produces the encrypted backup file: it encrypts the backup with the same key as for the database encryption.
 
-If you run [path]_gbak.exe_ from the plugin files with the switch ``-?``, you will see the new parameters of gbak.exe, which are used to work with the encrypted databases:
+If you run `gbak.exe` from the plugin files with the switch `-?`, you will see the new parameters of `gbak.exe`, which are used to work with the encrypted databases:
+
 ----
-
     -KEYFILE              name of a file with DB and backup crypt key(s)
     -KEYNAME              name of a key to be used for encryption
     -KEY                  key value in "0x5A," notation
 ----
 
-Let's consider how to use [path]_gbak.exe_ with encrypted databases and backups.
+Let's consider how to use `gbak.exe` with encrypted databases and backups.
 
-===== Backup encrypted Firebird database
+==== Backup encrypted Firebird database
 
-To backup an encrypted Firebird database, [path]_gbak.exe_ must provide the key for the server.
-This key will be used to connect and read the database and to encrypt the backup file.
+To backup an encrypted Firebird database, `gbak.exe` must provide the key for the server. This key will be used to connect and read the database and to encrypt the backup file.
 
-There are 2 ways to supply the key for [path]_gbak.exe_: store key in the key file or explicitly put it in the command line:
+There are 2 ways to supply the key for `gbak.exe`: store key in the key file or explicitly put it in the command line:
 
 .Example of backup with the encryption key in the key file
 ====
-
 ----
-
 gbak.exe -b -KEYFILE h:\Firebird\Firebird-3.0.3.32900-0_Win32\examplekeyfile.txt
   -KEYNAME RED localhost:h:\employee_30.fdb h:\testenc4.fbk -user SYSDBA
   -pass masterkey
 ----
 
-Here, in the parameter [parameter]``-KEYFILE`` we specify the location of the files with keys, and in [parameter]``-KEYNAME`` -- the name of the key being used.
-Please note, that the file [path]_examplekeyfile.txt_ has the same structure as [path]_KeyHolder.conf_.
+Here, in the parameter `-KEYFILE` we specify the location of the files with keys, and in `-KEYNAME` -- the name of the key being used. Please note, that the file `examplekeyfile.txt` has the same structure as `KeyHolder.conf`.
 
-If you apply backup with encryption (``gbak -b -keyfile ...
-                                    -keyname ...``) on the unencrypted database, the backup will be encrypted.
+If you apply backup with encryption (`gbak -b -keyfile ... -keyname ...`) on the unencrypted database, the backup will be encrypted.
 ====
 
 .Example of backup with the explicit key
 ====
-
 ----
-
 gbak -b -KEY 0xec,0xa1,0x52,0xf6,0x4d,0x27,0xda,0x93,0x53,0xe5,0x48,0x86,0xb9,
   0x7d,0xe2,0x8f,0x3b,0xfa,0xb7,0x91,0x22,0x5b,0x59,0x15,0x82,0x35,0xf5,0x30,
   0x1f,0x04,0xdc,0x75, -keyname RED localhost:h:\employee30\employee30.fdb
   h:\testenc303.fbk -user SYSDBA -pass masterkey
 ----
 
-Here, we specify the key value in the parameter [parameter]``-KEY``, and the name of the key in the parameter [parameter]``-KEYNAME``.
-It is necessary to specify key name even if we supply the explicit key value.
+Here, we specify the key value in the parameter `-KEY`, and the name of the key in the parameter `-KEYNAME`. It is necessary to specify key name even if we supply the explicit key value.
 ====
 
-===== Restore the backup to the encrypted Firebird database
+==== Restore the backup to the encrypted Firebird database
 
-The [app]``gbak`` can also restore from the backup files to the encrypted databases.
-The approach is the same: we need to provide the key name and key value to restore the backup file.
+The `gbak` can also restore from the backup files to the encrypted databases. The approach is the same: we need to provide the key name and key value to restore the backup file.
 
 See below examples of the restore commands:
 
 .Example of restore with the encryption key in the keyfile
 [example]
-
+====
 ----
-
 gbak -c -v -keyfile h:\Firebird\Firebird-3.0.3.32900-0_Win32\examplekeyfile.txt
   -keyname white  h:\testenc4.fbk localhost:h:\employeeenc4.fdb  -user SYSDBA
   -pass masterkey
 ----
+====
 
 .Example of restore with the explicit key
 ====
-
 ----
-
 gbak -c -v -key 0xec,0xa1,0x52,0xf6,0x4d,0x27,0xda,0x93,0x53,0xe5,0x48,0x86,
   0xb9,0x7d,0xe2,0x8f,0x3b,0xfa,0xb7,0x91,0x22,0x5b,0x59,0x15,0x82,0x35,0xf5,
   0x30,0x1f,0x04,0xdc,0x75, -keyname RED  h:\testenc4.fbk
   localhost:h:\employeeenc4.fdb  -user SYSDBA -pass masterkey
 ----
 
-If you restore from an unencrypted backup file with encryption keys (``gbak -c -keyfile ... -keyname ...``) , the restored database will be encrypted.
+If you restore from an unencrypted backup file with encryption keys (`gbak -c -keyfile ... -keyname ...`) , the restored database will be encrypted.
 ====
