@@ -44,9 +44,9 @@ image::3.1.1.png[]
 При первом запуске FBDataGuard проверит компьютер на наличие установленных серверов Firebird. FBDataGuard для Windows ищет в реестре записи Firebird, FBDataGuard для Linux проверяет местоположения по умолчанию для установок Firebird.
 
 FBDataGuard покажет список всех установленных копий Firebird, но FBDataGuard может отслеживать только один экземпляр Firebird.
-Выберите его, нажав btn:[Add Firebird engine to monitoring >>]
+Выберите его, нажав btn:[Добавить в мониторинг >>]
 
-Если вы не видите экземпляр Firebird в списке автоматического обнаружения, вы можете выбрать btn:[Add custom >>] и настроить параметры экземпляра вручную.
+Если вы не видите экземпляр Firebird в списке автоматического обнаружения, вы можете выбрать btn:[Добавить сервер вручную >>] и настроить параметры экземпляра вручную.
 
 .Функция автоматического обнаружения HQbird.
 image::3.1.2.png[]
@@ -151,84 +151,79 @@ image::3.1.3.png[]
 .HQbird FBDataGuard с зарегистрированным сервером Firebird.
 image::3.1.4.png[]
 
-FBDataGuard shows alerts and statuses of monitored objects: if everything is fine, it shows green signs, otherwise there will be yellow or red notifications.
+FBDataGuard показывает оповещения и статусы контролируемых объектов: если все в порядке, он показывает зеленые знаки, в противном случае будут желтые или красные уведомления.
 
-Below we will consider in details each monitored objects and its settings.
+Ниже мы подробно рассмотрим каждый контролируемый объект и его настройки.
 
 [NOTE]
 ====
-Note: you cannot delete registered Firebird server in FBDataGuard web-console.
-The only way to unregister server is to delete its configuration files.
-In general, there is no reason for deleting registered server, until you want completely uninstall FBDataGuard.
+Примечание: вы не можете удалить зарегистрированный сервер Firebird в веб-консоли FBDataGuard.
+Единственный способ отменить регистрацию сервера -- удалить его файлы конфигурации.
+В общем, нет смысла удалять зарегистрированный сервер, пока вы не захотите полностью удалить FBDataGuard.
 ====
 
-=== Server: Active server
+=== Сервер: Active server
 
-Server: Active server widget shows summarized status of all server-level jobs and statuses of monitored databases.
+Сервер: Виджет Active server отображает сводный статус всех заданий уровня сервера и статусы отслеживаемых баз данных.
 
 image::3.2.6.png[]
 
-**Server: Active server **also indicates Firebird currently running or not and shows detailed version of Firebird and HQbird.
+**Сервер: Active server** также указывает, работает ли Firebird в данный момент или нет, и показывает подробную версию Firebird и HQbird.
 
-If you click on *configure* link, you will see the same dialog that we have used to register Firebird instance in FBDataGuard, and now it can be used for changing Firebird instance properties:
+Если вы нажмете ссылку *Настройка*, то увидите тот же диалог, который мы использовали для регистрации экземпляра Firebird в FBDataGuard, и теперь его можно использовать для изменения свойств экземпляра Firebird:
 
 image::3.2.7.png[]
 
-In general, there is no need to edit Firebird server details after the registration, until you are not reinstalling Firebird – but in this case we recommend reinstalling HQBird too.
+В общем, нет необходимости редактировать данные сервера Firebird после регистрации, пока вы не переустановите Firebird -- но в этом случае мы рекомендуем также переустановить HQBird.
 
-=== Server: Replication Log
+=== Сервер: Лог репликации
 
 image::3.2.11.png[]
 
-If you are using HQbird Enterprise, FBDataGuard can check [path]_replication.log_ for errors.
-In case of error it sends an appropriate alert (by email) to the administrator.
+FBDataGuard проверяет `replication.log` на наличие ошибок.
+В случае ошибки он отправляет соответствующее предупреждение (по электронной почте) администратору.
 
-To enable this job please check "`Enabled`".
+Чтобы включить это задание, установите флажок "`Включить`".
 
 image::3.2.12.png[]
 
+* Период проверки, в минутах -- как часто проверять файл `replication.log` на наличие изменений.
+* Размер для переименования, в байтах -- если `replication.log` превысит значение, он будет переименован в соответствии с шаблоном даты и времени.
+* Шаблон имени для переименования -- как переименовать `replication.log`
+* Keep N rolled old log files -- сколько ошибок будет храниться в списке последних ошибок.
 
-* Check period – how often to check [path]_replication.log_ for changes
-* Size to roll, bytes -- if [path]_replication.log_ will exceed will value, it will be renamed according date-time pattern
-* Date pattern for rolling – how to rename [path]_replication.log_
-* Keep NN error messages: how many errors will be stored in the list of the recent errors.
 
-
-=== Server: Server log
+=== Сервер: Лог Firebird
 
 image::3.2.13.png[]
 
-"`Server log`" job periodically checks [path]_firebird.log_ and if it detects that file was changed, log analysis starts.
-The embedded analytic engine checks each entry in [path]_firebird.log_ and categorizes them into several categories with different levels of a severity.
-According the severity of messages status of job is assigned and appropriate alerts are generated.
+Задание "`Лог Firebird`" периодически проверяет `firebird.log`, и если обнаруживает, что файл был изменен, начинается анализ журнала. Встроенный аналитический механизм проверяет каждую запись в файле `firebird.log` и классифицирует их по нескольким категориям с разными уровнями серьезности. В зависимости от серьезности сообщений назначается статус задания и генерируются соответствующие оповещения.
 
-Once administrator has reviewed errors and alerts (and performed necessary actions to solve the reason of error), he need to click on *"`Resolved`"* link and FBDataGuard will forget old error messages in [path]_firebird.log_.
+После того, как администратор просмотрит ошибки и предупреждения (и выполнит необходимые действия для устранения причины ошибки), ему необходимо нажать на ссылку *"`Исправлено`"*, и FBDataGuard забудет старые сообщения об ошибках в `firebird.log`.
 
-In the configuration dialog of "`Server log`" you can enable/disable this job and set the check period (in minutes).
+В диалоге настройки "`Лог Firebird`" вы можете включить/отключить это задание и установить период проверки (в минутах).
 
 image::3.2.14.png[]
 
-Also this job watches for the size of [path]_firebird.log_ and if its size exceeds "`Size to roll`", FBDataGuard will split [path]_firebird.log_ and rename it according to the date-time pattern.
+Также это задание отслеживает размер `firebird.log`, и если его размер превышает "Размер для переименования", FBDataGuard разделит `firebird.log` и переименует его в соответствии с шаблоном даты и времени.
 
-=== Server: Temp files
+=== Сервер: Временные файлы
 
 image::3.2.15.png[]
 
-"`Server: Temp files`" job is useful to catch and solve performance problems with Firebird database.
+Задание "`Server: Temp files`" полезно для обнаружения и решения проблем с производительностью базы данных Firebird.
 
-While performing SQL queries Firebird stores intermediate results for sorting and merging data flows in temporary files, which are allocated in specified TEMP locations.
-FBDataGuard shows at "`Server: Temp files`" widget information about quantity and size of temporary files.
+При выполнении SQL-запросов Firebird сохраняет промежуточные результаты сортировки и объединения потоков данных во временных файлах, которые размещаются в папках `TEMP`. FBDataGuard показывает в виджете "`Сервер: Временные файлы`" информацию о количестве и размере временных файлов.
 
-FBDataGuard recognizes locations of TEMP folders and monitors quantity and size of temporary files.
-Lack of space can lead to the performance problem or more serious errors, too many (or too large) temporary files can indicate problems with SQL queries quality.
+FBDataGuard распознает расположение папок `TEMP` и отслеживает количество и размер временных файлов. Нехватка места может привести к проблемам с производительностью или более серьезным ошибкам, слишком большое количество (или слишком большие) временных файлов может указывать на проблемы с качеством SQL-запросов.
 
 image::3.2.16.png[]
 
-Using configuration dialog you can enable/disable this job, set period and thresholds to the maximum size of temporary files (size of all files) and quantity.
+Используя диалог конфигурации, вы можете включить/отключить это задание, установить период проверки и пороговые значения для максимального размера временных файлов (размера всех файлов) и количества.
 
-If you see that size of temp files is too high and if there is enough RAM on the server, increase [parameter]``TempCacheLimit`` parameter in [path]_firebird.conf_ to fit all temporary tables into RAM.
+Если вы видите, что размер временных файлов слишком велик и на сервере достаточно оперативной памяти, увеличьте параметр `TempCacheLimit` в `firebird.conf`, чтобы все временные таблицы поместились в оперативную память.
 
-Also, HQbird checks other temp files used by Firebird -- if you see extreme values (several Gb) for trace or monitor, the good idea will be check the FIREBIRD_TMP folder for outdated files (with old modification timestamps). Please note -- the screenshot below is not a real alert (i.e., values are Ok), it was created to demonstrate the output in case of large temporary files.
+Кроме того, HQbird проверяет другие временные файлы, используемые Firebird -- если вы видите экстремальные значения (несколько ГБайт) для трассировки или мониторинга, хорошей идеей будет проверить папку `FIREBIRD_TMP` на наличие устаревших файлов (со старыми метками времени модификации). Обратите внимание: снимок экрана ниже не является настоящим предупреждением (т. е. значение ОК), он был создан для демонстрации вывода в случае больших временных файлов.
 
 image::3.2.17.png[]
 

@@ -180,41 +180,38 @@ If you click on *configure* link, you will see the same dialog that we have used
 
 image::3.2.7.png[]
 
-In general, there is no need to edit Firebird server details after the registration, until you are not reinstalling Firebird – but in this case we recommend reinstalling HQBird too.
+In general, there is no need to edit Firebird server details after the registration, until you are not reinstalling Firebird -- but in this case we recommend reinstalling HQBird too.
 
 === Server: Replication Log
 
 image::3.2.11.png[]
 
-If you are using HQbird Enterprise, FBDataGuard can check [path]_replication.log_ for errors.
+FBDataGuard check `replication.log` for errors.
 In case of error it sends an appropriate alert (by email) to the administrator.
 
 To enable this job please check "`Enabled`".
 
 image::3.2.12.png[]
 
-
-* Check period – how often to check [path]_replication.log_ for changes
-* Size to roll, bytes -- if [path]_replication.log_ will exceed will value, it will be renamed according date-time pattern
-* Date pattern for rolling -- how to rename [path]_replication.log_
-* Keep NN error messages: how many errors will be stored in the list of the recent errors.
+* Check period, minutes -- how often to check `replication.log` for changes
+* Size to roll, bytes -- if `replication.log` will exceed will value, it will be renamed according date-time pattern
+* Date pattern for rolling -- how to rename `replication.log`
+* Keep N rolled old log files -- how many errors will be stored in the list of the recent errors.
 
 
 === Server: Server log
 
 image::3.2.13.png[]
 
-"`Server log`" job periodically checks [path]_firebird.log_ and if it detects that file was changed, log analysis starts.
-The embedded analytic engine checks each entry in [path]_firebird.log_ and categorizes them into several categories with different levels of a severity.
-According the severity of messages status of job is assigned and appropriate alerts are generated.
+"`Server log`" job periodically checks `firebird.log` and if it detects that file was changed, log analysis starts. The embedded analytic engine checks each entry in `firebird.log` and categorizes them into several categories with different levels of a severity. According the severity of messages status of job is assigned and appropriate alerts are generated.
 
-Once administrator has reviewed errors and alerts (and performed necessary actions to solve the reason of error), he need to click on *"`Resolved`"* link and FBDataGuard will forget old error messages in [path]_firebird.log_.
+Once administrator has reviewed errors and alerts (and performed necessary actions to solve the reason of error), he need to click on *"`Resolved`"* link and FBDataGuard will forget old error messages in `firebird.log`.
 
 In the configuration dialog of "`Server log`" you can enable/disable this job and set the check period (in minutes).
 
 image::3.2.14.png[]
 
-Also this job watches for the size of [path]_firebird.log_ and if its size exceeds "`Size to roll`", FBDataGuard will split [path]_firebird.log_ and rename it according to the date-time pattern.
+Also this job watches for the size of `firebird.log` and if its size exceeds "`Size to roll`", FBDataGuard will split `firebird.log` and rename it according to the date-time pattern.
 
 === Server: Temp files
 
@@ -222,19 +219,17 @@ image::3.2.15.png[]
 
 "`Server: Temp files`" job is useful to catch and solve performance problems with Firebird database.
 
-While performing SQL queries Firebird stores intermediate results for sorting and merging data flows in temporary files, which are allocated in specified TEMP locations.
-FBDataGuard shows at "`Server: Temp files`" widget information about quantity and size of temporary files.
+While performing SQL queries Firebird stores intermediate results for sorting and merging data flows in temporary files, which are allocated in specified `TEMP` locations. FBDataGuard shows at "`Server: Temp files`" widget information about quantity and size of temporary files.
 
-FBDataGuard recognizes locations of TEMP folders and monitors quantity and size of temporary files.
-Lack of space can lead to the performance problem or more serious errors, too many (or too large) temporary files can indicate problems with SQL queries quality.
+FBDataGuard recognizes locations of `TEMP` folders and monitors quantity and size of temporary files. Lack of space can lead to the performance problem or more serious errors, too many (or too large) temporary files can indicate problems with SQL queries quality.
 
 image::3.2.16.png[]
 
 Using configuration dialog you can enable/disable this job, set period and thresholds to the maximum size of temporary files (size of all files) and quantity.
 
-If you see that size of temp files is too high and if there is enough RAM on the server, increase [parameter]``TempCacheLimit`` parameter in [path]_firebird.conf_ to fit all temporary tables into RAM.
+If you see that size of temp files is too high and if there is enough RAM on the server, increase `TempCacheLimit` parameter in `firebird.conf` to fit all temporary tables into RAM.
 
-Also, HQbird checks other temp files used by Firebird -- if you see extreme values (several Gb) for trace or monitor, the good idea will be check the FIREBIRD_TMP folder for outdated files (with old modification timestamps). Please note -- the screenshot below is not a real alert (i.e., values are Ok), it was created to demonstrate the output in case of large temporary files.
+Also, HQbird checks other temp files used by Firebird -- if you see extreme values (several Gb) for trace or monitor, the good idea will be check the `FIREBIRD_TMP` folder for outdated files (with old modification timestamps). Please note -- the screenshot below is not a real alert (i.e., values are Ok), it was created to demonstrate the output in case of large temporary files.
 
 image::3.2.17.png[]
 
