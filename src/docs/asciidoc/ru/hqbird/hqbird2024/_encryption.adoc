@@ -197,20 +197,20 @@ image::8.2.png[]
 Если вы запустите `gbak.exe` из файлов плагина с ключом `-?`, вы увидите новые параметры `gbak.exe`, которые используются для работы с зашифрованными базами данных:
 
 ----
-    -KEYFILE              name of a file with DB and backup crypt key(s)
-    -KEYNAME              name of a key to be used for encryption
-    -KEY                  key value in "0x5A," notation
+  -KEYFILE              name of a file with DB and backup crypt key(s)
+  -KEYNAME              name of a key to be used for encryption
+  -KEY                  key value in "0x5A," notation
 ----
 
 Давайте рассмотрим, как использовать `gbak.exe` с зашифрованными базами данных и резервными копиями.
 
 ==== Резервное копирование зашифрованной базы данных Firebird
 
-To backup an encrypted Firebird database, `gbak.exe` must provide the key for the server. This key will be used to connect and read the database and to encrypt the backup file.
+Для резервного копирования зашифрованной базы данных Firebird `gbak.exe` должен предоставить ключ для сервера. Этот ключ будет использоваться для подключения и чтения базы данных, а также для шифрования файла резервной копии.
 
-There are 2 ways to supply the key for `gbak.exe`: store key in the key file or explicitly put it in the command line:
+Есть два способа предоставить ключ для `gbak.exe`: сохранить ключ в файле ключей или явно указать его в командной строке:
 
-.Example of backup with the encryption key in the key file
+.Пример создания резервной копии с ключом шифрования в файле ключей
 ====
 ----
 gbak.exe -b -KEYFILE h:\Firebird\Firebird-3.0.3.32900-0_Win32\examplekeyfile.txt
@@ -218,12 +218,12 @@ gbak.exe -b -KEYFILE h:\Firebird\Firebird-3.0.3.32900-0_Win32\examplekeyfile.txt
   -pass masterkey
 ----
 
-Here, in the parameter `-KEYFILE` we specify the location of the files with keys, and in `-KEYNAME` -- the name of the key being used. Please note, that the file `examplekeyfile.txt` has the same structure as `KeyHolder.conf`.
+Здесь в параметре `-KEYFILE` мы указываем расположение файлов с ключами, а в `-KEYNAME` -- имя используемого ключа. Обратите внимание, что файл `examplekeyfile.txt` имеет ту же структуру, что и `KeyHolder.conf`.
 
-If you apply backup with encryption (`gbak -b -keyfile ... -keyname ...`) on the unencrypted database, the backup will be encrypted.
+Если вы запустите создание резервной копии с шифрованием (`gbak -b -keyfile ... -keyname ...`) к незашифрованной базе данных, то резервная копия будет зашифрована.
 ====
 
-.Example of backup with the explicit key
+.Пример резервного копирования с явным ключом
 ====
 ----
 gbak -b -KEY 0xec,0xa1,0x52,0xf6,0x4d,0x27,0xda,0x93,0x53,0xe5,0x48,0x86,0xb9,
@@ -232,16 +232,16 @@ gbak -b -KEY 0xec,0xa1,0x52,0xf6,0x4d,0x27,0xda,0x93,0x53,0xe5,0x48,0x86,0xb9,
   h:\testenc303.fbk -user SYSDBA -pass masterkey
 ----
 
-Here, we specify the key value in the parameter `-KEY`, and the name of the key in the parameter `-KEYNAME`. It is necessary to specify key name even if we supply the explicit key value.
+Здесь мы указываем значение ключа в параметре `-KEY` и имя ключа в параметре `-KEYNAME`. Необходимо указать имя ключа, даже если мы указываем явное значение ключа.
 ====
 
-==== Restore the backup to the encrypted Firebird database
+==== Восстановление резервной копии зашифрованной базы данных Firebird.
 
-The `gbak` can also restore from the backup files to the encrypted databases. The approach is the same: we need to provide the key name and key value to restore the backup file.
+`gbak` также может восстанавливать данные из файлов резервных копий в зашифрованные базы данных. Подход тот же: нам нужно указать имя ключа и значение ключа для восстановления файла резервной копии.
 
-See below examples of the restore commands:
+Ниже приведены примеры команд восстановления:
 
-.Example of restore with the encryption key in the keyfile
+.Пример восстановления с использованием ключа шифрования в файле ключа
 [example]
 ====
 ----
@@ -251,7 +251,7 @@ gbak -c -v -keyfile h:\Firebird\Firebird-3.0.3.32900-0_Win32\examplekeyfile.txt
 ----
 ====
 
-.Example of restore with the explicit key
+.Пример восстановления с явным ключом
 ====
 ----
 gbak -c -v -key 0xec,0xa1,0x52,0xf6,0x4d,0x27,0xda,0x93,0x53,0xe5,0x48,0x86,
@@ -260,5 +260,5 @@ gbak -c -v -key 0xec,0xa1,0x52,0xf6,0x4d,0x27,0xda,0x93,0x53,0xe5,0x48,0x86,
   localhost:h:\employeeenc4.fdb  -user SYSDBA -pass masterkey
 ----
 
-If you restore from an unencrypted backup file with encryption keys (`gbak -c -keyfile ... -keyname ...`) , the restored database will be encrypted.
+Если вы выполняете восстановление из незашифрованного файла резервной копии с ключами шифрования (`gbak -c -keyfile ... -keyname ...`), то восстановленная база данных будет зашифрована.
 ====
