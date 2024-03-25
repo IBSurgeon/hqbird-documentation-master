@@ -1,29 +1,21 @@
 [[_hqbird_nanodbc_udr]]
-= NANODBC-UDR -- working with ODBC Data Sources
+= NANODBC-UDR -- работа с данными через ODBC
 
-Starting from version 2.5, Firebird DBMS has the ability to work with external data through
-the `EXECUTE STATEMENT .. ON EXTERNAL DATA SOURCE` statement. Unfortunately, working with external data sources
-is limited only to Firebird databases.
+СУБД Firebird начиная с версии 2.5 имеет возможность работать с внешними данными через оператор EXECUTE STATEMENT .. ON EXTERNAL DATA SOURCE. К сожалению работа с внешними источниками данных ограничена только базами данных Firebird.
 
-To be able to work with other DBMS, UDR nanodbc was developed. Fully open source library licensed under the
-MIT license and free to use. It is written in C++.
-Source code is available at https://github.com/mnf71/udr-nanodbc
+Для устранения этого недостатка была написана UDR nanodbc. Библиотека с полностью открытыми исходными кодами под лицензией MIT и свободна для использования. Она написана на языке {cpp}. Исходный код доступен по адресу https://github.com/mnf71/udr-nanodbc[]
 
-The library is based on a thin C ++ wrapper around the native C ODBC API https://github.com/nanodbc/nanodbc
+Библиотека основана на тонкой обёртке для {cpp} вокруг нативного C ODBC API https://github.com/nanodbc/nanodbc[]
 
-== Install UDR nanodbc
+== Установка UDR nanodbc
 
-To be able to use UDR nanodbc, it must be registered in your database.
-To do this, you need to execute the [path]_plugin/UDR/nanodbc_install.sql_ script.
+Библиотеку необходимо зарегистрировать в вашей базе данных. Для этого необходимо выполнить скрипт `plugin/UDR/nanodbc_install.sql`.
 
-== How it works?
+== Как это работает?
 
-UDR nanodbc is based on the free library nanodbc, therefore, for a complete understanding,
-we recommend that you study the API of this library in its source codes and documentation
-(see https://github.com/mnf71/udr-nanodbc).
+UDR nanodbc основана на свободной библиотеке *nanodbc*, поэтому для полного понимания рекомендуем изучить API этой библиотеки в её исходных кодах и документации (см. https://github.com/mnf71/udr-nanodbc[]).
 
-When working with library objects, so-called descriptors (pointers to nanodbc objects) are used.
-Pointers are described by a domain defined as:
+При работе с объектами библиотеки используются так называемые дескрипторы (указатели на объекты nanodbc). Указатели описываются доменом определённым как:
 
 [source,sql]
 ----
@@ -31,30 +23,23 @@ CREATE DOMAIN TY$POINTER AS
 CHAR(8) CHARACTER SET OCTETS;
 ----
 
-in Firebird 4.0 it can be described in the following way
+в Firebird 4.0 он может быть описан следующим способом
 
 [source,sql]
 ----
 CREATE DOMAIN TY$POINTER AS BINARY(8);
 ----
 
-After finishing work with the object, the pointer to it must be released using the `release_()` functions,
-which are located in the corresponding PSQL packages.
-Which package to use depends on the type of object you want to free the pointer to.
+После завершения работы с объектом указатель на него необходимо освободить при помощи функций release_(), которые расположены в соответствующих PSQL пакетах. Какой пакет использовать зависит от типа объекта, указатель на который необходимо освободить.
 
-In HQbird, it is impossible to create a function that does not return a result, therefore, for C++ functions with
-a `void` return type, UDR functions return the type described by the `TY$NANO_BLANK` domain.
-It makes no sense to analyze the result of such functions. Domain `TY$NANO_BLANK` is described as:
+В Firebird невозможно создать функцию не возвращающую результат, поэтому для {cpp} функций с типом возврата `void`, UDR функции возвращают тип описанный доменом `TY$NANO_BLANK`. Не имеет смысл анализировать результат таких функций. Домен `TY$NANO_BLANK` описан как:
 
 [source,sql]
 ----
 CREATE DOMAIN TY$NANO_BLANK AS SMALLINT;
 ----
 
-Before you start working with the UDR, you need to initialize the nanodbc library.
-This is done by calling the `nano$udr.initialize()` function. And upon completion of the work, call
-finalization function `nano$udr.finalize()`. It is recommended to call `nano$udr.initialize()` function in the
-`ON CONNECT` trigger, and `nano$udr.finalize()` function in the `ON DISCONNECT` trigger.
+Before you start working with the UDR, you need to initialize the nanodbc library. This is done by calling the `nano$udr.initialize()` function. And upon completion of the work, call finalization function `nano$udr.finalize()`. It is recommended to call `nano$udr.initialize()` function in the `ON CONNECT` trigger, and `nano$udr.finalize()` function in the `ON DISCONNECT` trigger.
 
 == Description of PSQL packages from UDR-nanodbc
 
@@ -83,23 +68,15 @@ END
 
 The `NANO$UDR` package contains functions for initializing and finalizing UDRs.
 
-The `initialize()` function initializes the nanodbc UDR. It is recommended to call this function in the `ON CONNECT` trigger.
-It must be called before the first call to any other function from the nanodbc UDR.
+The `initialize()` function initializes the nanodbc UDR. It is recommended to call this function in the `ON CONNECT` trigger. It must be called before the first call to any other function from the nanodbc UDR.
 
-The `finalize()` function terminates the nanodbc UDR. After calling it, it is impossible to work with UDR nanodbc.
-When called, the function automatically releases all previously allocated resources.
-It is recommended to call this function in the `ON DISCONNECT` trigger.
+The `finalize()` function terminates the nanodbc UDR. After calling it, it is impossible to work with UDR nanodbc. When called, the function automatically releases all previously allocated resources. It is recommended to call this function in the `ON DISCONNECT` trigger.
 
 The `expunge()` function automatically releases all previously allocated resources (connections, transactions, prepared statements, cursors).
 
-The `locale()` function returns or sets the default encoding for connections.
-If the `set_locale` parameter is specified, then a new encoding will be set, otherwise the function will return
-the value of the current encoding. This is necessary to transform transmitted and received strings,
-before and after exchanging with an ODBC source. The default encoding is cp1251.
+The `locale()` function returns or sets the default encoding for connections. If the `set_locale` parameter is specified, then a new encoding will be set, otherwise the function will return the value of the current encoding. This is necessary to transform transmitted and received strings, before and after exchanging with an ODBC source. The default encoding is cp1251.
 
-If initially the connection to the database is established with UTF8 encoding, then you can set utf8,
-according to the names of iconv. If the encoding is NONE, then it is better to convert to your language encoding
-using the `convert_[var]char()` functions.
+If initially the connection to the database is established with UTF8 encoding, then you can set utf8, according to the names of iconv. If the encoding is NONE, then it is better to convert to your language encoding using the `convert_[var]char()` functions.
 
 The `error_message()` function returns the text of the last error.
 
@@ -174,11 +151,9 @@ END
 
 The `NANO$CONN` package contains functions for setting up an ODBC data source and getting some connection information.
 
-The `connection()` function establishes a connection to an ODBC data source.
-If more than one parameter is not specified, the function will return a pointer to the "connection" object.
-The actual connection to the ODBC data source can be made later using the `connect_()` function.
-Function parameters:
+The `connection()` function establishes a connection to an ODBC data source. If more than one parameter is not specified, the function will return a pointer to the "connection" object. The actual connection to the ODBC data source can be made later using the `connect_()` function.
 
+Function parameters: 
 -  `attr` specifies the connection string or the so-called DSN;
 -  `user_` specifies the username;
 -  `pass` sets the password;
@@ -210,20 +185,16 @@ The `isolation_level()` function sets the isolation level for new transactions. 
 -  `pass` sets the password;
 -  `timeout` specifies the idle timeout.
 
-The `connected()` function returns whether a database connection has been established for
-the given pointer to the connection object.
+The `connected()` function returns whether a database connection has been established for the given pointer to the connection object.
 
-The `disconnect_()` function disconnects from the database. A pointer to the connection
-object is passed as a parameter.
+The `disconnect_()` function disconnects from the database. A pointer to the connection object is passed as a parameter.
 
 The `transactions()` function returns the number of active transactions for a given connection.
 
-The `get_info()` function returns various information about the driver or data source.
-This low-level function is the ODBC analogue of the `SQLGetInfo` function.
-It is not recommended use it directly. Function parameters:
+The `get_info()` function returns various information about the driver or data source. This low-level function is the ODBC analogue of the `SQLGetInfo` function. It is not recommended use it directly. Function parameters:
 
 - `conn` - pointer to the connection object;
-- `info_type` - the type of information returned. Numeric constants with return types can be found at https://github.com/microsoft/ODBC-Specification/blob/master/Windows/inc/sql.h
+- `info_type` - the type of information returned. Numeric constants with return types can be found at https://github.com/microsoft/ODBC-Specification/blob/master/Windows/inc/sql.h[]
 
 The `dbms_name()` function returns the name of the DBMS to which the connection was made.
 
@@ -262,18 +233,15 @@ END
 
 The `NANO$TNX` package contains functions for explicitly managing transactions.
 
-The `transaction _()` function disables the automatic confirmation of the transaction and
-starts a new transaction with the isolation level specified in the
+The `transaction _()` function disables the automatic confirmation of the transaction and starts a new transaction with the isolation level specified in the
 `NANO$CONN.isolation_level()` function. The function returns a pointer to a new transaction.
 
 The `valid()` function returns whether the pointer to the transaction object is valid.
 
-The `release_()` function releases the pointer to the transaction object.
-When the pointer is freed, the uncommitted transaction is rolled back and the driver returns
+The `release_()` function releases the pointer to the transaction object. When the pointer is freed, the uncommitted transaction is rolled back and the driver returns
 to the automatic transaction confirmation mode.
 
-The `connection()` function returns a pointer to the connection for which the transaction
-was started.
+The `connection()` function returns a pointer to the connection for which the transaction was started.
 
 The `commit_()` function confirms the transaction.
 
@@ -521,17 +489,15 @@ END
 The `NANO$STMT` package contains functions for working with SQL queries.
 
 The `statement_()` function creates and returns a pointer to an SQL query object.
+
 Parameters:
 
 - `conn` - pointer to the connection object;
 - `query` - the text of the SQL query;
-- `scrollable` - whether the cursor is scrollable (if, of course, the operator returns a cursor),
-if not set (NULL value), then the default behavior of the ODBC driver is used;
+- `scrollable` - whether the cursor is scrollable (if, of course, the operator returns a cursor), if not set (`NULL` value), then the default behavior of the ODBC driver is used;
 - `timeout` - SQL statement timeout.
 
-If no parameter is specified, then it returns a pointer to the newly created SQL query object,
-without binding to the connection. You can later associate this pointer with a connection
-and set other query properties.
+If no parameter is specified, then it returns a pointer to the newly created SQL query object, without binding to the connection. You can later associate this pointer with a connection and set other query properties.
 
 The `valid()` function returns whether the pointer to the SQL query object is valid.
 
@@ -542,61 +508,58 @@ The `connected()` function returns whether the request is attached to a connecti
 The `connection()` function is a pointer to the bound connection.
 
 The `open_()` function opens a connection and binds it to the request.
+
 Parameters:
 
 - `stmt` - pointer to SQL query;
 - `conn` - connection pointer.
 
-The `close_()` function closes a previously opened request and clears all resources allocated
-by the request.
+The `close_()` function closes a previously opened request and clears all resources allocated by the request.
 
 The `cancel()` function cancels the execution of the request.
 
 The `closed()` function returns whether the request is closed.
 
-The `prepare_direct()` function prepares an SQL statement and binds it to the specified
-connection. Parameters:
+The `prepare_direct()` function prepares an SQL statement and binds it to the specified connection. Parameters:
 
 - `stmt` - a pointer to the statement;
 - `conn` - connection pointer;
 - `query` - the text of the SQL query;
-- `scrollable` - whether the cursor is scrollable (if, of course, the operator returns a cursor),
-if not set (NULL value), then the default behavior of the ODBC driver is used;
+- `scrollable` - whether the cursor is scrollable (if, of course, the operator returns a cursor), if not set (`NULL` value), then the default behavior of the ODBC driver is used;
 - `timeout` - SQL statement timeout.
 
 The `prepare_()` function prepares the SQL query.
+
 Parameters:
 
 - `stmt` - a pointer to the statement;
 - `query` - the text of the SQL query;
-- `scrollable` - whether the cursor is scrollable (if, of course, the operator returns a cursor),
-if not set (NULL value), then the default behavior of the ODBC driver is used;
+- `scrollable` - whether the cursor is scrollable (if, of course, the operator returns a cursor), if not set (NULL value), then the default behavior of the ODBC driver is used;
 - `timeout` - SQL statement timeout.
 
 The `scrollable_()` function returns or sets whether the cursor is scrollable.
+
 Parameters:
 
 - `stmt` - a pointer to the statement;
-- `usage_` - whether the cursor is scrollable (if, of course, the operator returns a cursor),
-if not set (NULL value), then it returns the current value of this flag.
+- `usage_` - whether the cursor is scrollable (if, of course, the operator returns a cursor), if not set (NULL value), then it returns the current value of this flag.
 
 The `timeout()` function sets the timeout for the SQL query.
 
-The `execute_direct()` function prepares and executes an SQL statement.
-The function returns a pointer to a data set (cursor), which can be processed using
-the functions of the `NANO$RSLT` package. Parameters:
+The `execute_direct()` function prepares and executes an SQL statement. The function returns a pointer to a data set (cursor), which can be processed using
+the functions of the `NANO$RSLT` package. 
+
+Parameters:
 
 - `stmt` - a pointer to the statement;
 - `conn` - connection pointer;
 - `query` - the text of the SQL query;
-- `scrollable` - whether the cursor is scrollable (if, of course, the operator returns a cursor),
-if not set (NULL value), then the default behavior of the ODBC driver is used;
+- `scrollable` - whether the cursor is scrollable (if, of course, the operator returns a cursor), if not set (`NULL` value), then the default behavior of the ODBC driver is used;
 - `batch_operations` - the number of batch operations. The default is 1;
 - `timeout` - SQL statement timeout.
 
-The `just_execute_direct()` function prepares and executes an SQL statement.
-The function is designed to execute SQL statements that do not return data (do not open
-a cursor).
+The `just_execute_direct()` function prepares and executes an SQL statement. The function is designed to execute SQL statements that do not return data (do not open a cursor).
+
 Parameters:
 
 - `stmt` - a pointer to the statement;
@@ -605,15 +568,18 @@ Parameters:
 - `batch_operations` - the number of batch operations. The default is 1;
 - `timeout` - SQL statement timeout.
 
+The `execute_()` function executes the prepared SQL statement. The function returns a pointer to a data set (cursor), which can be processed using the functions of the `NANO$RSLT` package. 
 
-The `execute_()` function executes the prepared SQL statement. The function returns a pointer to a data set (cursor), which can be processed using the functions of the `NANO$RSLT` package. Parameters:
+Parameters:
 
 - `stmt` - a pointer to a prepared statement;
-- `batch_operations` - the number of batch operations. By default, NANO $ STMT is 1;
+- `batch_operations` - the number of batch operations. By default, `NANO$STMT` is 1;
 - `timeout` - SQL statement timeout.
 
 
-The `just_execute()` function executes the prepared SQL statement. The function is designed to execute SQL statements that do not return data (do not open a cursor). Parameters:
+The `just_execute()` function executes the prepared SQL statement. The function is designed to execute SQL statements that do not return data (do not open a cursor). 
+
+Parameters:
 
 - `stmt` - a pointer to a prepared statement;
 - `batch_operations` - the number of batch operations. The default is 1;
@@ -627,23 +593,18 @@ The `procedure_columns()` function -- returns the description of the output fiel
 - `procedure_` - the name of the stored procedure;
 - `column_` - the name of the output column of the SP.
 
-The `affected_rows()` function returns the number of rows affected by the SQL statement.
-This function can be called after the statement is executed.
+The `affected_rows()` function returns the number of rows affected by the SQL statement. This function can be called after the statement is executed.
 
 The `columns()` function returns the number of columns returned by the SQL query.
 
-The `parameters()` function returns the number of SQL query parameters.
-This function can be called only after preparing the SQL query.
+The `parameters()` function returns the number of SQL query parameters. This function can be called only after preparing the SQL query.
 
 The `parameter_size()` function returns the size of the parameter in bytes.
 
 - `stmt` - a pointer to a prepared statement;
 - `parameter_index` - parameter index.
 
-Functions of the `bind_<type> ...` family bind a value to a parameter if the DBMS supports
-batch operations see. `execute()` parameter `batch_operations`, then the number of transmitted
-values is not limited, within reasonable limits. Otherwise, only the first set of values entere
-d is transmitted. The binding itself occurs already when you call `execute()`.
+Functions of the `bind_<type> ...` family bind a value to a parameter if the DBMS supports batch operations see. `execute()` parameter `batch_operations`, then the number of transmitted values is not limited, within reasonable limits. Otherwise, only the first set of values entered is transmitted. The binding itself occurs already when you call `execute()`.
 
 The `bind_smallint()` function binds a `SMALLINT` value to an SQL parameter.
 
@@ -675,32 +636,28 @@ The `bind_double()` function binds a `DOUBLE PRECISION` value to an SQL paramete
 - `parameter_index` - parameter index;
 - `value_` - parameter value.
 
-The `bind_varchar()` function binds a `VARCHAR` value to a SQL parameter.
-Used for single-byte encodings.
+The `bind_varchar()` function binds a `VARCHAR` value to a SQL parameter. Used for single-byte encodings.
 
 - `stmt` - a pointer to a prepared statement;
 - `parameter_index` - parameter index;
 - `value_` - parameter value;
 - `param_size` - the size of the parameter (string).
 
-The `bind_char()` function binds a `CHAR` value to a SQL parameter.
-Used for single-byte encodings.
+The `bind_char()` function binds a `CHAR` value to a SQL parameter. Used for single-byte encodings.
 
 - `stmt` - a pointer to a prepared statement;
 - `parameter_index` - parameter index;
 - `value_` - parameter value;
 - `param_size` - the size of the parameter (string).
 
-The `bind_u8_varchar()` function binds a `VARCHAR` value to a SQL parameter.
-Used for UTF8 encoded strings.
+The `bind_u8_varchar()` function binds a `VARCHAR` value to a SQL parameter. Used for UTF8 encoded strings.
 
 - `stmt` - a pointer to a prepared statement;
 - `parameter_index` - parameter index;
 - `value_` - parameter value;
 - `param_size` - the size of the parameter (string).
 
-The `bind_u8_char()` function binds a `VARCHAR` value to a SQL parameter.
-Used for UTF8 encoded strings.
+The `bind_u8_char()` function binds a `VARCHAR` value to a SQL parameter. Used for UTF8 encoded strings.
 
 - `stmt` - a pointer to a prepared statement;
 - `parameter_index` - parameter index;
@@ -742,54 +699,38 @@ The `bind_timestamp()` function binds a `TIMESTAMP` value to a SQL parameter.
 - `parameter_index` - parameter index;
 - `value_` - parameter value.
 
-The `bind_null()` function binds a NULL value to an SQL parameter.
-It is not fundamentally necessary to assign a NULL value directly to a single value,
-unless it follows from the processing logic. You can also bind NULL by calling the corresponding
-function `bind _...` if NULL is passed to it.
+The `bind_null()` function binds a `NULL` value to an SQL parameter. It is not fundamentally necessary to assign a `NULL` value directly to a single value,
+unless it follows from the processing logic. You can also bind `NULL` by calling the corresponding function `bind _...` if `NULL` is passed to it.
 
 - `stmt` - a pointer to a prepared statement;
 - `parameter_index` - parameter index;
-- `batch_size` - batch size (default 1). Allows you to set the NULL value for the parameter
-with the specified index, in several elements of the package at once.
+- `batch_size` - batch size (default 1). Allows you to set the `NULL` value for the parameter with the specified index, in several elements of the package at once.
 
 The `convert_varchar()` function converts a `VARCHAR` value to a different encoding.
+
 Parameters:
 
 - `value_` - string value;
 - `from_` - encoding from which to recode the string;
 - `to_` - encoding into which you want to recode the string;
-- `convert_size` - sets the size of the input buffer for conversion (for speed), for UTF8,
-for example, the number of characters should be * 4. The size of the output buffer is
-always equal to the size of the returns declaration (you can create your own functions),
-the size change depends on where and from where it is converted string value:
-single-byte encoding to multibyte - possibly increasing relative to convert_size and
-vice versa - decreasing if multibyte encoding is converted to single-byte. The result is
-always truncated according to the size of the received parameter.
+- `convert_size` - sets the size of the input buffer for conversion (for speed), for UTF8, for example, the number of characters should be * 4. The size of the output buffer is always equal to the size of the returns declaration (you can create your own functions), the size change depends on where and from where it is converted string value: single-byte encoding to multibyte - possibly increasing relative to convert_size and vice versa - decreasing if multibyte encoding is converted to single-byte. The result is always truncated according to the size of the received parameter.
 
 This is a helper function for converting strings to the desired encoding, since the other ODBC side may not always respond in the correct encoding.
 
 The `convert_char()` function converts a `CHAR` value to a different encoding.
+
 Parameters:
 
 - `value_` - string value;
 - `from_` - encoding from which to recode the string;
 - `to_` - encoding into which you want to recode the string;
-- `convert_size` - sets the size of the input buffer for conversion (for speed), for UTF8,
-for example, the number of characters should be * 4. The size of the output buffer is
-always equal to the size of the returns declaration (you can create your own functions), the
-size change depends on where and from where it is converted string value: single-byte encoding
-to multibyte - possibly increasing relative to convert_size and vice versa - decreasing
-if multibyte encoding is converted to single-byte. The result is always truncated according
-to the size of the received parameter.
+- `convert_size` - sets the size of the input buffer for conversion (for speed), for UTF8, for example, the number of characters should be * 4. The size of the output buffer is always equal to the size of the returns declaration (you can create your own functions), the size change depends on where and from where it is converted string value: single-byte encoding to multibyte - possibly increasing relative to convert_size and vice versa - decreasing if multibyte encoding is converted to single-byte. The result is always truncated according to the size of the received parameter.
 
-This is a helper function for converting strings to the desired encoding, since the other
-ODBC side may not always respond in the correct encoding.
+This is a helper function for converting strings to the desired encoding, since the other ODBC side may not always respond in the correct encoding.
 
-The `clear_bindings ()` function clears the current bindings for parameters. This function
-call is required when reusing a prepared statement with new values.
+The `clear_bindings ()` function clears the current bindings for parameters. This function call is required when reusing a prepared statement with new values.
 
-The `describe_parameter()` function fills a buffer for describing the parameter, that is,
-it allows you to specify the type, size and scale of the parameter.
+The `describe_parameter()` function fills a buffer for describing the parameter, that is, it allows you to specify the type, size and scale of the parameter.
 
 - `stmt` - a pointer to a prepared request;
 - `idx` - parameter index;
@@ -797,8 +738,7 @@ it allows you to specify the type, size and scale of the parameter.
 - `size_` - size (for strings);
 - `scale_` - scale.
 
-The `describe_parameters()` function sends this parameter description buffer to ODBC,
-actually describes the parameters.
+The `describe_parameters()` function sends this parameter description buffer to ODBC, actually describes the parameters.
 
 The `reset_parameters()` function resets the parameter information of a prepared query.
 
@@ -1074,11 +1014,9 @@ The `release_()` function releases the pointer to the dataset.
 
 The `connection()` function returns a pointer to a database connection.
 
-The `rowset_size()` function returns the size of the dataset (how many active cursors are
-in the dataset).
+The `rowset_size()` function returns the size of the dataset (how many active cursors are in the dataset).
 
-The `affected_rows()` function returns the number of rows affected by the statement
-(fetched in the cursor).
+The `affected_rows()` function returns the number of rows affected by the statement (fetched in the cursor).
 
 The `has_affected_rows()` function returns whether at least one row is affected by the statement.
 
@@ -1086,26 +1024,20 @@ The `rows_()` function returns the number of records in the open cursor.
 
 The `columns()` function returns the number of columns in the current cursor.
 
-The `first_()` function moves the current cursor to the first record.
-Works only for bidirectional (scrollable cursors). Returns true if the operation is successful.
+The `first_()` function moves the current cursor to the first record. Works only for bidirectional (scrollable cursors). Returns `true` if the operation is successful.
 
-The `last_()` function moves the current cursor to the last record.
-Works only for bidirectional (scrollable cursors). Returns true if the operation is successful.
+The `last_()` function moves the current cursor to the last record. Works only for bidirectional (scrollable cursors). Returns `true` if the operation is successful.
 
-The `next_()` function moves the current cursor to the next record.
-Returns true if the operation is successful.
+The `next_()` function moves the current cursor to the next record. Returns `true` if the operation is successful.
 
-The `prior_()` function moves the current cursor to the previous record. Works only
-for bidirectional (scrollable cursors). Returns true if the operation is successful.
+The `prior_()` function moves the current cursor to the previous record. Works only for bidirectional (scrollable cursors). Returns `true` if the operation is successful.
 
-The `move()` function moves the current cursor to the specified record.
-Works only for bidirectional (scrollable cursors). Returns true if the operation is successful.
+The `move()` function moves the current cursor to the specified record. Works only for bidirectional (scrollable cursors). Returns `true` if the operation is successful.
 
 - `rslt` - a pointer to a prepared dataset;
 - `row_` - record number.
 
-The `skip_()` function moves the current cursor by the specified number of records.
-Works only for bidirectional (scrollable cursors). Returns true if the operation is successful.
+The `skip_()` function moves the current cursor by the specified number of records. Works only for bidirectional (scrollable cursors). Returns `true` if the operation is successful.
 
 - `rslt` - a pointer to a prepared dataset;
 - `row_` - how many records to skip.
@@ -1139,48 +1071,40 @@ The `get_double()` function returns the value of a `DOUBLE PRECISION` column.
 - `rslt` - a pointer to a prepared dataset;
 - `column_` - the name of the column or its number `0..n-1`.
 
-The `get_varchar()` function returns the value of column `VARCHAR (256) CHARACTER SET NONE`.
-The function is intended for single-byte encodings.
+The `get_varchar()` function returns the value of column `VARCHAR (256) CHARACTER SET NONE`. The function is intended for single-byte encodings.
 
 - `rslt` - a pointer to a prepared dataset;
 - `column_` - the name of the column or its number `0..n-1`.
 
-There is a whole family of these suffixed functions. The maximum size of the returned
-string changes depending on the suffix:
+There is a whole family of these suffixed functions. The maximum size of the returned string changes depending on the suffix:
 
-- `_s` - VARCHAR (64) CHARACTER SET NONE;
-- `_l` - VARCHAR (1024) CHARACTER SET NONE;
-- `_xl` - VARCHAR (8192) CHARACTER SET NONE;
-- `_xxl` - VARCHAR (32765) CHARACTER SET NONE.
+- `_s` - `VARCHAR (64) CHARACTER SET NONE`;
+- `_l` - `VARCHAR (1024) CHARACTER SET NONE`;
+- `_xl` - `VARCHAR (8192) CHARACTER SET NONE`;
+- `_xxl` - `VARCHAR (32765) CHARACTER SET NONE`.
 
-The data retrieval speed depends on the maximum row size. So filling the buffer for a
-`VARCHAR (32765)` string is several times slower than for a `VARCHAR (256)` string,
-so you need to choose the size of a smaller value if you don't need a larger one.
+The data retrieval speed depends on the maximum row size. So filling the buffer for a `VARCHAR (32765)` string is several times slower than for a `VARCHAR (256)` string, so you need to choose the size of a smaller value if you don't need a larger one.
 
-The `get_char()` function returns the value of column `CHAR (256) CHARACTER SET NONE`.
-The function is intended for single-byte encodings.
+The `get_char()` function returns the value of column `CHAR (256) CHARACTER SET NONE`. The function is intended for single-byte encodings.
 
 - `rslt` - a pointer to a prepared dataset;
 - `column_` - the name of the column or its number `0..n-1`.
 
-There is a whole family of these suffixed functions. The maximum size of the returned
-string changes depending on the suffix:
+There is a whole family of these suffixed functions. The maximum size of the returned string changes depending on the suffix:
 
-- `_s` - CHAR (64) CHARACTER SET NONE;
-- `_l` - CHAR (1024) CHARACTER SET NONE;
-- `_xl` - CHAR (8192) CHARACTER SET NONE;
-- `_xxl` - CHAR (32767) CHARACTER SET NONE.
+- `_s` - `CHAR (64) CHARACTER SET NONE`;
+- `_l` - `CHAR (1024) CHARACTER SET NONE`;
+- `_xl` - `CHAR (8192) CHARACTER SET NONE`;
+- `_xxl` - `CHAR (32767) CHARACTER SET NONE`.
 
-The data retrieval speed depends on the maximum row size. So filling the buffer for the
-`CHAR (32767)` string is several times slower than for the `CHAR (256)` string, so you need to choose the size of a smaller value if you don't need a larger one.
+The data retrieval speed depends on the maximum row size. So filling the buffer for the `CHAR (32767)` string is several times slower than for the `CHAR (256)` string, so you need to choose the size of a smaller value if you don't need a larger one.
 
 The `get_u8_varchar()` function returns the value of column `VARCHAR (64) CHARACTER SET UTF8`.
 
 - `rslt` - a pointer to a prepared dataset;
 - `column_` - the name of the column or its number `0..n-1`.
 
-There is a whole family of these suffixed functions.
-The maximum size of the returned string changes depending on the suffix:
+There is a whole family of these suffixed functions. The maximum size of the returned string changes depending on the suffix:
 
 - `_l` - VARCHAR (256) CHARACTER SET UTF8;
 - `_xl` - VARCHAR (2048) CHARACTER SET UTF8;
@@ -1223,41 +1147,38 @@ The `get_timestamp()` function returns the value of a `TIMESTAMP` column.
 - `column_` - the name of the column or its number `0..n-1`.
 
 The `convert_varchar()` function converts a `VARCHAR` value to a different encoding.
+
 Parameters:
 
 - `value_` - string value;
 - `from_` - encoding from which to recode the string;
 - `to_` - encoding into which you want to recode the string;
-- `convert_size` - sets the size of the input buffer for conversion.
-See `nano$stmt.convert_[var]char`.
+- `convert_size` - sets the size of the input buffer for conversion. See `nano$stmt.convert_[var]char`.
 
-There is a whole family of these suffixed functions. The maximum size of the returned
-string changes depending on the suffix:
+There is a whole family of these suffixed functions. The maximum size of the returned string changes depending on the suffix:
 
-- `_s` - VARCHAR (64) CHARACTER SET NONE;
-- `_l` - VARCHAR (1024) CHARACTER SET NONE;
-- `_xl` - VARCHAR (8192) CHARACTER SET NONE;
-- `_xxl` - VARCHAR (32765) CHARACTER SET NONE.
+- `_s` - `VARCHAR (64) CHARACTER SET NONE`;
+- `_l` - `VARCHAR (1024) CHARACTER SET NONE`;
+- `_xl` - `VARCHAR (8192) CHARACTER SET NONE`;
+- `_xxl` - `VARCHAR (32765) CHARACTER SET NONE`.
 
 The `convert_char()` function converts a `CHAR` value to a different encoding.
+
 Parameters:
 
 - `value_` - string value;
 - `from_` - encoding from which to recode the string;
 - `to_` - encoding into which you want to recode the string;
-- `convert_size` - set the size of the input buffer for conversion.
-See `nano$stmt.convert_[var]char`.
+- `convert_size` - set the size of the input buffer for conversion. See `nano$stmt.convert_[var]char`.
 
-There is a whole family of these suffixed functions.
-The maximum size of the returned string changes depending on the suffix:
+There is a whole family of these suffixed functions. The maximum size of the returned string changes depending on the suffix:
 
-- `_s` - CHAR (64) CHARACTER SET NONE;
-- `_l` - CHAR (1024) CHARACTER SET NONE;
-- `_xl` - CHAR (8192) CHARACTER SET NONE;
-- `_xxl` - CHAR (32765) CHARACTER SET NONE.
+- `_s` - `CHAR (64) CHARACTER SET NONE`;
+- `_l` - `CHAR (1024) CHARACTER SET NONE`;
+- `_xl` - `CHAR (8192) CHARACTER SET NONE`;
+- `_xxl` - `CHAR (32765) CHARACTER SET NONE`.
 
-The `unbind()` function unbinds a buffer from a given column.
-The peculiarity of transferring large data types in some ODBC implementations.
+The `unbind()` function unbinds a buffer from a given column. The peculiarity of transferring large data types in some ODBC implementations.
 
 - `rslt` - a pointer to a prepared dataset;
 - `column_` - the name of the column or its number `0..n-1`.
@@ -1282,8 +1203,7 @@ The `column_name()` function returns the name of a column by its index.
 - `rslt` - a pointer to a prepared dataset;
 - `index_` - column number `0..n-1`.
 
-The `column_size()` function returns the size of a column.
-For string fields, the number of characters.
+The `column_size()` function returns the size of a column. For string fields, the number of characters.
 
 The `column_decimal_digits()` function returns the precision for numeric types.
 
@@ -1367,45 +1287,46 @@ BEGIN
 END
 ----
 
-The `NANO$FUNC` package contains functions for working with SQL queries. This package
-is a lightweight version of the `NANO$STMT` package. The peculiarity is that the
-functions performed have inherited the behavior of NANODBC without changes and their
-own modifications of the UDR in terms of the exchange of parameters and values.
-Possible direction of use: performing ODBC connection settings through executing SQL
-commands (`just_execute` ...), if supported, event logging, etc. simple operations.
+The `NANO$FUNC` package contains functions for working with SQL queries. This package is a lightweight version of the `NANO$STMT` package. The peculiarity is that the
+functions performed have inherited the behavior of NANODBC without changes and their own modifications of the UDR in terms of the exchange of parameters and values.
+Possible direction of use: performing ODBC connection settings through executing SQL commands (`just_execute` ...), if supported, event logging, etc. simple operations.
 
-The `execute_conn()` function prepares and executes an SQL statement.
-The function returns a pointer to a data set (cursor), which can be processed using the functions of the `NANO$RSLT` package. Parameters:
+The `execute_conn()` function prepares and executes an SQL statement. The function returns a pointer to a data set (cursor), which can be processed using the functions of the `NANO$RSLT` package. 
+
+Parameters:
 
 - `conn` - connection pointer;
 - `query` - the text of the SQL query;
 - `batch_operations` - the number of batch operations. The default is 1;
 - `timeout` - SQL statement timeout.
 
-The `just_execute_conn()` function prepares and executes the SQL statement.
-The function is designed to execute SQL statements that do not return data (do not open
-a cursor). A pointer to the SQL query object is not created. Parameters:
+The `just_execute_conn()` function prepares and executes the SQL statement. The function is designed to execute SQL statements that do not return data (do not open
+a cursor). A pointer to the SQL query object is not created. 
+
+Parameters:
 
 - `conn` - connection pointer;
 - `query` - the text of the SQL query;
 - `batch_operations` - the number of batch operations. The default is 1;
 - `timeout` - SQL statement timeout.
 
-The `execute_stmt()` function executes the prepared SQL statement. The function returns
-a pointer to a data set (cursor), which can be processed using the functions of the
-`NANO$RSLT` package. Parameters:
+The `execute_stmt()` function executes the prepared SQL statement. The function returns a pointer to a data set (cursor), which can be processed using the functions of the `NANO$RSLT` package. 
+
+Parameters:
 
 - `stmt` - a pointer to a prepared statement;
 - `batch_operations` - the number of batch operations. The default is 1.
 
-The `transact_stmt()` function - executes a previously prepared SQL statement, starting and ending its own (autonomous) transaction. The function returns a pointer to a data set (cursor), which can be processed using the functions of the `NANO$RSLT` package. Parameters:
+The `transact_stmt()` function - executes a previously prepared SQL statement, starting and ending its own (autonomous) transaction. The function returns a pointer to a data set (cursor), which can be processed using the functions of the `NANO$RSLT` package. 
+
+Parameters:
 
 - `stmt` - a pointer to a prepared statement;
 - `batch_operations` - the number of batch operations. The default is 1.
 
-Function `just_transact_stmt()` - executes a previously prepared SQL statement, starting
-and ending its own (autonomous) transaction. The function is designed to execute SQL
-statements that do not return data (do not open a cursor). Parameters:
+Function `just_transact_stmt()` - executes a previously prepared SQL statement, starting and ending its own (autonomous) transaction. The function is designed to execute SQL statements that do not return data (do not open a cursor). 
+
+Parameters:
 
 - `stmt` - a pointer to a prepared statement;
 - `batch_operations` - the number of batch operations. The default is 1.
@@ -1420,8 +1341,7 @@ The `prepare_stmt()` function prepares the SQL query. Parameters:
 
 === Fetching data from a Postgresql table
 
-This example fetches from a Postgresql database. The block text is provided with
-comments to understand what is happening.
+This example fetches from a Postgresql database. The block text is provided with comments to understand what is happening.
 
 [source,sql]
 ----
