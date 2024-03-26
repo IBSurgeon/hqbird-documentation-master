@@ -39,13 +39,13 @@ CREATE DOMAIN TY$POINTER AS BINARY(8);
 CREATE DOMAIN TY$NANO_BLANK AS SMALLINT;
 ----
 
-Before you start working with the UDR, you need to initialize the nanodbc library. This is done by calling the `nano$udr.initialize()` function. And upon completion of the work, call finalization function `nano$udr.finalize()`. It is recommended to call `nano$udr.initialize()` function in the `ON CONNECT` trigger, and `nano$udr.finalize()` function in the `ON DISCONNECT` trigger.
+Перед началом работы с UDR необходимо провести инициализацию библиотеки nanodbc. Это делается с помощью вызова функции `nano$udr.initialize()`. А по завершению работу вызвать функцию финализации `nano$udr.finalize()`. Функцию `nano$udr.initialize()` рекомендуется вызывать в `ON CONNECT` триггере, а функцию `nano$udr.finalize()` в `ON DISCONNECT` триггере.
 
-== Description of PSQL packages from UDR-nanodbc
+== Описание PSQL пакетов из UDR nanodbc
 
-=== `NANO$UDR` package
+=== Пакет `NANO$UDR`
 
-The header of this package looks like this:
+Заголовок этого пакета выглядит следующим образом:
 
 [source,sql]
 ----
@@ -66,23 +66,23 @@ BEGIN
 END
 ----
 
-The `NANO$UDR` package contains functions for initializing and finalizing UDRs.
+Пакет `NANO$UDR` содержит функции инициализации и финализации UDR.
 
-The `initialize()` function initializes the nanodbc UDR. It is recommended to call this function in the `ON CONNECT` trigger. It must be called before the first call to any other function from the nanodbc UDR.
+Функция `initialize()` инициализирует UDR nanodbc. Эту функции рекомендуется вызывать в `ON CONNECT` триггере. Её необходимо вызывать перед первым обращением к любой другой функции из UDR nanodbc.
 
-The `finalize()` function terminates the nanodbc UDR. After calling it, it is impossible to work with UDR nanodbc. When called, the function automatically releases all previously allocated resources. It is recommended to call this function in the `ON DISCONNECT` trigger.
+Функция `finalize()` завершает работу UDR nanodbc. После её вызова работа с UDR nanodbc невозможна. При вызове функция автоматически освобождает все ранее выделенные ресурсы. Эту функцию рекомендуется вызывать в `ON DISCONNECT` триггере.
 
-The `expunge()` function automatically releases all previously allocated resources (connections, transactions, prepared statements, cursors).
+Функция `expunge()` автоматически освобождает все ранее выделенные ресурсы (соединения, транзакции, подготовленные запросы, курсоры).
 
-The `locale()` function returns or sets the default encoding for connections. If the `set_locale` parameter is specified, then a new encoding will be set, otherwise the function will return the value of the current encoding. This is necessary to transform transmitted and received strings, before and after exchanging with an ODBC source. The default encoding is cp1251.
+Функция `locale()` возвращает или устанавливает значение кодировки для соединений по умолчанию. Если параметр `set_locale` задан, то будет произведена установка новой кодировки, в противном случае функция вернёт значение текущей кодировки. Это необходимо для преобразования передаваемых и получаемых строк, перед и после обмена с источником ODBC. По умолчанию установлена кодировка cp1251.
 
-If initially the connection to the database is established with UTF8 encoding, then you can set utf8, according to the names of iconv. If the encoding is NONE, then it is better to convert to your language encoding using the `convert_[var]char()` functions.
+Если изначально соединение с БД установлено с кодировкой `UTF8`, то можно установить utf8, согласно названиям iconv. Если с кодировкой `NONE`, то лучше переводить в свою языковую кодировку с помощью функций `convert_[var]char()`.
 
-The `error_message()` function returns the text of the last error.
+Функция `error_message()` возвращает текст последней ошибки.
 
-=== `NANO$CONN` package
+=== Пакет `NANO$CONN`
 
-The header of this package looks like this:
+Заголовок этого пакета выглядит следующим образом:
 
 [source,sql]
 ----
@@ -149,66 +149,74 @@ BEGIN
 END
 ----
 
-The `NANO$CONN` package contains functions for setting up an ODBC data source and getting some connection information.
+Пакет `NANO$CONN` содержит функции для установки и источником данных ODBC, а также получении некоторой информации о соединении.
 
-The `connection()` function establishes a connection to an ODBC data source. If more than one parameter is not specified, the function will return a pointer to the "connection" object. The actual connection to the ODBC data source can be made later using the `connect_()` function.
+Функция `connection()` устанавливает соединение с источником данных ODBC. Если не один параметр не задан, то функция вернёт указатель на объект "соединение". Непосредственно само соединение с источником данных ODBC можно выполнить позднее с помощью функции `connect_()`.
 
-Function parameters: 
--  `attr` specifies the connection string or the so-called DSN;
--  `user_` specifies the username;
--  `pass` sets the password;
--  `timeout` specifies the idle timeout.
+Параметры функции:
 
-The `valid()` function returns whether the connection object pointer is valid.
+-  `attr` задаёт строку подключения или так называемый DSN;
+-  `user_` задаёт имя пользователя;
+-  `pass` задаёт пароль;
+-  `timeout` задаёт тайм-аут простоя.
 
-The `release_()` function releases the connection pointer and all associated resources (transactions, prepared statements, cursors).
+Функция `valid()` возвращает является ли указатель на объект соединения корректным.
 
-The `expunge()` function releases all resources associated with the connection (transactions, prepared statements, cursors).
+Функция `release_()` освобождает указатель на соединение и все связанные с ним ресурсы (транзакции, подготовленные запросы, курсоры).
 
-The `allocate()` function allows you to allocate descriptors on demand for setting the environment and ODBC attributes prior to establishing a connection to the database. Typically, the user does not need to make this call explicitly.
+Функция `expunge()` освобождает все связанные с соединением ресурсы (транзакции, подготовленные запросы, курсоры).
 
-The `deallocate()` function frees the connection handles.
+Функция `allocate()` позволяет по требованию выделять дескрипторы для настройки среды и атрибутов ODBC до установления соединения с базой данных. Обычно пользователю не нужно делать этот вызов явно.
 
-The `txn_read_uncommitted()` function returns the numeric constant required to set the transaction isolation level to READ UNCOMMITTED.
+Функция `deallocate()` освобождает дескрипторы подключения.
 
-The `txn_read_committed()` function returns the numeric constant required to set the transaction isolation level to READ COMMITTED.
+Функция `txn_read_uncommitted()` возвращает числовую константу, которая требуется для установки уровня изолированности транзакции `READ UNCOMMITTED`.
 
-The `txn_repeatable_read()` function returns a numeric constant required to set the isolation level of the REPEATABLE READ transaction.
+Функция `txn_read_committed()` возвращает числовую константу, которая требуется для установки уровня изолированности транзакции `READ COMMITTED`.
 
-The `txn_serializable()` function returns the numeric constant required to set the transaction isolation level to SERIALIZABLE.
+Функция `txn_repeatable_read()` возвращает числовую константу, которая требуется для установки уровня изолированности транзакции `REPEATABLE READ`.
 
-The `isolation_level()` function sets the isolation level for new transactions. Function parameters:
+Функция `txn_serializable()` возвращает числовую константу, которая требуется для установки уровня изолированности транзакции `SERIALIZABLE`.
 
--  `conn` - pointer to the connection object;
--  `attr` specifies the connection string or the so-called DSN;
--  `user_` specifies the username;
--  `pass` sets the password;
--  `timeout` specifies the idle timeout.
+Функция `isolation_level()` устанавливает уровень изолированности для новых транзакций. Параметры:
 
-The `connected()` function returns whether a database connection has been established for the given pointer to the connection object.
+- `conn` -- указатель на объект соединения;
+- `level_` -- уровень изолированности транзакции, должно быть одним из чисел возвращаемых функциями `tnx_*`.
 
-The `disconnect_()` function disconnects from the database. A pointer to the connection object is passed as a parameter.
+Функция `connect_()` устанавливает соединение с источником данных ODBC и привязывает его к переданному указателю на объект соединения. 
 
-The `transactions()` function returns the number of active transactions for a given connection.
+Параметры функции:
 
-The `get_info()` function returns various information about the driver or data source. This low-level function is the ODBC analogue of the `SQLGetInfo` function. It is not recommended use it directly. Function parameters:
+-  `conn` -- указатель на объект соединения;
+-  `attr` задаёт строку подключения или так называемый DSN;
+-  `user_` задаёт имя пользователя;
+-  `pass` задаёт пароль;
+-  `timeout` задаёт тайм-аут простоя.
 
-- `conn` - pointer to the connection object;
-- `info_type` - the type of information returned. Numeric constants with return types can be found at https://github.com/microsoft/ODBC-Specification/blob/master/Windows/inc/sql.h[]
+Функция `connected()` возвращает установлено ли соединение с базой данных для заданного указателя на объект соединения.
 
-The `dbms_name()` function returns the name of the DBMS to which the connection was made.
+Функция `disconnect_()` отключается от базы данных. В качестве параметра передаётся указатель на объект соединения.
 
-The `dbms_version()` function returns the version of the DBMS to which the connection was made.
+Функция `transactions()` возвращает количество активных транзакций для заданного соединения.
 
-The `driver_name()` function returns the name of the driver.
+Функция `get_info()` возвращает различную информацию о драйвере или источнике данных. Это низкоуровневая функция является аналогом ODBC функции `SQLGetInfo`. Не рекомендуется использовать её напрямую. Параметры:
 
-The `database_name()` function returns the name of the database to which the connection was made.
+- `conn` -- указатель на объект соединения;
+- `info_type` -- тип возвращаемой информации. Числовые константы с типами возвращаемой информации можно найти в  https://github.com/microsoft/ODBC-Specification/blob/master/Windows/inc/sql.h[]
 
-The `catalog_name()` function returns the name of the database catalog to which the connection was made.
+Функция `dbms_name()` возвращает имя СУБД к которой произведено подключение.
 
-=== `NANO$TNX` package
+Функция `dbms_version()` возвращает версию СУБД к которой произведено подключение.
 
-The header of this package looks like this:
+Функция `driver_name()` возвращает имя драйвера.
+
+Функция `database_name()` возвращает имя базы данных к которой произведено подключение.
+
+Функция `catalog_name()` возвращает имя каталога базы данных к которой произведено подключение.
+
+=== Пакет `NANO$TNX`
+
+Заголовок этого пакета выглядит следующим образом:
 
 [source,sql]
 ----
@@ -231,25 +239,23 @@ BEGIN
 END
 ----
 
-The `NANO$TNX` package contains functions for explicitly managing transactions.
+Пакет `NANO$TNX` содержит функции для явного управления транзакциями.
 
-The `transaction _()` function disables the automatic confirmation of the transaction and starts a new transaction with the isolation level specified in the
-`NANO$CONN.isolation_level()` function. The function returns a pointer to a new transaction.
+Функция `transaction_()` отключает отключает автоматическое подтверждение транзакции и стартует новую транзакцию с уровнем изолированности указанным в функции `NANO$CONN.isolation_level()`. Функция возвращает указатель на новую транзакцию.
 
-The `valid()` function returns whether the pointer to the transaction object is valid.
+Функция `valid()` возвращает является ли указатель на объект транзакции корректным.
 
-The `release_()` function releases the pointer to the transaction object. When the pointer is freed, the uncommitted transaction is rolled back and the driver returns
-to the automatic transaction confirmation mode.
+Функция `release_()` освобождает указатель на объект транзакции. При освобождении указателя не подтверждённая транзакция откатывается и драйвер возвращает в режим автоматического подтверждения транзакций.
 
-The `connection()` function returns a pointer to the connection for which the transaction was started.
+Функция `connection()` возвращает указатель на соединение для которого была запущена транзакция.
 
-The `commit_()` function confirms the transaction.
+Функция `commit_()` производит подтверждение транзакции.
 
-The `rollback_()` function rolls back the transaction.
+Функция `rollback_()` производит откат транзакции.
 
-=== `NANO$STMT` package
+=== Пакет `NANO$STMT`
 
-The header of this package looks like this:
+Заголовок этого пакета выглядит следующим образом:
 
 [source,sql]
 ----
@@ -486,266 +492,264 @@ BEGIN
 END
 ----
 
-The `NANO$STMT` package contains functions for working with SQL queries.
+Пакет `NANO$STMT` содержит функции для работы с SQL запросами.
 
-The `statement_()` function creates and returns a pointer to an SQL query object.
+Функция `statement_()` создаёт и возвращает указатель на объект SQL запрос. 
 
-Parameters:
+Параметры:
 
-- `conn` - pointer to the connection object;
-- `query` - the text of the SQL query;
-- `scrollable` - whether the cursor is scrollable (if, of course, the operator returns a cursor), if not set (`NULL` value), then the default behavior of the ODBC driver is used;
-- `timeout` - SQL statement timeout.
+- `conn` -- указатель на объект соединения;
+- `query` -- текст SQL запроса;
+- `scrollable` -- является ли курсор прокручиваемым (если конечно оператор возвращает курсор), если не задан (значение `NULL`), то используется поведения ODBC драйвера по умолчанию;
+- `timeout` -- тайм-аут SQL оператора.
 
-If no parameter is specified, then it returns a pointer to the newly created SQL query object, without binding to the connection. You can later associate this pointer with a connection and set other query properties.
+Если не указан ни один параметр, то возвращает указатель на вновь созданный объект SQL запроса, без привязки к соединению. Позже этот указатель можно связать с соединением и задать другие свойства запроса.
 
-The `valid()` function returns whether the pointer to the SQL query object is valid.
+Функция `valid()` возвращает является ли указатель на объект SQL запроса корректным.
 
-The `release_()` function releases the pointer to the SQL query object.
+Функция `release_()` освобождает указатель на объект SQL запроса.
 
-The `connected()` function returns whether the request is attached to a connection.
+Функция `connected()` возвращает привязан ли запрос к подключению.
 
-The `connection()` function is a pointer to the bound connection.
+Функция `connection()` возвращает указатель на привязанное подключение.
 
-The `open_()` function opens a connection and binds it to the request.
+Функция open_() открывает соединение и привязывает его к запросу. 
 
-Parameters:
+Параметры:
 
-- `stmt` - pointer to SQL query;
-- `conn` - connection pointer.
+- `stmt` -- указатель на SQL запрос;
+- `conn` -- указатель на подключение.
 
-The `close_()` function closes a previously opened request and clears all resources allocated by the request.
+Функция `close_()` закрывает открытый ранее запрос и очищает все выделенные запросом ресурсы.
 
-The `cancel()` function cancels the execution of the request.
+Функция `cancel()` отменяет выполнение запроса.
 
-The `closed()` function returns whether the request is closed.
+Функция `closed()` возвращает является ли запрос закрытым.
 
-The `prepare_direct()` function prepares an SQL statement and binds it to the specified connection. Parameters:
+Функция `prepare_direct()` подготавливает SQL запрос и привязывает его к указанному соединению. 
 
-- `stmt` - a pointer to the statement;
-- `conn` - connection pointer;
-- `query` - the text of the SQL query;
-- `scrollable` - whether the cursor is scrollable (if, of course, the operator returns a cursor), if not set (`NULL` value), then the default behavior of the ODBC driver is used;
-- `timeout` - SQL statement timeout.
+Параметры:
 
-The `prepare_()` function prepares the SQL query.
+- `stmt` -- указатель на запрос;
+- `conn` -- указатель на соединение;
+- `query` -- текст SQL запроса;
+- `scrollable` -- является ли курсор прокручиваемым (если конечно оператор возвращает курсор), если не задан (значение `NULL`), то используется поведения ODBC драйвера по умолчанию;
+- `timeout` -- тайм-аут SQL оператора.
 
-Parameters:
+Функция `prepare_()` подготавливает SQL запрос. 
 
-- `stmt` - a pointer to the statement;
-- `query` - the text of the SQL query;
-- `scrollable` - whether the cursor is scrollable (if, of course, the operator returns a cursor), if not set (NULL value), then the default behavior of the ODBC driver is used;
-- `timeout` - SQL statement timeout.
+Параметры:
 
-The `scrollable_()` function returns or sets whether the cursor is scrollable.
+- `stmt` -- указатель на запрос;
+- `query` -- текст SQL запроса;
+- `scrollable` -- является ли курсор прокручиваемым (если конечно оператор возвращает курсор), если не задан (значение `NULL`), то используется поведения ODBC драйвера по умолчанию;
+- `timeout` -- тайм-аут SQL оператора.
 
-Parameters:
+Функция `scrollable_()` возвращает или устанавливает будет ли курсор прокручиваемым.
 
-- `stmt` - a pointer to the statement;
-- `usage_` - whether the cursor is scrollable (if, of course, the operator returns a cursor), if not set (NULL value), then it returns the current value of this flag.
+Параметры:
 
-The `timeout()` function sets the timeout for the SQL query.
+- `stmt` -- указатель на запрос;
+- `usage_` -- является ли курсор прокручиваемым (если конечно оператор возвращает курсор), если не задан (значение `NULL`), то возвращает текущее значение этого флага.
 
-The `execute_direct()` function prepares and executes an SQL statement. The function returns a pointer to a data set (cursor), which can be processed using
-the functions of the `NANO$RSLT` package. 
+Функция timeout() устанавливает тайм-аут SQL запроса.
 
-Parameters:
+Функция `execute_direct()` подготавливает и выполняет SQL запрос. Функция возвращает указатель на набор данных (курсор), который можно обработать с помощью функций пакета `NANO$RSLT`. 
 
-- `stmt` - a pointer to the statement;
-- `conn` - connection pointer;
-- `query` - the text of the SQL query;
-- `scrollable` - whether the cursor is scrollable (if, of course, the operator returns a cursor), if not set (`NULL` value), then the default behavior of the ODBC driver is used;
-- `batch_operations` - the number of batch operations. The default is 1;
-- `timeout` - SQL statement timeout.
+Параметры:
 
-The `just_execute_direct()` function prepares and executes an SQL statement. The function is designed to execute SQL statements that do not return data (do not open a cursor).
+- `stmt` -- указатель на запрос;
+- `conn` -- указатель на соединение;
+- `query` -- текст SQL запроса;
+- `scrollable` -- является ли курсор прокручиваемым (если конечно оператор возвращает курсор), если не задан (значение `NULL`), то используется поведения ODBC драйвера по умолчанию;
+- `batch_operations` -- количество пакетных операций. По умолчанию равно 1;
+- `timeout` -- тайм-аут SQL оператора.
 
-Parameters:
+Функция `just_execute_direct()` подготавливает и выполняет SQL запрос. Функция предназначена для выполнения SQL операторов не возвращающих данные (не открывающих курсор). 
 
-- `stmt` - a pointer to the statement;
-- `conn` - connection pointer;
-- `query` - the text of the SQL query;
-- `batch_operations` - the number of batch operations. The default is 1;
-- `timeout` - SQL statement timeout.
+Параметры:
 
-The `execute_()` function executes the prepared SQL statement. The function returns a pointer to a data set (cursor), which can be processed using the functions of the `NANO$RSLT` package. 
+- `stmt` -- указатель на запрос;
+- `conn` -- указатель на соединение;
+- `query` -- текст SQL запроса;
+- `batch_operations` -- количество пакетных операций. По умолчанию равно 1;
+- `timeout` -- тайм-аут SQL оператора.
 
-Parameters:
+Функция `execute_()` выполняет подготовленный SQL запрос. Функция возвращает указатель на набор данных (курсор), который можно обработать с помощью функций пакета `NANO$RSLT`. 
 
-- `stmt` - a pointer to a prepared statement;
-- `batch_operations` - the number of batch operations. By default, `NANO$STMT` is 1;
-- `timeout` - SQL statement timeout.
+Параметры:
 
+- `stmt` -- указатель на подготовленный запрос;
+- `batch_operations` -- количество пакетных операций. По умолчанию равно 1;
+- `timeout` -- тайм-аут SQL оператора.
 
-The `just_execute()` function executes the prepared SQL statement. The function is designed to execute SQL statements that do not return data (do not open a cursor). 
+Функция `just_execute()` выполняет подготовленный SQL запрос. Функция предназначена для выполнения SQL операторов не возвращающих данные (не открывающих курсор). 
 
-Parameters:
+Параметры:
 
-- `stmt` - a pointer to a prepared statement;
-- `batch_operations` - the number of batch operations. The default is 1;
-- `timeout` - SQL statement timeout.
+- `stmt` -- указатель на подготовленный запрос;
+- `batch_operations` -- количество пакетных операций. По умолчанию равно 1;
+- `timeout` -- тайм-аут SQL оператора.
 
-The `procedure_columns()` function -- returns the description of the output field of the stored procedure as a `nano$rslt` dataset. Function parameters:
+Функция `procedure_columns()` возвращает описание выходного поля хранимой процедуры в виде набора данных `nano$rslt`.
 
-- `stmt` - a pointer to the statement;
-- `catalog_` - the name of the catalog to which the SP belongs;
-- `schema_` - the name of the schema in which the SP is located;
-- `procedure_` - the name of the stored procedure;
-- `column_` - the name of the output column of the SP.
+Параметры:
 
-The `affected_rows()` function returns the number of rows affected by the SQL statement. This function can be called after the statement is executed.
+- `stmt` -- указатель на запрос;
+- `catalog_` -- имя каталога которому принадлежит ХП;
+- `schema_` -- имя схемы в которой находится ХП;
+- `procedure_` -- имя хранимой процедуры;
+- `column_` -- имя выходного столбца ХП.
 
-The `columns()` function returns the number of columns returned by the SQL query.
+Функция `affected_rows()` возвращает количество строк затронутых SQL оператором. Эту функцию можно вызывать после выполнения оператора.
 
-The `parameters()` function returns the number of SQL query parameters. This function can be called only after preparing the SQL query.
+Функция `columns()` возвращает количество столбцов возвращаемых SQL запросом.
 
-The `parameter_size()` function returns the size of the parameter in bytes.
+Функция `parameters()` возвращает количество параметров SQL запроса. Эту функцию можно вызывать только после подготовки SQL запроса.
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index.
+Функция `parameter_size()` возвращает размер параметра в байтах.
 
-Functions of the `bind_<type> ...` family bind a value to a parameter if the DBMS supports batch operations see. `execute()` parameter `batch_operations`, then the number of transmitted values is not limited, within reasonable limits. Otherwise, only the first set of values entered is transmitted. The binding itself occurs already when you call `execute()`.
+Параметры:
 
-The `bind_smallint()` function binds a `SMALLINT` value to an SQL parameter.
+- `stmt` -- указатель на подготовленный запрос;
+- `parameter_index` -- индекс параметра.
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value.
+Функции семейства `bind_<type>...` связывают значение с параметром, если СУБД поддерживает пакетные операции cм. `execute()` параметр `batch_operations`, то количество передаваемых значений не ограничивается, в разумных пределах. В противном случае передается только первый введенный пакет значений. Само связывание происходит уже при вызове `execute()`.
 
-The `bind_integer()` function binds an `INTEGER` value to a SQL parameter.
+Функция `bind_smallint()` привязывает значение типа `SMALLINT` к SQL параметру. Параметры:
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value.
+- `stmt` -- указатель на подготовленный запрос;
+- `parameter_index` -- индекс параметра;
+- `value_` -- значение параметра.
 
-The `bind_bigint()` function binds a `BIGINT` value to a SQL parameter.
+Функция `bind_integer()` привязывает значение типа `INTEGER` к SQL параметру. Параметры:
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value.
+- `stmt` -- указатель на подготовленный запрос;
+- `parameter_index` -- индекс параметра;
+- `value_` -- значение параметра.
 
-The `bind_float()` function binds a `FLOAT` value to an SQL parameter.
+Функция `bind_bigint()` привязывает значение типа `BIGINT` к SQL параметру. Параметры: 
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value.
+- `stmt` -- указатель на подготовленный запрос;
+- `parameter_index` -- индекс параметра;
+- `value_` -- значение параметра.
 
-The `bind_double()` function binds a `DOUBLE PRECISION` value to an SQL parameter.
+Функция `bind_float()` привязывает значение типа `FLOAT` к SQL параметру. Параметры: 
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value.
+- `stmt` -- указатель на подготовленный запрос;
+- `parameter_index` -- индекс параметра;
+- `value_` -- значение параметра.
 
-The `bind_varchar()` function binds a `VARCHAR` value to a SQL parameter. Used for single-byte encodings.
+Функция `bind_double()` привязывает значение типа `DOUBLE PRECISION` к SQL параметру. Параметры: 
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value;
-- `param_size` - the size of the parameter (string).
+- `stmt` -- указатель на подготовленный запрос;
+- `parameter_index` -- индекс параметра;
+- `value_` -- значение параметра.
 
-The `bind_char()` function binds a `CHAR` value to a SQL parameter. Used for single-byte encodings.
+Функция `bind_varchar()` привязывает значение типа `VARCHAR` к SQL параметру. Используется для однобайтных кодировок. Параметры: 
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value;
-- `param_size` - the size of the parameter (string).
+- `stmt` -- указатель на подготовленный запрос;
+- `parameter_index` -- индекс параметра;
+- `value_` -- значение параметра;
+- `param_size` -- размер параметра (строки).
 
-The `bind_u8_varchar()` function binds a `VARCHAR` value to a SQL parameter. Used for UTF8 encoded strings.
+Функция `bind_char()` привязывает значение типа `CHAR` к SQL параметру. Используется для однобайтных кодировок. Параметры: 
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value;
-- `param_size` - the size of the parameter (string).
+- `stmt` -- указатель на подготовленный запрос;
+- `parameter_index` -- индекс параметра;
+- `value_` -- значение параметра;
+- `param_size` -- размер параметра (строки).
 
-The `bind_u8_char()` function binds a `VARCHAR` value to a SQL parameter. Used for UTF8 encoded strings.
+Функция `bind_u8_varchar()` привязывает значение типа `VARCHAR` к SQL параметру. Используется для строк в кодировке UTF8. Параметры: 
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value;
-- `param_size` - the size of the parameter (string).
+- `stmt` -- указатель на подготовленный запрос;
+- `parameter_index` -- индекс параметра;
+- `value_` -- значение параметра;
+- `param_size` -- размер параметра (строки).
 
-The `bind_blob()` function binds a `BLOB` value to an SQL parameter.
+Функция `bind_u8_char()` привязывает значение типа `CHAR` к SQL параметру. Используется для строк в кодировке UTF8. Параметры: 
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value.
+- `stmt` -- указатель на подготовленный запрос;
+- `parameter_index` -- индекс параметра;
+- `value_` -- значение параметра;
+- `param_size` -- размер параметра (строки).
 
-The `bind_boolean()` function binds a `BOOLEAN` value to an SQL parameter.
+Функция bind_blob() привязывает значение типа `BLOB` к SQL параметру. Параметры: 
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value.
+- `stmt` -- указатель на подготовленный запрос;
+- `parameter_index` -- индекс параметра;
+- `value_` -- значение параметра.
 
-The `bind_date()` function binds a `DATE` value to a SQL parameter.
+Функция `bind_boolean()` привязывает значение типа `BOOLEAN` к SQL параметру. Параметры: 
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value.
+- `stmt` -- указатель на подготовленный запрос;
+- `parameter_index` -- индекс параметра;
+- `value_` -- значение параметра.
 
-The `bind_time()` function binds a `TIME` value to an SQL parameter.
+Функция `bind_date()` привязывает значение типа `DATE` к SQL параметру. Параметры: 
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value.
+- `stmt` -- указатель на подготовленный запрос;
+- `parameter_index` -- индекс параметра;
+- `value_` -- значение параметра.
+
+Функция `bind_time()` привязывает значение типа TIME к SQL параметру. Параметры: 
+
+- `stmt` -- указатель на подготовленный запрос;
+- `parameter_index` -- индекс параметра;
+- `value_` -- значение параметра.
 
 [NOTE]
 ====
-Using `bind_time()` loses milliseconds unlike `bind_timestamp()`.
+При использовании `bind_time()` теряются миллисекунды в отличие от `bind_timestamp()`.
 ====
 
-The `bind_timestamp()` function binds a `TIMESTAMP` value to a SQL parameter.
+Функция `bind_timestamp()` привязывает значение типа `TIMESTAMP` к SQL параметру. Параметры: 
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value.
+- `stmt` -- указатель на подготовленный запрос;
+- `parameter_index` -- индекс параметра;
+- `value_` -- значение параметра.
 
-The `bind_null()` function binds a `NULL` value to an SQL parameter. It is not fundamentally necessary to assign a `NULL` value directly to a single value,
-unless it follows from the processing logic. You can also bind `NULL` by calling the corresponding function `bind _...` if `NULL` is passed to it.
+Функция `bind_null()` привязывает значение типа `NULL` к SQL параметру. Нет принципиальной необходимости назначать значение `NULL` непосредственно для одного значения, если это не вытекает из логики обработки. Привязку `NULL` можно сделать и при вызове соответствующей функции `bind_...` если ей передано значение `NULL`.
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `batch_size` - batch size (default 1). Allows you to set the `NULL` value for the parameter with the specified index, in several elements of the package at once.
+- `stmt` -- указатель на подготовленный запрос;
+- `parameter_index` -- индекс параметра;
+- `batch_size` -- размер пакета (по умолчанию 1). Позволяет установить значение NULL для параметра с заданным индексом, сразу в нескольких элементах пакета.
 
-The `convert_varchar()` function converts a `VARCHAR` value to a different encoding.
+Функция `convert_varchar()` преобразует значение типа `VARCHAR` в другую кодировку. Параметры:
 
-Parameters:
+- `value_` -- строковое значение;
+- `from_` -- кодировка из которой надо перекодировать строку;
+- `to_` -- кодировка в которую надо перекодировать строку;
+- `convert_size` -- задаёт размер входного буфера для конвертирования (для скорости), для UTF8 например должен быть количество символов * 4. Размер выходного буфера всегда равен размеру объявления returns (можно своих наделать функций), изменение размера зависит от того откуда и куда конвертируется строковое значение: однобайтовая кодировка в многобайтовую - возможно увеличение относительно `convert_size` и наоборот -- уменьшение, если многобайтовая кодировка преобразуется в однобайтовую. Усечение результата всегда происходит по размеру получаемого параметра.
 
-- `value_` - string value;
-- `from_` - encoding from which to recode the string;
-- `to_` - encoding into which you want to recode the string;
-- `convert_size` - sets the size of the input buffer for conversion (for speed), for UTF8, for example, the number of characters should be * 4. The size of the output buffer is always equal to the size of the returns declaration (you can create your own functions), the size change depends on where and from where it is converted string value: single-byte encoding to multibyte - possibly increasing relative to convert_size and vice versa - decreasing if multibyte encoding is converted to single-byte. The result is always truncated according to the size of the received parameter.
+Это вспомогательная функция, предназначенная для конвертирования строк в желаемую кодировку, поскольку не всегда другая сторона ODBC может ответить в правильной кодировке.
 
-This is a helper function for converting strings to the desired encoding, since the other ODBC side may not always respond in the correct encoding.
+Функция `convert_char()` преобразует значение типа `CHAR` в другую кодировку. Параметры:
 
-The `convert_char()` function converts a `CHAR` value to a different encoding.
+- `value_` -- строковое значение;
+- `from_` -- кодировка из которой надо перекодировать строку;
+- `to_` -- кодировка в которую надо перекодировать строку;
+- `convert_size` -- задаёт размер входного буфера для конвертирования (для скорости), для `UTF8` например должен быть количество символов * 4. Размер выходного буфера всегда равен размеру объявления returns (можно своих наделать функций), изменение размера зависит от того откуда и куда конвертируется строковое значение: однобайтовая кодировка в многобайтовую -- возможно увеличение относительно `convert_size` и наоборот -- уменьшение, если многобайтовая кодировка преобразуется в однобайтовую. Усечение результата всегда происходит по размеру получаемого параметра.
 
-Parameters:
+Это вспомогательная функция, предназначенная для конвертирования строк в желаемую кодировку, поскольку не всегда другая сторона ODBC может ответить в правильной кодировке.
 
-- `value_` - string value;
-- `from_` - encoding from which to recode the string;
-- `to_` - encoding into which you want to recode the string;
-- `convert_size` - sets the size of the input buffer for conversion (for speed), for UTF8, for example, the number of characters should be * 4. The size of the output buffer is always equal to the size of the returns declaration (you can create your own functions), the size change depends on where and from where it is converted string value: single-byte encoding to multibyte - possibly increasing relative to convert_size and vice versa - decreasing if multibyte encoding is converted to single-byte. The result is always truncated according to the size of the received parameter.
+Функция `clear_bindings()` очищает текущий пакет значений для параметров. Вызов данной функции необходим при повторном использовании подготовленного оператора с новыми значениями.
 
-This is a helper function for converting strings to the desired encoding, since the other ODBC side may not always respond in the correct encoding.
+Функция `describe_parameter()` заполняет буфер для описания параметра, то есть позволяет задать тип, размер и масштаб параметра. Параметры:
 
-The `clear_bindings ()` function clears the current bindings for parameters. This function call is required when reusing a prepared statement with new values.
+- `stmt` -- указатель на подготовленный запрос;
+- `idx` -- индекс параметра;
+- `type_` -- тип параметра;
+- `size_` -- размер (для строк);
+- `scale_` --  масштаб.
 
-The `describe_parameter()` function fills a buffer for describing the parameter, that is, it allows you to specify the type, size and scale of the parameter.
+Функция `describe_parameters()` отправляет этот буфер описания параметров в ODBC, фактически описывает параметры.
 
-- `stmt` - a pointer to a prepared request;
-- `idx` - parameter index;
-- `type_` - parameter type;
-- `size_` - size (for strings);
-- `scale_` - scale.
+Функция `reset_parameters()` сбрасывает информацию о параметрах подготовленного запроса.
 
-The `describe_parameters()` function sends this parameter description buffer to ODBC, actually describes the parameters.
+=== Пакет `NANO$RSLT`
 
-The `reset_parameters()` function resets the parameter information of a prepared query.
-
-
-=== `NANO$RSLT` package
-
-The header of this package looks like this:
+Заголовок этого пакета выглядит следующим образом:
 
 [source,sql]
 ----
@@ -1006,232 +1010,230 @@ BEGIN
 END
 ----
 
-The `NANO$RSLT` package contains functions for working with a dataset returned by an SQL query.
+Пакет `NANO$RSLT` содержит функции для работы с набором данных возвращаемым SQL запросом.
 
-The `valid()` function returns whether the pointer to the dataset is valid.
+Функция `valid()` возвращает является ли указатель на набор данных корректным.
 
-The `release_()` function releases the pointer to the dataset.
+Функция `release_()` освобождает указатель на набор данных.
 
-The `connection()` function returns a pointer to a database connection.
+Функция `connection()` возвращает указатель на соединение с базой данных.
 
-The `rowset_size()` function returns the size of the dataset (how many active cursors are in the dataset).
+Функция `rowset_size()` возвращает размер набора данных (сколько активных курсоров в наборе данных).
 
-The `affected_rows()` function returns the number of rows affected by the statement (fetched in the cursor).
+Функция `affected_rows()` возвращает количество строк затронутых оператором (выбрано в курсоре).
 
-The `has_affected_rows()` function returns whether at least one row is affected by the statement.
+Функция `has_affected_rows()` возвращает есть ли хотя бы одна строка затронутая запросом.
 
-The `rows_()` function returns the number of records in the open cursor.
+Функция `rows_()` возвращает количество записей в открытом курсоре.
 
-The `columns()` function returns the number of columns in the current cursor.
+Функция `columns()` возвращает количество столбцов в текущем курсоре.
 
-The `first_()` function moves the current cursor to the first record. Works only for bidirectional (scrollable cursors). Returns `true` if the operation is successful.
+Функция `first_()` перемещает указатель текущего курсора на первую запись. Работает только для двунаправленных (прокручиваемых курсоров). Возвращает `true` если операция успешна.
 
-The `last_()` function moves the current cursor to the last record. Works only for bidirectional (scrollable cursors). Returns `true` if the operation is successful.
+Функция `last_()` перемещает указатель текущего курсора на последнюю запись. Работает только для двунаправленных (прокручиваемых курсоров). Возвращает `true` если операция успешна.
 
-The `next_()` function moves the current cursor to the next record. Returns `true` if the operation is successful.
+Функция `next_()` перемещает указатель текущего курсора на следующую запись. Возвращает `true` если операция успешна.
 
-The `prior_()` function moves the current cursor to the previous record. Works only for bidirectional (scrollable cursors). Returns `true` if the operation is successful.
+Функция `prior_()` перемещает указатель текущего курсора на предыдущую запись. Работает только для двунаправленных (прокручиваемых курсоров). Возвращает `true` если операция успешна.
 
-The `move()` function moves the current cursor to the specified record. Works only for bidirectional (scrollable cursors). Returns `true` if the operation is successful.
+Функция `move()` перемещает указатель текущего курсора на указанную запись. Работает только для двунаправленных (прокручиваемых курсоров). Возвращает `true` если операция успешна.
 
-- `rslt` - a pointer to a prepared dataset;
-- `row_` - record number.
+- `rslt` -- указатель на подготовленный набор данных;
+- `row_` -- номер записи.
 
-The `skip_()` function moves the current cursor by the specified number of records. Works only for bidirectional (scrollable cursors). Returns `true` if the operation is successful.
+Функция `skip_()` перемещает указатель текущего курсора на указанное количество записей. Работает только для двунаправленных (прокручиваемых курсоров). Возвращает `true` если операция успешна.
 
-- `rslt` - a pointer to a prepared dataset;
-- `row_` - how many records to skip.
+- `rslt` -- указатель на подготовленный набор данных;
+- `row_` -- сколько записей пропустить.
 
-The `position_()` function returns the current position of the cursor.
+Функция `position_()` возвращает текущую позицию курсора.
 
-The `at_end()` function returns whether the cursor has reached the last record.
+Функция `at_end()` возвращает достиг ли указатель курсора последней записи.
 
-The `get_smallint()` function returns the value of the `SMALLINT` column.
+Функция `get_smallint()` возвращает значение столбца типа `SMALLINT`.
 
-- `rslt` - a pointer to a prepared dataset;
-- `column_` - the name of the column or its number `0..n-1`.
+- `rslt` -- указатель на подготовленный набор данных;
+- `column_` -- имя столбца или его номер `0..n-1`.
 
-The `get_integer()` function returns the value of an `INTEGER` column.
+Функция `get_integer()` возвращает значение столбца типа `INTEGER`.
 
-- `rslt` - a pointer to a prepared dataset;
-- `column_` - the name of the column or its number `0..n-1`.
+- `rslt` -- указатель на подготовленный набор данных;
+- `column_` -- имя столбца или его номер `0..n-1`.
 
-The `get_bigint()` function returns the value of a `BIGINT` column.
+Функция `get_bigint()` возвращает значение столбца типа `BIGINT`.
 
-- `rslt` - a pointer to a prepared dataset;
-- `column_` - the name of the column or its number `0..n-1`.
+- `rslt` -- указатель на подготовленный набор данных;
+- `column_` -- имя столбца или его номер `0..n-1`.
 
-The `get_float()` function returns the value of a `FLOAT` column.
+Функция `get_float()` возвращает значение столбца типа `FLOAT`.
 
-- `rslt` - a pointer to a prepared dataset;
-- `column_` - the name of the column or its number `0..n-1`.
+- `rslt` -- указатель на подготовленный набор данных;
+- `column_` -- имя столбца или его номер `0..n-1`.
 
-The `get_double()` function returns the value of a `DOUBLE PRECISION` column.
+Функция `get_double()` возвращает значение столбца типа `DOUBLE PRECISION`.
 
-- `rslt` - a pointer to a prepared dataset;
-- `column_` - the name of the column or its number `0..n-1`.
+- `rslt` -- указатель на подготовленный набор данных;
+- `column_` -- имя столбца или его номер `0..n-1`.
 
-The `get_varchar()` function returns the value of column `VARCHAR (256) CHARACTER SET NONE`. The function is intended for single-byte encodings.
+Функция `get_varchar()` возвращает значение столбца типа `VARCHAR(256) CHARACTER SET NONE`. Функция предназначена для однобайтовых кодировок.
 
-- `rslt` - a pointer to a prepared dataset;
-- `column_` - the name of the column or its number `0..n-1`.
+- `rslt` -- указатель на подготовленный набор данных;
+- `column_` -- имя столбца или его номер `0..n-1`.
 
-There is a whole family of these suffixed functions. The maximum size of the returned string changes depending on the suffix:
+Существует целое семейство этих функций с суффиксами. В зависимости от суффикса изменяется максимальный размер возвращаемой строки:
 
 - `_s` - `VARCHAR (64) CHARACTER SET NONE`;
 - `_l` - `VARCHAR (1024) CHARACTER SET NONE`;
 - `_xl` - `VARCHAR (8192) CHARACTER SET NONE`;
 - `_xxl` - `VARCHAR (32765) CHARACTER SET NONE`.
 
-The data retrieval speed depends on the maximum row size. So filling the buffer for a `VARCHAR (32765)` string is several times slower than for a `VARCHAR (256)` string, so you need to choose the size of a smaller value if you don't need a larger one.
+Скорость получения данных зависит от максимального размера строки. Так заполнение буфера для строки `VARCHAR(32765)` происходит в разы медленней, чем для строки `VARCHAR(256)`, поэтому надо подбирать размер меньшего значения, если не нужно большего.
 
-The `get_char()` function returns the value of column `CHAR (256) CHARACTER SET NONE`. The function is intended for single-byte encodings.
+Функция `get_char()` возвращает значение столбца типа `CHAR(256) CHARACTER SET NONE`. Функция предназначена для однобайтовых кодировок.
 
-- `rslt` - a pointer to a prepared dataset;
-- `column_` - the name of the column or its number `0..n-1`.
+- `rslt` -- указатель на подготовленный набор данных;
+- `column_` -- имя столбца или его номер `0..n-1`.
 
-There is a whole family of these suffixed functions. The maximum size of the returned string changes depending on the suffix:
+Существует целое семейство этих функций с суффиксами. В зависимости от суффикса изменяется максимальный размер возвращаемой строки:
 
 - `_s` - `CHAR (64) CHARACTER SET NONE`;
 - `_l` - `CHAR (1024) CHARACTER SET NONE`;
 - `_xl` - `CHAR (8192) CHARACTER SET NONE`;
 - `_xxl` - `CHAR (32767) CHARACTER SET NONE`.
 
-The data retrieval speed depends on the maximum row size. So filling the buffer for the `CHAR (32767)` string is several times slower than for the `CHAR (256)` string, so you need to choose the size of a smaller value if you don't need a larger one.
+Скорость получения данных зависит от максимального размера строки. Так заполнение буфера для строки `CHAR(32765)` происходит в разы медленней, чем для строки `CHAR(256)`, поэтому надо подбирать размер меньшего значения, если не нужно большего.
 
-The `get_u8_varchar()` function returns the value of column `VARCHAR (64) CHARACTER SET UTF8`.
+Функция `get_u8_varchar()` возвращает значение столбца типа `VARCHAR(64) CHARACTER SET UTF8`.
 
-- `rslt` - a pointer to a prepared dataset;
-- `column_` - the name of the column or its number `0..n-1`.
+- `rslt` -- указатель на подготовленный набор данных;
+- `column_` -- имя столбца или его номер `0..n-1`.
 
-There is a whole family of these suffixed functions. The maximum size of the returned string changes depending on the suffix:
+Существует целое семейство этих функций с суффиксами. В зависимости от суффикса изменяется максимальный размер возвращаемой строки:
 
-- `_l` - VARCHAR (256) CHARACTER SET UTF8;
-- `_xl` - VARCHAR (2048) CHARACTER SET UTF8;
-- `_xxl` - VARCHAR (8191) CHARACTER SET UTF8.
+- `_l` - `VARCHAR (256) CHARACTER SET UTF8`;
+- `_xl` - `VARCHAR (2048) CHARACTER SET UTF8`;
+- `_xxl` - `VARCHAR (8191) CHARACTER SET UTF8`.
 
-The `get_u8_char(`) function returns the value of column `CHAR (64) CHARACTER SET UTF8`.
+Функция `get_u8_char()` возвращает значение столбца типа `CHAR(64) CHARACTER SET UTF8`.
 
-- `rslt` - a pointer to a prepared dataset;
-- `column_` - the name of the column or its number `0..n-1`.
+- `rslt` -- указатель на подготовленный набор данных;
+- `column_` -- имя столбца или его номер `0..n-1`.
 
-There is a whole family of these suffixed functions. The maximum size of the returned string changes depending on the suffix:
+Существует целое семейство этих функций с суффиксами. В зависимости от суффикса изменяется максимальный размер возвращаемой строки:
 
-- `_l` - CHAR (256) CHARACTER SET UTF8;
-- `_xl` - CHAR (2048) CHARACTER SET UTF8;
-- `_xxl` - CHAR (8191) CHARACTER SET UTF8.
+- `_l` - `CHAR (256) CHARACTER SET UTF8`;
+- `_xl` - `CHAR (2048) CHARACTER SET UTF8`;
+- `_xxl` - `CHAR (8191) CHARACTER SET UTF8`.
 
-The `get_blob()` function returns the value of a `BLOB` column.
+Функция `get_blob()` возвращает значение столбца типа `BLOB`.
 
-- `rslt` - a pointer to a prepared dataset;
-- `column_` - the name of the column or its number `0..n-1`.
+- `rslt` -- указатель на подготовленный набор данных;
+- `column_` -- имя столбца или его номер `0..n-1`.
 
-The `get_boolean()` function returns the value of a `BOOLEAN` column.
+Функция `get_boolean()` возвращает значение столбца типа `BOOLEAN`.
 
-- `rslt` - a pointer to a prepared dataset;
-- `column_` - the name of the column or its number `0..n-1`.
+- `rslt` -- указатель на подготовленный набор данных;
+- `column_` -- имя столбца или его номер `0..n-1`.
 
-The `get_date()` function returns the value of a `DATE` column.
+Функция `get_date()` возвращает значение столбца типа `DATE`.
 
-- `rslt` - a pointer to a prepared dataset;
-- `column_` - the name of the column or its number `0..n-1`.
+- `rslt` -- указатель на подготовленный набор данных;
+- `column_` -- имя столбца или его номер `0..n-1`.
 
-The `get_time()` function returns the value of a `TIME` column.
+Функция `get_time()` возвращает значение столбца типа `TIME`.
 
-- `rslt` - a pointer to a prepared dataset;
-- `column_` - the name of the column or its number `0..n-1`.
+- `rslt` -- указатель на подготовленный набор данных;
+- `column_` -- имя столбца или его номер `0..n-1`.
 
-The `get_timestamp()` function returns the value of a `TIMESTAMP` column.
+Функция `get_timestamp()` возвращает значение столбца типа `TIMESTAMP`.
 
-- `rslt` - a pointer to a prepared dataset;
-- `column_` - the name of the column or its number `0..n-1`.
+- `rslt` -- указатель на подготовленный набор данных;
+- `column_` -- имя столбца или его номер `0..n-1`.
 
-The `convert_varchar()` function converts a `VARCHAR` value to a different encoding.
+Функция `convert_varchar()` преобразует значение типа VARCHAR в другую кодировку.
 
-Parameters:
+Параметры:
 
-- `value_` - string value;
-- `from_` - encoding from which to recode the string;
-- `to_` - encoding into which you want to recode the string;
-- `convert_size` - sets the size of the input buffer for conversion. See `nano$stmt.convert_[var]char`.
+- `value_` -- строковое значение;
+- `from_` -- кодировка из которой надо перекодировать строку;
+- `to_` -- кодировка в которую надо перекодировать строку;
+- `convert_size` -- задаёт размер входного буфера для конвертирования. См. `nano$stmt.convert_[var]char`.
 
-There is a whole family of these suffixed functions. The maximum size of the returned string changes depending on the suffix:
+Существует целое семейство этих функций с суффиксами. В зависимости от суффикса изменяется максимальный размер возвращаемой строки:
 
 - `_s` - `VARCHAR (64) CHARACTER SET NONE`;
 - `_l` - `VARCHAR (1024) CHARACTER SET NONE`;
 - `_xl` - `VARCHAR (8192) CHARACTER SET NONE`;
 - `_xxl` - `VARCHAR (32765) CHARACTER SET NONE`.
 
-The `convert_char()` function converts a `CHAR` value to a different encoding.
+Функция `convert_char()` преобразует значение типа CHAR в другую кодировку. Параметры:
 
-Parameters:
+- `value_` -- строковое значение;
+- `from_` -- кодировка из которой надо перекодировать строку;
+- `to_` -- кодировка в которую надо перекодировать строку;
+- `convert_size` -- задаёт размер входного буфера для конвертирования. См. `nano$stmt.convert_[var]char`.
 
-- `value_` - string value;
-- `from_` - encoding from which to recode the string;
-- `to_` - encoding into which you want to recode the string;
-- `convert_size` - set the size of the input buffer for conversion. See `nano$stmt.convert_[var]char`.
-
-There is a whole family of these suffixed functions. The maximum size of the returned string changes depending on the suffix:
+Существует целое семейство этих функций с суффиксами. В зависимости от суффикса изменяется максимальный размер возвращаемой строки:
 
 - `_s` - `CHAR (64) CHARACTER SET NONE`;
 - `_l` - `CHAR (1024) CHARACTER SET NONE`;
 - `_xl` - `CHAR (8192) CHARACTER SET NONE`;
 - `_xxl` - `CHAR (32765) CHARACTER SET NONE`.
 
-The `unbind()` function unbinds a buffer from a given column. The peculiarity of transferring large data types in some ODBC implementations.
+Функция `unbind()` отвязывает буфер от заданного столбца. Особенность передачи больших типов данных в некоторых реализациях ODBC.
 
-- `rslt` - a pointer to a prepared dataset;
-- `column_` - the name of the column or its number `0..n-1`.
+- `rslt` -- указатель на подготовленный набор данных;
+- `column_` -- имя столбца или его номер `0..n-1`.
 
-The `is_null()` function returns whether the value of a column is null.
+Функция `is_null()` возвращает является ли значение столбца значением `NULL`.
 
-- `rslt` - a pointer to a prepared dataset;
-- `column_` - the name of the column or its number `0..n-1`.
+- `rslt` -- указатель на подготовленный набор данных;
+- `column_` -- имя столбца или его номер `0..n-1`.
 
-The `is_bound()` function checks if a buffer of values for a given column is bound.
+Функция `is_bound()` проверяет привязан ли буфер значений для заданного столбца.
 
-- `rslt` - a pointer to a prepared dataset;
-- `column_` - the name of the column or its number `0..n-1`.
+- `rslt` -- указатель на подготовленный набор данных;
+- `column_` -- имя столбца или его номер `0..n-1`.
 
-The `column_()` function returns the number of a column by its name.
+Функция `column_()` возвращает номер столбца по его имени.
 
-- `rslt` - a pointer to a prepared dataset;
-- `column_` is the name of the column.
+- `rslt` -- указатель на подготовленный набор данных;
+- `column_` -- имя столбца или его номер `0..n-1`.
 
-The `column_name()` function returns the name of a column by its index.
+Функция `column_name()` возвращает имя столбца по его индексу.
 
-- `rslt` - a pointer to a prepared dataset;
-- `index_` - column number `0..n-1`.
+- `rslt` -- указатель на подготовленный набор данных;
+- `index_` -- номер столбца `0..n-1`.
 
-The `column_size()` function returns the size of a column. For string fields, the number of characters.
+Функция `column_size()` возвращает размер столбца. Для строковых полей количество символов.
 
-The `column_decimal_digits()` function returns the precision for numeric types.
+Функция `column_decimal_digits()` возвращает точность для числовых типов.
 
-- `rslt` - a pointer to a prepared dataset;
-- `column_` - the name of the column or its number `0..n-1`.
+- `rslt` -- указатель на подготовленный набор данных;
+- `column_` -- имя столбца или его номер `0..n-1`.
 
-The `column_datatype()` function returns the type of the column.
+Функция `column_datatype()` возвращает тип столбца.
 
-- `rslt` - a pointer to a prepared dataset;
-- `column_` - the name of the column or its number `0..n-1`.
+- `rslt` -- указатель на подготовленный набор данных;
+- `column_` -- имя столбца или его номер `0..n-1`.
 
-The `column_datatype_name()` function returns the name of the column type.
+Функция column_datatype_name() возвращает имя типа столбца.
 
-- `rslt` - a pointer to a prepared dataset;
-- `column_` - the name of the column or its number `0..n-1`.
+- `rslt` -- указатель на подготовленный набор данных;
+- `column_` -- имя столбца или его номер `0..n-1`.
 
-The `column_c_datatype()` function returns the type of the column as encoded in ODBC constants.
+Функция `column_c_datatype()` возвращает тип столбца как он закодирован в константах ODBC.
 
-- `rslt` - a pointer to a prepared dataset;
-- `column_` - the name of the column or its number `0..n-1`.
+- `rslt` -- указатель на подготовленный набор данных;
+- `column_` -- имя столбца или его номер `0..n-1`.
 
-The `next_result()` function switches to the next data set.
+Функция `next_result()` переключает на следующий набор данных.
 
-- `rslt` - a pointer to a prepared dataset.
+- `rslt` -- указатель на подготовленный набор данных.
 
-The `has_data()` function returns whether there is data in a dataset.
+Функция `has_data()` возвращает есть ли данные в наборе данных.
 
-- `rslt` - a pointer to a prepared dataset.
+- `rslt` -- указатель на подготовленный набор данных.
 
 === `NANO$FUNC` package
 

@@ -76,7 +76,7 @@ The `expunge()` function automatically releases all previously allocated resourc
 
 The `locale()` function returns or sets the default encoding for connections. If the `set_locale` parameter is specified, then a new encoding will be set, otherwise the function will return the value of the current encoding. This is necessary to transform transmitted and received strings, before and after exchanging with an ODBC source. The default encoding is cp1251.
 
-If initially the connection to the database is established with UTF8 encoding, then you can set utf8, according to the names of iconv. If the encoding is NONE, then it is better to convert to your language encoding using the `convert_[var]char()` functions.
+If initially the connection to the database is established with `UTF8` encoding, then you can set utf8, according to the names of iconv. If the encoding is `NONE`, then it is better to convert to your language encoding using the `convert_[var]char()` functions.
 
 The `error_message()` function returns the text of the last error.
 
@@ -169,23 +169,32 @@ The `allocate()` function allows you to allocate descriptors on demand for setti
 
 The `deallocate()` function frees the connection handles.
 
-The `txn_read_uncommitted()` function returns the numeric constant required to set the transaction isolation level to READ UNCOMMITTED.
+The `txn_read_uncommitted()` function returns the numeric constant required to set the transaction isolation level to `READ UNCOMMITTED`.
 
-The `txn_read_committed()` function returns the numeric constant required to set the transaction isolation level to READ COMMITTED.
+The `txn_read_committed()` function returns the numeric constant required to set the transaction isolation level to `READ COMMITTED`.
 
-The `txn_repeatable_read()` function returns a numeric constant required to set the isolation level of the REPEATABLE READ transaction.
+The `txn_repeatable_read()` function returns a numeric constant required to set the isolation level of the `REPEATABLE READ` transaction.
 
-The `txn_serializable()` function returns the numeric constant required to set the transaction isolation level to SERIALIZABLE.
+The `txn_serializable()` function returns the numeric constant required to set the transaction isolation level to `SERIALIZABLE`.
 
-The `isolation_level()` function sets the isolation level for new transactions. Function parameters:
+The `isolation_level()` function sets the isolation level for new transactions. 
 
--  `conn` - pointer to the connection object;
+Function parameters:
+
+- `conn` -- pointer to a connection object;
+- `level_` -- transaction isolation level, must be one of the numbers returned by the `tnx_*` functions.
+
+The `connected()` function returns whether a database connection has been established for the given pointer to the connection object.
+
+Function parameters:
+
+-  `conn` -- pointer to the connection object;
 -  `attr` specifies the connection string or the so-called DSN;
 -  `user_` specifies the username;
 -  `pass` sets the password;
 -  `timeout` specifies the idle timeout.
 
-The `connected()` function returns whether a database connection has been established for the given pointer to the connection object.
+The `connected()` function returns whether a connection to the database is established for the given pointer to a connection object.
 
 The `disconnect_()` function disconnects from the database. A pointer to the connection object is passed as a parameter.
 
@@ -193,8 +202,8 @@ The `transactions()` function returns the number of active transactions for a gi
 
 The `get_info()` function returns various information about the driver or data source. This low-level function is the ODBC analogue of the `SQLGetInfo` function. It is not recommended use it directly. Function parameters:
 
-- `conn` - pointer to the connection object;
-- `info_type` - the type of information returned. Numeric constants with return types can be found at https://github.com/microsoft/ODBC-Specification/blob/master/Windows/inc/sql.h[]
+- `conn` -- pointer to the connection object;
+- `info_type` -- the type of information returned. Numeric constants with return types can be found at https://github.com/microsoft/ODBC-Specification/blob/master/Windows/inc/sql.h[]
 
 The `dbms_name()` function returns the name of the DBMS to which the connection was made.
 
@@ -492,10 +501,10 @@ The `statement_()` function creates and returns a pointer to an SQL query object
 
 Parameters:
 
-- `conn` - pointer to the connection object;
-- `query` - the text of the SQL query;
-- `scrollable` - whether the cursor is scrollable (if, of course, the operator returns a cursor), if not set (`NULL` value), then the default behavior of the ODBC driver is used;
-- `timeout` - SQL statement timeout.
+- `conn` -- pointer to the connection object;
+- `query` -- the text of the SQL query;
+- `scrollable` -- whether the cursor is scrollable (if, of course, the operator returns a cursor), if not set (`NULL` value), then the default behavior of the ODBC driver is used;
+- `timeout` -- SQL statement timeout.
 
 If no parameter is specified, then it returns a pointer to the newly created SQL query object, without binding to the connection. You can later associate this pointer with a connection and set other query properties.
 
@@ -511,8 +520,8 @@ The `open_()` function opens a connection and binds it to the request.
 
 Parameters:
 
-- `stmt` - pointer to SQL query;
-- `conn` - connection pointer.
+- `stmt` -- pointer to SQL query;
+- `conn` -- connection pointer.
 
 The `close_()` function closes a previously opened request and clears all resources allocated by the request.
 
@@ -520,29 +529,31 @@ The `cancel()` function cancels the execution of the request.
 
 The `closed()` function returns whether the request is closed.
 
-The `prepare_direct()` function prepares an SQL statement and binds it to the specified connection. Parameters:
+The `prepare_direct()` function prepares an SQL statement and binds it to the specified connection. 
 
-- `stmt` - a pointer to the statement;
-- `conn` - connection pointer;
-- `query` - the text of the SQL query;
-- `scrollable` - whether the cursor is scrollable (if, of course, the operator returns a cursor), if not set (`NULL` value), then the default behavior of the ODBC driver is used;
-- `timeout` - SQL statement timeout.
+Parameters:
+
+- `stmt` -- a pointer to the statement;
+- `conn` -- connection pointer;
+- `query` -- the text of the SQL query;
+- `scrollable` -- whether the cursor is scrollable (if, of course, the operator returns a cursor), if not set (`NULL` value), then the default behavior of the ODBC driver is used;
+- `timeout` -- SQL statement timeout.
 
 The `prepare_()` function prepares the SQL query.
 
 Parameters:
 
-- `stmt` - a pointer to the statement;
-- `query` - the text of the SQL query;
-- `scrollable` - whether the cursor is scrollable (if, of course, the operator returns a cursor), if not set (NULL value), then the default behavior of the ODBC driver is used;
-- `timeout` - SQL statement timeout.
+- `stmt` -- a pointer to the statement;
+- `query` -- the text of the SQL query;
+- `scrollable` -- whether the cursor is scrollable (if, of course, the operator returns a cursor), if not set (NULL value), then the default behavior of the ODBC driver is used;
+- `timeout` -- SQL statement timeout.
 
 The `scrollable_()` function returns or sets whether the cursor is scrollable.
 
 Parameters:
 
-- `stmt` - a pointer to the statement;
-- `usage_` - whether the cursor is scrollable (if, of course, the operator returns a cursor), if not set (NULL value), then it returns the current value of this flag.
+- `stmt` -- a pointer to the statement;
+- `usage_` -- whether the cursor is scrollable (if, of course, the operator returns a cursor), if not set (NULL value), then it returns the current value of this flag.
 
 The `timeout()` function sets the timeout for the SQL query.
 
@@ -551,47 +562,47 @@ the functions of the `NANO$RSLT` package.
 
 Parameters:
 
-- `stmt` - a pointer to the statement;
-- `conn` - connection pointer;
-- `query` - the text of the SQL query;
-- `scrollable` - whether the cursor is scrollable (if, of course, the operator returns a cursor), if not set (`NULL` value), then the default behavior of the ODBC driver is used;
-- `batch_operations` - the number of batch operations. The default is 1;
-- `timeout` - SQL statement timeout.
+- `stmt` -- a pointer to the statement;
+- `conn` -- connection pointer;
+- `query` -- the text of the SQL query;
+- `scrollable` -- whether the cursor is scrollable (if, of course, the operator returns a cursor), if not set (`NULL` value), then the default behavior of the ODBC driver is used;
+- `batch_operations` -- the number of batch operations. The default is 1;
+- `timeout` -- SQL statement timeout.
 
 The `just_execute_direct()` function prepares and executes an SQL statement. The function is designed to execute SQL statements that do not return data (do not open a cursor).
 
 Parameters:
 
-- `stmt` - a pointer to the statement;
-- `conn` - connection pointer;
-- `query` - the text of the SQL query;
-- `batch_operations` - the number of batch operations. The default is 1;
-- `timeout` - SQL statement timeout.
+- `stmt` -- a pointer to the statement;
+- `conn` -- connection pointer;
+- `query` -- the text of the SQL query;
+- `batch_operations` -- the number of batch operations. The default is 1;
+- `timeout` -- SQL statement timeout.
 
 The `execute_()` function executes the prepared SQL statement. The function returns a pointer to a data set (cursor), which can be processed using the functions of the `NANO$RSLT` package. 
 
 Parameters:
 
-- `stmt` - a pointer to a prepared statement;
-- `batch_operations` - the number of batch operations. By default, `NANO$STMT` is 1;
-- `timeout` - SQL statement timeout.
+- `stmt` -- a pointer to a prepared statement;
+- `batch_operations` -- the number of batch operations. By default, `NANO$STMT` is 1;
+- `timeout` -- SQL statement timeout.
 
 
 The `just_execute()` function executes the prepared SQL statement. The function is designed to execute SQL statements that do not return data (do not open a cursor). 
 
 Parameters:
 
-- `stmt` - a pointer to a prepared statement;
-- `batch_operations` - the number of batch operations. The default is 1;
-- `timeout` - SQL statement timeout.
+- `stmt` -- a pointer to a prepared statement;
+- `batch_operations` -- the number of batch operations. The default is 1;
+- `timeout` -- SQL statement timeout.
 
 The `procedure_columns()` function -- returns the description of the output field of the stored procedure as a `nano$rslt` dataset. Function parameters:
 
-- `stmt` - a pointer to the statement;
-- `catalog_` - the name of the catalog to which the SP belongs;
-- `schema_` - the name of the schema in which the SP is located;
-- `procedure_` - the name of the stored procedure;
-- `column_` - the name of the output column of the SP.
+- `stmt` -- a pointer to the statement;
+- `catalog_` -- the name of the catalog to which the SP belongs;
+- `schema_` -- the name of the schema in which the SP is located;
+- `procedure_` -- the name of the stored procedure;
+- `column_` -- the name of the output column of the SP.
 
 The `affected_rows()` function returns the number of rows affected by the SQL statement. This function can be called after the statement is executed.
 
@@ -601,92 +612,92 @@ The `parameters()` function returns the number of SQL query parameters. This fun
 
 The `parameter_size()` function returns the size of the parameter in bytes.
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index.
+- `stmt` -- a pointer to a prepared statement;
+- `parameter_index` -- parameter index.
 
 Functions of the `bind_<type> ...` family bind a value to a parameter if the DBMS supports batch operations see. `execute()` parameter `batch_operations`, then the number of transmitted values is not limited, within reasonable limits. Otherwise, only the first set of values entered is transmitted. The binding itself occurs already when you call `execute()`.
 
 The `bind_smallint()` function binds a `SMALLINT` value to an SQL parameter.
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value.
+- `stmt` -- a pointer to a prepared statement;
+- `parameter_index` -- parameter index;
+- `value_` -- parameter value.
 
 The `bind_integer()` function binds an `INTEGER` value to a SQL parameter.
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value.
+- `stmt` -- a pointer to a prepared statement;
+- `parameter_index` -- parameter index;
+- `value_` -- parameter value.
 
 The `bind_bigint()` function binds a `BIGINT` value to a SQL parameter.
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value.
+- `stmt` -- a pointer to a prepared statement;
+- `parameter_index` -- parameter index;
+- `value_` -- parameter value.
 
 The `bind_float()` function binds a `FLOAT` value to an SQL parameter.
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value.
+- `stmt` -- a pointer to a prepared statement;
+- `parameter_index` -- parameter index;
+- `value_` -- parameter value.
 
 The `bind_double()` function binds a `DOUBLE PRECISION` value to an SQL parameter.
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value.
+- `stmt` -- a pointer to a prepared statement;
+- `parameter_index` -- parameter index;
+- `value_` -- parameter value.
 
 The `bind_varchar()` function binds a `VARCHAR` value to a SQL parameter. Used for single-byte encodings.
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value;
-- `param_size` - the size of the parameter (string).
+- `stmt` -- a pointer to a prepared statement;
+- `parameter_index` -- parameter index;
+- `value_` -- parameter value;
+- `param_size` -- the size of the parameter (string).
 
 The `bind_char()` function binds a `CHAR` value to a SQL parameter. Used for single-byte encodings.
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value;
-- `param_size` - the size of the parameter (string).
+- `stmt` -- a pointer to a prepared statement;
+- `parameter_index` -- parameter index;
+- `value_` -- parameter value;
+- `param_size` -- the size of the parameter (string).
 
 The `bind_u8_varchar()` function binds a `VARCHAR` value to a SQL parameter. Used for UTF8 encoded strings.
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value;
-- `param_size` - the size of the parameter (string).
+- `stmt` -- a pointer to a prepared statement;
+- `parameter_index` -- parameter index;
+- `value_` -- parameter value;
+- `param_size` -- the size of the parameter (string).
 
-The `bind_u8_char()` function binds a `VARCHAR` value to a SQL parameter. Used for UTF8 encoded strings.
+The `bind_u8_char()` function binds a `CHAR` value to a SQL parameter. Used for UTF8 encoded strings.
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value;
-- `param_size` - the size of the parameter (string).
+- `stmt` -- a pointer to a prepared statement;
+- `parameter_index` -- parameter index;
+- `value_` -- parameter value;
+- `param_size` -- the size of the parameter (string).
 
 The `bind_blob()` function binds a `BLOB` value to an SQL parameter.
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value.
+- `stmt` -- a pointer to a prepared statement;
+- `parameter_index` -- parameter index;
+- `value_` -- parameter value.
 
 The `bind_boolean()` function binds a `BOOLEAN` value to an SQL parameter.
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value.
+- `stmt` -- a pointer to a prepared statement;
+- `parameter_index` -- parameter index;
+- `value_` -- parameter value.
 
 The `bind_date()` function binds a `DATE` value to a SQL parameter.
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value.
+- `stmt` -- a pointer to a prepared statement;
+- `parameter_index` -- parameter index;
+- `value_` -- parameter value.
 
 The `bind_time()` function binds a `TIME` value to an SQL parameter.
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value.
+- `stmt` -- a pointer to a prepared statement;
+- `parameter_index` -- parameter index;
+- `value_` -- parameter value.
 
 [NOTE]
 ====
@@ -695,25 +706,25 @@ Using `bind_time()` loses milliseconds unlike `bind_timestamp()`.
 
 The `bind_timestamp()` function binds a `TIMESTAMP` value to a SQL parameter.
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `value_` - parameter value.
+- `stmt` -- a pointer to a prepared statement;
+- `parameter_index` -- parameter index;
+- `value_` -- parameter value.
 
 The `bind_null()` function binds a `NULL` value to an SQL parameter. It is not fundamentally necessary to assign a `NULL` value directly to a single value,
 unless it follows from the processing logic. You can also bind `NULL` by calling the corresponding function `bind _...` if `NULL` is passed to it.
 
-- `stmt` - a pointer to a prepared statement;
-- `parameter_index` - parameter index;
-- `batch_size` - batch size (default 1). Allows you to set the `NULL` value for the parameter with the specified index, in several elements of the package at once.
+- `stmt` -- a pointer to a prepared statement;
+- `parameter_index` -- parameter index;
+- `batch_size` -- batch size (default 1). Allows you to set the `NULL` value for the parameter with the specified index, in several elements of the package at once.
 
 The `convert_varchar()` function converts a `VARCHAR` value to a different encoding.
 
 Parameters:
 
-- `value_` - string value;
-- `from_` - encoding from which to recode the string;
-- `to_` - encoding into which you want to recode the string;
-- `convert_size` - sets the size of the input buffer for conversion (for speed), for UTF8, for example, the number of characters should be * 4. The size of the output buffer is always equal to the size of the returns declaration (you can create your own functions), the size change depends on where and from where it is converted string value: single-byte encoding to multibyte - possibly increasing relative to convert_size and vice versa - decreasing if multibyte encoding is converted to single-byte. The result is always truncated according to the size of the received parameter.
+- `value_` -- string value;
+- `from_` -- encoding from which to recode the string;
+- `to_` -- encoding into which you want to recode the string;
+- `convert_size` -- sets the size of the input buffer for conversion (for speed), for UTF8, for example, the number of characters should be * 4. The size of the output buffer is always equal to the size of the returns declaration (you can create your own functions), the size change depends on where and from where it is converted string value: single-byte encoding to multibyte -- possibly increasing relative to convert_size and vice versa -- decreasing if multibyte encoding is converted to single-byte. The result is always truncated according to the size of the received parameter.
 
 This is a helper function for converting strings to the desired encoding, since the other ODBC side may not always respond in the correct encoding.
 
@@ -721,10 +732,10 @@ The `convert_char()` function converts a `CHAR` value to a different encoding.
 
 Parameters:
 
-- `value_` - string value;
-- `from_` - encoding from which to recode the string;
-- `to_` - encoding into which you want to recode the string;
-- `convert_size` - sets the size of the input buffer for conversion (for speed), for UTF8, for example, the number of characters should be * 4. The size of the output buffer is always equal to the size of the returns declaration (you can create your own functions), the size change depends on where and from where it is converted string value: single-byte encoding to multibyte - possibly increasing relative to convert_size and vice versa - decreasing if multibyte encoding is converted to single-byte. The result is always truncated according to the size of the received parameter.
+- `value_` -- string value;
+- `from_` -- encoding from which to recode the string;
+- `to_` -- encoding into which you want to recode the string;
+- `convert_size` -- sets the size of the input buffer for conversion (for speed), for UTF8, for example, the number of characters should be * 4. The size of the output buffer is always equal to the size of the returns declaration (you can create your own functions), the size change depends on where and from where it is converted string value: single-byte encoding to multibyte -- possibly increasing relative to convert_size and vice versa -- decreasing if multibyte encoding is converted to single-byte. The result is always truncated according to the size of the received parameter.
 
 This is a helper function for converting strings to the desired encoding, since the other ODBC side may not always respond in the correct encoding.
 
@@ -732,11 +743,11 @@ The `clear_bindings ()` function clears the current bindings for parameters. Thi
 
 The `describe_parameter()` function fills a buffer for describing the parameter, that is, it allows you to specify the type, size and scale of the parameter.
 
-- `stmt` - a pointer to a prepared request;
-- `idx` - parameter index;
-- `type_` - parameter type;
-- `size_` - size (for strings);
-- `scale_` - scale.
+- `stmt` -- a pointer to a prepared request;
+- `idx` -- parameter index;
+- `type_` -- parameter type;
+- `size_` -- size (for strings);
+- `scale_` -- scale.
 
 The `describe_parameters()` function sends this parameter description buffer to ODBC, actually describes the parameters.
 
