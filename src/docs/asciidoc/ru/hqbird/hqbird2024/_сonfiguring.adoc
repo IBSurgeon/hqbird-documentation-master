@@ -290,7 +290,6 @@ image::3.1.5.png[]
 * "`*Название БД*`"  предназначен для вашего удобства и используется для ссылки на эту базу данных в оповещениях и сообщениях электронной почты.
 * "`*Алиас БД*`" -- это псевдоним базы данных из `aliases.conf` или `databases.conf`. Если вы укажете и "`Алиас БД`", и "`Путь к БД`", то будет использоваться "`Алиас БД`".
 * "`*Путь к базе данных*`" -- это локальный путь к базе данных (помните, что FBDataGuard должен работать на одном компьютере с Firebird). Если вы помещаете базу данных на внешний диск, может возникнуть ошибка "`File... has unknown partition`". Чтобы это исправить, вам нужно нажать "`Настроить`" в виджете "`Сервер`" и нажать "`Сохранить`", чтобы FBDataGuard перечитал разделы.
-* "`*Output folder*`" is the folder where FBDataGuard will store backups, logs and statistics for this database. If you do not select HQbirdData folder during the installation, and if you do not specify output folder for the server, it's a good idea to specify "`Output directory`" to some explicit location like [path]_F:\mydatabasedata_.
 * "`*Папка логов и бэкапов*`" -- это папка, в которой FBDataGuard будет хранить резервные копии, журналы и статистику для этой базы данных. Если вы не выбрали папку HQbirdData во время установки и не указали выходную папку для сервера, рекомендуется указать "`Папка логов и бэкапов`" в каком-то явном месте, например `F:\mydatabasedata`.
 * "`*Enable advanced monitoring*`" -- см. <<_hqbird_advanced_monitor_viewer>>
 
