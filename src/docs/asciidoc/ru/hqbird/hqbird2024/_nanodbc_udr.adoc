@@ -1235,9 +1235,9 @@ END
 
 - `rslt` -- указатель на подготовленный набор данных.
 
-=== `NANO$FUNC` package
+=== Пакет `NANO$FUNC`
 
-The header of this package looks like this:
+Заголовок этого пакета выглядит следующим образом:
 
 [source,sql]
 ----
@@ -1289,61 +1289,56 @@ BEGIN
 END
 ----
 
-The `NANO$FUNC` package contains functions for working with SQL queries. This package is a lightweight version of the `NANO$STMT` package. The peculiarity is that the
-functions performed have inherited the behavior of NANODBC without changes and their own modifications of the UDR in terms of the exchange of parameters and values.
-Possible direction of use: performing ODBC connection settings through executing SQL commands (`just_execute` ...), if supported, event logging, etc. simple operations.
+Пакет `NANO$FUNC` содержит функции для работы с SQL запросами. Этот пакет является облегчённой версией пакета `NANO$STMT`. Особенность состоит в том, что выполняемые функции унаследовали поведение NANODBC без изменений и собственных доработок UDR в части обмена параметрами и значениями. Возможное направление использования: выполнение настроек ODBC соединения через выполнение SQL-команд (`just_execute...`), если поддерживается, логирование событий и т.п. простые операции.
 
-The `execute_conn()` function prepares and executes an SQL statement. The function returns a pointer to a data set (cursor), which can be processed using the functions of the `NANO$RSLT` package. 
+Функция `execute_conn()` подготавливает и выполняет SQL запрос. Функция возвращает указатель на набор данных (курсор), который можно обработать с помощью функций пакета `NANO$RSLT`. 
 
-Parameters:
+Параметры:
 
-- `conn` - connection pointer;
-- `query` - the text of the SQL query;
-- `batch_operations` - the number of batch operations. The default is 1;
-- `timeout` - SQL statement timeout.
+- `conn` -- указатель на соединение;
+- `query` -- текст SQL запроса;
+- `batch_operations` -- количество пакетных операций. По умолчанию равно 1;
+- `timeout` -- тайм-аут SQL оператора.
 
-The `just_execute_conn()` function prepares and executes the SQL statement. The function is designed to execute SQL statements that do not return data (do not open
-a cursor). A pointer to the SQL query object is not created. 
+Функция `just_execute_conn()` подготавливает и выполняет SQL запрос. Функция предназначена для выполнения SQL операторов не возвращающих данные (не открывающих курсор). Указатель на объект SQL запрос не создается. Параметры:
 
-Parameters:
+- `conn` -- указатель на соединение;
+- `query` -- текст SQL запроса;
+- `batch_operations` -- количество пакетных операций. По умолчанию равно 1;
+- `timeout` -- тайм-аут SQL оператора.
 
-- `conn` - connection pointer;
-- `query` - the text of the SQL query;
-- `batch_operations` - the number of batch operations. The default is 1;
-- `timeout` - SQL statement timeout.
+Функция `execute_stmt()` выполняет подготовленный SQL запрос. Функция возвращает указатель на набор данных (курсор), который можно обработать с помощью функций пакета `NANO$RSLT`. 
 
-The `execute_stmt()` function executes the prepared SQL statement. The function returns a pointer to a data set (cursor), which can be processed using the functions of the `NANO$RSLT` package. 
+Параметры:
 
-Parameters:
+- `stmt` -- указатель на подготовленный запрос;
+- `batch_operations` -- количество пакетных операций. По умолчанию равно 1.
 
-- `stmt` - a pointer to a prepared statement;
-- `batch_operations` - the number of batch operations. The default is 1.
+Функция `transact_stmt()` - выполняет ранее подготовленный SQL запрос, стартуя и завершая собственную (автономную) транзакцию. Функция возвращает указатель на набор данных (курсор), который можно обработать с помощью функций пакета `NANO$RSLT`. Параметры:
 
-The `transact_stmt()` function - executes a previously prepared SQL statement, starting and ending its own (autonomous) transaction. The function returns a pointer to a data set (cursor), which can be processed using the functions of the `NANO$RSLT` package. 
+Параметры:
 
-Parameters:
+- `stmt` -- указатель на подготовленный запрос;
+- `batch_operations` -- количество пакетных операций. По умолчанию равно 1.
 
-- `stmt` - a pointer to a prepared statement;
-- `batch_operations` - the number of batch operations. The default is 1.
+Функция just_transact_stmt() - выполняет ранее подготовленный SQL запрос, стартуя и завершая собственную (автономную) транзакцию. Функция предназначена для выполнения SQL операторов не возвращающих данные (не открывающих курсор). 
 
-Function `just_transact_stmt()` - executes a previously prepared SQL statement, starting and ending its own (autonomous) transaction. The function is designed to execute SQL statements that do not return data (do not open a cursor). 
+Параметры:
 
-Parameters:
+- `stmt` -- указатель на подготовленный запрос;
+- `batch_operations` -- количество пакетных операций. По умолчанию равно 1.
 
-- `stmt` - a pointer to a prepared statement;
-- `batch_operations` - the number of batch operations. The default is 1.
+Функция `prepare_stmt()` подготавливает SQL запрос. Параметры:
 
-The `prepare_stmt()` function prepares the SQL query. Parameters:
+- `stmt` -- указатель на запрос;
+- `query` -- текст SQL запроса;
+- `timeout` -- тайм-аут SQL оператора.
 
-- `stmt` - a pointer to the statement;
-- `query` - the text of the SQL query;
-- `timeout` - SQL statement timeout.
+== Примеры
 
-== Examples
+=== Выборка данных из таблицы Postgresql
 
-=== Fetching data from a Postgresql table
-
-This example fetches from a Postgresql database. The block text is provided with comments to understand what is happening.
+В этом примере производится выборка из базы данных Postgresql. Текст блока снабжён комментариями для понимания происходящего.
 
 [source,sql]
 ----
@@ -1363,57 +1358,57 @@ BEGIN
   conn_str = 'DRIVER={PostgreSQL ODBC Driver(UNICODE)};SERVER=localhost;DATABASE=test;UID=postgres;PASSWORD=mypassword';
   sql_txt = 'select * from t1';
 
-  -- initialize nanodbc
-  -- this function can be called in the ON CONNECT trigger
+  -- инициализация nanodbc
+  -- эту функцию можно вызывать в ON CONNECT триггере
   nano$udr.initialize();
 
   BEGIN
-    -- connect to ODBC data source
+    -- соединение с источником данных ODBC
     conn = nano$conn.connection(conn_str);
     WHEN EXCEPTION nano$nanodbc_error DO
     BEGIN
-      -- if the connection was unsuccessful
-      -- call the function to terminate nanodbc
-      -- instead of an explicit call in the script, this function can be called
-      -- in the ON DISCONNECT trigger
+      -- если соединение было неудачным
+      -- вызываем функцию для завершения работы nanodbc
+      -- вместо явного вызова в скрипте эту функцию можно вызывать 
+      -- в ON DISCONNECT триггере
       nano$udr.finalize();
-      -- rethrow exception
+      -- после чего можно пробросить исключение далее 
       EXCEPTION;
     END
   END
 
   BEGIN
-    -- allocate a pointer to an SQL statement
+    -- выделяем указатель на SQL оператор
     stmt = nano$stmt.statement_(conn);
-    -- prepare query
+    -- подготавливаем запрос
     nano$stmt.prepare_(stmt, sql_txt);
-    -- execute query
-    -- function returns a pointer to a dataset
+    -- выполняем запрос
+    -- функция возвращает указатель на набор данных
     rs = nano$stmt.execute_(stmt);
-    -- while there are records in the cursor, move forward along it
+    -- пока в курсоре есть записи перемещаемся по нему вперёд
     while (nano$rslt.next_(rs)) do
     begin
-      -- for each column, depending on its type, it is necessary to call
-      -- the corresponding function or function with the type to which
-      -- the initial column can be converted
+      -- для каждого столбца необходимо в зависимости от его типа вызывать
+      -- соответствующую функцию или функцию с типом в который возможно 
+      -- преобразование исходного столбца
       id = nano$rslt.get_integer(rs, 'id');
-      -- note, since we are working with UTF8, the function is called with u8
+      -- обратите внимание, поскольку мы работает с UTF8 вызывается функция с u8
       name = nano$rslt.get_u8_char_l(rs, 'name');
       suspend;
     end
 
-    -- release the previously allocated resource
+    -- освобождаем ранее выделенные ресурсы
     /*
     rs = nano$rslt.release_(rs);
     stmt = nano$stmt.release_(stmt);
     */
-    -- the above functions can be omitted, since calling
-    -- nano$conn.release_ will automatically release all resources
-    -- bound to the connection
+    -- вышеперечисленные функции можно опустить, поскольку
+    -- вызов nano$conn.release_ автоматически освободит все 
+    -- привязанные к соединению ресурсы
     conn = nano$conn.release_(conn);
-    -- call the function to terminate nanodbc
-    -- instead of an explicit call in the script, this function can be called
-    -- in the ON DISCONNECT trigger
+    -- вызываем функцию для завершения работы nanodbc
+    -- вместо явного вызова в скрипте эту функцию можно вызывать в 
+    -- ON DISCONNECT триггере   
     nano$udr.finalize();
 
     WHEN EXCEPTION nano$invalid_resource,
@@ -1421,30 +1416,29 @@ BEGIN
          EXCEPTION nano$binding_error
     DO
     BEGIN
-      -- if an error occurs
-      -- release previously allocated resources
+      -- если произошла ошибка
+      -- освобождаем ранее выделенные ресурсы
       /*
       rs = nano$rslt.release_(rs);
       stmt = nano$stmt.release_(stmt);
       */
-      -- the above functions can be omitted, since calling
-      -- nano$conn.release_ will automatically release all resources
-      -- bound to the connection
+    -- вышеперечисленные функции можно опустить, поскольку
+    -- вызов nano$conn.release_ автоматически освободит все 
+    -- привязанные к соединению ресурсы 
       conn = nano$conn.release_(conn);
-      -- call the function to terminate nanodbc
-      -- instead of an explicit call in the script, this function can be called
-      -- in the ON DISCONNECT trigger
+      -- вызываем функцию для завершения работы nanodbc
+      -- вместо явного вызова в скрипте эту функцию можно вызывать в ON DISCONNECT триггере
       nano$udr.finalize();
-      -- rethrow exception
+      -- после чего можно пробросить исключение далее 
       EXCEPTION;
     END
   END
 END
 ----
 
-=== Inserting data into a Postgresql table
+=== Вставка данных в таблицу Postgresql
 
-This example inserts a new row into a table. The block text is provided with comments to understand what is happening.
+В этом примере производится вставка новой строки в таблицу. Текст блока снабжён комментариями для понимания происходящего.
 
 [source,sql]
 ----
@@ -1462,42 +1456,42 @@ BEGIN
   conn_str = 'DRIVER={PostgreSQL ODBC Driver(UNICODE)};SERVER=localhost;DATABASE=test;UID=postgres;PASSWORD=mypassword';
   sql_txt = 'insert into t1(id, name) values(?, ?)';
 
-  -- initialize nanodbc
-  -- this function can be called in the ON CONNECT trigger
+  -- инициализация nanodbc
+  -- эту функцию можно вызывать в ON CONNECT триггере
   nano$udr.initialize();
 
   BEGIN
-    -- connect to ODBC data source
+    -- соединение с источником данных ODBC
     conn = nano$conn.connection(conn_str);
     WHEN EXCEPTION nano$nanodbc_error DO
     BEGIN
-      -- if the connection was unsuccessful
-      -- call the function to terminate nanodbc
-      -- instead of an explicit call in the script, this function can be called
-      -- in the ON DISCONNECT trigger
+      -- если соединение было неудачным
+      -- вызываем функцию для завершения работы nanodbc
+      -- вместо явного вызова в скрипте эту функцию можно вызывать 
+      -- в ON DISCONNECT триггере   
       nano$udr.finalize();
       EXCEPTION;
     END
   END
 
   BEGIN
-    -- allocate a pointer to an SQL statement
+    -- выделяем указатель на SQL оператор
     stmt = nano$stmt.statement_(conn);
-    -- prepare query
+    -- подготавливаем запрос
     nano$stmt.prepare_(stmt, sql_txt);
-    -- set query parameters
-    -- index starts from 0!
+    -- устанавливаем параметры запроса
+    -- индекс начинается с 0!
     nano$stmt.bind_integer(stmt, 0, 4);
     nano$stmt.bind_u8_varchar(stmt, 1, 'Row 4', 4 * 20);
-    -- execute INSERT statement
+    -- выполняем оператор INSERT
     nano$stmt.just_execute(stmt);
-    -- get the number of affected rows
+    -- получаем количество затронутых строк
     aff_rows = nano$stmt.affected_rows(stmt);
-    -- release the previously allocated resource
+    -- освобождаем ранее выделенные ресурсы
     conn = nano$conn.release_(conn);
-    -- call the function to terminate nanodbc
-    -- instead of an explicit call in the script, this function can be called
-    -- in the ON DISCONNECT trigger
+    -- вызываем функцию для завершения работы nanodbc
+    -- вместо явного вызова в скрипте эту функцию можно вызывать в 
+    -- ON DISCONNECT триггере      
     nano$udr.finalize();
 
     WHEN EXCEPTION nano$invalid_resource,
@@ -1505,11 +1499,11 @@ BEGIN
          EXCEPTION nano$binding_error
     DO
     BEGIN
-      -- release the previously allocated resource
+      -- освобождаем ранее выделенные ресурсы
       conn = nano$conn.release_(conn);
-      -- call the function to terminate nanodbc
-      -- instead of an explicit call in the script, this function can be called
-      -- in the ON DISCONNECT trigger
+      -- вызываем функцию для завершения работы nanodbc
+      -- вместо явного вызова в скрипте эту функцию можно вызывать в 
+      -- ON DISCONNECT триггере  
       nano$udr.finalize();
       EXCEPTION;
     END
@@ -1519,9 +1513,9 @@ BEGIN
 END
 ----
 
-=== Batch insert into a Postgresql table
+=== Пакетная вставка данных в таблицу Postgresql
 
-If the DBMS and ODBC driver support batch execution of queries, then batch operations can be used.
+Если СУБД и ODBC драйвер поддерживают пакетное выполнение запросов, то можно использовать batch операции.
 
 [source,sql]
 ----
@@ -1536,44 +1530,44 @@ BEGIN
   conn_str = 'DRIVER={PostgreSQL ODBC Driver(UNICODE)};SERVER=localhost;DATABASE=test;UID=postgres;PASSWORD=mypassword';
   sql_txt = 'insert into t1(id, name) values(?, ?)';
 
-  -- initialize nanodbc
-  -- this function can be called in the ON CONNECT trigger
+  -- инициализация nanodbc
+  -- эту функцию можно вызывать в ON CONNECT триггере
   nano$udr.initialize();
 
   BEGIN
-    -- connect to ODBC data source
+    -- соединение с источником данных ODBC
     conn = nano$conn.connection(conn_str);
     WHEN EXCEPTION nano$nanodbc_error DO
     BEGIN
-      -- if the connection was unsuccessful
-      -- call the function to terminate nanodbc
-      -- instead of an explicit call in the script, this function can be called
-      -- in the ON DISCONNECT trigger
+      -- если соединение было неудачным
+      -- вызываем функцию для завершения работы nanodbc
+      -- вместо явного вызова в скрипте эту функцию можно вызывать 
+      -- в ON DISCONNECT триггере  
       nano$udr.finalize();
       EXCEPTION;
     END
   END
 
   BEGIN
-    -- allocate a pointer to an SQL statement
+    -- выделяем указатель на SQL оператор
     stmt = nano$stmt.statement_(conn);
-    -- prepare query
+    -- подготавливаем запрос
     nano$stmt.prepare_(stmt, sql_txt);
-    -- set query parameters
-    -- index starts from 0!
-    -- first row
+    -- устанавливаем параметры запроса
+    -- индекс начинается с 0!
+    -- первая запись
     nano$stmt.bind_integer(stmt, 0, 5);
     nano$stmt.bind_u8_varchar(stmt, 1, 'Row 5', 4 * 20);
-    -- second row
+    -- вторая запись
     nano$stmt.bind_integer(stmt, 0, 6);
     nano$stmt.bind_u8_varchar(stmt, 1, 'Row 6', 4 * 20);
-    -- execute an INSERT statement with a batch size of 2
+    -- выполняем оператор INSERT, с размером пакета 2
     nano$stmt.just_execute(stmt, 2);
-    -- release the previously allocated resource
+    -- освобождаем ранее выделенные ресурсы
     conn = nano$conn.release_(conn);
-    -- call the function to terminate nanodbc
-    -- instead of an explicit call in the script, this function can be called
-    -- in the ON DISCONNECT trigger
+    -- вызываем функцию для завершения работы nanodbc
+    -- вместо явного вызова в скрипте эту функцию можно вызывать в 
+    -- ON DISCONNECT триггере    
     nano$udr.finalize();
 
     WHEN EXCEPTION nano$invalid_resource,
@@ -1581,11 +1575,11 @@ BEGIN
          EXCEPTION nano$binding_error
     DO
     BEGIN
-      -- release the previously allocated resource
+      -- освобождаем ранее выделенные ресурсы
       conn = nano$conn.release_(conn);
-      -- call the function to terminate nanodbc
-      -- instead of an explicit call in the script, this function can be called
-      -- in the ON DISCONNECT trigger
+      -- вызываем функцию для завершения работы nanodbc
+      -- вместо явного вызова в скрипте эту функцию можно вызывать в 
+      -- ON DISCONNECT триггере  
       nano$udr.finalize();
       EXCEPTION;
     END
@@ -1593,7 +1587,7 @@ BEGIN
 END
 ----
 
-=== Using transaction
+=== Использование транзакций
 
 [source,sql]
 ----
@@ -1611,49 +1605,49 @@ BEGIN
   sql_txt = 'insert into t1(id, name) values(?, ?)';
   sql_txt2 = 'insert into t2(id, name) values(?, ?)';
 
-  -- initialize nanodbc
-  -- this function can be called in the ON CONNECT triggerре
+  -- инициализация nanodbc
+  -- эту функцию можно вызывать в ON CONNECT триггере
   nano$udr.initialize();
 
   BEGIN
-    -- connect to ODBC data source
+    -- соединение с источником данных ODBC
     conn = nano$conn.connection(conn_str);
     WHEN EXCEPTION nano$nanodbc_error DO
     BEGIN
-      -- if the connection was unsuccessful
-      -- call the function to terminate nanodbc
-      -- instead of an explicit call in the script, this function can be called
-      -- in the ON DISCONNECT trigger
+      -- если соединение было неудачным
+      -- вызываем функцию для завершения работы nanodbc
+      -- вместо явного вызова в скрипте эту функцию можно вызывать 
+      -- в ON DISCONNECT триггере      
       nano$udr.finalize();
       EXCEPTION;
     END
   END
 
   BEGIN
-    -- prepare first SQL query
+    -- подготавливаем первый SQL запрос
     stmt = nano$stmt.statement_(conn);
     nano$stmt.prepare_(stmt, sql_txt);
-    -- prepare second SQL query
+    -- подготавливаем второй SQL запрос
     stmt2 = nano$stmt.statement_(conn);
     nano$stmt.prepare_(stmt2, sql_txt2);
-    -- start transaction
+    -- стартуем транзакцию
     tnx = nano$tnx.transaction_(conn);
-    -- execute first statement within the transaction
+    --выполняем первый запрос в рамках транзакции
     nano$stmt.bind_integer(stmt, 0, 8);
     nano$stmt.bind_u8_varchar(stmt, 1, 'Row 8', 4 * 20);
     nano$stmt.just_execute(stmt);
-    -- execute second statement within the transaction
+    --выполняем второй запрос в рамках транзакции
     nano$stmt.bind_integer(stmt2, 0, 1);
     nano$stmt.bind_u8_varchar(stmt2, 1, 'Row 1', 4 * 20);
     nano$stmt.just_execute(stmt2);
-    -- commit transaction
+    -- подтверждаем транзакцию
     nano$tnx.commit_(tnx);
 
-    -- release the previously allocated resource
+    -- освобождаем ранее выделенные ресурсы
     conn = nano$conn.release_(conn);
-    -- call the function to terminate nanodbc
-    -- instead of an explicit call in the script, this function can be called
-    -- in the ON DISCONNECT trigger
+    -- вызываем функцию для завершения работы nanodbc
+    -- вместо явного вызова в скрипте эту функцию можно вызывать в 
+    -- ON DISCONNECT триггере  
     nano$udr.finalize();
 
     WHEN EXCEPTION nano$invalid_resource,
@@ -1661,12 +1655,12 @@ BEGIN
          EXCEPTION nano$binding_error
     DO
     BEGIN
-      -- release the previously allocated resource
-      -- in case of an error, the unconfirmed transaction will be rolled back automatically
+      -- освобождаем ранее выделенные ресурсы
+      -- в случаем ошибки неподтверждённая транзакция откатится автоматически
       conn = nano$conn.release_(conn);
-      -- call the function to terminate nanodbc
-      -- instead of an explicit call in the script, this function can be called
-      -- in the ON DISCONNECT trigger
+      -- вызываем функцию для завершения работы nanodbc
+      -- вместо явного вызова в скрипте эту функцию можно вызывать в 
+      -- ON DISCONNECT триггере  
       nano$udr.finalize();
       EXCEPTION;
     END
