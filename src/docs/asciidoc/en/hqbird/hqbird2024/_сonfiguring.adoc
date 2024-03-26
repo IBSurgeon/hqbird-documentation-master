@@ -294,12 +294,10 @@ To register database in FBDataGuard, you need to click at the symbol "`Plus`" in
 image::3.1.5.png[]
 
 * "`*Database nick name*`" is for your convenience, it is used to refer this database in alerts and email messages.
-* "`*DB alias*`" is a database alias from [path]_aliases.conf_ or in [path]_databases.conf_. If you specify both "`DB Alias`" and "`Path to database`", "`DB Alias`" will be used.
+* "`*DB alias*`" is a database alias from `aliases.conf` or in `databases.conf`. If you specify both "`DB Alias`" and "`Path to database`", "`DB Alias`" will be used.
 * "`*Path to database*`" is the local path to database (remember that FBDataGuard should work at the same computer with Firebird). If you are putting database on external drive, it can raise error "`File... has unknown partition`". To fix it you need to click on "`Configure`" at Server widget and click "`Save`" to make FBDataGuard re-read partitions.
-* "`*Crypt key name*`" – if the database is encrypted, specify encryption key name.
-* "`*Crypt key value*`" – if the database is encrypted, specify encryption key value.
-* "`*Output folder*`" is the folder where FBDataGuard will store backups, logs and statistics for this database. If you do not select HQbirdData folder during the installation, and if you do not specify output folder for the server, it's a good idea to specify "`Output directory`" to some explicit location like [path]_F:\mydatabasedata_.
-* "`*Enable advanced monitoring*`" - see <<_hqbird_advanced_monitor_viewer,Advanced Monitor Viewer>>
+* "`*Output folder (backups and logs)*`" is the folder where FBDataGuard will store backups, logs and statistics for this database. If you do not select HQbirdData folder during the installation, and if you do not specify output folder for the server, it's a good idea to specify "`Output folder`" to some explicit location like `F:\mydatabasedata`.
+* "`*Enable advanced monitoring*`" -- see <<_hqbird_advanced_monitor_viewer,Advanced Monitor Viewer>>
 
 
 [NOTE]
@@ -312,8 +310,6 @@ You can see the list of databases available for registration or their aliases by
 .Available database aliases.
 image::3.1.5-1.png[]
 
-You can see the list of databases available for registration or their aliases by clicking on the link **View open databases**.
-
 After registration, FBDataGuard will populate database configuration with default values and then show web-console with registered database:
 
 .HQbird FBDataGuard web console after adding a database.
@@ -321,10 +317,9 @@ image::3.1.6.png[]
 
 You can adjust database settings later; now let's proceed with alerts setup.
 
-=== Database: General configuration
+=== Database: Configure
 
-FBDataGuard can monitor several databases at the single server (up to 80 databases). For each database the separate widget is created.
-At the top widget database status is shown, database nickname (it's specified during database adding and can be changed). Also database widget shows the full path to the database, its size, status of backups and the number of currently connected users.
+FBDataGuard can monitor several databases at the single server (up to 80 databases). For each database the separate widget is created. At the top widget database status is shown, database nickname (it's specified during database adding and can be changed). Also database widget shows the full path to the database, its size, status of backups and the number of currently connected users.
 
 image::3.2.21.png[]
 
