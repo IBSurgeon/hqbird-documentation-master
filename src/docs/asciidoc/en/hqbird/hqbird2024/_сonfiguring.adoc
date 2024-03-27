@@ -336,8 +336,7 @@ Since HQbird 2020, the database widget in HQbird also shows the encryption statu
 
 === Database: Transactions
 
-"`Database: Transactions`" job is intended to log transactions activity.
-It monitors 2 important intervals: difference between Oldest Active Transaction and Next transaction and gap between Oldest Snapshot and Oldest Interesting.
+"`Database: Transactions`" job is intended to log transactions activity. It monitors 2 important intervals: difference between Oldest Active Transaction and Next transaction and gap between Oldest Snapshot and Oldest Interesting.
 
 If these intervals are out of the frames of the specified threshold, it means problem with transactions management.
 
@@ -345,36 +344,32 @@ image::3.2.23.png[]
 
 These logs can be analyzed to get helpful insight regarding database performance and application quality (see more information here http://ib-aid.com/en/articles/ibanalyst-what-you-can-see-at-summary-view/).
 
-This job also monitors the implementation limit in Firebird: maximum transactions number in Firebird versions before 3.0 should be less than 2^31^-1.
+This job also monitors the implementation limit in Firebird: maximum transactions number in Firebird versions before 3.0 should be less than 2^31^-1. Near this number database should be backup and restored. It will throw an alert if transaction number will be close to the restrictions. 
 
-Near this number database should be backup and restored.
-It will throw an alert if transaction number will be close to the restrictions.
 Also, the transaction dynamics is shown on the tab "`Graphs gallery`":
 
 image::3.2.24.png[]
 
 === Database: Lockprint
 
-"`Lockprint`" job monitors the information from the lock table of Firebird.
-It is very important for architectures Classic/SuperClassic and useful for SuperServer.
+"`Lockprint`" job monitors the information from the lock table of Firebird. It is very important for architectures Classic/SuperClassic and useful for SuperServer.
 
-The lock table is an internal Firebird mechanism to organize access to the objects inside Firebird engine.
-HQbird monitors the important parameters of the lock table:
+The lock table is an internal Firebird mechanism to organize access to the objects inside Firebird engine. HQbird monitors the important parameters of the lock table:
 
 image::3.2.25.png[]
 
 
-* **Check period**, minutes -- how often HQbird analyses lock table. 3 minutes is an optimal interval.
-* *Deadlock Scans threshold* -- deadlock scan is a process, started by Firebird engine, in case of a long response delay from the one of the threads. If a number of deadlock scans is high, it means that Firebird is heavily loaded. The value is accumulated since the Firebird engine start. The default value is pretty big – 12345, so if it is exceeded, it means that database performance is poor.
+* **Check period, minutes** -- how often HQbird analyses lock table. 3 minutes is an optimal interval.
+* *Deadlock Scans delta threshold* -- deadlock scan is a process, started by Firebird engine, in case of a long response delay from the one of the threads. If a number of deadlock scans is high, it means that Firebird is heavily loaded. The value is accumulated since the Firebird engine start. The default value is pretty big – 12345, so if it is exceeded, it means that database performance is poor.
 * *Deadlock threshold* -- if Firebird engine finds the true deadlock during the deadlock scans, it increases this value. Please note: true deadlocks are very seldom. Don't confuse them with transactions' conflicts ("`deadlock. Lock conflict on nowait transaction`" etc).
-* *Mutex wait threshold* -- Mutex Wait is a parameter of lock table which implicitly indicates the conflicts for the resources. The higher mutex wait, the more competition exists inside the engine for the resources. By default, the mutex wait threshold is set to 18%, but this value is not universal for all databases. The good approach is to watch for the mutex values during 1-2 weeks and then set the highest value seen during this period. Mutex wait graph is available in Mutex Wait gallery.
+* *Mutex Wait threshold* -- Mutex Wait is a parameter of lock table which implicitly indicates the conflicts for the resources. The higher mutex wait, the more competition exists inside the engine for the resources. By default, the mutex wait threshold is set to 18%, but this value is not universal for all databases. The good approach is to watch for the mutex values during 1-2 weeks and then set the highest value seen during this period. Mutex wait graph is available in Mutex Wait gallery.
 +
 image::3.2.26.png[]
 * **Hash slots alerts**. Lock table header has a parameter "`Hash lengths (min/avg/max): 0/0/4`", it shows the lengths in the lock table. It is important to keep these values as low as possible, so HQbird monitors them and suggest, how to improve the situation, if hash length is more than specified in this job.
-* *Owners limit.*"`Owners`" is a number of connections established to the specified database. In fact, this is the fastest way to get the actual number of connections to the database with the minimum load to the database -- other ways like request to `MON$ATTACHMENTS` or [constant]``isc_tpb_database`` have various disadvantages. The limit here should be set according the actual peak number of connections. For example, if you are sure that peak number of the connections to your database is 500, set 550 as Owners limit, and if at some moment the load will increase, you will not miss that moment.
+* *Owners limit.* "`Owners`" is a number of connections established to the specified database. In fact, this is the fastest way to get the actual number of connections to the database with the minimum load to the database -- other ways like request to `MON$ATTACHMENTS` or `isc_tpb_database` have various disadvantages. The limit here should be set according the actual peak number of connections. For example, if you are sure that peak number of the connections to your database is 500, set 550 as Owners limit, and if at some moment the load will increase, you will not miss that moment.
 +
 image::3.2.27.png[]
-* **Free owners**. "`Free owners`" is the value between the peak number of owners and current number of owners. If you see ``Free owners = 0``, it means that number of connections grows steadily since the Firebird start. If you see high number of Free owners, it can be sign that many connections were disconnected recently.
+* **Free owners limit**. "`Free owners`" is the value between the peak number of owners and current number of owners. If you see ``Free owners = 0``, it means that number of connections grows steadily since the Firebird start. If you see high number of Free owners, it can be sign that many connections were disconnected recently.
 * **Lock table size**. The lock table size is an implicit indicator of the load to the system. Normally, lock table size should be stable. Also, it is recommended to set the initial lock table size to the value it has after some active work period -- though the lock table is enlarged on demand, the re-allocation process is a heavy operation and can lead to micro-freezes in database responses. Lock table graph is useful to determine the proper initial value.
 +
 image::3.2.28.png[]

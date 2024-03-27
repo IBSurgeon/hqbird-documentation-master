@@ -311,7 +311,7 @@ image::3.1.6.png[]
 
 Вы можете изменить настройки базы данных позже; теперь приступим к настройке оповещений.
 
-=== Базы данных: Настройка
+=== Базы данных: Общие настройки
 
 FBDataGuard может контролировать несколько баз данных на одном сервере (до 80 баз данных). Для каждой базы данных создается отдельный виджет. Вверху виджета отображается состояние базы данных, никнейм базы данных (задается при добавлении базы данных и может быть изменен). Также виджет базы данных показывает полный путь к базе данных, ее размер, состояние резервных копий и количество подключенных в данный момент пользователей.
 
@@ -327,51 +327,46 @@ FBDataGuard проверяет корректность пути к базе д�
 
 Виджет базы данных в HQbird также показывает статус шифрования базы данных.
 
-=== Database: Transactions
+=== Базы данных: Транзакции
 
-"`Database: Transactions`" job is intended to log transactions activity.
-It monitors 2 important intervals: difference between Oldest Active Transaction and Next transaction and gap between Oldest Snapshot and Oldest Interesting.
+Задание "`Базы данных: Транзакции`" предназначено для регистрации активности транзакций. Оно отслеживает два важных интервала: разницу между Oldest Active Transaction и Next transaction, а также разрыв между Oldest Snapshot и Oldest Interesting.
 
-If these intervals are out of the frames of the specified threshold, it means problem with transactions management.
+Если эти интервалы выходят за рамки указанного порога, то это означает проблемы с управлением транзакциями.
 
 image::3.2.23.png[]
 
-These logs can be analyzed to get helpful insight regarding database performance and application quality (see more information here http://ib-aid.com/en/articles/ibanalyst-what-you-can-see-at-summary-view/).
+Эти журналы можно проанализировать, чтобы получить полезную информацию о производительности базы данных и качестве приложений (дополнительную информацию см. здесь http://ib-aid.com/en/articles/ibanalyst-what-you-can-see-at-summary-view/).
 
-This job also monitors the implementation limit in Firebird: maximum transactions number in Firebird versions before 3.0 should be less than 2^31^-1.
+Это задание также отслеживает ограничение реализации в Firebird: максимальное количество транзакций в версиях Firebird до 3.0 должно быть меньше 2^31^-1. При приближении к этому значению необходимо выполнить резервное копирование и восстановление базы данных. Оно выдаст предупреждение, если номер транзакции будет близок к ограничениям. 
 
-Near this number database should be backup and restored.
-It will throw an alert if transaction number will be close to the restrictions.
-Also, the transaction dynamics is shown on the tab "`Graphs gallery`":
+Также динамика транзакций отображается на вкладке "`Graphs gallery`":
 
 image::3.2.24.png[]
 
-=== Database: Lockprint
+=== Базы данных: Lockprint
 
-"`Lockprint`" job monitors the information from the lock table of Firebird.
-It is very important for architectures Classic/SuperClassic and useful for SuperServer.
+Задание "`Lockprint`" отслеживает информацию из таблицы блокировок Firebird. Это очень важно для архитектур Classic/SuperClassic и полезно для SuperServer.
 
-The lock table is an internal Firebird mechanism to organize access to the objects inside Firebird engine.
-HQbird monitors the important parameters of the lock table:
+Таблица блокировок -- это внутренний механизм Firebird для организации доступа к объектам внутри движка Firebird. HQbird отслеживает важные параметры таблицы блокировок:
 
 image::3.2.25.png[]
 
 
-* **Check period**, minutes -- how often HQbird analyses lock table. 3 minutes is an optimal interval.
-* *Deadlock Scans threshold* -- deadlock scan is a process, started by Firebird engine, in case of a long response delay from the one of the threads. If a number of deadlock scans is high, it means that Firebird is heavily loaded. The value is accumulated since the Firebird engine start. The default value is pretty big – 12345, so if it is exceeded, it means that database performance is poor.
-* *Deadlock threshold* -- if Firebird engine finds the true deadlock during the deadlock scans, it increases this value. Please note: true deadlocks are very seldom. Don't confuse them with transactions' conflicts ("`deadlock. Lock conflict on nowait transaction`" etc).
-* *Mutex wait threshold* -- Mutex Wait is a parameter of lock table which implicitly indicates the conflicts for the resources. The higher mutex wait, the more competition exists inside the engine for the resources. By default, the mutex wait threshold is set to 18%, but this value is not universal for all databases. The good approach is to watch for the mutex values during 1-2 weeks and then set the highest value seen during this period. Mutex wait graph is available in Mutex Wait gallery.
+* **Период проверки, минуты** -- как часто HQbird анализирует таблицу блокировок. 3 минуты -- оптимальный интервал.
+* *Лимит изменения Deadlock Scans* -- сканирование взаимоблокировок -- это процесс, запускаемый движком Firebird в случае длительной задержки ответа от одного из потоков. Если количество взаимоблокировок велико, это означает, что Firebird сильно загружен. Значение накапливается с момента запуска движка Firebird. Значение по умолчанию довольно велико -- 12345, поэтому его превышение означает низкую производительность базы данных.
+* *Лимит Deadlocks* -- если движок Firebird обнаруживает истинную взаимоблокировку во время сканирования взаимоблокировок, он увеличивает это значение. Обратите внимание: настоящие взаимоблокировки случаются очень редко. Не путайте их с конфликтами транзакций  ("`deadlock. Lock conflict on nowait transaction`" и другое).
+* *Лимит Mutex Wait*. Mutex Wait -- это параметр таблицы блокировок, который неявно указывает на конфликты ресурсов. Чем выше время ожидания мьютекса, тем выше конкуренция внутри движка за ресурсы. По умолчанию порог ожидания мьютекса установлен на 18%, но это значение не является универсальным для всех баз данных. Хороший подход -- следить за значениями мьютексов в течение 1–2 недель, а затем устанавливать самое высокое значение, наблюдаемое за этот период. График ожидания мьютекса доступен в галерее Mutex Wait.
 +
 image::3.2.26.png[]
-* **Hash slots alerts**. Lock table header has a parameter "`Hash lengths (min/avg/max): 0/0/4`", it shows the lengths in the lock table. It is important to keep these values as low as possible, so HQbird monitors them and suggest, how to improve the situation, if hash length is more than specified in this job.
-* *Owners limit.*"`Owners`" is a number of connections established to the specified database. In fact, this is the fastest way to get the actual number of connections to the database with the minimum load to the database -- other ways like request to `MON$ATTACHMENTS` or [constant]``isc_tpb_database`` have various disadvantages. The limit here should be set according the actual peak number of connections. For example, if you are sure that peak number of the connections to your database is 500, set 550 as Owners limit, and if at some moment the load will increase, you will not miss that moment.
+* **Проверять значение Hash Slots**. В заголовке таблицы блокировок есть параметр "`Hash lengths (min/avg/max): 0/0/4`", он отображает длины цепочек коллизий в хеш-таблице блокировок. Важно сохранять эти значения как можно меньшими, поэтому HQbird отслеживает их и подсказывает, как улучшить ситуацию, если длина цепочки коллизий в хеш таблице больше, чем указано в этом задании.
+* *Лимит активных соединений* "`Owners`" -- количество подключений, установленных к указанной базе данных. Фактически, это самый быстрый способ получить фактическое количество подключений к базе данных с минимальной нагрузкой на базу данных -- другие способы, такие как запрос к `MON$ATTACHMENTS` или `isc_tpb_database`, имеют различные недостатки. Ограничение здесь должно быть установлено в соответствии с фактическим пиковым количеством подключений. Например, если вы уверены, что пиковое количество подключений к вашей базе данных составляет 500, установите в качестве лимита 550, и если в какой-то момент нагрузка увеличится, вы не пропустите этот момент.
 +
 image::3.2.27.png[]
-* **Free owners**. "`Free owners`" is the value between the peak number of owners and current number of owners. If you see ``Free owners = 0``, it means that number of connections grows steadily since the Firebird start. If you see high number of Free owners, it can be sign that many connections were disconnected recently.
-* **Lock table size**. The lock table size is an implicit indicator of the load to the system. Normally, lock table size should be stable. Also, it is recommended to set the initial lock table size to the value it has after some active work period -- though the lock table is enlarged on demand, the re-allocation process is a heavy operation and can lead to micro-freezes in database responses. Lock table graph is useful to determine the proper initial value.
+* **Лимит закрытых соединений**. "`Free owners`" -- это соотношение между пиковым количеством соединений и текущим количеством соединений. Если вы видите `Free owners = 0`,  то это означает, что количество подключений постоянно растет с момента запуска Firebird. Если вы видите большое количество Free owners, то это может означать, что многие соединения недавно были отключены.
+* **Размер таблицы блокировок**. Размер таблицы блокировок является неявным индикатором нагрузки на систему. Обычно размер таблицы блокировок должен быть стабильным. Кроме того, рекомендуется установить первоначальный размер таблицы блокировок равным значению, которое она имеет после некоторого периода активной работы -- хотя таблица блокировок увеличивается по требованию, процесс перераспределения является тяжелой операцией и может привести к микрозависаниям в ответах базы данных. График таблицы блокировки полезен для определения правильного начального значения.
 +
 image::3.2.28.png[]
-* **Lock table queue**. Lock table queue does not have the explicit threshold in Lockprint job, but its values are collected and shown in "`Graphs gallery`". Lock table queue is an indicator of a general load.
+* **Очередь к таблице блокировок**. Очередь таблиц блокировки не имеет явного порога в задании Lockprint, но ее значения собираются и отображаются в "`Graphs gallery`". Очередь таблицы блокировок является индикатором общей загрузки.
 
 image::3.2.29.png[]
 
