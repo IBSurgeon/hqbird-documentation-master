@@ -1,0 +1,442 @@
+== Плагин mongodb_events_plugin
+
+Плагин `mongodb_events_plugin` предназначен для регистрации событий в базе данных Firebird и их запись в NoSQL СУБД MongoDB.
+
+Каждое событие представляет собой документ в коллекции `events`. 
+
+В событии содержаться следующие сведения:
+
+* тип события (`INSERT`, `UPDATE`, `DELETE`, `SET SEQUENCE`, `EXECUTE SQL`);
+* для событий `INSERT`, `UPDATE`, `DELETE`:
+** имя таблицы, для которого произошло это событие;
+** номер транзакции в которой произошло это событие;
+** старые и новые значение полей записи таблицы;
+** массив изменившихся полей для события `UPDATE`;
+** новые значения BLOB полей;
+* для события `SET SEQUENCE`:
+** имя последовательности (генератора);
+** значение последовательности;
+* для события `EXECUTE SQL`:
+** номер транзакции в которой произошло это событие;
+** текст SQL запроса.
+
+В событии `INSERT` присутствуют только новые значения полей.
+В событии `UPDATE` присутствуют как старые, так и новые значения полей.
+В событии `DELETE` присутствуют только старые значения полей.
+
+Событие `EXECUTE SQL` возникает только для DDL запросов.
+
+[NOTE]
+====
+Для BLOB полей всегда сохраняется BlobId. Если параметр конфигурации `dumpBlobs`, то в дополнение к этому для событий `INSERT` и `UPDATE` будут публиковаться новые значения BLOB полей. Для старых значений полей это не возможно, поскольку старые значения BLOB полей  отсутствуют в файлах журнала репликации.
+====
+
+== Алгоритм работы плагина mongodb_events_plugin
+
+Каждое событие в базе данных MongoDB сохраняется как документ в коллекцию `events`.
+
+* служба `fb_streaming` анализирует директорию с журналами репликации, установленную для задачи, на наличие необработанных файлов; 
+* для ещё необработанных файлов репликации анализируются следующие события:
+** старт транзакции. Выделяется структура в памяти для хранения точек сохранения;
+** создание точки сохранения. Выделяется структура в памяти для хранения документов;
+** освобождение точки сохранения. Документы сохранённые в этой точки сохранения копируются в точку сохранения более высокого уровня;
+** откат точки сохранения. Точка сохранения уничтожается вместе со всеми документами;
+** фиксация транзакции. Документы созданные в событиях `INSERT`, `UPDATE`, `DELETE` и `EXECUTE SQL` записываются в базу данных MongoDB;
+** откат транзакции. Уничтожаются все точки сохранения и сохранённые в них документы;
+** выполнение DDL запроса (`EXECUTE SQL`). Создаётся новый документ и сохраняется в список документов для точки сохранения. В документе сохраняются текст запроса, тип события и номер транзакции;
+** установка нового значения последовательности (`SET SEQUENCE`). Создаётся новый документ и немедленно записываются в базу данных MongoDB. В документе сохраняются имя последовательности, тип события и новое значение последовательности;
+** события `INSERT`, `UPDATE` и `DELETE`. Проверяется имя таблицы в фильтрах `include_tables` и `exclude_tables`, и если имя таблицы удовлетворяет критериям фильтрации, то создаётся новый документ и сохраняется в список документов для точки сохранения. В документе сохраняются имя таблицы, тип события, номер транзакции, старые и новые значения полей.
+* после обработки файла, его номер фиксируется в контрольном файле.
+ 
+Остальные события репликации игнорируются.
+
+== Настройка плагина mongodb_events_plugin
+
+В первую очередь необходимо настроить асинхронную репликацию для вашей базы данных, для этого в файле `replication.conf` необходимо добавить следующие строчки:
+
+[listing]
+----
+database = d:\fbdata\4.0\horses.fdb
+{
+    journal_directory = d:\fbdata\4.0\replication\horses\journal
+    journal_archive_directory = d:\fbdata\4.0\replication\horses\archive
+    journal_archive_command = "copy $(pathname) $(archivepathname) && copy $(pathname) d:\fbdata\4.0\replication\horses\archive_mongo
+}
+----
+
+Обратите внимание: здесь происходит дублирование файлов архивов журналов, чтобы одновременно работала логическая репликация и задача по записи событий в MongoDB. Это необходимо, поскольку файлы с архивами журналов удаляются после обработки и не могут быть использованы другой задаче.
+
+Теперь необходимо включить репликацию в базе данных:
+
+[source,sql]
+----
+ALTER DATABASE INCLUDE ALL TO PUBLICATION;
+ALTER DATABASE ENABLE PUBLICATION;
+----
+
+Далее настроим конфигурацию `fb_streaming.conf` для того, чтобы `fb_streaming` автоматически записывал события в MongoDB.
+
+[listing]
+----
+task = d:\fbdata\4.0\replication\horses\archive_mongo
+{
+   database = inet://localhost:3054/d:\fbdata\4.0\horses.fdb             
+   username = SYSDBA
+   password = masterkey
+   plugin = mongodb_events_plugin
+   mongo_uri = mongodb://localhost:27017
+   mongo_database = horses
+   dumpBlobs = true
+   register_ddl_events = true
+   register_sequence_events = true
+   # include_tables = 
+   # exclude_tables = 
+}
+----
+
+Для этого плагина появились ряд дополнительных настроек:
+
+- `mongo_uri` -- URI для подключения к серверу MongoDB;
+- `mongo_database` -- имя базы данных в MongoDB в которую сохраняются события;
+- `dumpBlobs` -- публиковать ли новые значения BLOB полей (по умолчанию false);
+- `register_ddl_events` -- регистрировать ли DDL события (по умолчанию true);
+- `register_sequence_events` -- регистрировать ли события установки значения последовательности (по умолчанию true);
+- `include_tables` -- регулярное выражение, определяющие имена таблиц для которых необходимо отслеживать события;
+- `exclude_tables` -- регулярное выражение, определяющие имена таблиц для которых не надо отслеживать события.
+
+[NOTE]
+====
+Если базы данных, указанной в параметре `mongo_database` не существует, то она будет создана при первой записи в неё.
+====
+
+Теперь можно установить и запустит службу:
+
+[listing]
+----
+c:\streaming>fb_streaming install
+Success install service!
+
+c:\streaming>fb_streaming start
+Service start pending...
+Service started successfully.
+----
+
+В Linux:
+
+[source,bash]
+----
+sudo systemctl enable fb_streaming
+
+sudo systemctl start fb_streaming
+----
+
+== Пример содержимого лога событий в БД MongoDB
+
+Для получения всех событий, набираем в `mongosh` следующие команды
+
+[listing]
+----
+use horses;
+'switched to db horses'
+db.events.find();
+----
+
+Здесь первой командой мы переключились на базу данных `horses` в которую велась запись событий.
+
+Вторая команда является запросом на выборку данных из коллекции `events`. Именно в эту коллекцию плагин `mongodb_events_plugin` записывает свои события.
+
+Содержимое коллекции выглядит следующим образом:
+
+[listing]
+----
+{ _id: ObjectId("638f37f5022b0000ad005775"),
+  event: 'EXECUTE SQL',
+  sql: 'CREATE SEQUENCE SEQ1',
+  tnx: 6590 }
+{ _id: ObjectId("638f37f9022b0000ad005776"),
+  event: 'EXECUTE SQL',
+  sql: 'CREATE TABLE TABLE1 (\r\n  ID INT NOT NULL,\r\n  S VARCHAR(10),\r\n  PRIMARY KEY(ID)\r\n)',
+  tnx: 6591 }
+{ _id: ObjectId("638f37f9022b0000ad005777"),
+  event: 'EXECUTE SQL',
+  sql: 'ALTER TABLE TABLE1\r\nENABLE PUBLICATION',
+  tnx: 6594 }
+{ _id: ObjectId("638f37f9022b0000ad005778"),
+  event: 'SET SEQUENCE',
+  sequence: 'SEQ1',
+  value: 1 }
+{ _id: ObjectId("638f37f9022b0000ad005779"),
+  event: 'INSERT',
+  table: 'TABLE1',
+  tnx: 6597,
+  record: { ID: 1, S: 'Hello' } }
+{ _id: ObjectId("638f3823022b0000ad00577b"),
+  event: 'EXECUTE SQL',
+  sql: 'DROP TABLE TABLE1',
+  tnx: 6608 }
+{ _id: ObjectId("638f3827022b0000ad00577c"),
+  event: 'EXECUTE SQL',
+  sql: 'DROP SEQUENCE SEQ1',
+  tnx: 6609 }
+{ _id: ObjectId("633d8c86873d0000d8004172"),
+  event: 'UPDATE',
+  table: 'COLOR',
+  tnx: 11771,
+  changedFields: [ 'NAME_DE' ],
+  oldRecord: 
+   { NAME_EN: 'dun',
+     NAME: 'мышастая',
+     CODE_COLOR: 14,
+     CODE_SENDER: 1,
+     NAME_DE: '',
+     SHORTNAME_EN: 'dun',
+     SHORTNAME: 'мыш.' },
+  record: 
+   { NAME_EN: 'dun',
+     NAME: 'мышастая',
+     CODE_COLOR: 14,
+     CODE_SENDER: 1,
+     NAME_DE: 'g',
+     SHORTNAME_EN: 'dun',
+     SHORTNAME: 'мыш.' } }
+{ _id: ObjectId("633d8c8a873d0000d8004173"),
+  event: 'UPDATE',
+  table: 'COLOR',
+  tnx: 11790,
+  changedFields: [ 'NAME_DE' ],
+  oldRecord: 
+   { NAME_EN: 'dun',
+     NAME: 'мышастая',
+     CODE_COLOR: 14,
+     CODE_SENDER: 1,
+     NAME_DE: 'g',
+     SHORTNAME_EN: 'dun',
+     SHORTNAME: 'мыш.' },
+  record: 
+   { NAME_EN: 'dun',
+     NAME: 'мышастая',
+     CODE_COLOR: 14,
+     CODE_SENDER: 1,
+     NAME_DE: '',
+     SHORTNAME_EN: 'dun',
+     SHORTNAME: 'мыш.' } }
+{ _id: ObjectId("633d8c8a873d0000d8004174"),
+  event: 'INSERT',
+  table: 'CLIP',
+  tnx: 11821,
+  record: 
+   { AVALUE: 44,
+     CODE_CLIP: 1,
+     CODE_CLIPTYPE: 1,
+     CODE_RECORD: 345,
+     REMARK: null } }
+{ _id: ObjectId("633d8c8a873d0000d8004175"),
+  event: 'DELETE',
+  table: 'CLIP',
+  tnx: 11849,
+  record: 
+   { AVALUE: 44,
+     CODE_CLIP: 1,
+     CODE_CLIPTYPE: 1,
+     CODE_RECORD: 345,
+     REMARK: null } }
+{ _id: ObjectId("633d8c8a873d0000d8004176"),
+  event: 'UPDATE',
+  table: 'BREED',
+  tnx: 11891,
+  changedFields: [ 'MARK' ],
+  oldRecord: 
+   { NAME: 'орловская рысистая',
+     CODE_DEPARTURE: 15,
+     CODE_BREED: 55,
+     CODE_SENDER: 1,
+     NAME_EN: 'Orlov trotter',
+     SHORTNAME_EN: 'orl. trot.',
+     SHORTNAME: 'орл.рыс.',
+     MARK: '' },
+  record: 
+   { NAME: 'орловская рысистая',
+     CODE_DEPARTURE: 15,
+     CODE_BREED: 55,
+     CODE_SENDER: 1,
+     NAME_EN: 'Orlov trotter',
+     SHORTNAME_EN: 'orl. trot.',
+     SHORTNAME: 'орл.рыс.',
+     MARK: '5' } }
+{ _id: ObjectId("633d8c8a873d0000d8004177"),
+  event: 'INSERT',
+  table: 'CLIP',
+  tnx: 11913,
+  record: 
+   { AVALUE: 1,
+     CODE_CLIP: 2,
+     CODE_CLIPTYPE: 1,
+     CODE_RECORD: 1,
+     REMARK: null } }
+{ _id: ObjectId("633d8c8a873d0000d8004178"),
+  event: 'DELETE',
+  table: 'CLIP',
+  tnx: 11942,
+  record: 
+   { AVALUE: 1,
+     CODE_CLIP: 2,
+     CODE_CLIPTYPE: 1,
+     CODE_RECORD: 1,
+     REMARK: null } }
+{ _id: ObjectId("633d8c8a873d0000d8004179"),
+  event: 'INSERT',
+  table: 'CLIP',
+  tnx: 12001,
+  record: 
+   { AVALUE: 3,
+     CODE_CLIP: 5,
+     CODE_CLIPTYPE: 1,
+     CODE_RECORD: 1,
+     REMARK: null } }
+{ _id: ObjectId("633d8c8a873d0000d800417a"),
+  event: 'DELETE',
+  table: 'CLIP',
+  tnx: 12039,
+  record: 
+   { AVALUE: 3,
+     CODE_CLIP: 5,
+     CODE_CLIPTYPE: 1,
+     CODE_RECORD: 1,
+     REMARK: null } }
+{ _id: ObjectId("633d8c8a873d0000d800417b"),
+  event: 'UPDATE',
+  table: 'COLOR',
+  tnx: 11799,
+  changedFields: [ 'NAME_DE' ],
+  oldRecord: 
+   { NAME_EN: 'clay with mixed hairs',
+     NAME: 'бурая в седине',
+     CODE_COLOR: 118,
+     CODE_SENDER: 1,
+     NAME_DE: '',
+     SHORTNAME_EN: 'c.m.h.',
+     SHORTNAME: 'бур. в сед.' },
+  record: 
+   { NAME_EN: 'clay with mixed hairs',
+     NAME: 'бурая в седине',
+     CODE_COLOR: 118,
+     CODE_SENDER: 1,
+     NAME_DE: '3',
+     SHORTNAME_EN: 'c.m.h.',
+     SHORTNAME: 'бур. в сед.' } }
+{ _id: ObjectId("633d8c8a873d0000d800417c"),
+  event: 'INSERT',
+  table: 'CLIP',
+  tnx: 12087,
+  record: 
+   { AVALUE: 1,
+     CODE_CLIP: 6,
+     CODE_CLIPTYPE: 1,
+     CODE_RECORD: 2,
+     REMARK: null } }
+{ _id: ObjectId("633d8c8a873d0000d800417d"),
+  event: 'INSERT',
+  table: 'CLIP',
+  tnx: 12087,
+  record: 
+   { AVALUE: 3,
+     CODE_CLIP: 7,
+     CODE_CLIPTYPE: 1,
+     CODE_RECORD: 3,
+     REMARK: 'Странный' } }
+{ _id: ObjectId("633d8c8a873d0000d800417e"),
+  event: 'UPDATE',
+  table: 'BREED',
+  tnx: 12197,
+  changedFields: [ 'MARK' ],
+  oldRecord: 
+   { NAME: 'русская рысистая',
+     CODE_DEPARTURE: 17,
+     CODE_BREED: 58,
+     CODE_SENDER: 1,
+     NAME_EN: 'Trotter',
+     SHORTNAME_EN: 'rus.rys.',
+     SHORTNAME: 'рус.рыс.',
+     MARK: '' },
+  record: 
+   { NAME: 'русская рысистая',
+     CODE_DEPARTURE: 17,
+     CODE_BREED: 58,
+     CODE_SENDER: 1,
+     NAME_EN: 'Trotter',
+     SHORTNAME_EN: 'rus.rys.',
+     SHORTNAME: 'рус.рыс.',
+     MARK: '3' } }
+{ _id: ObjectId("633d8c8a873d0000d800417f"),
+  event: 'UPDATE',
+  table: 'COLOR',
+  tnx: 12218,
+  changedFields: [ 'NAME_DE', 'SHORTNAME_EN' ],
+  oldRecord: 
+   { NAME_EN: 'red grey',
+     NAME: 'красно-серая',
+     CODE_COLOR: 3,
+     CODE_SENDER: 1,
+     NAME_DE: '',
+     SHORTNAME_EN: '2',
+     SHORTNAME: 'кр.-сер.' },
+  record: 
+   { NAME_EN: 'red grey',
+     NAME: 'красно-серая',
+     CODE_COLOR: 3,
+     CODE_SENDER: 1,
+     NAME_DE: '5',
+     SHORTNAME_EN: '',
+     SHORTNAME: 'кр.-сер.' } }
+{ _id: ObjectId("633d8c8a873d0000d8004180"),
+  event: 'INSERT',
+  table: 'CLIP',
+  tnx: 12287,
+  record: 
+   { AVALUE: 0,
+     CODE_CLIP: 8,
+     CODE_CLIPTYPE: 1,
+     CODE_RECORD: 5,
+     REMARK: null } }
+{ _id: ObjectId("633d8c8a873d0000d8004181"),
+  event: 'UPDATE',
+  table: 'CLIP',
+  tnx: 12287,
+  changedFields: [ 'REMARK' ],
+  oldRecord: 
+   { AVALUE: 3,
+     CODE_CLIP: 7,
+     CODE_CLIPTYPE: 1,
+     CODE_RECORD: 3,
+     REMARK: 'Странный' },
+  record: 
+   { AVALUE: 3,
+     CODE_CLIP: 7,
+     CODE_CLIPTYPE: 1,
+     CODE_RECORD: 3,
+     REMARK: 'Странный 2' } }
+{ _id: ObjectId("633d8c8a873d0000d8004182"),
+  event: 'DELETE',
+  table: 'CLIP',
+  tnx: 12287,
+  record: 
+   { AVALUE: 1,
+     CODE_CLIP: 6,
+     CODE_CLIPTYPE: 1,
+     CODE_RECORD: 2,
+     REMARK: null } }
+----
+
+Описание столбцов:
+
+- `_id` -- внутренний первичный ключ для коллекции MongoDB;
+- `event` -- тип события;
+- `table` -- имя таблицы для которой произошло событие;
+- `tnx` -- номер транзакции в которой произошло событие;
+- `record` -- новая запись в событиях `INSERT` и `UPDATE`, старая -- в событии `DELETE`;
+- `oldRecord` -- старая запись в событии `UPDATE`;
+- `changedFields` -- список имён столбцов, которые были изменены в событии `UPDATE`;
+- `newBlobs` -- новые значения BLOB полей;
+- `sql` -- текст SQL запроса для DDL операторов;
+- `sequence` -- наименование последовательности;
+- `value` -- новое значение последовательности.

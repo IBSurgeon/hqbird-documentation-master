@@ -6,7 +6,7 @@
 
 == About this Guide
 
-HQbird User Guide contains detailed description of functions and features of HQbird – advanced Firebird distribution, including with configuration examples and best practices recommendations.
+HQbird User Guide contains detailed description of functions and features of HQbird -- advanced Firebird distribution, including with configuration examples and best practices recommendations.
 
 == About IBSurgeon
 

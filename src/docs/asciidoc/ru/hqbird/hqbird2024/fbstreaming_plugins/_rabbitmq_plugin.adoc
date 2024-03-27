@@ -1,0 +1,284 @@
+= Плагин rabbitmq_plugin
+
+Плагин `rabbitmq_plugin` предназначен для регистрации событий в базе данных Firebird и их отправки на сервер очередей RabbitMQ.
+
+Каждое событие представляет собой документ в формате JSON. 
+
+В событии содержаться следующие сведения:
+
+* тип события (`INSERT`, `UPDATE`, `DELETE`, `SET SEQUENCE`, `EXECUTE SQL`);
+* для событий `INSERT`, `UPDATE`, `DELETE`:
+** имя таблицы, для которого произошло это событие;
+** номер транзакции в которой произошло это событие;
+** старые и новые значение полей записи таблицы;
+** массив изменившихся полей для события `UPDATE`;
+** новые значения BLOB полей;
+* для события `SET SEQUENCE`:
+** имя последовательности (генератора);
+** значение последовательности;
+* для события `EXECUTE SQL`:
+** номер транзакции в которой произошло это событие;
+** текст SQL запроса.
+
+В событии `INSERT` присутствуют только новые значения полей.
+В событии `UPDATE` присутствуют как старые, так и новые значения полей.
+В событии `DELETE` присутствуют только старые значения полей.
+
+Событие `EXECUTE SQL` возникает только для DDL запросов.
+
+[NOTE]
+====
+Для BLOB полей всегда сохраняется BlobId. Если параметр конфигурации `dumpBlobs`, то в дополнение к этому для событий `INSERT` и `UPDATE` будут публиковаться новые значения BLOB полей. Для старых значений полей это не возможно, поскольку старые значения BLOB полей  отсутствуют в файлах журнала репликации.
+====
+
+== Алгоритм работы плагина rabbitmq_plugin
+
+Каждое событие упаковывается в формате JSON и отправляется в обменник сервера очередей RabbitMQ, указанный в параметре `exchange_name`. В зависимости от типа обменника, событие либо отправляется во все привязанные к обменнику очереди, либо в очередь, привязанную по ключу маршрутизации `routing_key`. Если указан параметр `queue_name`, то очередь с заданным именем декларируется и привязывается по ключу `routing_key` к обменнику `exchange_name`.
+
+* служба `fb_streaming` анализирует директорию с журналами репликации, установленную для задачи, на наличие необработанных файлов; 
+* для ещё необработанных файлов репликации анализируются следующие события:
+** старт транзакции. Выделяется структура в памяти для хранения точек сохранения;
+** создание точки сохранения. Выделяется структура в памяти для хранения документов;
+** освобождение точки сохранения. Документы сохранённые в этой точки сохранения копируются в точку сохранения более высокого уровня;
+** откат точки сохранения (точка сохранения уничтожается вместе со всеми документами);
+** фиксация транзакции. Документы созданные в событиях `INSERT`, `UPDATE`, `DELETE` и `EXECUTE SQL` отправляются в обменник RabbitMQ;
+** откат транзакции. Уничтожаются все точки сохранения и сохранённые в них документы;
+** выполнение DDL запроса (`EXECUTE SQL`). Создаётся новый документ и сохраняется в список документов для точки сохранения. В документе сохраняются текст запроса, тип события и номер транзакции;
+** установка нового значения последовательности (`SET SEQUENCE`). Создаётся новый документ и немедленно отправляются в обменник RabbitMQ.
+В документе сохраняются имя последовательности, тип события и новое значение последовательности;
+** события `INSERT`, `UPDATE` и `DELETE`. Проверяется имя таблицы в фильтрах `include_tables` и `exclude_tables`,  и если имя таблицы удовлетворяет критериям фильтрации, то создаётся новый документ и сохраняется в список документов для точки сохранения. В документе сохраняются имя таблицы, тип события, номер транзакции, старые и новые значения полей.
+* после обработки файла, его номер фиксируется в контрольном файле.
+
+Остальные события репликации игнорируются.
+
+== Настройка плагина rabbitmq_plugin
+
+В первую очередь необходимо настроить асинхронную репликацию для вашей базы данных, для этого в файле `replication.conf` необходимо добавить следующие строчки:
+
+[listing]
+----
+database = d:\fbdata\4.0\horses.fdb
+{
+    journal_directory = d:\fbdata\4.0\replication\horses\journal
+    journal_archive_directory = d:\fbdata\4.0\replication\horses\archive
+    journal_archive_command = "copy $(pathname) $(archivepathname) && copy $(pathname) d:\fbdata\4.0\replication\horses\archive_rabbit
+}
+----
+
+Обратите внимание: здесь происходит дублирование файлов архивов журналов, чтобы одновременно работала логическая репликация и задача по отправки событий в RabbitMQ. Это необходимо, поскольку файлы с архивами журналов удаляются после обработки и не могут быть использованы другой задаче.
+
+Теперь необходимо включить репликацию в базе данных:
+
+[source,sql]
+----
+ALTER DATABASE INCLUDE ALL TO PUBLICATION;
+ALTER DATABASE ENABLE PUBLICATION;
+----
+
+Далее настроим конфигурацию `fb_streaming.conf` для того, чтобы `fb_streaming` автоматически отправлял события в обменник RabbitMQ.
+
+Перед настройкой конфигурации откройте в браузере инструмент "RabbitMQ Management". Если вы устанавливали его на тот же компьютер, то по умолчанию необходимо набрать в браузере `http://localhost:15672`, логин "guest" пароль "guest". Этот инструмент позволяет управлять обменниками, очередями и привязками, а также просматривать очереди. 
+
+[listing]
+----
+task = d:\fbdata\4.0\replication\horses\archive_rabbit
+{
+    database = inet://localhost:3054/d:\fbdata\4.0\horses.fdb
+    username = SYSDBA
+    password = masterkey
+    deleteProcessedFile = true
+    plugin = rabbitmq_plugin
+    dumpBlobs = true
+    register_ddl_events = true
+    register_sequence_events = true
+    # include_tables =
+    # exclude_tables =
+    rabbit_uri = amqp://guest:guest@localhost
+    exchange_name = horses
+    exchange_type = direct
+    queue_name = horses_events
+    routing_key = 123
+}
+----
+
+В Linux эта конфигурация будет выглядеть так:
+
+[listing]
+----
+task = /mnt/d/fbdata/4.0/replication/horses/archive
+{    
+    database = inet://192.168.1.48:3054/horses
+    username = SYSDBA
+    password = masterkey
+    deleteProcessedFile = true
+    plugin = rabbitmq_plugin
+    dumpBlobs = true
+    register_ddl_events = true
+    register_sequence_events = true
+    # include_tables =
+    # exclude_tables =
+    rabbit_uri = amqp://test:test@192.168.1.48
+    exchange_name = horses
+    exchange_type = direct
+    queue_name = horses_events
+    routing_key = 123	
+}
+----
+
+Для этого плагина появились ряд дополнительных настроек:
+
+- `rabbit_uri` -- URI для подключения к серверу RabbitMQ;
+- `exchange_name` -- имя обменника. Если обменника ещё не существует, то он будет создан;
+- `exchange_type` -- тип обменника. Допустимые значения: fanout, topic, direct (по умолчанию fanout);
+- `queue_name` -- имя очереди. Если указана, то очередь декларируется и привязывается к обменнику по ключу `routing_key`;
+- `routing_key` -- ключ маршрутизации;
+- `dumpBlobs` -- публиковать ли новые значения BLOB полей (по умолчанию false);
+- `register_ddl_events` -- регистрировать ли DDL события (по умолчанию true);
+- `register_sequence_events` -- регистрировать ли события установки значения последовательности (по умолчанию true);
+- `include_tables` -- регулярное выражение, определяющие имена таблиц для которых необходимо отслеживать события;
+- `exclude_tables` -- регулярное выражение, определяющие имена таблиц для которых не надо отслеживать события.
+
+Теперь можно установить и запустит службу:
+
+[listing]
+----
+c:\streaming>fb_streaming install
+Success install service!
+
+c:\streaming>fb_streaming start
+Service start pending...
+Service started successfully.
+----
+
+В Linux:
+
+[source,bash]
+----
+sudo systemctl enable fb_streaming
+
+sudo systemctl start fb_streaming
+----
+
+Пока будет работать служба, в очередь `horses_events` будут приходить сообщения. 
+
+Содержание сообщений будет примерно таким:
+
+[source,json]
+----
+{ 
+  "event": "EXECUTE SQL",
+  "sql": "CREATE SEQUENCE SEQ1",
+  "tnx": 6590 
+}
+{ 
+  "event": "EXECUTE SQL",
+  "sql": "CREATE TABLE TABLE1 (\r\n  ID INT NOT NULL,\r\n  S VARCHAR(10),\r\n  PRIMARY KEY(ID)\r\n)",
+  "tnx": 6591 
+}
+{ 
+  "event": "EXECUTE SQL",
+  "sql": "ALTER TABLE TABLE1\r\nENABLE PUBLICATION",
+  "tnx": 6594 
+}
+{ 
+  "event": "SET SEQUENCE",
+  "sequence": "SEQ1",
+  "value": 1 
+}
+{ 
+  "event": "INSERT",
+  "table": "TABLE1",
+  "tnx": 6597,
+  "record": { 
+    "ID": 1, 
+    "S": "Hello" 
+  } 
+}
+{ 
+  "event": "UPDATE",
+  "table": "COLOR",
+  "tnx": 11771,
+  "changedFields": [ "NAME_DE" ],
+  "oldRecord": { 
+     "NAME_EN": "dun",
+     "NAME": "мышастая",
+     "CODE_COLOR": 14,
+     "CODE_SENDER": 1,
+     "NAME_DE": "",
+     "SHORTNAME_EN": "dun",
+     "SHORTNAME": "мыш." 
+  },
+  "record": { 
+     "NAME_EN": "dun",
+     "NAME": "мышастая",
+     "CODE_COLOR": 14,
+     "CODE_SENDER": 1,
+     "NAME_DE": "g",
+     "SHORTNAME_EN": "dun",
+     "SHORTNAME": "мыш." 
+  } 
+}
+{ 
+  "event": "INSERT",
+  "table": "CLIP",
+  "tnx": 11821,
+  "record": { 
+     "AVALUE": 44,
+     "CODE_CLIP": 1,
+     "CODE_CLIPTYPE": 1,
+     "CODE_RECORD": 345,
+     "REMARK": null 
+  } 
+}
+{ 
+  "event": "DELETE",
+  "table": "CLIP",
+  "tnx": 11849,
+  "record": { 
+     "AVALUE": 44,
+     "CODE_CLIP": 1,
+     "CODE_CLIPTYPE": 1,
+     "CODE_RECORD": 345,
+     "REMARK": null 
+  } 
+}
+{ 
+  "event": "UPDATE",
+  "table": "BREED",
+  "tnx": 11891,
+  "changedFields": [ "MARK" ],
+  "oldRecord": { 
+     "NAME": "орловская рысистая",
+     "CODE_DEPARTURE": 15,
+     "CODE_BREED": 55,
+     "CODE_SENDER": 1,
+     "NAME_EN": "Orlov trotter",
+     "SHORTNAME_EN": "orl. trot.",
+     "SHORTNAME": "орл.рыс.",
+     "MARK": "" 
+  },
+  "record": { 
+     "NAME": "орловская рысистая",
+     "CODE_DEPARTURE": 15,
+     "CODE_BREED": 55,
+     "CODE_SENDER": 1,
+     "NAME_EN": "Orlov trotter",
+     "SHORTNAME_EN": "orl. trot.",
+     "SHORTNAME": "орл.рыс.",
+     "MARK": "5" 
+  } 
+}
+----
+
+Описание столбцов:
+
+- `event` -- тип события;
+- `table` -- имя таблицы для которой произошло событие;
+- `tnx` -- номер транзакции в которой произошло событие;
+- `record` -- новая запись в событиях INSERT и UPDATE, старая -- в событии DELETE;
+- `oldRecord` -- старая запись в событии UPDATE;
+- `changedFields` -- список имён столбцов, которые были изменены в событии UPDATE;
+- `newBlobs` -- новые значения BLOB полей;
+- `sql` -- текст SQL запроса для DDL операторов;
+- `sequence` -- наименование последовательности;
+- `value` -- новое значение последовательности.
