@@ -1,21 +1,23 @@
 [[_eds_other_dbms]]
 = Working with external data sources (other DBMS)
 
-In HQBird 2022 for Firebird 4.0, it became possible to work with external data sources, that is, not only with other Firebird DBMS databases, but also with other DBMS. The following plugins are used for this:
+In HQBird for Firebird 4.0 or higher, it became possible to work with external data sources, that is, not only with other Firebird DBMS databases, but also with other DBMS. The following plugins are used for this:
 
-* MySQLEngine to work with MySQL and MariaDB;
-* ODBCEngine to work with any data source through the appropriate ODBC driver.
+* `MySQLEngine` to work with MySQL and MariaDB;
+* `ODBCEngine` to work with any data source through the appropriate ODBC driver.
 
 This feature is currently only available for Windows.
 
+[[_eds_other_dbms_mysql]]
 == MySQLEngine
 
-The MySQLEngine plugin is designed to access MySQL and MariaDB databases.
+The `MySQLEngine` plugin is designed to access MySQL and MariaDB databases.
 
 In order for the plugin to be known to Firebird, you need to edit the `firebird.conf` configuration file by adding the `MySQLEngine` plugin to the list of providers (the `Providers` parameter):
 
+[source,conf]
 ----
- Providers = Remote,Engine13,MySQLEngine,Loopback
+Providers = Remote,Engine13,MySQLEngine,Loopback
 ----
 
 Now you can try to execute the simplest query on the MySQL database
@@ -45,17 +47,18 @@ The connection string for the MySQLEngine plugin must begin with the prefix `:my
 
 Possible options:
 
-* host - host or IP address where the MySQL server is located;
+* host -- host or IP address where the MySQL server is located;
 * port is the port number that the MySQL server is listening on. Can be omitted if the default port (3306) is used;
-* database - the name of the database in which queries will be executed;
-* user - username;
-* password - password.
+* database -- the name of the database in which queries will be executed;
+* user -- username;
+* password -- password.
 
-*Notes:*
-
+.Notes
+[NOTE]
+====
 * Do not specify the user's password in the connection string (this is not safe), it is better to pass it using the `password` keyword;
 * Do not specify a username with the `user` keyword (leave `NULL` or an empty string) as this does not work with the `Remote` provider.
-
+====
 
 === Supported statement types
 
@@ -75,62 +78,62 @@ Data types returned from a SQL queries
 ^|MySQL data type
 ^|Firebird data type
 
-| TINYINT
-| SMALLINT
+| `TINYINT`
+| `SMALLINT`
 
-| SMALLINT
-| SMALLINT
+| `SMALLINT`
+| `SMALLINT`
 
-| MEDIUMINT
-| INTEGER
+| `MEDIUMINT`
+| `INTEGER`
 
-| INT
-| INTEGER
+| `INT`
+| `INTEGER`
 
-| BIGINT
-| BIGINT
+| `BIGINT`
+| `BIGINT`
 
-| FLOAT
-| FLOAT
+| `FLOAT`
+| `FLOAT`
 
-| DOUBLE
-| DOUBLE PRECISION
+| `DOUBLE`
+| `DOUBLE PRECISION`
 
-| DECIMAL
-| VARCHAR(N)
+| `DECIMAL`
+| `VARCHAR(N)`
 
-| YEAR
-| SMALLINT
+| `YEAR`
+| `SMALLINT`
 
-| TIME
-| TIME
+| `TIME`
+| `TIME`
 
-| DATE
-| DATE
+| `DATE`
+| `DATE`
 
-| TIMESTAMP
-| TIMESTAMP
+| `TIMESTAMP`
+| `TIMESTAMP`
 
-| DATETIME
-| TIMESTAMP
+| `DATETIME`
+| `TIMESTAMP`
 
-| CHAR(N), BINARY(N)
-| CHAR(N), BINARY(N)
+| `CHAR(N)`, `BINARY(N)`
+| `CHAR(N)`, `BINARY(N)`
 
-| VARCHAR(N), VARBINARY(N)
-| VARCHAR(N), VARBINARY(N)
+| `VARCHAR(N)`, `VARBINARY(N)`
+| `VARCHAR(N)`, `VARBINARY(N)`
 
-| TINYTEXT, TEXT, MEDIUMTEXT, LONGTEXT
-| BLOB SUB_TYPE TEXT
+| `TINYTEXT`, `TEXT`, `MEDIUMTEXT`, `LONGTEXT`
+| `BLOB SUB_TYPE TEXT`
 
-| TYNYBLOB, BLOB, MEDIUMBLOB, LONGBLOB
-| BLOB SUB_TYPE BINARY
+| `TYNYBLOB`, `BLOB`, `MEDIUMBLOB`, `LONGBLOB`
+| `BLOB SUB_TYPE BINARY`
 
-| JSON
-| BLOB SUB_TYPE TEXT
+| `JSON`
+| `BLOB SUB_TYPE TEXT`
 
-| BIT(N)
-| VARBINARY(N)
+| `BIT(N)`
+| `VARBINARY(N)`
 |===
 
 Sample query with multiple fields:
@@ -175,8 +178,12 @@ end
 
 A `SELECT` statement always returns a cursor.
 
-In MySQL, `CALL` statements can return values via `OUT` and `INOUT` type parameters.
-Return parameters of type `OUT` and `INOUT` are not supported.
+In MySQL, `CALL` statements can return values through parameters of type `OUT` and `INOUT`. The Firebird parser knows nothing about the `CALL` operator, so returning parameters of `OUT` and `INOUT` types is not supported.
+
+[NOTE]
+====
+This may change in the future. Firebird 6.0 added the ability to call stored procedures using the `CALL` statement.
+====
 
 However, you can return `OUT` and `INOUT` parameters using local variables and executing multiple queries in sequence.
 
@@ -233,8 +240,7 @@ begin
 end
 ----
 
-`CALL` statements can also return a cursor or multiple cursors. Cursor return from `CALL` statements is not supported in the current version.
-Working with multiple datasets using the `EXECUTE STATEMENT ... ON EXTERNAL` statement is not supported.
+`CALL` statements can also return a cursor or multiple cursors. Cursor return from `CALL` statements is not supported in the current version. Working with multiple datasets using the `EXECUTE STATEMENT ... ON EXTERNAL` statement is not supported.
 
 
 === Input parameters of SQL queries
@@ -324,8 +330,7 @@ end
 
 === Restricting the use of input parameters
 
-For named parameters to work, the EDS (EXTERNAL DATA SOURCE) subsystem uses an internal preparser of queries, which replaces all parameters of the form `:<name>` with `?` and retains the binding of the parameter name and its number.
-Therefore, this only works for queries whose syntax is similar to Firebird's. For example, for `CALL` statements, named parameters will not work. In this case, you must use unnamed parameters.
+For named parameters to work, the EDS (EXTERNAL DATA SOURCE) subsystem uses an internal preparser of queries, which replaces all parameters of the form `:<name>` with `?` and retains the binding of the parameter name and its number. Therefore, this only works for queries whose syntax is similar to Firebird's. For example, for `CALL` statements, named parameters will not work. In this case, you must use unnamed parameters.
 
 [source,sql]
 ----
@@ -376,36 +381,37 @@ begin
 end#
 ----
 
-When executing `prepare`, Firebird obtains the types, sizes, and other properties of input and output query parameters.
-Further, based on these data, input and output messages are built, buffers for data exchange are allocated.
-MySQL is able to return the types, sizes, and properties of output parameters (columns), but for input parameters, only their total number is returned. The MySQL C-API is designed so that the types, sizes, and other attributes for input parameters are set by the client application. However, in the Firebird API it is not possible to fully define the input message on its own, it is only possible to convert the input message returned after `prepare` to another message (type compatible).
+[NOTE]
+====
+This may change in the future. Firebird 6.0 added the ability to call stored procedures using the `CALL` statement.
+====
 
-Since it is impossible to know the types of input parameters, all parameters are assumed to be of type `VARCHAR(8191) CHARACTER SET UTF8`.
-Most Firebird types can be converted to and from a string. However, you cannot pass binary data (types `BINARY(N)`, `VARBINARY(N)`, and `BLOB SUB_TYPE BINARY`) to such parameters, as they will be malformed.
-Also, you cannot pass `BLOB SUB_TYPE TEXT` as parameters if the text is longer than 8191 characters.
+When executing `prepare`, Firebird obtains the types, sizes, and other properties of input and output query parameters. Further, based on these data, input and output messages are built, buffers for data exchange are allocated. MySQL is able to return the types, sizes, and properties of output parameters (columns), but for input parameters, only their total number is returned. The MySQL C-API is designed so that the types, sizes, and other attributes for input parameters are set by the client application. However, in the Firebird API it is not possible to fully define the input message on its own, it is only possible to convert the input message returned after `prepare` to another message (type compatible).
 
+Since it is impossible to know the types of input parameters, all parameters are assumed to be of type `VARCHAR(8191) CHARACTER SET UTF8`. Most Firebird types can be converted to and from a string. However, you cannot pass binary data (types `BINARY(N)`, `VARBINARY(N)`, and `BLOB SUB_TYPE BINARY`) to such parameters, as they will be malformed. Also, you cannot pass `BLOB SUB_TYPE TEXT` as parameters if the text is longer than 8191 characters.
 
+[[_eds_other_dbms_odbc]]
 == ODBCEngine
 
-The ODBCEngine plugin is designed to access various databases through the ODBC interface.
+The `ODBCEngine` plugin is designed to access various databases through the ODBC interface.
 
 In order for the plugin to be known to Firebird, you need to edit the `firebird.conf` configuration file by adding the `ODBCEngine` plugin to the list of providers (the `Providers` parameter):
 
+[source,conf]
 ----
- Providers = Remote,Engine13,ODBCEngine,Loopback
+Providers = Remote,Engine13,ODBCEngine,Loopback
 ----
-
 
 === Connection string format
 
-The connection string for an ODBCEngine plugin must begin with the prefix `:odbc:` followed by the connection parameters. There are two options for connecting to the database: using DNS or using the full connection string for the specified driver.
+The connection string for an `ODBCEngine` plugin must begin with the prefix `:odbc:` followed by the connection parameters. There are two options for connecting to the database: using DNS or using the full connection string for the specified driver.
 
 Possible connection string options:
 
-* DSN - DSN of the data source (required if there is no DRIVER);
-* DRIVER - ODBC driver name (required if there is no DSN);
-* UID or USER - username;
-* PWD or PASSWORD - password;
+* DSN -- DSN of the data source (required if there is no DRIVER);
+* DRIVER -- ODBC driver name (required if there is no DSN);
+* UID or USER -- username;
+* PWD or PASSWORD -- password;
 * other parameters specific to the selected driver.
 
 On Windows, if Firebird is running as a service, only *system* DSNs are visible.
@@ -433,8 +439,7 @@ begin
 end
 ----
 
-Another option is to connect to the same database using the full connection string.
-The set of valid parameters in the connection string depends on the selected driver.
+Another option is to connect to the same database using the full connection string. The set of valid parameters in the connection string depends on the selected driver.
 
 For example, for the MariaDB driver, the connection would look like this:
 
@@ -455,11 +460,13 @@ begin
 end
 ----
 
-_Notes:_
-
+.Notes
+[NOTE]
+====
 * Do not specify the user's password in the connection string (this is not safe), it is better to pass it using the `password` keyword;
 * Do not specify a username with the `user` keyword (leave `NULL` or an empty string) as this does not work with the `Remote` provider.
 * To work correctly with non-ASCII strings, always specify a connection character set compatible with UTF8 in the DSN. This is done differently in different ODBC drivers.
+====
 
 
 === Correspondence table of data types between ODBC and Firebird
@@ -469,62 +476,62 @@ _Notes:_
 |ODBC data type
 |Firebird data type
 
-|SQL_CHAR, SQL_WCHAR 
-|VARCHAR(N), if length does not exceed 32765 bytes, otherwise BLOB SUB_TYPE TEXT
+|`SQL_CHAR`, `SQL_WCHAR` 
+|`VARCHAR(N)`, if length does not exceed 32765 bytes, otherwise `BLOB SUB_TYPE TEXT`
 
-|SQL_VARCHAR, SQL_WVARCHAR
-|VARCHAR(N), if length does not exceed 32765 bytes, otherwise BLOB SUB_TYPE TEXT
+|`SQL_VARCHAR`, `SQL_WVARCHAR`
+|`VARCHAR(N)`, if length does not exceed 32765 bytes, otherwise `BLOB SUB_TYPE TEXT`
 
-|SQL_BINARY
-|VARBINARY(N), if length does not exceed 32765 bytes, otherwise BLOB SUB_TYPE BINARY
+|`SQL_BINARY`
+|`VARBINARY(N)`, if length does not exceed 32765 bytes, otherwise `BLOB SUB_TYPE BINARY`
 
-|SQL_VARBINARY
-|VARBINARY(N), if length does not exceed 32765 bytes, otherwise BLOB SUB_TYPE BINARY
+|`SQL_VARBINARY`
+|`VARBINARY(N)`, if length does not exceed 32765 bytes, otherwise `BLOB SUB_TYPE BINARY`
 
-|SQL_TINYINT, SQL_SMALLINT
-|SMALLINT. If SQL_SMALLINT is unsigned, then INTEGER.
+|`SQL_TINYINT`, `SQL_SMALLINT`
+|`SMALLINT`. If `SQL_SMALLINT` is unsigned, then `INTEGER`.
 
-|SQL_INTEGER
-|INTEGER. If SQL_SMALLINT is unsigned, then BIGINT.
+|`SQL_INTEGER`
+|`INTEGER`. If `SQL_SMALLINT` is unsigned, then `BIGINT`.
 
-|SQL_BIGINT
-|BIGINT. If SQL_SMALLINT is unsigned, then VARCHAR(20).
+|`SQL_BIGINT`
+|`BIGINT`. If `SQL_SMALLINT` is unsigned, then `VARCHAR(20)`.
 
-|SQL_REAL
-|FLOAT
+|`SQL_REAL`
+|`FLOAT`
 
-|SQL_DOUBLE, SQL_FLOAT
-|DOUBLE PRECISION
+|`SQL_DOUBLE`, `SQL_FLOAT`
+|`DOUBLE PRECISION`
 
-|SQL_TYPE_DATE
-|DATE
+|`SQL_TYPE_DATE`
+|`DATE`
 
-|SQL_TYPE_TIME
-|TIME
+|`SQL_TYPE_TIME`
+|`TIME`
 
-|SQL_TYPE_TIMESTAMP
-|TIMESTAMP
+|`SQL_TYPE_TIMESTAMP`
+|`TIMESTAMP`
 
-|SQL_DECIMAL
-|VARCHAR(N), where N = precision + 2
+|`SQL_DECIMAL`
+|`VARCHAR(N)`, where `N = precision + 2`
 
-|SQL_NUMERIC
-|VARCHAR(N), where N = precision + 2
+|`SQL_NUMERIC`
+|`VARCHAR(N)`, where `N = precision + 2`
 
-|SQL_LONGVARCHAR
-|BLOB SUB_TYPE TEXT
+|`SQL_LONGVARCHAR`
+|`BLOB SUB_TYPE TEXT`
 
-|SQL_WLONGVARCHAR
-|BLOB SUB_TYPE TEXT
+|`SQL_WLONGVARCHAR`
+|`BLOB SUB_TYPE TEXT`
 
-|SQL_LONGVARBINARY
-|BLOB SUB_TYPE BINARY
+|`SQL_LONGVARBINARY`
+|`BLOB SUB_TYPE BINARY`
 
-|SQL_BIT
-|BOOLEAN
+|`SQL_BIT`
+|`BOOLEAN`
 
-|SQL_GUID
-|VARBINARY(16)
+|`SQL_GUID`
+|`VARBINARY(16)`
 |===
 
 
@@ -532,11 +539,14 @@ _Notes:_
 
 A `SELECT` query always returns a cursor.
 
-`CALL` statements can return values via `OUT` and `INOUT` type parameters.
-Return parameters of type `OUT` and `INOUT` are not supported.
+`CALL` statements can return values through parameters of type `OUT` and `INOUT`. The Firebird parser knows nothing about the `CALL` operator, so returning parameters of `OUT` and `INOUT` types is not supported.
 
-`CALL` statements can also return a cursor or multiple cursors. Cursor return from `CALL` statements is not supported in the current version.
-Working with multiple datasets using the `EXECUTE STATEMENT ... ON EXTERNAL` statement is not supported.
+[NOTE]
+====
+This may change in the future. Firebird 6.0 added the ability to call stored procedures using the `CALL` statement.
+====
+
+`CALL` statements can also return a cursor or multiple cursors. Cursor return from `CALL` statements is not supported in the current version. Working with multiple datasets using the `EXECUTE STATEMENT ... ON EXTERNAL` statement is not supported.
 
 Queries like `INSERT`, `UPDATE`, `DELETE` usually return no data unless a `RETURNING` clause is specified, otherwise a cursor is returned.
 
@@ -579,7 +589,7 @@ end
 
 === Input parameters of SQL queries
 
-The ODBCEngine plugin supports the use of parameters in queries. Parameters can be unnamed (positional) or named.
+The `ODBCEngine` plugin supports the use of parameters in queries. Parameters can be unnamed (positional) or named.
 
 An example of using anonymous parameters:
 
@@ -650,12 +660,8 @@ end
 
 === Restricting the use of input parameters
 
-For named parameters to work, the EDS (EXTERNAL DATA SOURCE) subsystem uses an internal preparser of queries, which replaces all parameters of the form `:&lt;name&gt;` with `?` and retains the binding of the parameter name and its number.
-Therefore, this only works for queries whose syntax is similar to Firebird's. For example, for `CALL` statements, named parameters will not work. In this case, you must use unnamed parameters.
+For named parameters to work, the EDS (EXTERNAL DATA SOURCE) subsystem uses an internal preparser of queries, which replaces all parameters of the form `:&lt;name&gt;` with `?` and retains the binding of the parameter name and its number. Therefore, this only works for queries whose syntax is similar to Firebird's. For example, for `CALL` statements, named parameters will not work. In this case, you must use unnamed parameters.
 
-When executing `prepare`, Firebird obtains the types, sizes, and other properties of input and output query parameters.
-Further, based on these data, input and output messages are built, buffers for data exchange are allocated.
+When executing `prepare`, Firebird obtains the types, sizes, and other properties of input and output query parameters. Further, based on these data, input and output messages are built, buffers for data exchange are allocated.
 
-Not all ODBC drivers support describing input parameters with the `SQLDescribeParam` function. Some ODBC drivers
-formally support this function, but in fact the description does not correspond to reality. For example ODBC driver for MySQL
-for all parameters returns type `SQL_VARCHAR` with a length of 255 characters.
+Not all ODBC drivers support describing input parameters with the `SQLDescribeParam` function. Some ODBC drivers formally support this function, but in fact the description does not correspond to reality. For example ODBC driver for MySQL for all parameters returns type `SQL_VARCHAR` with a length of 255 characters.

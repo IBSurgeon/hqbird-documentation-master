@@ -33,6 +33,8 @@ include::_сonfiguring.adoc[leveloffset=1]
 
 #include::_auth_esoe.adoc[leveloffset=1]
 
+#include::_eds_other_dbms.adoc[leveloffset=1]
+
 #include::_rsa_udr.adoc[leveloffset=1]
 
 #include::_split_udr.adoc[leveloffset=1]

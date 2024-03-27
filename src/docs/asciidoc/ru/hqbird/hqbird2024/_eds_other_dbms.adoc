@@ -1,0 +1,668 @@
+[[_eds_other_dbms]]
+= Работа с внешними источниками данных (другие СУБД)
+
+В HQBird для Firebird 4.0 и выше появилась возможность работать с внешними источниками данных, то есть не только c другими базами данных СУБД Firebird, но и другими СУБД. Для этого используются следующие плагины:
+
+* `MySQLEngine` для работы с MySQL и MariaDB;
+* `ODBCEngine` для работы с любым источником данных через соответствующий ODBC драйвер.
+
+В настоящее время доступно только под Windows.
+
+[[_eds_other_dbms_mysql]]
+== MySQLEngine
+
+Плагин `MySQLEngine` предназначен для доступа к базам данных MySQL и MariaDB.
+
+Для того чтобы плагин был известен Firebird необходимо отредактировать файл конфигурации `firebird.conf` добавив в список провайдеров (параметр `Providers`) плагин `MySQLEngine`:
+
+[source,conf]
+----
+Providers = Remote,Engine13,MySQLEngine,Loopback
+----
+
+Теперь можно попробовать выполнить простейший запрос к базе данных MySQL
+
+[source,sql]
+----
+execute block
+returns (i integer)
+as
+  declare dsn_mysql varchar(128);
+begin
+  dsn_mysql = ':mysql:host=localhost;port=3306;database=employees;user=root';
+
+  for
+    execute statement 'select 1'
+    on external dsn_mysql
+    as user null password 'sa'
+    into i
+  do
+    suspend;
+end
+----
+
+=== Формат строки соединения
+
+Строка соединения для плагина `MySQLEngine` должна начинаться с префикса `:mysql:` за которым следуют параметры подключения в виде `<param>=<value>` разделённых точкой с запятой.
+
+Возможные параметры:
+
+* host -- хост или IP адрес на котором находится сервер MySQL;
+* port -- номер порта, который слушает MySQL сервер. Можно не указывать если используется порт по умолчанию (3306);
+* database -- имя базы данных в которой будут выполняться запросы;
+* user -- имя пользователя;
+* password -- пароль.
+
+.Замечания
+[NOTE]
+====
+* Не указывайте в строке подключения пароль пользователя (это не безопасно), лучше передавать его с использованием ключевого слова `password`;
+* Не указывайте имя пользователя с помощью ключевого слова `user` (оставьте `NULL` или пустую строку), поскольку это не работает совместно с провайдером `Remote`.
+====
+
+=== Поддерживаемые типы запросов
+
+Плагин MySQLEngine поддерживает следующие типы запросов:
+
+* `SELECT`
+* `INSERT`, `UPDATE`, `DELETE`
+* `CALL procedure(<params>)`
+
+
+=== Выходные параметры запросов
+
+Типы данных возвращаемые из запроса
+
+[cols="<2,<2",options="header",stripes="none"]
+|===
+^|Тип данных MySQL
+^|Тип данных Firebird
+
+| `TINYINT`
+| `SMALLINT`
+
+| `SMALLINT`
+| `SMALLINT`
+
+| `MEDIUMINT`
+| `INTEGER`
+
+| `INT`
+| `INTEGER`
+
+| `BIGINT`
+| `BIGINT`
+
+| `FLOAT`
+| `FLOAT`
+
+| `DOUBLE`
+| `DOUBLE PRECISION`
+
+| `DECIMAL`
+| `VARCHAR(N)`
+
+| `YEAR`
+| `SMALLINT`
+
+| `TIME`
+| `TIME`
+
+| `DATE`
+| `DATE`
+
+| `TIMESTAMP`
+| `TIMESTAMP`
+
+| `DATETIME`
+| `TIMESTAMP`
+
+| `CHAR(N)`, `BINARY(N)`
+| `CHAR(N)`, `BINARY(N)`
+
+| `VARCHAR(N)`, `VARBINARY(N)`
+| `VARCHAR(N)`, `VARBINARY(N)`
+
+| `TINYTEXT`, `TEXT`, `MEDIUMTEXT`, `LONGTEXT`
+| `BLOB SUB_TYPE TEXT`
+
+| `TYNYBLOB`, `BLOB`, `MEDIUMBLOB`, `LONGBLOB`
+| `BLOB SUB_TYPE BINARY`
+
+| `JSON`
+| `BLOB SUB_TYPE TEXT`
+
+| `BIT(N)`
+| `VARBINARY(N)`
+|===
+
+Пример запроса с несколькими полями:
+
+[source,sql]
+----
+execute block
+returns (
+  emp_no bigint,
+  birth_date date,
+  first_name varchar(14),
+  last_name varchar(16),
+  gender char(1),
+  hire_date date
+)
+as
+  declare dsn_mysql varchar(128);
+begin
+  dsn_mysql = ':mysql:host=localhost;port=3306;database=employees;user=root';
+
+  for
+    execute statement q'{
+      select
+        emp_no,
+        birth_date,
+        first_name,
+        last_name,
+        gender,
+        hire_date
+      from employees
+      order by birth_date desc 
+      limit 5
+    }'
+    on external dsn_mysql
+    as user null password 'sa'
+    into
+      emp_no, birth_date, first_name, last_name, gender, hire_date
+  do
+    suspend;
+end
+----
+
+Запрос `SELECT` всегда возвращает курсор. 
+
+В MySQL запросы `CALL` могут возвращать значения через параметры типа `OUT` и `INOUT`. Синтаксическому анализатору Firebird ничего неизвестно об операторе типа `CALL`, поэтому возврат параметров типа `OUT` и `INOUT` не поддерживается. 
+
+[NOTE]
+====
+Это может изменится в будущем. В Firebird 6.0 добавлена возможность вызова хранимых процедур через оператор `CALL`.
+====
+
+Однако вы можете возвратить параметры типа `OUT` и `INOUT` с помощью локальных переменных и последовательного выполнения нескольких запросов.
+
+Предположим у вас есть следующая хранимая процедура:
+
+[source,sql]
+----
+CREATE PROCEDURE `sp_test_add`(
+  IN `A` INT,
+  IN `B` INT,
+  OUT `C` INT
+)
+LANGUAGE SQL
+NOT DETERMINISTIC
+NO SQL
+SQL SECURITY DEFINER
+BEGIN
+  SET C = A + B;
+END
+----
+
+Тогда результат выполнения процедуры можно вернуть следующим образом:
+
+[source,sql]
+----
+execute block
+returns (
+  c int
+)
+as
+  declare dsn_mysql varchar(128);
+  declare psw_mysql varchar(25);
+begin
+  dsn_mysql = ':mysql:host=localhost;port=3306;database=employees;user=root';
+  psw_mysql = 'sa';
+
+  execute statement 'SET @C=NULL'
+  on external dsn_mysql
+  as user null password psw_mysql;
+
+  execute statement
+  ('CALL sp_test_add(?, ?, @C)')
+  (1, 2)
+  on external dsn_mysql
+  as user null password psw_mysql;
+
+  execute statement
+  'SELECT @C'
+  on external dsn_mysql
+  as user null password psw_mysql
+  into c;
+
+  suspend;
+end
+----
+
+Запросы `CALL` также могут возвращать курсор или несколько курсоров. В текущей версии возврат курсора из запросов `CALL` не поддерживается. Работа с несколькими наборами данных с использованием оператора `EXECUTE STATEMENT ... ON EXTERNAL` не поддерживается.
+
+=== Входные параметры запросов
+
+Плагин `MySQLEngine` поддерживает использование параметров в запросах. Параметры могут быть безымянные (позиционные) или именованные.
+
+Пример использования безымянных параметров:
+
+[source,sql]
+----
+execute block
+returns (
+  emp_no bigint,
+  birth_date date,
+  first_name varchar(14),
+  last_name varchar(16),
+  gender char(1),
+  hire_date date
+)
+as
+  declare dsn_mysql varchar(128);
+begin
+  dsn_mysql = ':mysql:host=localhost;port=3306;database=employees;user=root';
+
+  for
+    execute statement (q'{
+      select
+        emp_no,
+        birth_date,
+        first_name,
+        last_name,
+        gender,
+        hire_date
+        from employees
+      where emp_no = ?
+    }') 
+    (10020)
+    on external dsn_mysql
+    as user null password 'sa'
+    into
+      emp_no, birth_date, first_name, last_name, gender, hire_date
+  do
+    suspend;
+end
+----
+
+Пример использования именованных параметров:
+
+[source,sql]
+----
+execute block
+returns (
+  emp_no bigint,
+  birth_date date,
+  first_name varchar(14),
+  last_name varchar(16),
+  gender char(1),
+  hire_date date
+)
+as
+  declare dsn_mysql varchar(128);
+begin
+  dsn_mysql = ':mysql:host=localhost;port=3306;database=employees;user=root';
+
+  for
+    execute statement (q'{
+      select
+        emp_no,
+        birth_date,
+        first_name,
+        last_name,
+        gender,
+        hire_date
+      from employees
+      where emp_no = :emp_no
+    }')
+    (emp_no := 10020)
+    on external dsn_mysql
+    as user null password 'sa'
+    into
+      emp_no, birth_date, first_name, last_name, gender, hire_date
+  do
+    suspend;
+end
+----
+
+
+=== Ограничение использования входных параметров
+
+Для работы именных параметров подсистема EDS (EXTERNAL DATA SOURCE) использует внутренний предварительный анализатор запросов, который заменяет все параметры вида `:<name>` на `?` и сохраняет привязку имени параметра к его номеру.  Поэтому это работает только для запросов синтаксис которых схож с синтаксисом Firebird. Например, для запросов `CALL` именованные параметры работать не будут. В этом случае необходимо использовать безымянные параметры.
+
+[source,sql]
+----
+set term ;#
+
+execute block
+as
+  declare dsn_mysql varchar(128);
+begin
+  dsn_mysql = ':mysql:host=localhost;port=3306;database=employees;user=root';
+
+  execute statement
+  ('CALL sp_conn_audit(:A_CONN_ID, :A_USER, :A_DT)')
+  (
+    A_CONN_ID := current_connection,
+    A_USER := current_user,
+    A_DT := localtimestamp
+  )
+  on external dsn_mysql
+  as user null password 'sa';
+end#
+----
+
+----
+Statement failed, SQLSTATE = 42000
+Execute statement error at isc_dsql_prepare :
+335544382 : You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near ':A_CONN_ID, :A_USER, :A_DT)' at line 1
+Statement : CALL sp_conn_audit(:A_CONN_ID, :A_USER, :A_DT)
+Data source : Firebird:::mysql:host=localhost;port=3306;database=employees;user=root
+-At block line: 7, col: 3
+----
+
+Если же заменить именованные параметры безымянными, то запрос успешно отработает
+
+[source,sql]
+----
+execute block
+as
+  declare dsn_mysql varchar(128);
+begin
+  dsn_mysql = ':mysql:host=localhost;port=3306;database=employees;user=root';
+
+  execute statement
+    ('CALL sp_conn_audit(?, ?, ?)')
+    (current_connection, current_user, localtimestamp)
+  on external dsn_mysql
+  as user null password 'sa';
+end#
+----
+
+[NOTE]
+====
+Это может изменится в будущем. В Firebird 6.0 добавлена возможность вызова хранимых процедур через оператор `CALL`.
+====
+
+Firebird при выполнении `prepare` получает типы, размеры и другие свойства входных и выходных параметров запросов. Далее исходя из этих данных строятся входные и выходные сообщения, выделяются буферы для обмена данными. MySQL умеет возвращать типы, размеры и свойства выходных параметров (столбцов), а для входных параметров 
+возвращается только их общее количество. MySQL C-API устроен так, что типы, размеры и другие атрибуты для входных параметров задаются клиентским приложением. Однако в Firebird API невозможно целиком и полностью определить входное сообщение самостоятельно, возможно только преобразовать входное сообщение возвращённое после `prepare` в другое сообщение (совместимое по типам).
+
+Поскольку невозможно узнать типы входных параметров, мы задаём всем параметрам тип `VARCHAR(8191) CHARACTER SET UTF8`. Большинство типов Firebird могут быть преобразованы в строку и обратно. Однако вы не можете передавать в такие параметры  бинарные данные (типы `BINARY(N)`, `VARBINARY(N)` и `BLOB SUB_TYPE BINARY`), поскольку они будут искажены. Кроме того, нельзя передавать в качестве параметров `BLOB SUB_TYPE TEXT`, если текст превышает длину 8191 символов.
+
+[[_eds_other_dbms_odbc]]
+== ODBCEngine
+
+Плагин `ODBCEngine` предназначен для доступа к различным базам данных через интерфейс ODBC.
+
+Для того чтобы плагин был известен Firebird необходимо отредактировать файл конфигурации `firebird.conf` добавив в список провайдеров (параметр `Providers`) плагин `ODBCEngine`:
+
+[source,conf]
+----
+Providers = Remote,Engine13,ODBCEngine,Loopback
+----
+
+
+=== Формат строки соединения
+
+Строка соединения для плагина ODBCEngine должна начинаться с префикса `:odbc:` за которым следуют параметры подключения. Возможно два варианта подключения к базе данных: с помощью DNS или с помощью полной строки соединения для указанного драйвера.
+
+Возможные параметры строки подключения:
+
+* DSN -- DSN источника данных (обязателен, если нет DRIVER);
+* DRIVER -- имя ODBC драйвера (обязателен, если нет DSN);
+* UID или USER -- имя пользователя;
+* PWD или PASSWORD -- пароль;
+* другие параметры специфичные для выбранного драйвера.
+
+В Windows, если Firebird работает как служба, видны только *системные* DSN. 
+
+Приведём примеры подключения к базе данных MySQL. Допустим вы настроили системный DSN с именем `test_dsn`, тогда строка подключения будет выглядеть следующим образом:
+
+[source,sql]
+----
+execute block
+returns (
+  i integer
+)
+as
+begin
+  for
+    execute statement q'{
+       select 1
+    }'
+    on external ':odbc:dsn=test_dsn;user=root'
+    as user null password '12345'
+    into
+      i
+  do
+    suspend;
+end
+----
+
+Другой вариант подключения к той же базе данных с помощью полной строки соединения. Набор допустимых параметров в строке соединения зависит от выбранного драйвера. 
+
+Например для драйвера MariaDB подключение будет выглядеть следующим образом:
+
+[source,sql]
+----
+execute block returns (
+  i integer
+)
+as
+begin
+  for 
+    execute statement 'select 1' 
+    on external ':odbc:DRIVER={MariaDB ODBC 3.1 Driver};SERVER=127.0.0.1;PORT=3306;DATABASE=test;TCPIP=1;CHARSET=utf8mb4;UID=root' 
+    as user null password '12345'
+    into i 
+  do 
+    suspend;
+end
+----
+
+.Замечания
+[NOTE]
+====
+* Не указывайте в строке подключения пароль пользователя (это не безопасно), лучше передавать его с использованием ключевого слова `password`;
+* Не указывайте имя пользователя с помощью ключевого слова `user` (оставьте `NULL` или пустую строку), поскольку это не работает совместно с провайдером `Remote`.
+* Для корректной работы со строками не ASCII кодировки всегда указывайте в DSN набор символов подключения совместимый с UTF8. В разных драйверах ODBC это делается по разному.
+====
+
+
+=== Таблица соответствия типов данных между ODBC и Firebird
+
+[cols="<2,<2",options="header",stripes="none"]
+|===
+|Тип данных ODBC
+|Тип данных Firebird
+
+|`SQL_CHAR`, `SQL_WCHAR` 
+|`VARCHAR(N)`, если длина не превышает 32765 байт, в противном случае `BLOB SUB_TYPE TEXT`
+
+|`SQL_VARCHAR`, `SQL_WVARCHAR`
+|`VARCHAR(N)`, если длина не превышает 32765 байт, в противном случае `BLOB SUB_TYPE TEXT`
+
+|`SQL_BINARY`
+|`VARBINARY(N)`, если длина не превышает 32765 байт, в противном случае `BLOB SUB_TYPE BINARY`
+
+|`SQL_VARBINARY`
+|`VARBINARY(N)`, если длина не превышает 32765 байт, в противном случае `BLOB SUB_TYPE BINARY`
+
+|`SQL_TINYINT`, `SQL_SMALLINT`
+|`SMALLINT`. Если `SQL_SMALLINT` беззнаковый, то `INTEGER`.
+
+|`SQL_INTEGER`
+|`INTEGER`. Если `SQL_INTEGER` беззнаковый, то `BIGINT`.
+
+|`SQL_BIGINT`
+|`BIGINT`. Если `SQL_BIGINT` беззнаковый, то `VARCHAR(20)`.
+
+|`SQL_REAL`
+|`FLOAT`
+
+|`SQL_DOUBLE`, `SQL_FLOAT`
+|`DOUBLE PRECISION`
+
+|`SQL_TYPE_DATE`
+|`DATE`
+
+|`SQL_TYPE_TIME`
+|`TIME`
+
+|`SQL_TYPE_TIMESTAMP`
+|`TIMESTAMP`
+
+|`SQL_DECIMAL`
+|`VARCHAR(N)`, где `N = precision + 2`
+
+|`SQL_NUMERIC`
+|`VARCHAR(N)`, где `N = precision + 2`
+
+|`SQL_LONGVARCHAR`
+|`BLOB SUB_TYPE TEXT`
+
+|`SQL_WLONGVARCHAR`
+|`BLOB SUB_TYPE TEXT`
+
+|`SQL_LONGVARBINARY`
+|`BLOB SUB_TYPE BINARY`
+
+|`SQL_BIT`
+|`BOOLEAN`
+
+|`SQL_GUID`
+|`VARBINARY(16)`
+|===
+
+
+=== Типы запросов
+
+Запрос `SELECT` всегда возвращает курсор. 
+
+Запросы `CALL` могут возвращать значения через параметры типа `OUT` и `INOUT`. Синтаксическому анализатору Firebird ничего неизвестно об операторе типа `CALL`, поэтому возврат параметров типа `OUT` и `INOUT` не поддерживается. 
+
+[NOTE]
+====
+Это может изменится в будущем. В Firebird 6.0 добавлена возможность вызова хранимых процедур через оператор `CALL`.
+====
+
+Запросы `CALL` также могут возвращать курсор или несколько курсоров. В текущей версии возврат курсора из запросов `CALL` не поддерживается. Работа с несколькими наборами данных с использованием оператора `EXECUTE STATEMENT ... ON EXTERNAL` не поддерживается.
+
+Запросы типа `INSERT`, `UPDATE`, `DELETE` обычно не возвращают данных, если не указано предложение `RETURNING`, в противном случае возвращается курсор.
+
+Пример выполнения `SELECT` запроса.
+
+[source,sql]
+----
+execute block 
+returns (
+  id     integer,
+  title  varchar(255),
+  body blob sub_type text,
+  bydate varchar(50)
+)
+as
+declare sql varchar(8191);
+begin
+  sql = Q'{
+    SELECT 
+      id,
+      title,
+      body,
+      bydate
+    FROM article  
+  }';
+  for 
+    execute statement (:sql) 
+    on external ':odbc:DRIVER={MariaDB ODBC 3.1 Driver};SERVER=127.0.0.1;PORT=3306;DATABASE=test;TCPIP=1;CHARSET=utf8mb4;UID=root' 
+    as user null password 'root'
+    into 
+      id,
+      title,
+      body,
+      bydate	  
+  do 
+    suspend;
+end
+----
+
+
+=== Входные параметры запросов
+
+Плагин `ODBCEngine` поддерживает использование параметров в запросах. Параметры могут быть безымянные (позиционные) или именованные.
+
+Пример использования безымянных параметров:
+
+[source,sql]
+----
+execute block 
+returns(
+   CODE_SEX INTEGER,
+   NAME VARCHAR(70),
+   NAME_EN VARCHAR(70)
+)
+as
+declare xSQL varchar(8191);
+declare xCODE_SEX INT = 1;
+begin
+  xSQL = '
+SELECT 
+  CODE_SEX,
+  NAME,
+  NAME_EN
+FROM sex  
+WHERE CODE_SEX = ?
+';
+  for 
+    execute statement (:xSQL)
+    (xCODE_SEX)
+    on external ':odbc:DRIVER={MariaDB ODBC 3.1 Driver};SERVER=127.0.0.1;PORT=3306;DATABASE=test;TCPIP=1;CHARSET=utf8mb4;UID=test' 
+    as user null password '12345'
+    into CODE_SEX, NAME, NAME_EN
+  do 
+    suspend;
+end
+----
+
+Пример использования именованных параметров:
+
+[source,sql]
+----
+execute block 
+returns(
+   CODE_SEX INTEGER,
+   NAME VARCHAR(70),
+   NAME_EN VARCHAR(70)
+)
+as
+declare xSQL varchar(8191);
+declare xCODE_SEX INT = 1;
+begin
+  xSQL = '
+SELECT 
+  CODE_SEX,
+  NAME,
+  NAME_EN
+FROM sex  
+WHERE CODE_SEX = :A_CODE_SEX
+';
+  for 
+    execute statement (:xSQL)
+    (A_CODE_SEX := xCODE_SEX)
+    on external ':odbc:DRIVER={MariaDB ODBC 3.1 Driver};SERVER=127.0.0.1;PORT=3306;DATABASE=test;TCPIP=1;CHARSET=utf8mb4;UID=test' 
+    as user null password '12345'
+    into CODE_SEX, NAME, NAME_EN
+  do 
+    suspend;
+end
+----
+
+
+=== Ограничение использования входных параметров
+
+Для работы именных параметров подсистема EDS (EXTERNAL DATA SOURCE) использует внутренний предварительный анализ запросов, который заменяет все параметры вида `:<name>` на `?` и сохраняет привязку имени параметра к его номеру.  Поэтому это работает только для запросов синтаксис которых схож с синтаксисом Firebird. Например, для запросов `CALL` именованные параметры работать не будут. В этом случае необходимо использовать безымянные параметры.
+
+Firebird при выполнении `prepare` получает типы, размеры и другие свойства входных и выходных параметров запросов. Далее исходя из этих данных строятся входные и выходные сообщения, выделяются буферы для обмена данными.
+
+Не все ODBC драйверы поддерживают описание входных параметров функцией `SQLDescribeParam`. Некоторые ODBC драйверы формально поддерживают эту функцию, а на деле описание не соответствует действительности. Например ODBC драйвер для MySQL для всех входных параметров возвращает тип `SQL_VARCHAR` с длинной 255 символов.

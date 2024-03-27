@@ -7,6 +7,13 @@ To be able to work with other DBMS, UDR nanodbc was developed. Fully open source
 
 The library is based on a thin {cpp} wrapper around the native C ODBC API https://github.com/nanodbc/nanodbc[]
 
+[IMPORTANT]
+====
+UDR nanodbc provides a low-level interface for interaction with ODBC drivers, which is difficult to use.
+
+Instead of UDR nanodbc, you can use the higher-level and more familiar `EXECUTE STATEMENT ON EXTERNAL` interface. For more details see <<_eds_other_dbms_odbc>>
+====
+
 == Install UDR nanodbc
 
 To be able to use UDR nanodbc, it must be registered in your database. To do this, you need to execute the `plugin/UDR/nanodbc_install.sql` script.

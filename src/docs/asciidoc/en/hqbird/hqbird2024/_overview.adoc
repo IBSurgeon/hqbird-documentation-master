@@ -4,7 +4,7 @@
 
 HQbird is an advanced distribution of Firebird for enterprises, with the following list of features:
 
-* Native one-to-many replication (2.5, 3.0, 4.0)
+* Native one-to-many replication (2.5, 3.0, 4.0, 5.0)
 +
 ** Replicates databases with 1500+ connections
 ** Asynchronous replication with 10 seconds delay
