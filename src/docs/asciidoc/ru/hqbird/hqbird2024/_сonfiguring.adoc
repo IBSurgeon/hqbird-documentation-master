@@ -371,63 +371,54 @@ image::3.2.28.png[]
 image::3.2.29.png[]
 
 
-=== Database: Index statistics recalculation
+=== Базы данных: Пересчет статистики индексов
 
-"`Database: Index statistics recalculation`" is an important job which helps to keep performance of indices at optimal level, and performs additional checking of a database health.
+"`Базы данных: Пересчет статистики индексов`" -- важная задача, которая помогает поддерживать производительность индексов на оптимальном уровне, а также выполняет дополнительную проверку работоспособности базы данных.
 
-"`Database: Index statistics recalculation`" allows to run re-computing of indices selectivity values.
-During this procedure Firebird quickly walks through leaf pages of indices, and renews statistics about selectivity.
-By visiting these pages Firebird also verifies their integrity and if index is corrupted, the warning will be thrown.
+"`Пересчет статистики индексов`"  позволяет запустить пересчет значений селективности индексов. Во время этой процедуры Firebird быстро просматривает листовые страницы индексов и обновляет статистику избирательности. Посещая эти страницы, Firebird также проверяет их целостность, и если индекс поврежден, то будет выдано предупреждение.
 
-Also, this job verifies that all indices are active in database.
-Inactive or non-activated indices usually indicate corruption and lead to performance degradation.
+Кроме того, это задание проверяет, активны ли все индексы в базе данных. Неактивные или неактивированные индексы обычно указывают на повреждения и приводят к снижению производительности.
 
-By default this job is disabled, but we recommend enabling it after careful selecting of indices for the recalculation.
+По умолчанию это задание отключено, но мы рекомендуем включить его после тщательного выбора показателей для пересчета.
 
-There are three modes in this job: AUTO, ALL, SELECTED.
+В этом задании есть три режима: AUTO, ALL, SELECTED.
 
-ALL is the mode where all indices will be checked.
+ALL -- режим, в котором будут проверены все индексы.
 
-AUTO is the default mode.
-It is very similar to ALL, but it also checks the size of database and do not touch indices if database is bigger than 3.6Gb.
+AUTO -- режим по умолчанию. Он очень похож на ALL, но также проверяет размер базы данных и не трогает индексы, если база данных больше 3,6 ГБ.
 
 image::3.2.30.png[]
 
-SELECTED is the recommended mode.
-It allows choosing of indices which should be recomputed or those which should be avoided.
+SELECTED -- рекомендуемый режим. Это позволяет выбрать индексы, которые следует пересчитывать, или те, которых следует избегать.
 
-To include indices into the list of recomputed, you need to specify indices names (divided by comma), and to exclude – perform the same in the appropriate field.
+Для включения индексов в список пересчитываемых необходимо указать названия индексов (через запятую), а для исключения – выполнить то же самое в соответствующем поле.
 
-As you can see at configuration dialog screenshot, there are fields to enable/disable job, to set update mode, and to include or exclude indices. "`DB
-                    size to switch, bytes`" is to set limit where AUTO mode is working. "`Check index activity`" switch should be always on, until you are not performing special manipulations with inactive indices.
+Как вы можете видеть на снимке экрана диалогового окна конфигурации, здесь есть поля для включения/отключения задания, установки режима обновления, а также включения или исключения индексов. "`Размер БД для переключения, байты`" -- устанавливает предел, при котором работает режим AUTO. Переключатель "`Проверять активность индексов`" должен быть включен всегда, пока вы не проведете специальные манипуляции с неактивными индексами.
+
 
 [[_hqbird_config_verified_backup]]
-=== Database: Verified Backup
+=== Базы данных: Бэкап
 
-"`Database: Verified Backup`" is one of the key jobs to guarantee the safety of data stored in the protected database.
-During the development of HQbird we had in mind certain recovery scenario, and this scenario implies that the key goal of database protection is to minimize potential losses of data.
-If we have healthy backup, recovery can be concentrated on saving the most recent data (just entered into the database), and it greatly decreases the time of overall outage.
+"`Базы данных: Бэкап`" -- одно из ключевых заданий, гарантирующих сохранность данных, хранящихся в защищенной базе данных. При разработке HQbird мы учитывали определенный сценарий восстановления, и этот сценарий подразумевает, что ключевой целью защиты базы данных является минимизация потенциальных потерь данных. Если у нас есть работоспособная резервная копия, восстановление может быть сконцентрировано на сохранении самых последних данных (только что введенных в базу данных), и это значительно сокращает время общего простоя.
 
-As you will see below, "`Database: Verified Backup`" is not just a wrapper for standard `gbak` functionality and scheduler, this is a smart job which has many built-in rules to prevent problems with backups and provide suitable interface for backups management.
+Как вы увидите ниже, "`Базы данных: Бэкап`" -- это не просто оболочка для стандартных функций `gbak` и планировщика, это умное задание, в котором есть множество встроенных правил для предотвращения проблем с резервным копированием и предоставления подходящего интерфейса для управление резервными копиями.
 
 [IMPORTANT]
 ====
-"`Database: Verified Backup`" is disabled **by
-                        default**, but we strongly recommend reviewing of its settings immediately after HQbird setup.
+Задание "`Базы данных: Бэкап`" отключено **по умолчанию**, но мы настоятельно рекомендуем изменить его настройки сразу после установки HQbird.
 ====
 
 image::3.2.31.png[]
 
-Initially "`Database: Verified Backup`" job is shown as Ok, though backup was not tried.
-In this case OK means that backup at least scheduled.
+Первоначально задание "`Базы данных: Бэкап`" отображается как ОК, хотя попытка резервного копирования не выполнялась. В этом случае ОК означает, что резервное копирование как минимум запланировано.
 
-Also this job recognizes files according the name pattern (see below information regarding configuration), and shows the totals number of backups.
+Также это задание распознает файлы по шаблону имен (см. ниже информацию о конфигурации) и показывает общее количество резервных копий.
 
-After the backup will be done, the widget information will be changed: creation time of last successful backup will be shown, and also the time took to actually perform the backup (only 1 minute 12 seconds at the screenshot with example).
+После завершения резервного копирования информация в виджете изменится: будет показано время создания последней успешной резервной копии, а также время, затраченное на фактическое выполнение резервного копирования (всего 1 минута 12 секунд на скриншоте с примером).
 
 image::3.2.32.png[]
 
-Also, the detailed alert will be send to your email and/or HQbird Control Center:
+Кроме того, подробное оповещение будет отправлено на вашу электронную почту и/или в HQbird Control Center:
 
 image::3.2.33.png[]
 
@@ -435,10 +426,9 @@ image::3.2.33.png[]
 
 [NOTE]
 ====
-Be careful – by default backup time is set to **23-00
-                        Monday-Sunday**.
+Be careful -- by default backup time is set to **23-00 Monday-Sunday**.
 
-By default, database backups will be stored into the output folder that you have specified during installation step! By default, it is [path]_C:\HQbirdData\output\..._
+By default, database backups will be stored into the output folder that you have specified during installation step! By default, it is `C:\HQbirdData\output\...`
 
 It is very important to carefully review database backups settings and adjust them according the local configuration!
 ====
@@ -454,8 +444,8 @@ Let`'s consider the configuration dialog for backup in more details:
 * *"`Compress backups`"* specifies should FBDataGuard archive backups after regular Firebird backup. By default, this option is on, but you need to know that FBDataGuard will zip backups`' files which are less than *100 Gb* in size. After that size, the backup compression will be automatically switched off. We recommend to turn this feature on for small databases only.
 * *"`Check restore`"* is an important option. If it is on (by default), FBDataGuard will perform test restore of fresh backup, in order to test its validity. It guarantees the quality of created backup and notifies administrator in case of any problems with test restore.
 * *"`Remove restored`"* specifies should FBDataGuard delete restored database. By default it is OFF, so you might want to turn it ON, but you need carefully consider – do you really need to keep the copy of test restored database. With each test restore this copy will be overwritten.
-* *"`Use multiple cores to backup and test restore`"* - this feature is for HQbird Enterprise only, it allows to backup database and restore test database using multiple CPU cores, so backup can be made 3-5 times faster. We recommend to allocate ½ of CPU cores,
-* *"`Send "Ok" report`"* – by default it is off, but it`'s strongly recommended to turn it ON and start to receive notifications about correct backups. This feature will use email settings from alerts system
+* *"`Use multiple cores to backup and test restore`"* -- this feature is for HQbird Enterprise only, it allows to backup database and restore test database using multiple CPU cores, so backup can be made 3-5 times faster. We recommend to allocate ½ of CPU cores,
+* *"`Send "Ok" report`"* -- by default it is off, but it`'s strongly recommended to turn it ON and start to receive notifications about correct backups. This feature will use email settings from alerts system
 
 image::3.2.34.png[]
 
@@ -463,20 +453,30 @@ If we will click on button btn:[More>>], the advanced backup options will appear
 
 image::3.2.35.png[]
 
-* *"`Backup (gbak) timeout, minutes`"* - maximum time to complete only backup (``gbak -b``) operation, otherwise alert will be generated.
-* *"`Restore (gbak) timeout, minutes`"* – maximum time to complete test restore operation.
-* *"`Final destination folder for backups`"* - if you need to make backups into the one folder, and then move created backup to another folder (for long-term storage, for example), you can change the value of this parameter from [path]_${backup-directory}_ to the folder where you will keep them. Backup files in both locations are watched by HQbird FBDataGuard, and included into the count of backup copies shown in the widget.
+* *"`Backup (gbak) timeout, minutes`"* -- maximum time to complete only backup (`gbak -b`) operation, otherwise alert will be generated.
+* *"`Restore (gbak) timeout, minutes`"* -- maximum time to complete test restore operation.
+* *"`Final destination folder for backups`"* -- if you need to make backups into the one folder, and then move created backup to another folder (for long-term storage, for example), you can change the value of this parameter from `${backup-directory}` to the folder where you will keep them. Backup files in both locations are watched by HQbird FBDataGuard, and included into the count of backup copies shown in the widget.
 * *"`Copy backup`"* switch and *"`Copy backup to`"* path. If you have network location or plugged USB drive to store database where you want to store copy of backup (in addition to usual backups), FBDataGuard can copy the latest backup there: just turn on "`Copy backup`" switch and specify *"`Copy backup to`"* path. The copied files are not monitored and not included into the number of backup files shown in the widget.
 * *"`Execute shell command`"* switch and *"`Shell command`"* path. It is possible to specify custom script or executable after the general backup procedure will be complete. Shell command gets as the path to the fresh database backup as a parameter.
-* *"`Optional path to gbak executable`"* - it is possible to specify other gbak tool than standard [path]_gbak_.
-* *"`Backups option for gbak`"* - if you need to add some specific options, add them here.
-* *"`Restore options for gbak`"* - if you need to add specific options for test restore, add them here.
+* *"`Optional path to gbak executable`"* - it is possible to specify other gbak tool than standard `gbak`.
+* *"`Backups option for gbak`"* -- if you need to add some specific options, add them here.
+* *"`Restore options for gbak`"* -- if you need to add specific options for test restore, add them here.
 
 
 [TIP]
 ====
 If you are monitoring more than one database, it is highly recommended splitting the runtime of the restores.
 ====
+
+==== Important Note: Backup to the network locations
+
+Please be aware that for creating and copying backup to the network locations Firebird and FBDataGuard services must be started under the account with sufficient rights. By default, Firebird and FBDataGuard are started under LocalSystem account, which does not have rights to access network location.
+
+image::3.2.36.png[]
+
+So, to store Firebird backups to the network location on Windows, run Services applet (`services.msc`) and on the tab Log On change "`Log on as`" to the appropriate account (Domain Admin should be fine).
+
+For Linux -- add necessary rights for "`firebird`" user.
 
 ==== Important Note: Backup to the network locations
 
