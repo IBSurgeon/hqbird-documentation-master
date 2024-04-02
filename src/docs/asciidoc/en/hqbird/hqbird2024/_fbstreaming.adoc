@@ -1,192 +1,216 @@
 [[_hqbird_fbstreaming]]
 = Firebird Streaming
 
-The Firebird Streaming project is a set of libraries for parsing Firebird replication logs after being
-processed by the `fb_repl_print` utility.For each event in the log, you can write your own handler by
-inheriting the `SegmentProcessEventListener` interface.
+Firebird streaming is a technology for asynchronously publishing events that occur during the analysis of the replication log.
 
-The source code of project can be downloaded at https://github.com/sim1984/fbstreaming
+The service (daemon) `fb_streaming` is used for event processing. The service monitors for new replication log files, analyzes them and generates events that are processed by one of the plugins.
 
-This library can be used to notify about events through the queue system, or to write your own replicator in other DBMS.
+Available plugins:
 
-The release can be downloaded from the link https://github.com/sim1984/fbstreaming/releases/download/v1.0/release.zip
+* `kafka_cdc_plugin` -- publishing CDC (Change Data Capture) events in Kafka;
+* `rabbitmq_plugin` -- publishing replication events in RabbitMQ;
+* `mongodb_events_plugin` -- saving replication events in MongoDB;
+* `fts_lucene_plugin` -- automatic updating of full-text indexes without triggers (IBSurgeon Full Text Search UDR);
+* `simple_json_plugin` -- saving replication logs in JSON format.
 
-The `journals/incoming` folder contains replication logs after being processed by the `fb_repl_print` utility.
+Firebird Streaming technology is designed to work with replication logs in Firebird 4.0 format and higher. It will not work with Firebird 2.5 and 3.0 replication segments.
 
-The `journals/outgoing` folder some output files that are the output of one of the plugins.
+The `fb_streaming` service and its plugins are not included in the HQBird 2024 distribution. They can be provided to our clients upon separate request.
 
-The `journals/segments.journal` file is a file in which the file names of the processed segments are written.Used by some plugins.
+== How fb_streaming works?
 
-JAR files containing plugins are located in the `plugins` folder.The example contains the following plugins:
+The `fb_streaming` service (daemon) checks the contents of the directory specified for the task in the `fb_streaming.conf` configuration file, and if this directory contains unprocessed replication log files, then it analyzes them and generates appropriate events that are processed by the specified plugin . The last replication segment number processed is written to a control file named `<database guid>`. The location of this file can be specified in the `lockDir` configuration parameter. If this parameter is not specified, then by default the control file `<database guid>` will be created in the directory specified as the archive log directory for the task.
 
-* converting replication segments to JSON format
-* sending the associated DML statement data (in JSON format) to the RabbitMQ queue on a transaction confirmation event
-* writing DML statements to SQL files. Recording occurs on the event of a transaction confirmation.
+[IMPORTANT]
+====
+Replication log files must be in an archived state.
+====
 
-For configuration, the `config.properties` file is used, which must be located next to the `fbstreaming-1.0.jar` file.
-Properties in the config file:
+The control file is necessary to restore operation after a sudden shutdown of the service (for example, the lights were turned off or the server was rebooted). It contains the following information:
 
-* `pluginClassName` -- fully qualified plugin class name
-* `incomingFolder` -- folder with input logs (replication segments)
-* `outgoingFolder` -- folder with plugin results (used by JSON and SQL plugins)
-* `journalFileName` -- file with processed replication segments (used by SQL and RabbitMQ plugins)
-* `segmentFileNameMask` -- mask for input files (replication segments)
-* `segmentFileCharset` -- encoding of replication segments
-* `includeTables` -- regular expression for filtering tables (if not specified, all tables are processed)
-* `rabbit.host` -- host for RabbitMQ plugin
-* `rabbit.queueName` -- the name of the queue for the RabbitMQ plugin
+- control information (database GUID, size, etc.);
+- number of the last processed segment and position in it;
+- the number of the segment with the oldest active transaction (a transaction can start in one segment and end in another);
+- a list of all active transactions in the form of pairs `{tnxNumber, segmentNumber}`, where `segmentNumber` is the number of the segment in which the transaction began.
 
-To be able to process a replication segment, it must be processed with the `fb_repl_print` utility using the
-following command:
+If an emergency situation occurs and the `fb_streaming` service has been stopped, then the next time it starts, it reads the control file and rereads all replication segments, starting with the number of the segment with the oldest active transaction, and ending with the number of the last processed segment. In the process of reading these segments, `fb_streaming` repeats all events from the list of active transactions, after which it goes into normal operation.
 
-[source]
+A replication segment file is deleted if its number is less than the segment number with the oldest active transaction.
+
+During the analysis of replication logs, the following events may occur:
+
+- transaction start (START);
+- preparation of a two-phase transaction (PREPARE);
+- transaction commit (COMMIT);
+- transaction rollback (ROLLBACK);
+- set savepoint (SAVE);
+- rollback to savepoint (UNDO);
+- release savepoint (RELEASE);
+- set value of the generator (SET SEQUENCE);
+- execution of the SQL statement (EXECUTE SQL). Such events occur only for DDL statements;
+- save BLOB (BLOB);
+- inserting a new record into the table (INSERT);
+- updating records in the table (UPDATE);
+- deleting a record from a table (DELETE).
+
+Which of them will be processed and which are simply ignored depends on the selected plugin.
+
+== Installing and starting a service on Windows
+
+Go to the `fb_streaming` installation directory.
+
+Perform the settings in the `fb_streaming.conf` configuration file.
+
+After setting up the configuration file, you can install and start the service.
+
+For help using and installing the service, type the command
+
+[source,bash]
 ----
-fb_repl_print -d -b <archive_journal_file> > <journal_file_for_streaming>
-----
-
-.Example
-[source]
-----
-fb_repl_print -d -b f:\fbdata\archives\examples.fdb.arch-000000010 > f:\journals\incoming\examples.fdb.arch-000000010.txt
-----
-
-To start the handler of received files, enter the command:
-
-[source]
-----
-java -jar fbstreaming-1.0.jar
-----
-
-<<<
-
-[[_hqbird_fbstreaming_json]]
-== Json plugin description
-
-Full name of plugin `com.hqbird.fbstreaming.plugin.json.JsonStreamPlugin`.
-
-The `JsonStreamPlugin` plugin reads replication segment files and stores DML statement data over tables in JSON format.
-A JSON data file is created for each replication segment file. JSON files are saved in the folder specified in the `outgoingFolder` parameter.
-
-The JSON file has the following format:
-
-[source,json]
-----
-[
-  {
-    "transactionNumber": 409036118,
-    "statements": [
-      {
-        "tableName": "CLBULLETS",
-        "statementType": "INSERT",
-        "keyValues": {
-          "NUMBULL": 156803509
-        },
-        "newFieldValues": {
-          "CLAGE": 45,
-          "REPL$GRPID": 15,
-          "PROFID": 990000090,
-          "SENDSTATUS": 0,
-          "POL": 1,
-          "FILIAL": 15,
-          "BDATE": "1976-05-03",
-          "CLINICID": 38,
-          "PRIMLIST": 1,
-          "MODIFYDATE": "16-AUG-2021 23:50:14.2480",
-          "DGOPEN": 14438,
-          "DATEOPEN": "16-AUG-2021",
-          "TREATCODE": 156802708,
-          "PCODE": 150002994,
-          "ISSUEDATE": "16-AUG-2021",
-          "DISABILITYID": 150050614,
-          "DCODEOPEN": 150000278,
-          "NUMBULL": 156443509
-        },
-        "oldFieldValues": {}
-      }
-    ]
-  }
-]
+fb_streaming help
 ----
 
-The JSON file at the top level is an array of transactions. For each transaction, its number is stored in the `transactionNumber` key.
-An array with a description of all DML statements on tables produced within this transaction is stored in the `statements` key.
-The following data is saved for each DML statement:
+You will be shown information on installing, removing, starting and stopping the service:
 
-* `tableName` -- the name of the table on which the operation is performed;
-* `statementType` -- the type of the statement (`INSERT`, `UPDATE`, `DELETE`);
-* `keyValues` -- values of key fields;
-* `newFieldValues` -- new field values;
-* `oldFieldValues` -- old field values.
-
-Example configuration file `config.properties`:
-
-[source]
+[listing]
 ----
-pluginClassName=com.hqbird.fbstreaming.plugin.json.JsonStreamPlugin
-incomingFolder=./journals/incoming
-outgoingFolder=./journals/outgoing/json
-segmentFileNameMask=.*txt
-segmentFileCharset=windows-1251
-includeTables=CLBULLETS|CLREFDET
+================================================================================
+ Firebird streaming service
+
+ Copyright (c) 2023 IBSurgeon ltd.
+================================================================================
+
+usage: fb_streaming <command> [service_name]
+Possible commands are:
+    install            install service
+    remove             remove service
+    start              start service
+    stop               stop service
 ----
 
-<<<
+After setting up the configuration file, you can install and start the service by running the following commands:
 
-== Sql plugin description
-
-Full name of plugin `com.hqbird.fbstreaming.plugin.sql.SqlStreamPlugin`.
-
-The `SqlStreamPlugin` reads the replication segment files and saves them to files with DML statements as SQL.
-For each transaction from the replication segment, a file with SQL statements is created.
-SQL files are saved in the folder specified in the `outgoingFolder` parameter.
-
-The file stores script DML statements separated by semicolons ";".BLOB of subtype TEXT is converted to character literal,
-if subtype is BINARY, then it is converted to binary literal in hexadecimal notation.Attention, for BLOBs longer
-than 65535 bytes, an error script will be generated.This is planned to be fixed in the future.
-
-Example configuration file `config.properties`:
-
-[source]
+[listing]
 ----
-pluginClassName=com.hqbird.fbstreaming.plugin.sql.SqlStreamPlugin
-incomingFolder=./journals/incoming
-outgoingFolder=./journals/outgoing/sql
-journalFileName=./journals/segments.journal
-segmentFileNameMask=.*txt
-segmentFileCharset=windows-1251
-includeTables=CLBULLETS|CLREFDET
+c:\streaming>fb_streaming install
+Success install service!
+
+c:\streaming>fb_streaming start
+Service start pending...
+Service started successfully.
 ----
 
-<<<
+Once installed, you can manage the service through the graphical utility - services (`services.msc`).
 
-== Rabbitmq plugin description
+To remove a service, run the following commands:
 
-Full name of plugin `com.hqbird.fbstreaming.plugin.rabbitmq.RabbitMQStreamPlugin`.
-
-The `RabbitMQStreamPlugin` plugin reads replication segment files and stores DML statement data over tables in JSON format.
-When a transaction commit event is detected, JSON data is sent to the RabbitMQ queue.
-The JSON message format is similar to the one described above.
-
-Example configuration file `config.properties`:
-
-[source]
+[listing]
 ----
-pluginClassName=com.hqbird.fbstreaming.plugin.rabbitmq.RabbitMQStreamPlugin
-incomingFolder=./journals/incoming
-journalFileName=./journals/segments.journal
-segmentFileNameMask=.*txt
-segmentFileCharset=windows-1251
-includeTables=CLBULLETS|CLREFDET
-rabbit.host=localhost
-rabbit.queueName=hello
+c:\streaming>fb_streaming stop
+Service is already stopped.
+
+c:\streaming>fb_streaming remove
+Service deleted successfully
 ----
 
-The delivery contains the simplest example of a client that reads a message from the RabbitMQ queue:
-`RabbitMQReceiver-1.0.jar`.
+[NOTE]
+====
+If you have multiple `fb_streaming` services running, they must be given unique names when installed, started, stopped, and removed.
+====
 
-The client is launched with the command:
+== Installing and starting a service on Linux
 
-[source]
+Go to the `fb_streaming` installation directory. On Linux this is usually the `/opt/fb_streaming` directory.
+
+Perform the settings in the `fb_streaming.conf` configuration file.
+
+After setting up the configuration file, you can install and start the service by running the following commands:
+
+[source,bash]
 ----
-java -jar RabbitMQReceiver-1.0.jar
+sudo systemctl enable fb_streaming
+
+sudo systemctl start fb_streaming
 ----
+
+To remove a service, run the following commands:
+
+[source,bash]
+----
+sudo systemctl stop fb_streaming
+
+sudo systemctl disable fb_streaming
+----
+
+== Configuring the service (daemon) fb_streaming
+
+To configure the service, use the `fb_streaming.conf` file, which should be located in the `fb_streaming` root directory.
+
+The configuration file syntax is exactly the same as for Firebird configuration files.
+
+The `#` character denotes a comment, that is, everything that follows this character to the end of the line is ignored.
+
+The structure of the `fb_streaming.conf` configuration file looks like this:
+
+[listing]
+----
+# logLevel = info
+
+# pluginDir = $(root)/stream_plugins 
+
+task = <sourceDir_1>
+{
+# другие параметры задачи 1
+}
+
+task = <sourceDir_2>
+{
+# другие параметры задачи 2
+}
+----
+
+General parameters of the `fb_streaming` service (daemon):
+
+- `logLevel` -- logging level (default info). Allowed logging levels: trace, debug, info, warning, error, critical, off.
+- `pluginDir` -- directory where `fb_streaming` plugins are located. Defaults to `$(root)/stream_plugins`. The macro substitution `$(root)` denotes the root directory of the service (daemon).
+
+Next are the task configurations. One service instance can serve several tasks at once. Each task runs in its own thread.
+A separate task is created for each directory with replication log files.
+
+Here `sourceDir_N` is the directory with replication log files. These directories must be unique. The same directory cannot be processed by more than one task.
+
+The main parameters of the task:
+
+- `controlFileDir` -- the directory in which the control file will be created (by default, the same directory as `sourceDir`);
+- `database` -- database connection string (required);
+- `username` -- user name for connecting to the database;
+- `password` -- password for connecting to the database;
+- `plugin` -- plugin that processes events that occur during the analysis of the replication log (required);
+- `deleteProcessedFile` -- whether to delete the log file after processing (true by default).
+
+The task may also contain other parameters specific to the plugin being used.
+
+Plugins for handling events from the replication log are located in dynamic libraries.
+The name of the dynamic library file depends on the operating system and is built as follows:
+
+- for Windows `<plugin name>.dll`
+- for Linux `lib<plugin name>.so`
+
+The dynamic library file must be located in the `stream_plugins` directory, or in the one specified in the `pluginDir` parameter.
+
+== Firebird configuration tricks
+
+Please note: replication log archives folder should only be processed by a single `fb_streaming` service task. If you want to have logical replication running at the same time, or multiple services running on the log archive, then duplication of archive logs in different directories is necessary.
+
+This can be done in the `replication.conf` file as follows
+
+[listing]
+----
+...
+journal_archive_directory = <archiveDir>
+journal_archive_command = "copy $(pathname) $(archivepathname) && copy $(pathname) <archiveDirTask>
+...
+----
+
+Here `archiveDir` is the directory of archives for asynchronous replication, `archiveDirTask` is the directory of archives for the service task `fb_streaming`.
+
