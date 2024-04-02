@@ -190,8 +190,7 @@ The main parameters of the task:
 
 The task may also contain other parameters specific to the plugin being used.
 
-Plugins for handling events from the replication log are located in dynamic libraries.
-The name of the dynamic library file depends on the operating system and is built as follows:
+Plugins for handling events from the replication log are located in dynamic libraries. The name of the dynamic library file depends on the operating system and is built as follows:
 
 - for Windows `<plugin name>.dll`
 - for Linux `lib<plugin name>.so`
