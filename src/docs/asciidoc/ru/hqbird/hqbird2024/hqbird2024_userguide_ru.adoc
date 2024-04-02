@@ -1,5 +1,5 @@
 = Руководство пользователя HQbird 2024
-1.0, от 27.03.2024
+1.0, от 02.04.2024
 :doctype: book
 :sectnums:
 :sectanchors:
@@ -13,13 +13,13 @@ include::../../attributes-ru.adoc[]
 
 toc::[]
 
-#include::_preface.adoc[leveloffset=1]
+include::_preface.adoc[leveloffset=1]
 
-#include::_overview.adoc[leveloffset=1]
+include::_overview.adoc[leveloffset=1]
 
-#include::_installation.adoc[leveloffset=1]
+include::_installation.adoc[leveloffset=1]
 
-#include::_сonfiguring.adoc[leveloffset=1]
+include::_сonfiguring.adoc[leveloffset=1]
 
 #include::_enterprise_config.adoc[leveloffset=1]
 
@@ -47,12 +47,12 @@ toc::[]
 
 #include::_http_client_udr.adoc[leveloffset=1]
 
-include::_fbstreaming.adoc[leveloffset=1]
+#include::_fbstreaming.adoc[leveloffset=1]
 
 :sectnums!:
 
 [appendix]
-= Support contacts
+= Контакты поддержки
 
 Мы ответим на все ваши вопросы, касающиеся HQbird FBDataGuard.
 Пожалуйста, направляйте все ваши вопросы на link:mailto:support@ib-aid.com[support@ib-aid.com]

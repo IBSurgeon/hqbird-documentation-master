@@ -1,5 +1,5 @@
 = HQbird 2024 User Guide
-1.0, by 19.03.2024
+1.0, by 2024-04-02
 :doctype: book
 :sectnums:
 :sectanchors:

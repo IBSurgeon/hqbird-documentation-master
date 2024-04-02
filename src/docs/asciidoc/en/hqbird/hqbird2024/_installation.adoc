@@ -17,6 +17,7 @@ Please note, that only Firebird 2.5, 3.0, 4.0 and 5.0 are fully supported in HQb
 We offer the comprehensive https://ib-aid.com/en/firebird-database-migration/[Firebird migration service] with guaranteed
 and fast result to migrate Firebird to the latest version.
 
+[[_hqbird_install_silent]]
 === Silent installation on Windows
 
 The fastest way to install HQbird is to use the silent installation command.
@@ -266,6 +267,7 @@ In this example, Firebird is installed in the folder `H:\Firebird\Firebird-2.5.5
 
 <<<
 
+[[_hqbird_install_linux]]
 == Installing HQbird Server on Linux
 
 To install HQbird Server Side on Linux, you need to download HQbird ServerSide for Linux with built-in Firebird of the appropriate version from the link https://ib-aid.com/en/download-hqbird/[]

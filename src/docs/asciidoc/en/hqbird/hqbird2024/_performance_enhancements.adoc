@@ -1,6 +1,7 @@
 [[_hqbird_performance]]
 = Performance enhancements
 
+[[_hqbird_performance_extconn_pool]]
 == Pool of external connections
 
 HQbird supports a pool of external connections for Firebird 2.5 and Firebird 3. The standard build of Firebird 4.0 and higher supports the creation of external connection pools out of the box.

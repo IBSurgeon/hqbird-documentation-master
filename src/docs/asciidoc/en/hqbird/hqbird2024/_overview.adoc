@@ -2,222 +2,565 @@
 
 == What is HQbird
 
-HQbird is an advanced distribution of Firebird for enterprises, with the following list of features:
+HQbird is a distribution of the Firebird DBMS for enterprises from IBSurgeon Software (www.ibaid.com), which includes additional functions that mainly improve performance for large and highly loaded databases, and a set of tools for organizing a full cycle of database maintenance without a DBA (including tools for performance optimization, monitoring, local and cloud backups, and recovery in case of failures).
 
-* Native one-to-many replication (2.5, 3.0, 4.0, 5.0)
-+
-** Replicates databases with 1500+ connections
-** Asynchronous replication with 10 seconds delay
-** Synchronous replication
-** No triggers or other changes in schema required, DDL support, online re-initialization
-* multi-thread backup, restore, and sweep;
-* support for encryption;
-* pool of execute on external connections;
-* cached prepared statements;
-* optimized configurations;
-* backups automation, including cloud backups;
-* database health monitoring;
-* automatic performance and transactions reports;
-* advanced transactions and queries monitoring (Trace, MON$ and FBScanner);
-* database structure analysis;
-* recovery toolset and database development GUI.
+HQbird speeds up the performance of large databases (from 50 GB to 2 TB) and enables companies to manage large databases without requiring a dedicated database administrator for a few servers, or lowering support expenses for many (hundreds and thousands) Firebird servers. The minimal hardware requirements for HQbird are 8Gb RAM and 4 cores. 
 
-Also HQbird includes a performance self-test to measure Firebird performance on the specific hardware and OS configuration.
+The first version of HQbird was released in 2015, the current version is HQbird 2024.
 
-HQBird contains 2 parts: Server and Admin.
-The Server part has versions for Windows and Linux, and the administration part works on Windows only.
+== How is Firebird related to HQbird?
 
-There are 3 editions of HQbird: Standard, Professional and Enterprise.
+To put it simply, HQbird is an enterprise version of the open-source Firebird DBMS. In keeping with the tradition of open-source projects, we call Firebird the “vanilla” version: in the same way, there is a "`vanilla`" version of PostgreSQL and commercial versions of EnterpriseDB, PostgresPro, etc.
 
-<<<
+HQbird is not a "`different`" database in terms of compatibility with Firebird: there is no need to make a backup-restore when switching between HQbird and Firebird, no need to rewrite SQLs or change client applications.
 
-== What's new in HQbird 2022
+Without any problems, you can install HQbird and the vanilla version of Firebird in parallel on the same server, work with the database file using HQbird, then switch to the vanilla Firebird, and vice versa.
 
-HQbird 2022 is a major new release that adds support for Firebird 4 and adds a number of significant features:
+HQbird's 100% compatibility with vanilla Firebird is the most important feature of HQbird! Almost all functions that are developed for HQbird end up in Firebird within 1-2 versions: for example, replication appeared in HQbird for version 2.5, and it appeared in vanilla version 4.0, external connection pooling was developed in HQbird 3.0, and appeared in Firebird 4.0, multithreaded backup, restore, sweep capabilities appeared starting with HQbird 2.5, and became available in vanilla Firebird 5.0, etc.
 
-. Performance improvements:
-* Optimizer improvements for automatic recognition of implicit INNER join (transform LEFT JOIN to INNER JOIN if queries are equivalent)
-* Temporary blob caching to speed up blob operations up to 15% and prevent abnormal database growth
-* `blob_append` function for faster blob concatenation, blob operations up to 18x faster
-* Multithreaded restore in Firebird 4 HQbird 2022
-. Streaming changes to the database:
-* Each change (such as INSERT, UPDATE or DELETE) for each table can be sent outside the database by a commit event
-* Ability to send changes as JSON via RabbitMQ and similar software
-. A set of additional UDRs:
-* Text recognition (OCR) inside the database in queries, stored procedures and triggers, with support for dictionaries.
-* UDR for working with JSON (construction and parsing)
-* Split UDR to quickly split a string by delimiter
-* UDR for working with external data sources via ODBC
-. The most complete performance monitoring, based on MON$ and trace data, makes it easy to identify performance problems, from long transactions to slow or too frequent requests.
+In addition to the new functionality, bugs fixed in HQbird are also fixed in the corresponding versions of vanilla Firebird.
 
-In addition, HQbird 2022 still offers advanced replication functionality, external connection pooling, prepared statements pool, and other features necessary when working with large databases under critical load.
+Also, IBSurgeon Software provides public testing of Firebird and HQbird in terms of reliability and
+performance: the testing results are published on the website https://www.firebirdtest.com[www.firebirdtest.com].
+
+== What is the price of HQbird?
+
+The permament license for 1 server is USD$899. It also includes 1 replica server license.
+
+What will be the price of HQbird for a company that needs to use not 1 or 2 servers, but several hundred or even thousands of installations? If the number of servers is more than 20, purchasing permanent licenses (USD899/server) becomes too expensive. That's why we offer HQbird Unlimited Subscription for software development
+companies.
+
+HQbird Unlimited Subscription for software development companies costs USD$1200/month (or USD$13450/year with upfront payment), for the annual contract (please note, that regional pricing can be different).
+
+This is a special license for software development companies that allows you to install and use an unlimited number of HQbird copies along with business applications (ERP, CRM, etc) produced by the company.
+
+For example, if a company has 40 clients, then the subscription will cost USD$1200/month, that is, approximately $30 per client per month. If the software development company has 400 clients, then the cost for 1 client per month will be $3 per month.
+
+== What's new in HQbird 2024
+
+HQbird 2024 is a new major version that adds support for Firebird 5.0 and a number of important features:
+
+* Replacing queries "on the fly"
+* Improved Firebird Streaming technology:
+** Added control file, with the same format used for replication in Firebird 4 and higher
+** Added recovery of the `fb_streaming` service after a failure (replication segments are not deleted until the transactions started in them are completed or rolled back. After a failure, transactions that have not yet been committed are repeated).
+** Added new Kafka CDC plugin (Change Data Capture)
+
+In addition, HQbird 2024 still offers advanced replication features, external connection pooling, prepared statement pooling, and other features needed when working with large databases under high load.
 
 <<<
 
 == Feature matrix
 
-Below there is the feature matrix for HQbird editions.
+Ниже представлена матрица функций и уровень их поддержки в различных версиях Firebird, поставляемых в составе HQBird.
 
-[cols="3,1,1,1", frame="all"]
+[cols="1,4,1,1,1,1,2", frame="all", options="header"]
 |===
-.2+h| Features 3+h| Editions
-h| Standard h| Professional h| Enterprise
+| #
+| Feature
+| V5.0
+| V4.0
+| V3.0
+| V2.5
+| Level
 
+|1
+|High-performance native replication
+|X
+|X
+|X
+|X
+|server
+
+|2
+|Replacing queries “in the air”
+|X
+|X
+|X
+|X
+|server
+
+|3
+|Plugins to access ODBC/MySQL through Execute Statement On External
+|X
+|X
+|X
+|
+|plugin
+
+|4
+|Caching BLOBs in temp space
+|X
+|X
+|X
+|X
+|server
+
+|5
+|Improvements in optimizer for JOINs and large sortings
+|X
+|X
+|X
+|
+|server
+
+|6
+|Cache of compiled statements
+|X
+|X
+|X
+|
+|server
+
+|7
+|Streaming/Change Data Capture (plugins for Kafka, JSON, etc)
+|X
+|X
+|
+|
+|plugin
+
+|8
+|Full Text Search
+|X
+|X
+|X
+|
+|plugin
+
+|9
+|Multi-thread backup/restore/sweep, creation of indices
+|X
+|X
+|X
+|X
+|server
+
+|10
+|Parallel Reading of consistent data
+|X
+|X
+|X
+|X
+|server
+
+|11
+|Pool of External Connections
+|X
+|X
+|X
+|
+|server
+
+|12
+|Encryption
+|X
+|X
+|X
+|
+|server
+
+|13
+|Automatic correction of  `firebird.conf` (`DefaultDbCachePages`)
+|X
+|X
+|X
+|X
+|server
+
+|14
+|Advanced Monitoring of Performance (trace, MON, locks, CPU, RAM, frequency)
+|X
+|X
+|X
+|X
+|tools
+
+|15
+|Monitoring of queries with large sortings
+|X
+|X
+|X
+|X
+|server
+
+|16
+|Manage (and configure replication) many databases at once with command-line tools
+|X
+|X
+|X
+|X
+|tools
+
+|17
+|Backups, Restore, and Automatic Backup/Restore
+|X
+|X
+|X
+|X
+|tools
+
+|18
+|Transfer backups, segments, etc through FTP/sockets/Amazon S3
+|X
+|X
+|X
+|X
+|tools
+
+|19
+|Advanced database maintenance: proper garbage collection and more
+|X
+|X
+|X
+|X
+|tools
+
+|20
+|Multi-instance support
+|X
+|X
+|X
+|X
+|tools
+
+|21
+|Silent installation on Windows and Linux
+|X
+|X
+|X
+|X
+|tools
+
+|22
+|Tool to analyze database statistics
+|X
+|X
+|X
+|X
+|tools
+
+|23
+|Tool to analyze connections/transactions/memory consumption/IO operations
+|X
+|X
+|X
+|X
+|tools
+
+|24
+|Recovery tools
+|X
+|X
+|X
+|X
+|tools
+
+|25
 |Optimized configurations
 |X
 |X
 |X
+|X
+|tools
 
-|Backups
-|X
-|X
-|X
-
-|Automatic Performance Reports
-|X
-|X
-|X
-
-|SQL queries tracking
-|X
-|X
-|X
-
-|Transactions tracking
-|X
-|X
-|X
-
-|Database structure analysis
-|X
-|X
-|X
-
-|Performance self-test suite
-|
-|X
-|X
-
-|SQL development, design&debugging
-|
-|X
-|X
-
-|Recovery
-|
-|
-|X
-
-|Replication and high availability
-|
-|
-|X
-
-|Pool of Execute On External statements
-|
-|
-|X
-
-|Cached prepared statements
-|
-|
-|X
-
-|Multi-thread backup, sweep, restore
-|
-|
-|X
-
-|Encryption support
-|
-|
-|X
-
-|Enhanced authentication and security features
-|
-|
-|X
 |===
 
-It is possible to single out components in the HQbird modules that are responsible for certain operations (such as backup, monitoring, database repair).
+<<<
 
-The table below shows how features are distributed among the HQbird modules:
+== Brief Description of HQBird Features
 
-[cols="1,1,3", frame="all", options="header"]
-|===
-| Features
-| Modules
-| Description
+=== High-performance native replication
 
+HQbird includes native replication to create fault-tolerant systems based on Firebird databases:
 
-|**Backup** (automated verified and incremental backup)
-|FBDataGuard
-|FBDataGuard runs on the server side and performs all kinds of
-    backup
+* Replicates databases with 1500+ connections
+* Asynchronous replication with 1-30 seconds delay,
+* Synchronous replication without delay,
+* No triggers or other changes in schema required
+* Automatic propagation of DDL changes,
+* Online re-initialization of replicas.
+* Embedded transport for replication changes, verification of transferred replication segments
 
-|**Optimized Configurations**
-                                (balanced, read-intensive and write-intensive)
-|FBDataGuard, a collection of optimized configurations
-|The optimized configuration file can be customized on the basis
-    of recommendations from FBDataGuard
+Native replication is configured through the special plugin, with the ability to exclude records without PK/UK at the plugin level.
 
-|**Performance Test Suite** (hardware
-                                score)
-|Performance Test Suite
-|The test measures the hardware performance
+HQbird has complete transport to arrange transfer of segments for asynchronous replication for 1-to-1 or 1-to-many schemas, with automatic setup, transfer and validation of replication segments via sockets or FTP. HQbird has command-line commands to set up databases for replication in bulk, to choose databases in the folder, or in nested folders.
 
-|**Monitoring SQL Queries** (MON$, TraceAPI and FBScanner)
-|Performance Monitor, MON$Logger, FBScanner
-|Three different monitoring methods are used in different
-    scenarios
+=== Replacing queries "on the fly"
 
-|**Health Monitoring** (online validation, database health check, log analysis)
-|FBDataGuard
-|Everything is carried out on the server. FBDataGuard sends
-    notifications by e-mail.
+If you have an application with inaccessible or missing sources, HQbird can help you change texts of incompatible or most resource-consuming SQL queries "`on the fly`", and therefore help to optimize the performance or migrate an application without SQL queries sources. The replacement is easy configurable, it is implemented by pairs of files which contains text of original and replaced queries.
 
-|**Transaction Tracking** (dynamic analysis of transaction markers)
-|FBDataGuard, Transaction Monitor, MON$Logger
-|FBDataGuard tracks problems with transactions, Transaction
-    Monitor and MON$Logger show the dynamics of changes and the current
-    status of active transactions.
+With Advanced Monitoring, you can find SQL queries that cause issues and then configure the substitution for them, even without access to the application's source code.
+The replaced query will occur in trace and MON$ tables with the new text.
 
-|**Database Structure Analysis** (table and index sizes, fragmentation, versioning, etc.)
-|Database Analyst
-|Database Analyst analyses the database structure in detail and
-    shows warnings and recommendations.
+=== Plugins for performing external connections with MySQL and ODBC
 
-|**SQL Development & Debugging**
-                                (a GUI tool for developing databases and queries)
-|SQL Studio
-|SQL Studio is a powerful tool for developing and debugging
-    database objects and SQL queries.
+HQbird has External Datasource plugins for ODBC and MySQL. Using these plugins, it is possible to execute commands `EXECUTE STATEMENT ON EXTERNAL` with
+queries to MySQL or ODBC data source, in order to read data from external datasources, or to write data to external datasources.
 
-|**Recovery** (database recovery,
-                                backup recovery, record undeleting)
-|FirstAID, FBDataGuard, IBBackupSurgeon, IBUndelete
-|FirstAID repairs databases when they get corrupted, FBDataGuard
-   stores important metadata thus increasing the chances of successful
-   repairs, IBBackupSurgeon exports data from corrupted backup copies.
-   IBUndelete can undo records deletion.
+Plugins support input parameters and correct mapping of data types (however, in case of ODBC it depends on the specific driver implementation).
 
-|**High Availability**
-                                (replication)
-2+|The HQbird Enterprise edition includes
-   replication and high availability tools.
+See example of an external connection below:
 
-|**Performance improvements (pool of Execute On External and Cached prepared)**
-2+|HQbird Enterprise includes performance improvements.
+[source,sql]
+----
+execute block
+returns (
+  emp_no bigint,
+  birth_date date,
+  first_name varchar(14),
+  last_name varchar(16),
+  gender char(1),
+  hire_date date
+)
+as
+  declare dsn_mysql varchar(128);
+begin
+  dsn_mysql = ':mysql:host=localhost;port=3306;database=employees;user=root';
+  for
+    execute statement q'{
+select
+  emp_no,
+  birth_date,
+  first_name,
+  last_name,
+  gender,
+  hire_date
+from employees
+order by birth_date desc limit 5
+}'
+    on external dsn_mysql
+    as user null password 'sa'
+    into
+      emp_no, birth_date, first_name, 
+      last_name, gender, hire_date
+  do
+    suspend;
+end
+----
 
-|**Multi-thread backup, sweep, restore**
-|HQbird Enterprise
-|
+See more <<_eds_other_dbms>>
 
-|**Encryption support**
-|HQbird Enterprise
-|
+=== Caching blobs in temp space
 
-|**Enhanced authentication and security features**
-|HQbird Enterprise
-|
-|===
+HQbird can cache BLOBs in temp space, in order to speed up BLOBs operations (+15%-200% faster than in vanilla Firebird), and to prevent growth of the database file in case of mistaken BLOB operations.
+
+HQbird uses an extra `firebird.conf` parameter `BlobTempSpace` to control this feature.
+
+The caching option can be:
+
+* 0 -- disabled,
+* 1 -- enabled for PSQL (default),
+* 2 -- enabled for all blobs operations.
+
+=== Improvements in optimizer for JOINs and large sortings
+
+==== LeftJoinConversion / OuterLeftConversion
+
+HQbird can automatically convert implicit inner joins to explicit ones for better optimization in versions 3 and 4.
+
+To activate this feature, change the `LeftJoinConversion` setting in `firebird.conf` to `true`. HQbird in v5.0 supports the `OuterLeftConversion` option that is available in the vanilla version 5.0.
+
+==== SortDataStorageThreshold / InlineSortThreshold
+
+HQbird can optimize queries that involve large sorting operations. In versions 2.5 and 3.0, you can use the `SortDataStorageThreshold` setting to activate the `Refetch` plan for this purpose. 
+
+In the vanilla version 4.0, this setting is renamed as `InlineSortThreshold`. Usually, we recommend to set `SortDataStorageThreshold` to 8192 or 16384 bytes.
+
+=== Cache of compiled queries
+
+This feature can improve the performance of repeated queries, especially when using a connection pool (PHP, etc).
+
+Cache keeps a certain number of prepared queries in each connection's memory. HQbird has this cache in versions 3.0 and 4.0, and you can adjust it with the `DSQLCacheSize` setting (default is 0, i.e., disabled).
+
+In vanilla version 5.0, there is a comparable feature, regulated by the `MaxCompiledCache` option, which is measured in Megabytes, the default is 2Mb.
+
+=== Streaming/Change Data Capture (plugins for Kafka, JSON, etc)
+
+Firebird Streaming is a technology that tracks changes in the database and sends them to another system, such as Kafka, JSON files, RabbitMQ, full text search plugin, etc.
+
+HQbird offers a replication-based Change Data Capture plugin. The plugin creates a change flow that reflects transaction commits/rollbacks.
+
+HQbird provides ready-made plugins for Kafka, RabbitMQ, JSON files, and also supports their configuration for any destination. CDC is useful for processing queues, sending alerts asynchronously, and copying changes to other systems (such as business intelligence or data science pipelines).
+
+CDC plugin available upon request. For more information, contact IBSurgeon support (support@ib-aid.com).
+
+See more <<_hqbird_fbstreaming>>
+
+=== Full-text search
+
+Full-text search is a technique that allows you to search for any word or phrase within a large collection of documents or data. Full-text search is different from searching based on metadata or partial text, which may not capture the full meaning or context of the query. Full-text search uses a full-text engine, such as Lucene, to perform the search and return the results.
+
+IBSurgeon Full Text Search UDR is a user-defined routine (UDR) that integrates Lucene with Firebird. A UDR is a custom function that can be called from SQL statements. IBSurgeon Full Text Search UDR allows you to perform full-text search on Firebird tables in varchar and BLOB fields using Lucene engine.
+
+This UDR is available in open source, but HQbird, provides a customizable plugin based on streaming for operational update.
+
+More details: https://www.firebirdsql.org/en/full-text-search-udr/[]
+
+=== Multi-threaded backup, restore, sweep, creation of indices
+
+HQbird implements multi-thread maintenance (sweep), backup, restore, and create index operations. Firebird 2.5, 3.0 and 4.0 are supported, and this functionality also appeared in Firebird vanilla version 5.0.
+
+The format of backup files is the same as in the vanilla Firebird. On the test server with CPU with 8 cores and SSD, we have the following results (compared with 1 thread);
+
+* Backup -- 4-6x times faster
+* Restore -- 2-4x time faster on CPUs with 8 cores and SSD
+* Sweep -- 4-6x time faster
+
+The actual acceleration depends on CPU, disk subsystem of the server, and structure of the database. Install HQbird in the trial mode (up to 30 days) and check what results will be on your server!
+
+More details and test results can be found here: https://ib-aid.com/articles/firebird-gbak-backuptips-and-tricks#110hqbirdbackup[]
+
+=== Parallel reading of consistent data
+
+HQbird, starting from version 2.5, supports two important features:
+
+. `make_dbkey()` function, which enables reading a table that is partitioned by physical storage blocks (from pointer pages),
+. and "`shared snapshot`" transaction mode, which facilitates parallel operations in multiple connections.
+
+These features help to achieve parallel reading of large data sets, and to accelerate 2-10x times export operations (such as for BI exports or data pipeline).
+These features are also available in Firebird vanilla, from version 4.0.4 onwards.
+
+* More details are in the article: https://ib-aid.com/articles/parallel-reading-of-data-in-firebird[]
+* Example application & sources: https://github.com/IBSurgeon/FBCSVExport[]
+
+=== Pool of external connections
+
+HQbird has a pool of external connections for Firebird 2.5, 3.0, and this pool is also available in vanilla version since 4.0.
+
+An external connection pool allows you to execute `EXECUTE STATEMENT ON EXTERNAL` statements with less overhead in reconnecting to the external database.
+
+The feature is controlled in the `firebird.conf` with `ExtConnPoolSize` and `ExtConnPoolLifeTime` parameters.
+
+From the application perspective, no extra steps are needed to use or not use -- it is switched on or off in the server configuration, and completely transparent for the applications. It is also possible to disable garbage collection for queries executed in external connections. It is regulated through configuration parameter `ExtConnNoGarbageCollect`.
+
+See details: <<_hqbird_performance_extconn_pool>>
+
+=== Encryption
+
+HQbird supports encryption with Encryption Framework's Plugin. The main features are:
+
+. DB encryption plugin (available on demand) for versions 3, 4, 5, Windows & Linux. Comprehensive and fast encryption plugin framework, with AES256. Performance loss is
+between 4%-20%, depending on the RAM and configuration.
+. Support for multi-thread work (for middleware applications, with connections to multiple databases).
+. Sending keys through `fbclient.dll` to implement encryption without changing the application. If you have a database tool that does not support key transfer, or a third-party application, key can be sent through `fbclient.dll` with a special configuration.
+. Password input window for `fbclient.dll` in Windows and password input on the terminal in Linux.
+
+We can offer examples of client applications in various languages, such as Delphi, NET, Java, PHP, {cpp}, etc., upon request.
+
+=== Automatic correction of firebird.conf (DefaultDbCachePages)
+
+Incorrect configuration of `DefaultDbCachePages` in `firebird.conf`, `databases.conf` or in database header is a common configuration mistake, which often happens during the migration between versions. For instance, it can be too large values of Page Buffers in database header for Classic or SuperClassic, or too low for SuperServer.
+
+HQbird will automatically fix the wrong setting in `firebird.conf` and `databases.conf` and it will overwrite, if the configuration is unsuitable for a selected architecture.
+
+=== Advanced Monitoring of Performance (trace, MON, locks, CPU, RAM, frequency)
+
+Advanced Monitoring of Performance in HQbird is a feature that allows you to monitor and analyze the performance of your Firebird databases (version 5.0, 4.0, 3.0, 2.5) in real time. It collects data from various sources, such as Trace API, MON$ tables, lock table, transactions, CPU and RAM usage, and displays them in graphical and tabular forms. You can see the overall performance trends, as well as drill down to the details of each minute,
+query, or transaction.
+
+You can also identify performance problems, such as slow and frequent queries, long-running transactions, lock table spikes, etc., and view their plans and statistics.
+
+* More details: https://ib-aid.com/monitoring-in-hqbird[]
+* Video: https://www.youtube.com/watch?v=GuRmHZ8ErZ4[]
+
+=== Monitoring of queries with large sortings
+
+This feature helps to troubleshoot queries that produce large reports, where many records need to be sorted. HQbird can track queries and operations that create sorting files larger than a given size. When such a query is detected, its text is recorded to `firebird.log`
+
+Configured as a `TempSpaceLogThreshold` parameter in `firebird.conf`, which defines the size of the sorting file for monitoring.
+
+=== Manage (and configure replication) many databases at once with command-line tools
+
+If you have many databases stored in the folder, and want to register all of them in HQbird to setup replication, in HQbird v2024 there is new command-line command to generate JSON file from the folder (recursive or not) with the registration information, which can be used for mass registration.
+
+From replica side, there is special version of HQBird Central for Replicas, which allows to store hundreds of replicas (from different servers) on the single server. HQbird Central for Replicas is shipped by request.
+
+=== Backups, Restore, and Automatic Backup/Restore
+
+. Backups: HQbird implements all types of backups with sophisticated or simple scheduling (all can be done online, with connected users):
+.. Verified backup with `gbak.exe`. The traditional Firebird backup format when Firebird reads every record in the database, guaranteeing that database is healthy. In HQbird (versions 2.5-5.0) verified backup is very fast due to multi-thread support. HQbird implements rotation of verified backups, compression, and test restore. HQbird
+calculates necessary space for backups to ensure that backup will fit into the free space, and creates detailed logs for all operations.
+.. Incremental backup. The fast physical level backup which copies changed data pages. HQbird offers 3 backup schemes: simple weekly 3-levels backup, enhanced multi-level backup (up to 5 levels), and dump backup to create a copy of the database. Backup files are rotated, the necessary space is calculated.
+. Restores
+.. Restore your databases from backups. HQbird allows to restore database from FBK. It is especially important for cloud instances, when FBK is uploaded to the cloud instance, so there is no necessity to connect to server's console (i.e., ssh or RDP).
+.. Test restore, as part of verified backup process. You can opt to perform test of restore of fresh backup, it will be done as a part of verified backup restore process.
+.. Scheduled restores. It is possible to organize scheduled restores of verified (gbak) backups and/or incremental (nbackup) backups, for example, as part of backup
+infrastructure.
+. Automatic backup-restore. Support of full backup-restore cycle, both planned and by request. HQbird will do the full backup-restore in the safe and fast manner: stop all users, do backup and restore, enable users. The old copy of the database will be kept. In case of a problem the process will be reverted. If there will be not enough space, backup-restore will not start.
+
+With HQbird, you can always keep track of your backups and avoid losing them, no matter how many databases you have or where they are.
+
+=== Transfer backups, segments, etc through FTP/sockets/Amazon S3
+
+HQbird can transfer backups (or other files by mask) via FTP, sockets, or to Amazon S3 (needs plugin which is available on demand).
+
+HQbird also has built-in FTP server and sockets server with easy setup.
+
+=== Advanced maintenance: proper garbage collection and more
+
+Excessive record versions, also known as garbage versions, slow down Firebird databases significantly.
+HQbird implements the proper combination of sweep operations and "`soft`" shutdown of long running writeable transactions, and allows to avoid frequent database backups/restores. With HQbird it is recommended to do backup/restore no more than once per year.
+
+Maintenance can also include the recalculation of indices statistics and the verification of indices health, as well as the examination of metadata health.
+
+=== Multi-instance support
+
+HQbird allows installation of multiple Firebird instances of different versions on the same server. It makes migration from one version to another easier. HQbird for Windows installs all supported Firebird versions (5.0, 4.0, 3.0, 2.5) by default, each instance with a different port. You can choose to install only one version, or several versions, during the installation.
+
+To install HQbird for Linux with multiple instances, please use united installer (it is a new feature of HQbird v2024), and indicate what versions you want.
+
+=== Silents installation on Windows and Linux
+
+The fastest way to install HQbird is to use the silent installation in the command line.
+
+In the example below we will install HQbird with Firebird 3.0 into `c:\HQbird`, the configuration will be `c:\HQbirdData\config`, output in `c:\HQbirdData\output`.
+
+----
+HQbirdServer2024.exe /VERYSILENT /SP- /TYPE="hqbird30x64" /DIR="C:\HQbird2020" /CONFIGDIR=C:\HQBirdData\config /OUTPUTDIR=C:\HQBirdData\output
+----
+
+See also:
+
+* How to setup on Linux: <<_hqbird_install_linux>>
+* More details: <<_hqbird_install_silent>>
+
+=== Tool to analyze database statistics
+
+HQbird's Admin package (it runs on Windows), includes Database Analyst, a tool that assists a user to analyze in detail Firebird database statistics and identify possible problems with database performance, maintenance and how an application interacts with the database. IBAnalyst graphically displays Firebird database statistics in a user-friendly way and highlights the following problems:
+
+* tables and BLOBs fragmentation,
+* record versioning,
+* garbage collection,
+* indices effectiveness, etc
+
+More details: <<_hqbird_struct_analyze>>
+
+=== Tool to analyze connections/transactions/memory consumption/IO operations
+
+HQbird MonLogger is a tool to analyze monitoring tables output in Firebird and find problems with slow SQL queries, wrongly designed transactions (long-running transactions, transactions with incorrect isolation level, etc) and identify problematic applications.
+
+MonLogger can connect to Firebird database with performance problems and identify what is the reason of slowness: is it some user attachment, slow SQL query or long-running transaction?
+
+MonLogger supports Firebird 2.1, 2.5, 3.0, 4.0 and 5.0 -- for older Firebird versions or InterBase please use FBScanner.
+
+MonLogger can show you:
+
+* Top attachments with highest number of IO operations, non-indexed and indexed reads
+* Top SQL statements with highest number of IO operations, non-indexed and indexed reads
+* Problematic transactions: long-running transactions, transactions with erroneous isolation level, read/write transactions, and related information: when they started, what applications started these transactions, from what IP address, etc
+* Attachments and statements with the most intensive garbage collection actions
+* Read/write ratio, INSERTS/UPDATE/DELETE ratio, and more.
+
+=== Recovery tools
+
+HQbird includes license of FirstAID, recovery toold for Firebird. IBSurgeon FirstAID is the tool that can automatically diagnose and repair corrupted Firebird or InterBase databases -- it can recover corruptions that neither `gbak` nor `gfix` can fix. Supported versions: Firebird 1.0, 2.0, 2.1, 2.5, 3.0, 4.0, 5.0, InterBase from 4.0 to 2020.
+
+It uses its layer for low-level database access without using the InterBase or Firebird engine, so it can perform real "surgical" operations and repair your database when all other standard mechanisms (`gfix` and `gbak`) cannot.
+
+=== Optimized configurations
+
+HQbird comes with the optimized configuration by default to make the best use of resources of powerful servers and Virtual Machines. To improve HQbird configuration, you can use Cofiguration Calculator for Firebird, where you can choose "`HQbird`", to obtain the basic optimized configuration for your system here: https://cc.ib-aid.com/democalc.html[].
+
+Please note that Calculator produces conservative configurations, and to create customized configuration, you need to monitor and analyze performance logs.
+IBSurgeon can assist you to create the ideal configuration in the context of Optimization/Configuration/Audit Incident for Firebird: https://ib-aid.com/en/firebird-interbase-performance-optimization-service/[]
