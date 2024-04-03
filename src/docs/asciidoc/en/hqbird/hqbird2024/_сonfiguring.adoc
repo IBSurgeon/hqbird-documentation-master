@@ -446,11 +446,11 @@ Let`'s consider the configuration dialog for backup in more details:
 * *"`Backups folder`"* specifies the folder to store backups. This folder should be at the same computer where database is. By default, it is situated inside database default directory. Usually it's a good idea to set the explicit path to the folders with backups.
 * *"`Maximum number of backup files in folder`"* specifies how many previous backups should be stored. FBDataGuard stores backups in revolver order: when the maximum number will be reached (i.e., 5 backups will be created), FBDataGuard will delete the oldest backup and create the new backup. In combination with CRON expressions it gives a powerful ability to create necessary history of backups.
 * *"`Backup name pattern`"* specifies how backup files will be named. Also this name pattern allows FBDataGuard to recognize old backups with the same name pattern.
-* *"`Backup extension`"* is fbk by default.
+* *"`Backup extension`"* is `.fbk` by default.
 * *"`Compress backups`"* specifies should FBDataGuard archive backups after regular Firebird backup. By default, this option is on, but you need to know that FBDataGuard will zip backups`' files which are less than *100 Gb* in size. After that size, the backup compression will be automatically switched off. We recommend to turn this feature on for small databases only.
 * *"`Check restore`"* is an important option. If it is on (by default), FBDataGuard will perform test restore of fresh backup, in order to test its validity. It guarantees the quality of created backup and notifies administrator in case of any problems with test restore.
 * *"`Remove restored`"* specifies should FBDataGuard delete restored database. By default it is OFF, so you might want to turn it ON, but you need carefully consider – do you really need to keep the copy of test restored database. With each test restore this copy will be overwritten.
-* *"`Use multiple cores to backup and test restore`"* -- this feature is for HQbird Enterprise only, it allows to backup database and restore test database using multiple CPU cores, so backup can be made 3-5 times faster. We recommend to allocate ½ of CPU cores,
+* *"`Use multiple cores to backup and test restore`"* -- this feature is for HQbird Enterprise only, it allows to backup database and restore test database using multiple CPU cores, so backup can be made 3-5 times faster. We recommend to allocate 1/2 of CPU cores.
 * *"`Send "Ok" report`"* -- by default it is off, but it`'s strongly recommended to turn it ON and start to receive notifications about correct backups. This feature will use email settings from alerts system
 
 image::3.2.34.png[]

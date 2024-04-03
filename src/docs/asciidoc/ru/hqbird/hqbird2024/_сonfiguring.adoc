@@ -422,34 +422,34 @@ image::3.2.32.png[]
 
 image::3.2.33.png[]
 
-"`Database: Verified Backup`" checks the free space at the drive with backup destination, and if it detects that there is not enough free disk space, CRITICAL alert will be sent, and current backup will be canceled (if necessary).
+"`База данных: Бэкап`"  проверяет свободное место на диске с местом назначения резервной копии, и если обнаруживает, что на диске недостаточно свободного места, будет отправлено CRITICAL предупреждение, а текущая резервная копия будет отменена (при необходимости).
 
 [NOTE]
 ====
-Be careful -- by default backup time is set to **23-00 Monday-Sunday**.
+Будьте осторожны: по умолчанию время резервного копирования установлено **23-00 Понедельник-Воскресенье*.
 
-By default, database backups will be stored into the output folder that you have specified during installation step! By default, it is `C:\HQbirdData\output\...`
+По умолчанию резервные копии базы данных будут храниться в выходной папке, указанной вами на этапе установки! По умолчанию это `C:\HQbirdData\output\...`
 
-It is very important to carefully review database backups settings and adjust them according the local configuration!
+Очень важно внимательно просмотреть настройки резервного копирования базы данных и настроить их в соответствии с локальной конфигурацией!
 ====
 
-Let`'s consider the configuration dialog for backup in more details:
+Рассмотрим диалог настройки резервного копирования подробнее:
 
-* *"`Enabled`"* is obvious – it enables or disables scheduled backups
-* In the *"`Schedule`"* field you can set the time when backup should be run. Scheduler uses CRON expression and this is a right place to apply all the power of CRON (see <<_hqbird_config_cron_expr,CRON Expressions>>).
-* *"`Backups folder`"* specifies the folder to store backups. This folder should be at the same computer where database is. By default, it is situated inside database default directory. Usually it's a good idea to set the explicit path to the folders with backups.
-* *"`Maximum number of backup files in folder`"* specifies how many previous backups should be stored. FBDataGuard stores backups in revolver order: when the maximum number will be reached (i.e., 5 backups will be created), FBDataGuard will delete the oldest backup and create the new backup. In combination with CRON expressions it gives a powerful ability to create necessary history of backups.
-* *"`Backup name pattern`"* specifies how backup files will be named. Also this name pattern allows FBDataGuard to recognize old backups with the same name pattern.
-* *"`Backup extension`"* is fbk by default.
-* *"`Compress backups`"* specifies should FBDataGuard archive backups after regular Firebird backup. By default, this option is on, but you need to know that FBDataGuard will zip backups`' files which are less than *100 Gb* in size. After that size, the backup compression will be automatically switched off. We recommend to turn this feature on for small databases only.
-* *"`Check restore`"* is an important option. If it is on (by default), FBDataGuard will perform test restore of fresh backup, in order to test its validity. It guarantees the quality of created backup and notifies administrator in case of any problems with test restore.
-* *"`Remove restored`"* specifies should FBDataGuard delete restored database. By default it is OFF, so you might want to turn it ON, but you need carefully consider – do you really need to keep the copy of test restored database. With each test restore this copy will be overwritten.
-* *"`Use multiple cores to backup and test restore`"* -- this feature is for HQbird Enterprise only, it allows to backup database and restore test database using multiple CPU cores, so backup can be made 3-5 times faster. We recommend to allocate ½ of CPU cores,
-* *"`Send "Ok" report`"* -- by default it is off, but it`'s strongly recommended to turn it ON and start to receive notifications about correct backups. This feature will use email settings from alerts system
+* *"`Включить`"* -- включает или отключает задание резервного копирования.
+* В поле *"`Расписание`"* вы можете установить время, когда должно запускаться резервное копирование. Планировщик использует выражение CRON (см. <<_hqbird_config_cron_expr,Выражения CRON>>).
+* *"`Создавать бакапы в`"* указывает папку для хранения резервных копий. Эта папка должна находиться на том же компьютере, где находится база данных. По умолчанию она расположен в каталоге базы данных по умолчанию. Обычно рекомендуется указать явный путь к папкам с резервными копиями.
+* *"`Количество бэкапов`"* указывает, сколько предыдущих резервных копий должно храниться. FBDataGuard хранит резервные копии в револьверном порядке: когда будет достигнуто максимальное количество (т. е. будет создано 5 резервных копий), FBDataGuard удалит самую старую резервную копию и создаст новую резервную копию. В сочетании с выражениями CRON это дает мощную возможность создавать необходимую историю резервных копий.
+* *"`Шаблон имени бэкапа`"* определяет, как будут именоваться файлы резервных копий. Кроме того этот шаблон имени позволяет FBDataGuard распознавать старые резервные копии с тем же шаблоном имени.
+* *"`Расширение бэкапа`"* -- по умолчанию `.fbk`.
+* *"`Сжимать бэкапы`"* указывает, должен ли FBDataGuard архивировать резервные копии после обычного резервного копирования Firebird. По умолчанию эта опция включена, но вы должны знать, что FBDataGuard будет архивировать файлы резервных копий размером менее *100 ГБ*. После достижения этого размера сжатие резервной копии будет автоматически отключено. Мы рекомендуем включать эту функцию только для небольших баз данных.
+* *"`Проверить восстановление`"* -- важная опция. Если она включена, то FBDataGuard выполнит тестовое восстановление новой резервной копии, чтобы проверить её. Это гарантирует качество созданной резервной копии и уведомляет администратора в случае возникновения проблем с тестовым восстановлением.
+* *"`Удалять тестовый рестор`"* указывает, должен ли FBDataGuard удалить восстановленную базу данных. По умолчанию она ВЫКЛЮЧЕНА, поэтому вы можете ВКЛЮЧИТЬ её, но вам нужно внимательно подумать: действительно ли вам нужно сохранять копию тестовой восстановленной базы данных. При каждом тестовом восстановлении эта копия будет перезаписана.
+* *"`Использовать N CPU ядер для бэкапа`"* -- эта функция позволяет выполнять резервное копирование базы данных и восстановление тестовой базы данных с использованием нескольких ядер ЦП, поэтому резервное копирование может выполняться в 3-5 раз быстрее. Мы рекомендуем выделить половину ядер вашего процессора.
+* *"`Отчет об успешных бэкапах`"* -- по умолчанию отключено, но настоятельно рекомендуется включить её и начать получать уведомления о успешном резервном копировании. Эта функция будет использовать настройки электронной почты из системы оповещений.
 
 image::3.2.34.png[]
 
-If we will click on button btn:[More>>], the advanced backup options will appear:
+Если вы нажмете кнопку btn:[Раскрыть>>], то появятся расширенные параметры резервного копирования:
 
 image::3.2.35.png[]
 
