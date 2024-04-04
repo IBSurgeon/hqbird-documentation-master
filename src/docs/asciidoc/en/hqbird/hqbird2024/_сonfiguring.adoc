@@ -515,29 +515,29 @@ The top area is devoted for general settings of the incremental backup – they 
 
 image::3.2.39.png[]
 
-*Max duration, sec* – it limits the maximum duration of backup process, by default is 1 day (86400 seconds).
+*Max duration, sec* -- it limits the maximum duration of backup process, by default is 1 day (86400 seconds).
 
-*Minimum free disk space (bytes)* – minimal size of free disk space to prevent backup to start, by default ~9Mb
+*Minimum free disk space (bytes)* -- minimal size of free disk space to prevent backup to start, by default ~9Mb
 
-**Backup folder** - where incremental backup for the selected database will be stored. It is necessary to store incremental backups for each database separately from backups of other databases: i.e., the separate folder for each database.
+**Backup folder** -- where incremental backup for the selected database will be stored. It is necessary to store incremental backups for each database separately from backups of other databases: i.e., the separate folder for each database.
 
 It is necessary to specify backup folder with enough free disk space to store all level of backups!
 
-**Journal name** – file name details information about incremental backups files, for internal use only.
+**Journal name** -- file name details information about incremental backups files, for internal use only.
 
-*Path to nBackup* – it is possible to specify other nbackup tool than standard `nbackup` (not recommended).
+*Path to nBackup* -- it is possible to specify other nbackup tool than standard `nbackup` (not recommended).
 
-*Backup name pattern* – pattern for files of incremental backup (no need to change it).
+*Backup name pattern* -- pattern for files of incremental backup (no need to change it).
 
-*Options* – additional options for nbackup command line tool (no need to change it).
+*Options* -- additional options for nbackup command line tool (no need to change it).
 
-*Do not check existence of backup files* – this option should be checked if you plan to delete or more incremental backups to another location.
+*Do not check existence of backup files* -- this option should be checked if you plan to delete or more incremental backups to another location.
 
-*Do not check GUID chain* – this option should be checked if you want to skip existence check of previous levels of incremental backups.
+*Do not check GUID chain* -- this option should be checked if you want to skip existence check of previous levels of incremental backups.
 
-*Immediately create non-existing low-level backups* – by default this option is __On__. It means that if you have scheduled the initial start moment of level 1 backup earlier than the initial start moment of level 0 backup, DataGuard will automatically fix it and create level 0 backup right before level 1. The following backups of level 0 will be fulfilled according the regular schedule.
+*Immediately create non-existing low-level backups* -- by default this option is __On__. It means that if you have scheduled the initial start moment of level 1 backup earlier than the initial start moment of level 0 backup, DataGuard will automatically fix it and create level 0 backup right before level 1. The following backups of level 0 will be fulfilled according the regular schedule.
 
-*Send OK email for levels 0, 1, 2* – enable this option to receive notifications about incremental backups (__highly recommended__!)
+*Send OK email for levels 0, 1, 2* -- enable this option to receive notifications about incremental backups (__highly recommended__!)
 
 After setting main set of parameters the schedule itself should be set. As you can see on the screenshot below, you need to specify day of the week and time to do level 0 (weekly) backup, days of week and time to start level 1 (daily) backups and hours and minutes of level 3 (hourly backups).
 
@@ -555,7 +555,7 @@ As you can see, the upper part of the configuration screen is the same as in Sim
 
 Advanced schedule allows to setup up to 5 levels of backup, and plan them with flexible <<_hqbird_config_cron_expr,CRON expressions>>.
 
-For example, you can setup it to create full copy (level 0) backup every 3 months, level 1 copy every month, level 2 – every week, level 3 every day and level 4 – every hour.
+For example, you can setup it to create full copy (level 0) backup every 3 months, level 1 copy every month, level 2 -- every week, level 3 every day and level 4 -- every hour.
 
 [TIP]
 ====
