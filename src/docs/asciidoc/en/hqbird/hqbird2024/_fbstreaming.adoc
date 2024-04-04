@@ -182,11 +182,12 @@ Here `sourceDir_N` is the directory with replication log files. These directorie
 The main parameters of the task:
 
 - `controlFileDir` -- the directory in which the control file will be created (by default, the same directory as `sourceDir`);
+- `errorTimeout` -- timeout after error in seconds. After this timeout expires, the segments will be re-scanned and the task will be restarted. The default is 60 seconds;
 - `database` -- database connection string (required);
 - `username` -- user name for connecting to the database;
 - `password` -- password for connecting to the database;
 - `plugin` -- plugin that processes events that occur during the analysis of the replication log (required);
-- `deleteProcessedFile` -- whether to delete the log file after processing (true by default).
+- `deleteProcessedFile` -- whether to delete the log file after processing (`true` by default).
 
 The task may also contain other parameters specific to the plugin being used.
 
@@ -213,3 +214,8 @@ journal_archive_command = "copy $(pathname) $(archivepathname) && copy $(pathnam
 
 Here `archiveDir` is the directory of archives for asynchronous replication, `archiveDirTask` is the directory of archives for the service task `fb_streaming`.
 
+include::fbstreaming_plugins/_kafka_cdc_plugin.adoc[leveloffset=2]
+include::fbstreaming_plugins/_rabbitmq_plugin.adoc[leveloffset=2]
+include::fbstreaming_plugins/_mongodb_events_plugin.adoc[leveloffset=2]
+include::fbstreaming_plugins/_fts_lucene_plugin.adoc[leveloffset=2]
+include::fbstreaming_plugins/_simple_json_plugin.adoc[leveloffset=2]

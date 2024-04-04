@@ -1,0 +1,98 @@
+= Plugin fts_lucene_plugin
+
+The `fts_lucene_plugin` plugin is designed to maintain full-text indexes created with the library IBSurgeon Full Text Search UDR (see https://github.com/IBSurgeon/lucene_udr[]), up to date.
+
+[IMPORTANT]
+====
+`fts_lucene_plugin` plugin cannot maintain indexes whose key is the `RDB$DB_KEY` pseudo-column, since the values of this pseudo-column are not included in the replication log. In addition, full-text indexes built for views will not be automatically updated.
+====
+
+== Algorithm of the `fts_lucene_plugin` plugin
+
+* the `fb_streaming` service analyzes the replication log directory set for the task for unprocessed files;
+* at each iteration, the metadata of full-text indexes are re-read;
+** only full-text indexes in the active state are selected;
+** a list of tables for which these indexes are created is created, then this list is used to filter events (`INSERT`, `UPDATE`, `DELETE`);
+* for unprocessed replication files, the following events are analyzed:
+** start of a transaction (a structure in memory is allocated to store savepoints);
+** set savepoint (a structure in memory is allocated for storing documents of full-text indexes);
+** release savepoint (documents saved in this save point are copied to a higher level save point);
+** rollback to savepoint (the save point is destroyed along with all documents);
+** committing the transaction (changes are applied to all affected full-text indexes: new documents are added to the corresponding index, changed ones are updated, and deleted ones are deleted);
+** transaction rollback;
+** inserting a new record (only for tables that participate in full-text indexes). For each index, a new document is created and saved to the list of added documents for the savepoint.
+** record update (only for tables that participate in full-text indexes). A new document is created for each index. The new document and search key are saved to the list of documents to update for the savepoint.
+** deleting a record (only for tables that participate in full-text indexes). The key value for finding and deleting the corresponding document is saved to the current savepoint.
+
+Other replication events are ignored.
+
+Work features:
+
+- if all indexed fields in the created document are empty, the document will not be added to the index;
+- if not a single indexed field in the document has changed, then such a document will not be updated in the index;
+- if in the updated document all indexed fields are empty, then such a document will be deleted.
+
+== fts_lucene_plugin configuration
+
+For example, we will use the database https://github.com/IBSurgeon/lucene_udr/releases/download/1.2/fts_demo_4.0.zip[fts_demo_4.0]
+
+First of all, you need to install the IBSurgeon Full Text Search UDR library for this database and create the full text indexes we need.
+This process is described in https://github.com/IBSurgeon/lucene_udr[]
+
+Now let's set up asynchronous replication for this database, for this, the following lines must be added to the `replication.conf` file:
+
+[listing]
+----
+database = d:\fbdata\4.0\fts_demo.fdb
+{
+	journal_directory = d:\fbdata\4.0\replication\fts_demo\journal
+	journal_archive_directory = d:\fbdata\4.0\replication\fts_demo\archive
+	journal_archive_command = "copy $(pathname) $(archivepathname) && copy $(pathname) d:\fbdata\4.0\replication\fts_demo\archive_fts
+}
+----
+
+Please note: the log archive files are duplicated here so that logical replication and the full-text index update task work at the same time. This is necessary because log archive files are deleted after processing and cannot be used by another task.
+
+Now you need to enable replication in the database:
+
+[source,sql]
+----
+ALTER DATABASE INCLUDE ALL TO PUBLICATION;
+ALTER DATABASE ENABLE PUBLICATION;
+----
+
+Next, configure `fb_streaming.conf` so that `fb_streaming` automatically updates full-text indexes.
+
+[listing]
+----
+task = d:\fbdata\4.0\replication\fts_demo\archive_fts
+{
+   database = inet://localhost:3054/d:\fbdata\4.0\fts_demo.fdb             
+   username = SYSDBA
+   password = masterkey
+   plugin = fts_lucene_plugin
+}
+----
+
+Now you can install and start the service:
+
+[listing]
+----
+c:\streaming>fb_streaming install
+Success install service!
+
+c:\streaming>fb_streaming start
+Service start pending...
+Service started successfully.
+----
+
+On Linux:
+
+[source,bash]
+----
+sudo systemctl enable fb_streaming
+
+sudo systemctl start fb_streaming
+----
+
+While the service is running, all active full-text indexes, except of indexes created on views and indexes  where the `RDB$DB_KEY` pseudo-column is selected as a key, will be automatically updated when data in the `fts_demo.fdb` database tables changes.

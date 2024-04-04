@@ -1,0 +1,872 @@
+= Plugin kafka_cdc_plugin
+
+The `kafka_cdc_plugin` plugin is designed to register data change events in Firebird database tables and save them in Kafka. This process is also known as Change Data Capture, henceforth CDC.
+
+Each event is a document in JSON format, which is as close as possible to the https://debezium.io/documentation/reference/2.5/index.html[debezium] event format. In the next version it is planned to add the ability to serialize events in AVRO format.
+
+== How it works
+
+The `fb_streaming` service (daemon) checks the contents of the directory specified for the task in the `fb_streaming.conf` configuration file, and if this directory contains unprocessed replication log files, then it analyzes them and generates appropriate events that are processed by the specified plugin. The last replication segment number processed is written to a control file named `<database guid>`. The location of this file can be specified in the `lockDir` configuration parameter. If this parameter is not specified, then by default the control file `<database guid>` will be created in the directory specified as the archive log directory for the task.
+
+[IMPORTANT]
+====
+**Important**: Replication log files must be in an archived state.
+====
+
+The control file is necessary to restore operation after a sudden shutdown of the service (for example, the lights were turned off or the server was rebooted). It contains the following information:
+
+- control information (database GUID, size, etc.);
+- number of the last processed segment and position in it;
+- the number of the segment with the oldest active transaction (a transaction can start in one segment and end in another);
+- a list of all active transactions in the form of pairs `{tnxNumber, segmentNumber}`, where `segmentNumber` is the number of the segment in which the transaction began.
+
+If an emergency situation occurs and the `fb_streaming` service has been stopped, then the next time it starts, it reads the control file and rereads all replication segments, starting with the number of the segment with the oldest active transaction, and ending with the number of the last processed segment. In the process of reading these segments, `fb_streaming` repeats all events from the list of active transactions, after which it goes into normal operation.
+
+A replication segment file is deleted if its number is less than the segment number with the oldest active transaction.
+
+The `kafka_cdc_plugin` generates only data change events for the given tables for each of the `INSERT`, `UPDATE` and `DELETE` operations. Each active transaction has its own buffer in which these events accumulate, and they are sent to Kafka only when the transaction completes, after which the buffer is cleared.
+
+Events can enter Kafka in two formats:
+
+- JSON without schema (parameters `key_converter_schemas_enable` and `value_converter_schemas_enable` equal to `false`);
+- JSON with a schema (parameters `key_converter_schemas_enable` and `value_converter_schemas_enable` equal to `true`).
+
+Future versions also plan to add support for event serialization in AVRO format, as well as support for schema registries.
+
+Next, we will talk in detail about data change events.
+
+== Data Change Events
+
+The `kafka_cdc_plugin` generates a data change event for each `INSERT`, `UPDATE` and `DELETE` operation at the record level. Each event contains a key and a value. The key and value structure depends on the modified table.
+
+The `fb_streaming` service and the `kafka_cdc_plugin` plugin are designed for _continuous streams of event messages_. However, the structure of these events may change over time, which may be difficult for consumers to process. To solve this problem, each event contains a schema for its content or, if you are using a schema registry, a schema identifier that the consumer can use to retrieve the schema from the registry. This makes each event self-contained.
+
+The following JSON skeleton shows the four main parts of a change event. The schema field is only in the change event when you configure the `kafka_cdc_plugin` plugin to create it. Likewise, the event key and event payload are only found in the change event if you have configured the `kafka_cdc_plugin` plugin to generate them. If you are using the JSON format and have configured the `kafka_cdc_plugin` to generate all four main parts of change events, the change events have the following structure:
+
+[source,json]
+----
+{
+  "schema": { <1>
+    ...
+   },
+  "payload": { <2>
+    ...
+  }
+}
+{
+  "schema": { <3>
+    ...
+  },
+  "payload": { <4>
+    ...
+  }
+}
+----
+
+.Overview of change event basic content
+[cols="<1,<1,<3", options="header",stripes="none"]
+|===
+^|Item
+^|Field name
+^|Description
+
+|1
+|schema
+|The first `schema` field is part of the event key. It defines a schema that describes what is in the payload portion of the event key. In other words, the first `schema` field describes the structure of the primary key, or unique key if the table does not have a primary key, for the modified table. This part of the event will only be published if the parameter `key_converter_schemas_enable = true`.
+
+|2
+|payload
+|The first `payload` field is part of the event key. It has the structure described by the previous `schema` field and it contains the key for the row that was changed.
+
+|3
+|schema
+|The second `schema` field is part of the event value. It defines a schema that describes what is in the `payload` of the event value. In other words, the second `schema` describes the structure of the row that was changed. Typically this schema contains nested schemas. This part of the event will only be published if the parameter `value_converter_schemas_enable = true`.
+
+|4
+|payload
+|The second `payload` field is part of the event value. It has the structure described by the previous `schema` field and it contains the actual data for the row that was changed.
+|===
+
+=== Change event keys
+
+For a given table, the change event key has a structure that contains a field for each column of the table's primary key at the time the event was created.
+
+Consider the `CUSTOMERS` table, and an example of a change event key for that table.
+
+[source,sql]
+----
+CREATE TABLE CUSTOMERS (
+  ID BIGINT GENERATED BY DEFAULT AS IDENTITY,
+  FIRST_NAME VARCHAR(255) NOT NULL,
+  LAST_NAME VARCHAR(255) NOT NULL,
+  EMAIL VARCHAR(255) NOT NULL,
+  CONSTRAINT PK_CUSTOMERS PRIMARY KEY(ID)
+);
+----
+
+[source,json]
+----
+{
+    "schema": { <1>
+        "type": "struct",
+        "name": "fbstreaming.CUSTOMERS.Key", <2>
+        "optional": "false", <3>
+        "fields": [ <4>
+            {
+                "type": "int64",
+                "optional": false,
+                "field": "ID"
+            }
+        ]
+    },
+    "payload": { <5>
+        "ID": 1
+    }
+}
+----
+
+.Description of change event key
+[cols="<1,<1,<3", options="header",stripes="none"]
+|===
+^|Item
+^|Field name
+^|Description
+
+|1
+|`schema`
+|The schema that describes what is in key's payload portion. The schema will only be included in the event if the configuration option is set to `key_converter_schemas_enable = true`.
+
+|2
+|`name`
+|Name of the schema that defines the structure of the key's payload. This schema describes the structure of the primary key for the table that was changed. Key schema names have the format `fbstreaming.<table_name>.Key`.
+
+|3
+|`optional`
+|Indicates whether the event key must contain a value in its `payload` field. In this example, a value in the key's payload is required. A value in the key's payload field is optional when a table does not have a primary key.
+
+|4
+|`fields`
+|Specifies each field that is expected in the payload, including each field's name, type, and whether it is required.
+
+|5
+|`payload`
+|Contains the key for the row for which this change event was generated. In this example, the key, contains a single `ID` field whose value is `1`.
+|===
+
+=== Change event values
+
+The value in a change event is a bit more complicated than the key. Like the key, the value has a `schema` section and a `payload` section. The `schema` section contains the schema that describes the `Envelope` structure of the `payload` section, including its nested fields. Change events for operations that create, update or delete data all have a value payload with an envelope structure.
+
+Consider the same sample table that was used to show an example of a change event key:
+
+[source,sql]
+----
+CREATE TABLE CUSTOMERS (
+  ID BIGINT GENERATED BY DEFAULT AS IDENTITY,
+  FIRST_NAME VARCHAR(255) NOT NULL,
+  LAST_NAME VARCHAR(255) NOT NULL,
+  EMAIL VARCHAR(255) NOT NULL,
+  CONSTRAINT PK_CUSTOMERS PRIMARY KEY(ID)
+);
+----
+
+The value portion of a change event for a change to this table is described for:
+
+- create events
+- update events
+- delete events
+
+To demonstrate these events, let's run the following set of SQL queries:
+
+[source,sql]
+----
+insert into CUSTOMERS (FIRST_NAME, LAST_NAME, EMAIL)
+values ('Anne', 'Kretchmar', 'annek@noanswer.org');
+
+commit;
+
+update CUSTOMERS
+set FIRST_NAME = 'Anne Marie';
+
+commit;
+
+delete from CUSTOMERS;
+
+commit;
+----
+
+=== Create events
+
+The following example shows part of the change event value that `fb_streaming` generates for an operation that creates data in the `CUSTOMERS` table:
+
+[source,json]
+----
+{
+    "schema": { <1>
+        "type": "struct",
+        "fields": [
+            {
+                "type": "struct",
+                "fields": [
+                    {
+                        "type": "int64",
+                        "optional": false,
+                        "field": "ID"
+                    },
+                    {
+                        "type": "string",
+                        "optional": false,
+                        "field": "FIRST_NAME"
+                    },
+                    {
+                        "type": "string",
+                        "optional": false,
+                        "field": "LAST_NAME"
+                    },
+                    {
+                        "type": "string",
+                        "optional": false,
+                        "field": "EMAIL"
+                    }
+                ],
+                "optional": true,
+                "name": "fbstreaming.CUSTOMERS.Value", <2>
+                "field": "before"
+            },
+            {
+                "type": "struct",
+                "fields": [
+                    {
+                        "type": "int64",
+                        "optional": false,
+                        "field": "ID"
+                    },
+                    {
+                        "type": "string",
+                        "optional": false,
+                        "field": "FIRST_NAME"
+                    },
+                    {
+                        "type": "string",
+                        "optional": false,
+                        "field": "LAST_NAME"
+                    },
+                    {
+                        "type": "string",
+                        "optional": false,
+                        "field": "EMAIL"
+                    }
+                ],
+                "optional": true,
+                "name": "fbstreaming.CUSTOMERS.Value",
+                "field": "after"
+            },
+            {
+                "type": "struct",
+                "fields": [
+                    {
+                        "type": "string",
+                        "optional": false,
+                        "field": "dbguid"
+                    },
+                    {
+                        "type": "int64",
+                        "optional": false,
+                        "field": "sequence"
+                    },
+                    {
+                        "type": "string",
+                        "optional": false,
+                        "field": "filename"
+                    },
+                    {
+                        "type": "string",
+                        "optional": false,
+                        "field": "table"
+                    },
+                    {
+                        "type": "int64",
+                        "optional": false,
+                        "field": "tnx"
+                    },
+                    {
+                        "type": "int64",
+                        "optional": false,
+                        "field": "ts_ms"
+                    }
+                ],
+                "optional": false,
+                "name": "fbstreaming.Source", <3>
+                "field": "source"
+            },
+            {
+                "type": "string",
+                "optional": false,
+                "field": "op"
+            },
+            {
+                "type": "int64",
+                "optional": true,
+                "field": "ts_ms"
+            }     
+        ],
+        "optional": false,
+        "name": "fbstreaming.CUSTOMERS.Envelope" <4>
+    },
+    "payload": { <5>
+       "before": null, <6>
+       "after": { <7>
+           "ID": 1,
+           "FIRST_NAME": "Anne",
+           "LAST_NAME": "Kretchmar",
+           "EMAIL": "annek@noanswer.org"
+        },
+        "source": { <8>
+           "dbguid": "{9D66A972-A8B9-42E0-8542-82D1DA5F1692}",
+           "sequence": 1,
+           "filename": "TEST.FDB.journal-000000001",
+           "table": "CUSTOMERS",
+           "tnx": 200,
+           "ts_ms": 1711288254908
+        },
+        "op": "c" <9>,
+        "ts_ms": 1711288255056  <10>
+    }
+}
+----
+
+.Descriptions of _create_ event value fields
+[cols="<1,<1,<3", options="header",stripes="none"]
+|===
+^|Item
+^|Field name
+^|Description
+
+|1
+|`schema`
+|The value's schema, which describes the structure of the value's payload. A change event's value schema is the same in every change event that the connector generates for a particular table. The schema will only be included in the event if the configuration option is set to `value_converter_schemas_enable = true`.
+
+|2
+|`name`
+|In the `schema` section, each `name` field specifies the schema name for the `payload` part fields.
+
+`fbstreaming.CUSTOMERS.Value` is the scheme for the `before` and `after` fields of the payload. This schema is specific to the `CUSTOMERS` table.
+
+The schema names for the `before` and `after` fields are `<logicalName>.<tableName>.Value`, which ensures that the schema name is unique in the database. This means that when using the Avro converter, the resulting Avro schema for each table in each logical source has its own evolution and history.
+
+|3
+|`name`
+|`fbstreaming.Source` is the schema of the payload `source` field. This scheme is specific to the `fbstreaming` service and the `kafka_cdc_plugin` plugin. `fbstreaming` uses it for all events it generates.
+
+|4
+|`name`
+|`fbstreaming.CUSTOMERS.Envelope` is the schema for the overall structure of the payload, where `fbstreaming` is service name, and `CUSTOMERS` is table name.
+
+|5
+|`payload`
+|The value's actual data. This is the information that the change event is providing.
+
+|6
+|`before`
+|An optional field that specifies the state of the row before the event occurred. When the `op` field is `c` for create, as it is in this example, the before field is `null` since this change event is for new content.
+
+|7
+|`after`
+|An optional field that specifies the state of the row after the event occurred. In this example, the `after` field contains the values of the new row's `ID`, `FIRST_NAME`, `LAST_NAME` and `EMAIL` columns.
+
+|8
+|`source`
+a|Mandatory field that describes the source metadata for the event. This field contains information that you can use to compare this event with other events, with regard to the origin of the events, the order in which the events occurred, and whether events were part of the same transaction. The source metadata includes:
+
+- Database GUID
+- Replication log segment number
+- Replication log segment file name
+- Table name
+- Transaction number in which the event occurred
+- Time of last modification of the replication log segment file
+
+|9
+|`op`
+a|Mandatory string that describes the type of operation that caused the connector to generate the event. In this example, `c` indicates that the operation created a row. Valid values are:
+
+- `c` - create
+- `u` - update
+- `d` - delete
+
+|10
+|`ts_ms`
+a|Displays the time at which `fbstreaming` recorded the event in Kafka. 
+
+In the `source` object, the value `ts_ms` indicates the time of the last modification of the replication log segment file (to some approximation, this time can be considered the time the event occurred in the database). By comparing the value of `payload.source.ts_ms` with the value of `payload.ts_ms`, you can determine the delay between the source database update and `fbstreaming`. 
+|===
+
+=== Update events
+
+The change event value for the _update_ operation in the example table `CUSTOMERS` has the same schema as the _create_ event for that table. Likewise, the event value payload has the same structure. However, the event value payload contains different values in the _update_ event. Here is an example of the change event value in the event that `fb_streaming` generates for an update on the `CUSTOMERS` table:
+
+[source,json]
+----
+{
+    "schema": { ... },
+    "payload": {
+        "before": { <1>
+            "ID": 1,
+            "FIRST_NAME": "Anne",
+            "LAST_NAME": "Kretchmar",
+            "EMAIL": "annek@noanswer.org"
+        },
+        "after": { <2>
+            "ID": 1,
+            "FIRST_NAME": "Anne Marie",
+            "LAST_NAME": "Kretchmar",
+            "EMAIL": "annek@noanswer.org"
+        },
+        "source": { <3>
+            "dbguid": "{9D66A972-A8B9-42E0-8542-82D1DA5F1692}",
+            "sequence": 2,
+            "filename": "TEST.FDB.journal-000000002",
+            "table": "CUSTOMERS",
+            "tnx": 219,
+            "ts_ms": 1711288254908
+        },
+        "op": "u", <4>
+        "ts_ms": 1711288256121 <5>
+    }
+}
+----
+
+.Descriptions of _update_ event value fields
+[cols="<1,<1,<3", options="header",stripes="none"]
+|===
+^|Item
+^|Field name
+^|Description
+
+|1
+|`before`
+|An optional field that specifies the state of the row before the event occurred. In an _update_ event value, the `before` field contains a field for each table column and the value that was in that column before the database commit. In this example, the `FIRST_NAME` value is `Anne`.
+
+|2
+|`after`
+|An optional field that specifies the state of the row after the event occurred. You can compare the `before` and `after` structures to determine what the update to this row was. In the example, the `FIRST_NAME` value is now `Anne Marie`.
+
+|3
+|`source`
+a|Mandatory field that describes the source metadata for the event. This field contains information that you can use to compare this event with other events, with regard to the origin of the events, the order in which the events occurred, and whether events were part of the same transaction. The source metadata includes:
+
+- Database GUID
+- Replication log segment number
+- Replication log segment file name
+- Table name
+- Transaction number in which the event occurred
+- Time of last modification of the replication log segment file
+
+|4
+|`op`
+|Mandatory string that describes the type of operation. In an _update_ event value, the `op` field value is `u`, signifying that this row changed because of an update.
+
+|5
+|`ts_ms`
+a|Displays the time at which `fbstreaming` recorded the event in Kafka. 
+
+In the `source` object, the value `ts_ms` indicates the time of the last modification of the replication log segment file (to some approximation, this time can be considered the time the event occurred in the database). By comparing the value of `payload.source.ts_ms` with the value of `payload.ts_ms`, you can determine the delay between the source database update and `fbstreaming`. 
+|===
+
+=== Delete events
+
+The value in a _delete_ change event has the same schema portion as _create_ and _update_ events for the same table. The `payload` portion in a delete event for the sample `CUSTOMERS` table looks like this:
+
+[source,json]
+----
+{
+    "schema": { ... },
+    "payload": { <1>
+        "before": {
+            "ID": 1,
+            "FIRST_NAME": "Anne Marie",
+            "LAST_NAME": "Kretchmar",
+            "EMAIL": "annek@noanswer.org"
+        },
+        "after": null, <2>
+        "source": { <3>
+            "dbguid": "{9D66A972-A8B9-42E0-8542-82D1DA5F1692}",
+            "sequence": 3,
+            "filename": "TEST.FDB.journal-000000003",
+            "table": "CUSTOMERS",
+            "tnx": 258,
+            "ts_ms": 1711288254908
+        },
+        "op": "d", <4>
+        "ts_ms": 1711288256152 <5>
+    }
+}
+----
+
+.Descriptions of delete event value fields
+[cols="<1,<1,<3", options="header",stripes="none"]
+|===
+^|Item
+^|Field name
+^|Description
+
+|1
+|`before`
+|Optional field that specifies the state of the row before the event occurred. In a _delete_ event value, the `before` field contains the values that were in the row before it was deleted with the database commit.
+
+|2
+|`after`
+|Optional field that specifies the state of the row after the event occurred. In a _delete_ event value, the `after` field is `null`, signifying that the row no longer exists.
+
+|3
+|`source`
+a|Mandatory field that describes the source metadata for the event. This field contains information that you can use to compare this event with other events, with regard to the origin of the events, the order in which the events occurred, and whether events were part of the same transaction. The source metadata includes:
+
+- Database GUID
+- Replication log segment number
+- Replication log segment file name
+- Table name
+- Transaction number in which the event occurred
+- Time of last modification of the replication log segment file
+
+|4 |`op` |Mandatory string that describes the type of operation. The `op` field value is `d`, signifying that this row was deleted.
+
+|5
+|`ts_ms`
+a|Displays the time at which `fbstreaming` recorded the event in Kafka. 
+
+In the `source` object, the value `ts_ms` indicates the time of the last modification of the replication log segment file (to some approximation, this time can be considered the time the event occurred in the database). By comparing the value of `payload.source.ts_ms` with the value of `payload.ts_ms`, you can determine the delay between the source database update and `fbstreaming`. 
+|===
+
+== Data type mappings
+
+[cols="<1,<1,<3", options="header",stripes="none"]
+|===
+^|Firebird data type
+^|Literal type
+^|Semantic type
+
+|BOOLEAN
+|boolean
+|
+
+|SMALLINT
+|int16
+|
+
+|INTEGER
+|int32
+|
+
+|BIGINT
+|int64
+|
+
+|INT128
+|string
+|
+
+|FLOAT
+|float32
+|
+
+|DOUBLE PRECISION
+|float64
+|
+
+|NUMERIC(N,M)
+|string
+|
+
+|DECIMAL(N,M)
+|string
+|
+
+|DECFLOAT(16)
+|string
+|
+
+|DECFLOAT(34)
+|string
+|
+
+|CHAR(N)
+|string
+|
+
+|VARCHAR(N)
+|string
+|
+
+|BINARY(N)
+|string
+|Each byte is encoded with a hexadecimal `XX` pair.
+
+|VARBINARY(N)
+|string
+|Each byte is encoded with a hexadecimal `XX` pair.
+
+|TIME
+|string
+|String representation of time in the format `HH24:MI:SS.F`, where `F` is ten-thousandths of a second.
+
+|TIME WITH TIME ZONE
+|string
+|String representation of time in the format `HH24:MI:SS.F TZ`, where `F` is ten-thousandths of a second, `TZ` is the name of the time zone.
+
+|DATE
+|string
+|String representation of date in `Y-M-D` format.
+
+|TIMESTAMP
+|string
+|String representation of the date and time in the format `Y-M-D HH24:MI:SS.F`, where `F` is ten-thousandths of a second.
+
+|TIMESTAMP WITH TIMEZONE
+|string
+|String representation of the date and time in the format `Y-M-D HH24:MI:SS.F`, where `F` is ten-thousandths of a second, `TZ` is the name of the time zone.
+
+|BLOB SUB_TYPE TEXT
+|string
+|The `before` values are always `null`, since old BLOB field values are not stored in replication segments.
+
+|BLOB SUB_TYPE 0
+|string
+|The `before` values are always `null`, since old BLOB field values are not stored in replication segments. Each byte is encoded with a hexadecimal pair `XX`.
+|===
+
+== Run Change Data Capture
+
+We will describe in detail the steps required to launch Change Data Capture on your database:
+
+. Setting up Kafka
+. Setting up Firebird and preparing the database
+. Configuring the `fb_streaming` service and the `kafka_cdc_plugin` plugin
+. Launch Kafka
+. Installation and start of the `fb_streaming` service
+. Start publishing in the database
+
+=== Setting up Kafka
+
+To test the `kafka_cdc_plugin` plugin, a configured Kafka installation in docker is used. To do this, use `docker-compose.yml` with the following content:
+
+[source,yml]
+----
+version: "2"
+
+services:
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.2.1
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-server:7.2.1
+    hostname: kafka
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "9997:9997"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9997
+      KAFKA_JMX_HOSTNAME: kafka
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - 8080:8080
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'true'
+    volumes:
+      - "d:\\docker\\kafka\\config.yml:/etc/kafkaui/dynamic_config.yaml"
+----
+
+The included file `config.yml` contains:
+
+[source,yml]
+----
+auth:
+  type: DISABLED
+kafka:
+  clusters:
+  - bootstrapServers: kafka:29092
+    name: Kafka CDC Cluster
+    properties: {}
+    readOnly: false
+rbac:
+  roles: []
+webclient: {}
+----
+
+=== Setting up Firebird and preparing the database
+
+Now you need to configure asynchronous replication for your database; to do this, you need to add the following lines to the `replication.conf` file:
+
+[source,conf]
+----
+database = c:\fbdata\5.0\test.fdb
+{
+   journal_directory = d:\fbdata\5.0\replication\test\journal
+   journal_archive_directory = d:\fbdata\5.0\replication\test\archive
+   journal_archive_command = "copy $(pathname) $(archivepathname) && copy $(pathname) d:\fbdata\5.0\replication\test\kafka_source"
+   journal_archive_timeout = 10
+}
+----
+
+Please note: this involves duplicating log archive files so that logical replication and the task of sending events to Kafka can work simultaneously. This is necessary because log archive files are deleted after processing and cannot be used by another task.
+
+If replication logs are not used for replication itself, but are only needed for Change Data Capture, then the configuration can be simplified:
+
+[source,conf]
+----
+database = c:\fbdata\5.0\test.fdb
+{
+   journal_directory = d:\fbdata\5.0\replication\test\journal
+   journal_archive_directory = d:\fbdata\5.0\replication\test\kafka_source
+   journal_archive_timeout = 10
+}
+----
+
+Now you need to include the necessary tables in the publication. For the example above, just add the `CUSTOMERS` table to the publication. This is done with the following statement:
+
+[source,sql]
+----
+ALTER DATABASE INCLUDE CUSTOMERS TO PUBLICATION;
+----
+
+or you can include all database tables in the publication at once:
+
+[source,sql]
+----
+ALTER DATABASE INCLUDE ALL TO PUBLICATION;
+----
+
+=== Configuring the `fb_streaming` service and the `kafka_cdc_plugin` plugin
+
+Next, we'll configure the `fb_streaming.conf` configuration so that `fb_streaming` automatically sends data change events to Kafka.
+
+[source,conf]
+----
+task = d:\fbdata\5.0\replication\test\kafka_source
+{
+    database = inet://localhost:3055/test
+    username = SYSDBA
+    password = masterkey
+    deleteProcessedFile = true
+    plugin = kafka_cdc_plugin
+    dumpBlobs = true
+    kafka_brokers = localhost:9092
+    kafka_topic = cdc
+    key_converter_schemas_enable = true
+    value_converter_schemas_enable = true
+}
+----
+
+On Linux this configuration would look like this:
+
+[source,conf]
+----
+task = /mnt/d/fbdata/5.0/replication/test/kafka_source
+{
+    database = inet://localhost:3055/test
+    username = SYSDBA
+    password = masterkey
+    deleteProcessedFile = true
+    plugin = kafka_cdc_plugin
+    dumpBlobs = true
+    kafka_brokers = localhost:9092
+    kafka_topic = cdc
+    key_converter_schemas_enable = true
+    value_converter_schemas_enable = true
+}
+----
+
+The `task` parameter describes the task to be performed by the `fb_streaming` service. It specifies the folder where the replication segment files are located for the plugin to process. There may be several such tasks. This parameter is complex and itself describes the configuration of a specific task. Let's describe the parameters available for the task performed by the `kafka_cdc_plugin` plugin:
+
+- `controlFileDir` -- the directory in which the control file will be created (by default, the same directory as `sourceDir`);
+- `database` -- database connection string (required);
+- `username` -- user name for connecting to the database;
+- `password` -- password for connecting to the database;
+- `plugin` -- plugin that processes events that occur during the analysis of the replication log (required);
+- `deleteProcessedFile` -- whether to delete the log file after processing (`true` by default). It is useful to set this parameter to `false` for debugging, when the same logs need to be processed multiple times without deleting them;
+- `warn_tnx_not_found` -- generate a warning instead of an error if the transaction is not found in the replication segments. If this parameter is set to `true`, then an appropriate warning will be written to the `fb_streaming` log, the contents of the lost transaction will be ignored, and the plugin will continue to work. Default is `false`;
+- `errorTimeout` -- timeout after an error, in seconds. After this timeout expires, the segments will be re-scanned and the task will be restarted. Default is 60 seconds;
+- `include_tables` -- a regular expression that defines the names of the tables for which events need to be tracked;
+- `exclude_tables` -- a regular expression that defines the names of tables for which events do not need to be tracked;
+- `dumpBlobs` -- whether to publish new BLOB field values (default `false`);
+- `kafka_brokers` -- addresses of Kafka brokers. You can specify multiple addresses. Addresses are separated by commas;
+- `kafka_topic` -- the name of the Kafka topic in which data change events are stored;
+- `key_converter_schemas_enable` -- whether to include a schema in the data update event key;
+- `value_converter_schemas_enable` -- whether to include the schema in the data update event value.
+
+=== Launch Kafka
+
+Now you can run docker with a Kafka container:
+
+[source,bash]
+----
+docker-compose up -d
+----
+
+To stop docker run:
+
+[source,bash]
+----
+docker-compose down
+----
+
+=== Installing and starting the `fb_streaming` service
+
+The next step is to install and start the `fb_streaming` service.
+
+In Windows, this is done with the following commands (Administrator privileges are required):
+
+[source,bash]
+----
+fb_streaming install
+fb_streaming start
+----
+
+On Linux:
+
+[source,bash]
+----
+sudo systemctl enable fb_streaming
+
+sudo systemctl start fb_streaming
+----
+
+[NOTE]
+====
+To test how `fb_streaming` works without installing the service, simply type the `fb_streaming` command without any arguments.
+`fb_streaming` will be launched as an application and terminated after pressing Enter.
+====
+
+=== Start publication in the database
+
+Once you have everything set up and running, you need to enable publishing to your database. This is done with the following SQL query:
+
+[source,sql]
+----
+ALTER DATABASE ENABLE PUBLICATION;
+----
+
+From this moment on, the `fb_streaming` service will monitor changes in the specified tables and publish them in the `cdc` topic, on the servers specified in `kafka_brokers`.
