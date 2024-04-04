@@ -1041,106 +1041,105 @@ access.guest-password=yournewpassword
 <<<
 
 [[_hqbird_config_cron_expr]]
-== Appendix: CRON Expressions
+== Приложение: Выражения CRON
 
-All jobs in FBDataGuard have time settings in CRON format. CRON is very easy and powerful format to schedule execution times.
+Все задания в FBDataGuard имеют настройки времени в формате CRON. CRON -- очень простой и мощный формат для планирования времени выполнения.
 
-=== CRON Format
+=== Формат CRON
 
-A CRON expression is a string comprised of 6 or 7 fields separated by white space. Fields can contain any of the allowed values, along with various combinations of the allowed special characters for that field. The fields are as follows:
+Выражение CRON представляет собой строку, состоящую из 6 или 7 полей, разделенных пробелами. Поля могут содержать любые разрешенные значения, а также различные комбинации разрешенных специальных символов для этого поля. Поля следующие:
 
 [cols="1,1,1,1", frame="topbot", options="header"]
 |===
-| Field Name
-| Mandatory
-| Allowed Values
-| Allowed Special Characters
+| Имя поля
+| Обязательное
+| Допустимые значения
+| Допустимые специальные символы
 
 
-|Seconds
-|YES
+|Секунды
+|Да
 |0-59
 |, - * /
 
-|Minutes
-|YES
+|Минуты
+|Да
 |0-59
 |, - * /
 
-|Hours
-|YES
+|Часы
+|Да
 |0-23
 |, - * /
 
-|Day of month
-|YES
+|День месяца
+|Да
 |1-31
 |, - * / L W
 
-|Month
-|YES
-|1-12 or JAN-DEC
+|Месяц
+|Да
+|1-12 или JAN-DEC
 |, - * /
 
-|Day of week
-|YES
-|1-7 or SUN-SAT
+|День недели
+|Да
+|1-7 или SUN-SAT
 |, - * / L #
 
-|Year
-|NO
+|Год
+|Нет
 |empty, 1970-2099
 |, - * /
 |===
 
-So cron expressions can be as simple as this: `\* * * * ? *` or more complex, like this: `0 0/5 14,18,3-39,52 ? JAN,MAR,SEP MON-FRI 2002-2010`
+Таким образом, выражения cron могут быть такими простыми: `\* * * * ? *` или более сложными, например: `0 0/5 14,18,3-39,52 ? JAN,MAR,SEP MON-FRI 2002-2010`
 
-=== Special characters
+=== Специальные символы
 
-** `\*` (__"`all values`"__) -- used to select all values within a field.
-For example, "`*`" in the minute field means __"`every minute`"__.
+* `{asterisk}` ("`все значения`") -- используется для выбора всех значений в поле.
+Например, "`{asterisk}`" в поле минуты обозначает "`каждую минуту`".
 
-** `?` (__"`no specific value`"__) -- useful when you need to specify something in one of the two fields in which the character is allowed, but not the other.
-For example, if I want my trigger to fire on a particular day of the month (say, the 10th), but don't care what day of the week that happens to be, I would put "`10`" in the day-of-month field, and "`?`" in the day-of-week field. See the examples below for clarification.
+* `?` ("`нет конкретного значения`") -- полезно, когда вам нужно указать что-то в одном из двух полей, в котором разрешен символ, но не в другом.
+Например, если я хочу, чтобы мой триггер сработал в определенный день месяца (скажем, 10-го числа), но меня не волнует, какой это будет день недели. Тогда необходимо поместить "`10`" в поле день месяца и "`?`" в поле день недели. См. пояснительные примеры ниже.
 
-** `-` -- used to specify ranges.
-For example, "`10-12`" in the hour field means __"`the hours 10, 11 and 12`"__.
+* `-` -- используется для указания диапазонов.
+Например, "`10-12`" в поле часы обозначает "`10, 11 и 12 час`".
 
-** `,` -- used to specify additional values.
-For example, "`MON,WED,FRI`" in the day-of-week field means __"`the days Monday, Wednesday, and Friday`"__.
+* `,` -- используется для указания дополнительных значений.
+Например, `MON,WED,FRI` в поле день недели обозначает "`Понедельник, Среда и Пятница`".
 
-** `/` -- used to specify increments.
-For example, "`0/15`" in the seconds field means __"`the seconds 0, 15, 30, and 45`"__.
-And "`5/15`" in the seconds field means __"`the seconds 5, 20, 35, and 50`"__.
-You can also specify "`/`" after the "`*character – in this case *`" is equivalent to having "`0`" before the "`/`". "`1/3`" in the day-of-month field means __"`fire every 3 days starting on the first day of the month`"__.
+* `/` -- используется для указания приращений.
+Например, "`0/15`" в поле секунды обозначает "`0, 15, 30, и 45 секунду`".
+А "`5/15`" в поле секунды обозначает "`5, 20, 35, и 50 секунду`".
+Вы также можете указать "`/`" после символа "`{asterisk}`" -- в этом случае "`{asterisk}`" эквивалентна наличию "`0`" до "`/`". "`1/3`" в поле день месяца обозначает "`срабатывать каждые 3 дня начиная с первого дня месяца`".
 
-** `L` (__"`last`"__) -- has different meaning in each of the two fields in which it is allowed.
-For example, the value "`L`" in the day-of-month field means _"`the last day of the month`"_ -- day 31 for January, day 28 for February on non-leap years.
-If used in the day-of-week field by itself, it simply means "`7`" or "`SAT`".
-But if used in the day-of-week field after another value, it means _"`the last xxx day of the month`"_ -- for example "`6L`" means __"`the last Friday of the month`"__.
-When using the "`L`" option, it is important not to specify lists, or ranges of values, as you'll get confusing results.
+* `L` ("`last`") -- имеет разное значение в каждом из двух полей, в которых оно разрешено.
+Например, значение "`L`" в поле день месяца обозначает "`последний день месяца`" -- 31 января, 28 день Февраля в невисокосные годы.
+Если оно используется в поле день недели, то это просто обозначает "`7`" или "`SAT`".
+Но если оно используется в поле дня недели после другого значения, то оно означает "`последний xxx день месяца`" -- например "`6L`" обозначает "`последняя Пятница месяца`".
+При использовании опции "`L`" важно не указывать списки или диапазоны значений, так как вы получите запутанные результаты.
 
-** `W` (__"`weekday`"__) -- used to specify the weekday (Monday-Friday) nearest the given day.
-As an example, if you were to specify "`15W`" as the value for the day-of-month field, the meaning is: __"`the nearest weekday to the 15th of the month`"__.
-So if the 15th is a Saturday, the trigger will fire on Friday the 14th.
-If the 15th is a Sunday, the trigger will fire on Monday the 16th.
-If the 15th is a Tuesday, then it will fire on Tuesday the 15th.
-However, if you specify "`1W`" as the value for day-of-month, and the 1st is a Saturday, the trigger will fire on Monday the 3rd, as it will not "`jump`" over the boundary of a month's days.
-The "`W`" character can only be specified when the day-of-month is a single day, not a range or list of days.
+* `W` ("`weekday`") -- используется для указания дня недели (Понедельник-Пятница) ближайшего к данному дню. (Дня рабочей недели).
+Например, если вы указали "`15W`" в качестве значения в поле день месяца, то это обозначает: "`ближайший день недели к 15 числу месяца`".
+Таким образом, если 15-е число -- суббота, то триггер сработает в пятницу 14-го.
+Если 15-е число выпадает на воскресенье, триггер сработает в понедельник 16-го числа.
+Если 15-е число -- вторник, то сработает во вторник 15-го.
+Однако если вы укажете "`1W`" в качестве значения для дня месяца, а 1-е число -- суббота, то триггер сработает в понедельник, 3-го числа, так как он не будет "`перепрыгивать`" через границу дня месяца.
+Символ "`W`" можно указать только в том случае, если день месяца представляет собой один день, а не диапазон или список.
++
+[NOTE]
+====
+Символы "`L`" и "`W`" также можно объединить в поле день месяца, чтобы получить "`LW`", что переводится как "`последний день недели месяца`".
+====
+
+* `#` -- используется для указания "`n-ого`" XXX дня месяца.
+Например, значение "`6#3`" в поле дня недели означает "`третью пятницу месяца`" (день 6 = Пятница и "`#3`" = третья пятница месяца). Другие примеры: "`2#1`" = первый понедельник месяца, "`4#5`" = пятая среда месяца.
+Обратите внимание, что если вы укажете "`#5`" и в месяце нет пяти заданных дней недели, то в этом месяце триггер не сработает.
 
 [NOTE]
 ====
-The "`L`" and "`W`" characters can also be combined in the day-of-month field to yield "`LW`", which translates to __"`last weekday of the month`"__.
-====
-
-** `#` -- used to specify "`the nth`" XXX day of the month.
-For example, the value of "`6#3`" in the day-of-week field means _"`the third Friday of the month`"_ (day 6 = Friday and "`#3`" = the 3rd one in the month). Other examples: "`2#1`" = the first Monday of the month and "`4#5`" = the fifth Wednesday of the month.
-Note that if you specify "`#5`" and there is not 5 of the given day-of-week in the month, then no firing will occur that month.
-
-[NOTE]
-====
-The legal characters and the names of months and days of the week are not case sensitive.
-MON is the same as mon.
+Специальные символы и названия дней и месяцев не чувствительны к регистру символов. "`MON`" -- то же самое, что и "`mon`".
 ====
 
 === CRON Examples
