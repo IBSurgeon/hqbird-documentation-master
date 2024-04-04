@@ -464,7 +464,7 @@ image::3.2.35.png[]
 * *"`Final destination folder for backups`"* -- if you need to make backups into the one folder, and then move created backup to another folder (for long-term storage, for example), you can change the value of this parameter from `${backup-directory}` to the folder where you will keep them. Backup files in both locations are watched by HQbird FBDataGuard, and included into the count of backup copies shown in the widget.
 * *"`Copy backup`"* switch and *"`Copy backup to`"* path. If you have network location or plugged USB drive to store database where you want to store copy of backup (in addition to usual backups), FBDataGuard can copy the latest backup there: just turn on "`Copy backup`" switch and specify *"`Copy backup to`"* path. The copied files are not monitored and not included into the number of backup files shown in the widget.
 * *"`Execute shell command`"* switch and *"`Shell command`"* path. It is possible to specify custom script or executable after the general backup procedure will be complete. Shell command gets as the path to the fresh database backup as a parameter.
-* *"`Optional path to gbak executable`"* - it is possible to specify other gbak tool than standard `gbak`.
+* *"`Optional path to gbak executable`"* -- it is possible to specify other gbak tool than standard `gbak`.
 * *"`Backups option for gbak`"* -- if you need to add some specific options, add them here.
 * *"`Restore options for gbak`"* -- if you need to add specific options for test restore, add them here.
 
@@ -519,14 +519,13 @@ image::3.2.39.png[]
 
 *Minimum free disk space (bytes)* – minimal size of free disk space to prevent backup to start, by default ~9Mb
 
-**Backup folder – **where incremental backup for the selected database will be stored.
-It is necessary to store incremental backups for each database separately from backups of other databases: i.e., the separate folder for each database.
+**Backup folder** - where incremental backup for the selected database will be stored. It is necessary to store incremental backups for each database separately from backups of other databases: i.e., the separate folder for each database.
 
 It is necessary to specify backup folder with enough free disk space to store all level of backups!
 
-**Journal name**–file name details information about incremental backups files, for internal use only.
+**Journal name** – file name details information about incremental backups files, for internal use only.
 
-*Path to nBackup* – it is possible to specify other nbackup tool than standard [path]_nbackup_ (not recommended).
+*Path to nBackup* – it is possible to specify other nbackup tool than standard `nbackup` (not recommended).
 
 *Backup name pattern* – pattern for files of incremental backup (no need to change it).
 
@@ -536,14 +535,11 @@ It is necessary to specify backup folder with enough free disk space to store al
 
 *Do not check GUID chain* – this option should be checked if you want to skip existence check of previous levels of incremental backups.
 
-*Immediately create non-existing low-level backups* – by default this option is __On__.
-It means that if you have scheduled the initial start moment of level 1 backup earlier than the initial start moment of level 0 backup, DataGuard will automatically fix it and create level 0 backup right before level 1.
-The following backups of level 0 will be fulfilled according the regular schedule.
+*Immediately create non-existing low-level backups* – by default this option is __On__. It means that if you have scheduled the initial start moment of level 1 backup earlier than the initial start moment of level 0 backup, DataGuard will automatically fix it and create level 0 backup right before level 1. The following backups of level 0 will be fulfilled according the regular schedule.
 
 *Send OK email for levels 0, 1, 2* – enable this option to receive notifications about incremental backups (__highly recommended__!)
 
-After setting main set of parameters the schedule itself should be set.
-As you can see on the screenshot below, you need to specify day of the week and time to do level 0 (weekly) backup, days of week and time to start level 1 (daily) backups and hours and minutes of level 3 (hourly backups).
+After setting main set of parameters the schedule itself should be set. As you can see on the screenshot below, you need to specify day of the week and time to do level 0 (weekly) backup, days of week and time to start level 1 (daily) backups and hours and minutes of level 3 (hourly backups).
 
 For each backup level you can specify how many files to keep in history.
 
@@ -569,8 +565,7 @@ If you are monitoring more than one database, it is highly recommended splitting
 [[_hqbird_config_db_dump_backup]]
 === Database: Dump Backup
 
-This job also utilizes nbackup functionality in Firebird, but unlike multilevel backups, it always performs a full copy (level 0) of the database.
-Such job is useful to quickly create a copy of working database.
+This job also utilizes nbackup functionality in Firebird, but unlike multilevel backups, it always performs a full copy (level 0) of the database. Such job is useful to quickly create a copy of working database.
 
 The configuration of Database: Dump backup is trivial:
 
@@ -580,13 +575,9 @@ You just need to setup when and where DataGuard should copy a full copy (level 0
 
 === Database: Delta
 
-If you are using incremental backups (or Dump backup), this job is critically important.
-It watches for delta-files lifetime and size, and warns if something goes wrong.
-Forgotten delta-files are the often reason of corruptions and significant losses of data.
+If you are using incremental backups (or Dump backup), this job is critically important. It watches for delta-files lifetime and size, and warns if something goes wrong. Forgotten delta-files are the often reason of corruptions and significant losses of data.
 
-This jobs finds all delta files associated with database and check their age and size.
-If one of these parameters exceeds thresholds "`Maximum delta
-size`" or "`Maximum delta age`", administrator will receive the alert and database status will be set to CRITICAL.
+This jobs finds all delta files associated with database and check their age and size. If one of these parameters exceeds thresholds "`Maximum delta size`" or "`Maximum delta age`", administrator will receive the alert and database status will be set to CRITICAL.
 
 [NOTE]
 ====
@@ -597,17 +588,13 @@ image::3.2.56.png[]
 
 === Database: RestoreDB
 
-One of the often tasks of the database administrators is restoring database from the backup.
-There could be many reason to do restore, the most popular reasons are regular check of the stored backups and necessity to have fresh restored copy for quick rollback.
-HQbird FBDataGuard can automate restoring of backups (which were created with gbak or Database: Verified backup) with *Database: RestoreDB* job.
-Let's consider the options and parameters of this job.
+One of the often tasks of the database administrators is restoring database from the backup. There could be many reason to do restore, the most popular reasons are regular check of the stored backups and necessity to have fresh restored copy for quick rollback. HQbird FBDataGuard can automate restoring of backups (which were created with gbak or Database: Verified backup) with *Database: RestoreDB* job. Let's consider the options and parameters of this job.
 
 image::3.2.43.png[]
 
 By default, restore is disabled – and, since restoring can be long and resource-consuming job, please plan when to restore carefully.
 
-The database can be restored from different types of backups.
-To specify which types of backups are used during recovery, use the *Restore Source* switch.
+The database can be restored from different types of backups. To specify which types of backups are used during recovery, use the *Restore Source* switch.
 
 Below you can see the configuration dialog for **Database: RestoreDB** in **nbackup** mode:
 
@@ -620,9 +607,8 @@ image::3.2.44.png[]
 * "`*Scheduled*`" field contains <<_hqbird_config_cron_expr,CRON expression>> which defines when to run restore.
 * "`*Get backup from folder*`" - specify the location of backup file(s) to be restored. If you are restoring backups at the same computer where they have been created, specify the same folder as it is in Database: Verified backup job. If you are restoring backups from the another computer, specify the folder where those backups are located.
 * "`*Take backup not older than, hours*`" - this parameter specifies the maximum age of backup to be restored. If the latest backup file will be older than specified number of hours, RestoreDB job will send the alert with warning that backup is too old. This is useful for automatic checking of backups created on the remote computer.
-* "`*Restore source*`" specifies what types of backups will be used to restore the database .
-* "`*Datatime pattern for nbackup*`" contains the template for backup names made with nbackup.
-It should be the same as *Backup name pattern* see <<_hqbird_config_incremental_backup,Database: Incremental Backup>>.
+* "`*Restore source*`" specifies what types of backups will be used to restore the database.
+* "`*Datatime pattern for nbackup*`" contains the template for backup names made with nbackup. It should be the same as *Backup name pattern* see <<_hqbird_config_incremental_backup,Database: Incremental Backup>>.
 * "`*Template for gbak backup file name*`" contains the template for backup names. It should be the same as *Backup name pattern* see <<_hqbird_config_verified_backup, Verified backup>>.
 * "`*Backup gbak file extension*`" - by default it is fbk
 * "`*Use NN CPU cores to restore*`" - only available in gbak mode.
@@ -645,12 +631,11 @@ It should be the same as *Backup name pattern* see <<_hqbird_config_incremental_
 [[_hqbird_config_cloud_backup]]
 === Database: Transfer Replication Segments
 
-The purpose of "Transfer Replication Segments" job is to send replication segments produced by async replication from master to replica server. In the case of distributed environment of the
-asynchronous replication, when the network connection between master and replica server is unstable, or with high latency, or when servers are in the different geographical regions, the best way to transfer replication segments will be through FTP or FTP over SSH.
+The purpose of "Transfer Replication Segments" job is to send replication segments produced by async replication from master to replica server. In the case of distributed environment of the asynchronous replication, when the network connection between master and replica server is unstable, or with high latency, or when servers are in the different geographical regions, the best way to transfer replication segments will be through FTP or FTP over SSH.
 
 Below we will consider how to setup Cloud Backup for this task.
 
-First, the asynchronous replication master should be configured to save replication segments into the some local folder – by default, it will be [path]_${db.path}.LogArch_ – as it is shown in the example below:
+First, the asynchronous replication master should be configured to save replication segments into the some local folder – by default, it will be `${db.path}.LogArch` – as it is shown in the example below:
 
 image::3.2.45.png[]
 
@@ -661,23 +646,20 @@ image::3.2.46.png[]
 Then we can setup *Transfer Replication Segments* job to monitor this folder for the new replication segments and upload them to the remote FTP server.
 
 As you can see at the screenshot above, Cloud backup job checks folder, specified in "`*Monitor this folder*`" with an interval, specified in "`*Check period, seconds*`".
+
 Please note – Cloud Backup sends files in the order of their names, not dates.
 
 To check that transferred files are valid replication segments, and to support automatic re-initialization of the replica databases, the checkmark "`*Enable/disable replication cloud backup job*`" must be enabled.
 
-By default, Cloud Backup compresses and encrypts replication segments before send them.
-The default password is "`*zipmasterkey*`" (without quotes), which can be specified in the field "`*Compress with optional password*`".
-FBDataGuard creates the compressed and encrypted copy of the replication segment and upload it to the specified target server.
+By default, Cloud Backup compresses and encrypts replication segments before send them. The default password is "`*zipmasterkey*`" (without quotes), which can be specified in the field "`*Compress with optional password*`". FBDataGuard creates the compressed and encrypted copy of the replication segment and upload it to the specified target server.
 
 To disable packing and encryption, uncheck the "`*Compress with optional password*`" checkmark.
 
 ==== FTP/FTPS/FTPS over SSH
 
-There are several types of target servers: FTP, FTP over SSL/TLS, FTP over SSH.
-When you select the necessary type, dialog shows mandatory fields to be completed.
+There are several types of target servers: FTP, FTP over SSL/TLS, FTP over SSH. When you select the necessary type, dialog shows mandatory fields to be completed.
 
-You can select up to 5 simultaneous remote servers to upload backups.
-Below you can see the configuration dialog for FTP.
+You can select up to 5 simultaneous remote servers to upload backups. Below you can see the configuration dialog for FTP.
 
 image::3.2.47.png[]
 
@@ -689,9 +671,7 @@ If you don't have FTP installed on the target server with Windows, install Filez
 
 [NOTE]
 ====
-Replication segments will be uploaded to the subdirectory specified in the "`Upload to folder`".
-By default, this is [path]_/dababase0/${db.id}_, where [replaceable]``db.id`` is the identifier of the database inside the DataGuard.
-The replica about this [replaceable]``db.id`` does not know anything, so you need to register it manually in "`Unpack to directory`" (see <<_hqbird_config_cloud_backup_receiver,File  Receiver>>).
+Replication segments will be uploaded to the subdirectory specified in the "`Upload to folder`". By default, this is `/dababase0/${db.id}`, where `db.id` is the identifier of the database inside the DataGuard. The replica about this `db.id` does not know anything, so you need to register it manually in "`Unpack to directory`" (see <<_hqbird_config_cloud_backup_receiver,File  Receiver>>).
 ====
 
 ===== FTP over SSL/TLS
@@ -708,8 +688,7 @@ The last part of parameters in Cloud Backup dialog allows controlling the behavi
 * *Delete local prepared file copy* – by default is Off. It means status means that replication segment will be not deleted by FBDataGuard after uploading. It can be useful if you want to keep the full history of changes in replication segments, but, be careful; in case of an intensive write activity replication segments can occupy a lot of space (Terabytes).
 * *Send Ok report* – send email to the specified in Alerts address every time when replication segment is uploaded. By default it is off.
 
-As a result, FBDataGuard will upload encrypted and compressed replication segments to the remote server.
-To decompress and decrypt them into the regular replication segments, another instance of HQbird FBDataGuard should be installed on the replica server, and Cloud Backup Receiver job should be configured – see more details in the section <<_hqbird_config_cloud_backup_receiver,Database: File Receiver>>.
+As a result, FBDataGuard will upload encrypted and compressed replication segments to the remote server. To decompress and decrypt them into the regular replication segments, another instance of HQbird FBDataGuard should be installed on the replica server, and Cloud Backup Receiver job should be configured – see more details in the section <<_hqbird_config_cloud_backup_receiver,Database: File Receiver>>.
 
 ===== FTP over SSH
 
@@ -740,11 +719,9 @@ To disable encryption, uncheck the “**Encrypt when compressing**” checkmark.
 
 ==== FTP/FTPS/FTPS over SSH
 
-There are several types of target servers: FTP, FTP over SSL/TLS, FTP over SSH.
-When you select the necessary type, dialog shows mandatory fields to be completed.
+There are several types of target servers: FTP, FTP over SSL/TLS, FTP over SSH. When you select the necessary type, dialog shows mandatory fields to be completed.
 
-You can select up to 5 simultaneous remote servers to upload backups.
-Below you can see the configuration dialog for FTP.
+You can select up to 5 simultaneous remote servers to upload backups. Below you can see the configuration dialog for FTP.
 
 image::3.2.49-2.png[]
 
@@ -756,9 +733,7 @@ If you don't have FTP installed on the target server with Windows, install Filez
 
 [NOTE]
 ====
-Replication segments will be uploaded to the subdirectory specified in the "`Upload to folder`".
-By default, this is [path]_/database0/${db.id}_, where [replaceable]``db.id`` is the identifier of the database inside the DataGuard.
-The replica about this [replaceable]``db.id`` does not know anything, so you need to register it manually in "`Unpack to directory`" (see <<_hqbird_config_cloud_backup_receiver,File  Receiver>>).
+Replication segments will be uploaded to the subdirectory specified in the "`Upload to folder`". By default, this is `/database0/${db.id}`, where `db.id` is the identifier of the database inside the DataGuard. The replica about this `db.id` does not know anything, so you need to register it manually in "`Unpack to directory`" (see <<_hqbird_config_cloud_backup_receiver,File Receiver>>).
 ====
 
 ===== FTP over SSL/TLS
@@ -776,8 +751,7 @@ The last part of parameters in Cloud Backup dialog allows controlling the behavi
 * *Send Ok report* -- send email to the specified in Alerts address every time when replication segment is uploaded. By default, it is off.
 * *Perform fresh backup* -- disabled by default. Transfer Files remembers the last number of file it sends. If you need to start again from scratch, from file 1, enable this parameter. Please note that it will automatically become disabled after the resetting of the counter.
 
-As a result, FBDataGuard will upload encrypted and compressed files to the remote server.
-To decompress and decrypt them into the regular files, another instance of HQbird FBDataGuard should be installed on the replica server, and File Receiver job should be configured -- see more details in the section <<_hqbird_config_cloud_backup_receiver,Database: File Receiver>>.
+As a result, FBDataGuard will upload encrypted and compressed files to the remote server. To decompress and decrypt them into the regular files, another instance of HQbird FBDataGuard should be installed on the replica server, and File Receiver job should be configured -- see more details in the section <<_hqbird_config_cloud_backup_receiver,Database: File Receiver>>.
 
 ===== FTP over SSH
 
@@ -787,11 +761,9 @@ To use FTP over SSH with private key authentication, please specify the full pat
 
 ==== Sending verified and incremental backups through Cloud Backups
 
-Cloud Backup also can be used to send any files to FTP/FTPS/etc.
-For example, you can setup Cloud Backup to look for FBK files, produces by Verified Backup Job, and schedule to upload to the remote FTP server.
+Cloud Backup also can be used to send any files to FTP/FTPS/etc. For example, you can setup Cloud Backup to look for FBK files, produces by Verified Backup Job, and schedule to upload to the remote FTP server.
 
-It is necessary to remember that number of stored backups should be less than the number of files to be preserved by Cloud Backup (specified in the parameter "`How many files to keep`".
-By default, Cloud Backup keeps 10 last sent files, and Verified backup has 5 most recent backup files, so it work Ok, but if you will reduce the number of kept files in Cloud Backup, it will delete extra files according "`Filename template`".
+It is necessary to remember that number of stored backups should be less than the number of files to be preserved by Cloud Backup (specified in the parameter "`How many files to keep`". By default, Cloud Backup keeps 10 last sent files, and Verified backup has 5 most recent backup files, so it work Ok, but if you will reduce the number of kept files in Cloud Backup, it will delete extra files according "`Filename template`".
 
 The same can be done for incremental backups.
 
@@ -814,14 +786,10 @@ image::3.2.63.png[]
 
 The algorithm of this task is as follows:
 
-. At each iteration of the task, a list of files is generated for the directory for monitoring files to be sent.
-Masks are used to select the list of files: "Filemask to pump" and "Exclude file-mask".
+. At each iteration of the task, a list of files is generated for the directory for monitoring files to be sent. Masks are used to select the list of files: "Filemask to pump" and "Exclude file-mask".
 . For each selected file (from the list from step 1, in ascending date order from the lastModified file), the following is performed:
-.. If the packing option is set, the file is packed (if the file is not of zero size).
-The name of the packed file is formed by adding a hardcoded extension: `.zipfilepump`. The file is packed in the same directory.
-If the file turns out to be of zero size, the algorithm will consider that the file has not been completed yet and will interrupt sending the rest of the files with a corresponding message.
-.. The file sending task is configured for one of several possible sending options using optional plugins (see below).
-Depending on whether the packing option was enabled or not, the original or packed file is sent using the specified algorithm (in the current version it is ftp or sftp).
+.. If the packing option is set, the file is packed (if the file is not of zero size). The name of the packed file is formed by adding a hardcoded extension: `.zipfilepump`. The file is packed in the same directory. If the file turns out to be of zero size, the algorithm will consider that the file has not been completed yet and will interrupt sending the rest of the files with a corresponding message.
+.. The file sending task is configured for one of several possible sending options using optional plugins (see below). Depending on whether the packing option was enabled or not, the original or packed file is sent using the specified algorithm (in the current version it is ftp or sftp).
 .. After sending, if the packing option was selected, the packed file is deleted.
 .. The original file is renamed by adding the extension `.fuploaded`.
 . The algorithm proceeds to send the next file from the list. The total number of files sent during the iteration and their original (unpacked) size are summed up for display in the widget
@@ -837,7 +805,7 @@ Upon completion of sending, if the "Send OK-report on every pump" checkbox is ch
 In general, Cloud Backup Receiver is designed to decompress files from zip archives, and the most often it is used in the pair with Cloud Backup to transfer archived replication segments.
 
 Cloud Backup Receiver checks files in the folder specified in "`*Monitor directory*`", with interval equal to "`*Check periods, minutes*`".
-Its checks only files with specified mask according "`*Filename template*`" (*arch* by default) and specified extension ([path]_.replpacked_ by default), and if it encounters such files, it decompresses and decrypts them with the password, specified in "`*Decrypt password*`", and copies to the folder, specified in "`*Unpack to directory*`".
+Its checks only files with specified mask according "`*Filename template*`" (*arch* by default) and specified extension (`.replpacked` by default), and if it encounters such files, it decompresses and decrypts them with the password, specified in "`*Decrypt password*`", and copies to the folder, specified in "`*Unpack to directory*`".
 
 If parameter "`*Monitor for replication*`" is enabled, Cloud Backup Receiver also will check that received file is actually a replication segment (it has specific header), and if it is not, it will raise an appropriate warning.
 
@@ -856,15 +824,14 @@ image::3.2.51.png[]
 
 ==== Embedded FTP server
 
-HQbird has embedded FTP server, which is off by default.
-It is suitable to use embedded FTP server to receive replication segments.
+HQbird has embedded FTP server, which is off by default. It is suitable to use embedded FTP server to receive replication segments.
 
-In order to enable embedded FTP server, it is necessary to edit the [path]_ftpsrv.properties_ configuration file, which is located in [path]_C:\HQbirdData\config_ or [path]_/opt/hqbird/ftpsrv.properties_
+In order to enable embedded FTP server, it is necessary to edit the `ftpsrv.properties` configuration file, which is located in `C:\HQbirdData\config` or `/opt/hqbird/ftpsrv.properties`
 
 By default, it contains the following:
+
 [source]
 ----
-
 #path in ftpsrv.homedir must be escaped "ftpsrv.homedir=c:\\ftp\\pub"
 
 # or backslashed for ex: "ftpsrv.homedir=c:/ftp/pub"
@@ -880,8 +847,7 @@ ftpsrv.defpsw=strong password2
 ftpsrv.homedir=
 ----
 
-It is necessary to change **ftpsrv.enabled **to *true* and specify the home directory for FTP in *ftpsrv.homedir* parameter.
-Also, it is recommended to use non-default username and password.
+It is necessary to change **ftpsrv.enabled **to *true* and specify the home directory for FTP in *ftpsrv.homedir* parameter. Also, it is recommended to use non-default username and password.
 
 After that, restart FBDataGuard service, and check availability of the FTP.
 
@@ -897,14 +863,11 @@ On the Linux, FBDataGuard service runs under *firebird* user, so FTP home direct
 
 First of all, this job stores raw metadata in special repository, so in case of heavy corruption (due to hardware failure, for example) of database it is possible to use this repository to recover database.
 
-The second purpose of this job is to constantly check all important system tables for consistency.
-Every 20 minutes it walks through all important system tables in the database and ensures that there are no errors at metadata level.
+The second purpose of this job is to constantly check all important system tables for consistency. Every 20 minutes it walks through all important system tables in the database and ensures that there are no errors at metadata level.
 
 The third purpose is to warn administrator about too many formats for each tables.
 
-There is an implementation limit in Firebird to have 256 formats per table, however even several formats can greatly increase a chance of hard corruption and can slow down the performance.
-It is recommended do not change tables structure at production database and keep only one format per each table.
-If it`'s not possible, administrator should try to perform backup/restore more often to transform all formats into the single one.
+There is an implementation limit in Firebird to have 256 formats per table, however even several formats can greatly increase a chance of hard corruption and can slow down the performance. It is recommended do not change tables structure at production database and keep only one format per each table. If it`'s not possible, administrator should try to perform backup/restore more often to transform all formats into the single one.
 
 image::3.2.52.png[]
 
@@ -914,8 +877,8 @@ image::3.2.52.png[]
 Validation of Firebird database requires exclusive access: i.e., no users should be connected during validation. "`Database: Validate DB`" job shuts down the database and performs validation of database, and then turns it on.
 
 By default, this job is OFF.
-Please consider carefully, is it possible to provide exclusive access for database.
-Validation can also take significant time.
+
+Please consider carefully, is it possible to provide exclusive access for database. Validation can also take significant time.
 
 image::3.2.53.png[]
 
@@ -927,36 +890,26 @@ Also, Firebird will write errors into [path]_firebird.log_, and they will appear
 
 === Database: Sweep Schedule
 
-FBDataGuard includes special job to run an explicit sweep, in case if automatic sweep was disabled.
-By default, job is disabled.
+FBDataGuard includes special job to run an explicit sweep, in case if automatic sweep was disabled. By default, job is disabled.
 
 image::3.2.54.png[]
 
-The recommendation is to schedule explicit sweep with disconnection of long-running transactions for all databases where such transactions are detected.
-The recommended period is once per day (usually during the night, after backup's completing).
+The recommendation is to schedule explicit sweep with disconnection of long-running transactions for all databases where such transactions are detected. The recommended period is once per day (usually during the night, after backup's completing).
 
 By default, sweep is set to 23-00, which can be not a good time, because default verified backup starts at the same time, so better change it.
 
 image::3.2.55.png[]
 
-Please note: by default, check mark "`*Disconnect all
-                        connections with long-running active transactions before
-                    sweep*`" is enabled.
+Please note: by default, check mark "`*Disconnect all connections with long-running active transactions before sweep*`" is enabled.
 It means that HQbird will find and disconnect long-running transactions (more than 30 minutes) before sweep -- in order to make sweep efficient.
 If long-running active transactions will be not disconnected, sweep cannot clean old records versions.
 
-"`*Do not disconnect processes with name
-                        pattern*`" -- in this parameter specify SIMILAR TO expression for processes names which will be not disconnected.
-By default, we exclude [app]``gbak``, [app]``gstat`` and [app]``fbsvcmgr`` processes.
+"`*Do not disconnect processes with name pattern*`" -- in this parameter specify SIMILAR TO expression for processes names which will be not disconnected.
+By default, we exclude `gbak`, `gstat` and `fbsvcmgr` processes.
 
-"`*Disconnect all processes older than
-                        (minutes)*`" -- HQbird will disconnect processes which have long-running active writeable transactions, by default threshold is 30 minutes.
-The practical upper limit for this parameter is 1440 minutes (it is highly unlikely that transaction does something useful more than 1 day).
+"`*Disconnect all processes older than (minutes)*`" -- HQbird will disconnect processes which have long-running active writeable transactions, by default threshold is 30 minutes. The practical upper limit for this parameter is 1440 minutes (it is highly unlikely that transaction does something useful more than 1 day).
 
-"`*Use multiple cores to sweep*`" -- HQbird Enterprise can use multiple cores to perform sweep operation, in order to make sweep 4-6 times faster.
-We recommend to specify no more than 1/2 CPU cores in case of the single database on the server, or
-1/4 of CPU cores if there are several databases.
-For example, if you have 16 cores and 1 big database, set this parameter to 8, if there are several big databases, set 4.
+"`*Use multiple cores to sweep*`" -- HQbird Enterprise can use multiple cores to perform sweep operation, in order to make sweep 4-6 times faster. We recommend to specify no more than 1/2 CPU cores in case of the single database on the server, or 1/4 of CPU cores if there are several databases. For example, if you have 16 cores and 1 big database, set this parameter to 8, if there are several big databases, set 4.
 
 === Database: Disk space
 
@@ -964,16 +917,13 @@ This job watches for all objects related with database: database files (includin
 
 "`Database: Disk space`" job analyzes the growth of database and estimate will there be enough free space for the next operation like backup (including test restore) on the specific hard drive.
 
-It generates several types of alerts.
-Problems with disk space are in the top list of corruption reasons, so please pay attention to the alerts from this job.
+It generates several types of alerts. Problems with disk space are in the top list of corruption reasons, so please pay attention to the alerts from this job.
 
 This job also contributes data to the server space analysis graph ().
 
 By default, this job is enabled.
 
-Using configuration dialog, you can specify check period and thresholds for free space.
-The first reached threshold will be alerted.
-To set threshold only in % of disk space, you need to set explicit space in bytes to 0.
+Using configuration dialog, you can specify check period and thresholds for free space. The first reached threshold will be alerted. To set threshold only in % of disk space, you need to set explicit space in bytes to 0.
 
 image::3.2.57.png[]
 
@@ -989,13 +939,12 @@ Then, with HQbird Database IBAnalyst it is possible to find problems with databa
 
 [NOTE]
 ====
-As a useful side effect, [app]``gstat`` visits all database pages for tables and indices, and ensures that all of them are correct.
+As a useful side effect, `gstat` visits all database pages for tables and indices, and ensures that all of them are correct.
 ====
 
 === Database: Replica Check
 
-This task allows you to check the availability of the replica database.
-After a specified period, it changes the value of the specified generator and compares the value of the generator on the replica side and the master database.
+This task allows you to check the availability of the replica database. After a specified period, it changes the value of the specified generator and compares the value of the generator on the replica side and the master database.
 
 image::3.2.58-1.png[]
 
@@ -1021,8 +970,7 @@ Descriptions of some of the properties you can set here:
 * "`*Installation GUID*`" is a service field; there is no need to change it.
 * "`*Web console background color*`" – often it is useful to adjust the color of HQbird web interface to distinguish them easily.
 
-It's a good idea to enable setup email alerts.
-To do this you need to click on the envelope button in the top of the web-console:
+It's a good idea to enable setup email alerts. To do this you need to click on the envelope button in the top of the web-console:
 
 image::3.1.7.png[]
 
@@ -1048,8 +996,7 @@ Click "`Save`" to save email alerts settings.
 
 == FBDataGuard tips&tricks
 
-FBDataGuard allows changing its setting not only through web-console, but also using direct modification of configuration files.
-This can be useful when you need to install FBDataGuard in silent mode (no interaction with user), to bundle it with third-party software, or to perform some fine configuration adjustments.
+FBDataGuard allows changing its setting not only through web-console, but also using direct modification of configuration files. This can be useful when you need to install FBDataGuard in silent mode (no interaction with user), to bundle it with third-party software, or to perform some fine configuration adjustments.
 
 === Path to FBDataGuard configuration
 
@@ -1062,18 +1009,20 @@ These values specify the paths to FBDataGuard configuration and output folder --
 [[_hqbird_config_fbdataguard_port]]
 === Adjusting web-console port
 
-One of the most frequently asked questions is how to adjust port for web-console application (by default it is 8082), It can be done by changing port setting in file [path]_%config%\agent\agent.properties_ ([var]``%config%`` is [path]_C:\HQbirdData\config_ or [path]_/opt/hqbird/conf_).
+One of the most frequently asked questions is how to adjust port for web-console application (by default it is 8082), It can be done by changing port setting in file `%config%\agent\agent.properties` (`%config%` is `C:\HQbirdData\config` or `/opt/hqbird/conf`).
 
+[listing]
 ----
 server.port = 8082  #change it
 ----
 
-[var]``%config%`` - folder to store configuration information, it is specified in .
+`%config%` -- folder to store configuration information, it is specified in .
 
 === How to change password for Admin user
 
-You can specify its password in the file [path]_access.properties_ (in [path]_C:\HQbirdData\config_ or [path]_/opt/hqbird/conf_)
+You can specify its password in the file `access.properties` (in `C:\HQbirdData\config` or `/opt/hqbird/conf`)
 
+[listing]
 ----
 access.login=admin
 
@@ -1086,6 +1035,7 @@ After setting the password, restart FBDataGuard, and new password will be encryp
 
 There is read-only user to access HQbird FBDataGuard, with the name guest.
 
+[listing]
 ----
 access.guest-login=guest
 
@@ -1097,14 +1047,11 @@ access.guest-password=yournewpassword
 [[_hqbird_config_cron_expr]]
 == Appendix: CRON Expressions
 
-All jobs in FBDataGuard have time settings in CRON format.
-CRON is very easy and powerful format to schedule execution times.
+All jobs in FBDataGuard have time settings in CRON format. CRON is very easy and powerful format to schedule execution times.
 
 === CRON Format
 
-A CRON expression is a string comprised of 6 or 7 fields separated by white space.
-Fields can contain any of the allowed values, along with various combinations of the allowed special characters for that field.
-The fields are as follows:
+A CRON expression is a string comprised of 6 or 7 fields separated by white space. Fields can contain any of the allowed values, along with various combinations of the allowed special characters for that field. The fields are as follows:
 
 [cols="1,1,1,1", frame="topbot", options="header"]
 |===
@@ -1150,48 +1097,29 @@ The fields are as follows:
 |, - * /
 |===
 
-So cron expressions can be as simple as this: `\* * * * ? *` or more complex, like this: `0 0/5 14,18,3-39,52 ? JAN,MAR,SEP MON-FRI
-                2002-2010`
+So cron expressions can be as simple as this: `\* * * * ? *` or more complex, like this: `0 0/5 14,18,3-39,52 ? JAN,MAR,SEP MON-FRI 2002-2010`
 
 === Special characters
 
-** `\*` (__"`all values`"__) -- used to select all values within a field.
-For example, "`*`" in the minute field means __"`every minute`"__.
+** `\*` (__"`all values`"__) -- used to select all values within a field. For example, "`*`" in the minute field means __"`every minute`"__.
 
-** `?` (__"`no specific value`"__) -- useful when you need to specify something in one of the two fields in which the character is allowed, but not the other.
-For example, if I want my trigger to fire on a particular day of the month (say, the 10th), but don't care what day of the week that happens to be, I would put "`10`" in the day-of-month field, and "`?`" in the day-of-week field.
-See the examples below for clarification.
+** `?` (__"`no specific value`"__) -- useful when you need to specify something in one of the two fields in which the character is allowed, but not the other. For example, if I want my trigger to fire on a particular day of the month (say, the 10th), but don't care what day of the week that happens to be, I would put "`10`" in the day-of-month field, and "`?`" in the day-of-week field. See the examples below for clarification.
 
-** `-` -- used to specify ranges.
-For example, "`10-12`" in the hour field means __"`the hours 10, 11 and 12`"__.
+** `-` -- used to specify ranges. For example, "`10-12`" in the hour field means __"`the hours 10, 11 and 12`"__.
 
-** `,` -- used to specify additional values.
-For example, "`MON,WED,FRI`" in the day-of-week field means __"`the days Monday, Wednesday, and
-                    Friday`"__.
+** `,` -- used to specify additional values. For example, "`MON,WED,FRI`" in the day-of-week field means __"`the days Monday, Wednesday, and Friday`"__.
 
-** `/` -- used to specify increments.
-For example, "`0/15`" in the seconds field means __"`the seconds 0, 15, 30, and 45`"__.
-And "`5/15`" in the seconds field means __"`the seconds 5, 20, 35, and 50`"__.
-You can also specify "`/`" after the "`*character – in this
-                        case *`" is equivalent to having "`0`" before the "`/`". "`1/3`" in the day-of-month field means __"`fire every 3 days starting on the first day of the
-                        month`"__.
+** `/` -- used to specify increments. For example, "`0/15`" in the seconds field means __"`the seconds 0, 15, 30, and 45`"__. And "`5/15`" in the seconds field means __"`the seconds 5, 20, 35, and 50`"__. You can also specify "`/`" after the "`*character – in this case *`" is equivalent to having "`0`" before the "`/`". "`1/3`" in the day-of-month field means __"`fire every 3 days starting on the first day of the month`"__.
 
-** `L` (__"`last`"__) -- has different meaning in each of the two fields in which it is allowed.
-For example, the value "`L`" in the day-of-month field means _"`the last day of the
-                        month`"_ -- day 31 for January, day 28 for February on non-leap years.
-If used in the day-of-week field by itself, it simply means "`7`" or "`SAT`".
-But if used in the day-of-week field after another value, it means _"`the last xxx day of the
-                        month`"_ -- for example "`6L`" means __"`the last Friday of the month`"__.
+** `L` (__"`last`"__) -- has different meaning in each of the two fields in which it is allowed. For example, the value "`L`" in the day-of-month field means _"`the last day of the month`"_ -- day 31 for January, day 28 for February on non-leap years. If used in the day-of-week field by itself, it simply means "`7`" or "`SAT`".
+But if used in the day-of-week field after another value, it means _"`the last xxx day of the month`"_ -- for example "`6L`" means __"`the last Friday of the month`"__.
 When using the "`L`" option, it is important not to specify lists, or ranges of values, as you'll get confusing results.
 
-** `W` (__"`weekday`"__) -- used to specify the weekday (Monday-Friday) nearest the given day.
-As an example, if you were to specify "`15W`" as the value for the day-of-month field, the meaning is: __"`the nearest weekday to the 15th of the
-                        month`"__.
+** `W` (__"`weekday`"__) -- used to specify the weekday (Monday-Friday) nearest the given day. As an example, if you were to specify "`15W`" as the value for the day-of-month field, the meaning is: __"`the nearest weekday to the 15th of the month`"__.
 So if the 15th is a Saturday, the trigger will fire on Friday the 14th.
 If the 15th is a Sunday, the trigger will fire on Monday the 16th.
 If the 15th is a Tuesday, then it will fire on Tuesday the 15th.
-However, if you specify "`1W`" as the value for day-of-month, and the 1st is a Saturday, the trigger will fire on Monday the 3rd, as it will not "`jump`" over the boundary of a month's days.
-The "`W`" character can only be specified when the day-of-month is a single day, not a range or list of days.
+However, if you specify "`1W`" as the value for day-of-month, and the 1st is a Saturday, the trigger will fire on Monday the 3rd, as it will not "`jump`" over the boundary of a month's days. The "`W`" character can only be specified when the day-of-month is a single day, not a range or list of days.
 
 [NOTE]
 ====
@@ -1199,8 +1127,7 @@ The "`L`" and "`W`" characters can also be combined in the day-of-month field to
 ====
 
 ** `#` -- used to specify "`the nth`" XXX day of the month.
-For example, the value of "`6#3`" in the day-of-week field means _"`the third Friday of
-                        the month`"_ (day 6 = Friday and "`#3`" = the 3rd one in the month). Other examples: "`2#1`" = the first Monday of the month and "`4#5`" = the fifth Wednesday of the month.
+For example, the value of "`6#3`" in the day-of-week field means _"`the third Friday of the month`"_ (day 6 = Friday and "`#3`" = the 3rd one in the month). Other examples: "`2#1`" = the first Monday of the month and "`4#5`" = the fifth Wednesday of the month.
 Note that if you specify "`#5`" and there is not 5 of the given day-of-week in the month, then no firing will occur that month.
 
 [NOTE]
@@ -1219,67 +1146,58 @@ Here are some full examples:
 | Meaning
 
 
-|``0 0 12 * * ?``
+|`0 0 12 * * ?`
 |Fire at 12pm (noon) every day
 
-|``0 15 10 ? * *``
+|`0 15 10 ? * *`
 |Fire at 10:15am every day
 
-|``0 15 10 * * ?``
+|`0 15 10 * * ?`
 |Fire at 10:15am every day
 
-|``0 15 10 * * ? *``
+|`0 15 10 * * ? *`
 |Fire at 10:15am every day
 
-|``0 15 10 * * ? 2005``
+|`0 15 10 * * ? 2005`
 |Fire at 10:15am every day during the year 2005
 
-|``0 * 14 * * ?``
-|Fire every minute starting at 2pm and ending at 2:59pm, every
-                                    day
+|`0 * 14 * * ?`
+|Fire every minute starting at 2pm and ending at 2:59pm, every day
 
-|``0 0/5 14 * * ?``
-|Fire every 5 minutes starting at 2pm and ending at 2:55pm,
-                                    every day
+|`0 0/5 14 * * ?`
+|Fire every 5 minutes starting at 2pm and ending at 2:55pm, every day
 
-|``0 0/5 14,18 * * ?``
-|Fire every 5 minutes starting at 2pm and ending at 2:55pm,
-                                    AND fire every 5 minutes starting at 6pm and ending at 6:55pm,
-                                    every day
+|`0 0/5 14,18 * * ?`
+|Fire every 5 minutes starting at 2pm and ending at 2:55pm, AND fire every 5 minutes starting at 6pm and ending at 6:55pm, every day
 
-|``0 0-5 14 * * ?``
-|Fire every minute starting at 2pm and ending at 2:05pm, every
-                                    day
+|`0 0-5 14 * * ?`
+|Fire every minute starting at 2pm and ending at 2:05pm, every day
 
-|``0 10,44 14 ? 3 WED``
-|Fire at 2:10pm and at 2:44pm every Wednesday in the month of
-                                    March.
+|`0 10,44 14 ? 3 WED`
+|Fire at 2:10pm and at 2:44pm every Wednesday in the month of March.
 
-|``0 15 10 ? * MON-FRI``
-|Fire at 10:15am every Monday, Tuesday, Wednesday, Thursday
-                                    and Friday
+|`0 15 10 ? * MON-FRI`
+|Fire at 10:15am every Monday, Tuesday, Wednesday, Thursday and Friday
 
-|``0 15 10 15 * ?``
+|`0 15 10 15 * ?`
 |Fire at 10:15am on the 15th day of every month
 
-|``0 15 10 L * ?``
+|`0 15 10 L * ?`
 |Fire at 10:15am on the last day of every month
 
-|``0 15 10 ? * 6L``
+|`0 15 10 ? * 6L`
 |Fire at 10:15am on the last Friday of every month
 
-|``0 15 10 ? * 6L 2002-2005``
-|Fire at 10:15am on every last Friday of every month during
-                                    the years 2002, 2003, 2004 and 2005
+|`0 15 10 ? * 6L 2002-2005`
+|Fire at 10:15am on every last Friday of every month during the years 2002, 2003, 2004 and 2005
 
-|``0 15 10 ? * 6#3``
+|`0 15 10 ? * 6#3`
 |Fire at 10:15am on the third Friday of every month
 
-|``0 0 12 1/5 * ?``
-|Fire at 12pm (noon) every 5 days every month, starting on the
-                                    first day of the month.
+|`0 0 12 1/5 * ?`
+|Fire at 12pm (noon) every 5 days every month, starting on the first day of the month.
 
-|``0 11 11 11 11 ?``
+|`0 11 11 11 11 ?`
 |Fire every November 11th at 11:11am.
 |===
 
@@ -1292,8 +1210,7 @@ Pay attention to the effects of '?' and '*' in the day-of-week and day-of-month 
 
 Support for specifying both a day-of-week and a day-of-month value is not complete (you must currently use the '?' character in one of these fields).
 
-Be careful when setting fire times between mid-night and 1:00 AM - "`daylight
-                    savings`" can cause a skip or a repeat depending on whether the time moves back or jumps forward.
+Be careful when setting fire times between mid-night and 1:00 AM - "`daylight savings`" can cause a skip or a repeat depending on whether the time moves back or jumps forward.
 
 More information is here http://www.quartz-scheduler.org/docs/tutorials/crontrigger.html
 
