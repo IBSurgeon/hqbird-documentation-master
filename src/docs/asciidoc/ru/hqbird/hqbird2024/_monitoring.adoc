@@ -66,7 +66,6 @@ Below you can see the table with some popular options.
 h| Start
 h| End
 
-
 |0 0 * ? * *
 |0 10 * ?* *
 |Run trace every hour from 0 to 10 minutes
@@ -77,8 +76,8 @@ h| End
 
 |0 30 10,13,15 ? * *
 |0 0 11,14,16 ? * *
-|Run trace sessions every day from 10-30 to 11-00, 13-30 to
-                                    14-00 and from 15-30 to 16-00
+|Run trace sessions every day from 10-30 to 11-00, 13-30 to 14-00 and from 15-30 to 16-00
+
 |===
 
 The next important parameter is time threshold for the slow queries, it is set in the field "`Log SQLs with execution time more than`".
@@ -128,7 +127,7 @@ When you click on "`Sort by frequency`" link in the header of the report, you wi
 
 image::4.1.9.png[]
 
-For example, in this case the statement SP_GETINVOICE_REPORT was run 46 times.
+For example, in this case the statement `SP_GETINVOICE_REPORT` was run 46 times.
 It means that this query heavily affects the overall performance, and it should be optimized first.
 
 When you click on Sort by summary, you will see the queries which took the most part of the time (among logged queries). These queries usually are the best candidates for the optimization.
@@ -137,8 +136,7 @@ image::4.1.10.png[]
 
 ==== Detailed information for the problematic SQL queries
 
-To see details of the most frequent query, click in the link "`View details`"
-in the bottom of the query text:
+To see details of the most frequent query, click in the link "`View details`" in the bottom of the query text:
 
 image::4.1.11.png[]
 
@@ -162,8 +160,8 @@ Let's consider it's settings:
 * Show transactions older then (minutes): it specifies the time threshold to show the transaction (and associated connection) in the list of long-running-transactions. By default, this threshold is 60 minutes: it means that writeable transactions which started more than 1 hour ago, will be considered as long-running.
 * Send alert if oldest active transaction is older then (minutes): the same, but it triggers alert and, if email notifications are enabled, the automatic email with the details of long running active transaction. The text of the alert looks like the following:
 +
+[listing]
 ----
-
 There is a long running active transactions: it was started at 11/13/17 1:19 PM
 (and run at least 107 minutes}) from ::1/51068 by C:\HQbird\Firebird30\isql.exe.
 Such transactions block garbage collection, please perform transactions analysis
@@ -175,7 +173,7 @@ The list of long-running active transactions is shown on the screenshot below:
 
 image::4.1.13.png[]
 
-Here you can see that isql.exe started 2 long-running active transactions to the database [path]_h:\employee_30.fdb at November 13, 18-05_.
+Here you can see that `isql.exe` started 2 long-running active transactions to the database `h:\employee_30.fdb` at November 13, 18-05.
 
 === How to select a tool for detailed monitoring
 
@@ -184,8 +182,7 @@ FBDataGuard is the first line of a defense for Firebird database; once FBDataGua
 .Important!
 [IMPORTANT]
 ====
-If you have several Firebird servers, we offer HQbird Control Center application which gathers alerts data from the Firebird servers and databases and shows them at the single screen.
-Contact our for more details.
+If you have several Firebird servers, we offer HQbird Control Center application which gathers alerts data from the Firebird servers and databases and shows them at the single screen. Contact our for more details.
 ====
 
 After receiving such alert from FBDataGuard the database administrator should proceed with detailed investigation of the problem.
@@ -212,7 +209,7 @@ HQbird MonLogger is a tool to analyze monitoring tables output in Firebird and f
 
 MonLogger can connect to Firebird database with performance problems and identify what is the reason of slowness: is it some user attachment, slow SQL query or long-running transaction?
 
-MonLogger supports Firebird 2.1, 2.5, 3.0 and 4.0 – for older Firebird versions or InterBase please use FBScanner.
+MonLogger supports Firebird 2.1, 2.5, 3.0, 4.0 and 5.0 -- for older Firebird versions or InterBase please use FBScanner.
 
 MonLogger can show you:
 
@@ -232,16 +229,13 @@ image::4.2.1.png[]
 
 ==== Sequential reads / Indexed reads
 
-"`Sequential reads / Indexed reads`" shows us total ratio between sequential (non-indexed) reads and indexed reads in application.
-Usually number of non-indexed reads should be low, so big percent of sequential reads is sign that many SQL queries have NATURAL execution plans, and they could be a reason of slow response time.
+"`Sequential reads / Indexed reads`" shows us total ratio between sequential (non-indexed) reads and indexed reads in application. Usually number of non-indexed reads should be low, so big percent of sequential reads is sign that many SQL queries have `NATURAL` execution plans, and they could be a reason of slow response time.
 
 Click on record in "`TOP attachments: sequential/indexed reads`" will bring you to tab "`Attachments`", where you can see more details about Attachment, and then jump to tab "`Transactions`" or "`Statements`", where you will see transactions and attachments linked with selected attachment (if checkmark "`Link to selected attachment`" is on, otherwise all transactions/statements for all attachments will be shown).
 
 ==== Write details
 
-"`Write details`" gives you an overview of write operations: ratio between INSERTs/UPDATEs/DELETEs among all database attachments.
-In the table of top writers you can see attachments with the biggest number of write operations.
-It is useful to identify applications or software modules which performs excessive number of update or deletes (which are the most dangerous operations in terms of garbage collections).
+"`Write details`" gives you an overview of write operations: ratio between INSERTs/UPDATEs/DELETEs among all database attachments. In the table of top writers you can see attachments with the biggest number of write operations. It is useful to identify applications or software modules which performs excessive number of update or deletes (which are the most dangerous operations in terms of garbage collections).
 
 ==== Garbage collection details
 
@@ -251,15 +245,14 @@ What garbage collection operations mean?
 * Expunge -- both primary version and all back-versions were deleted.
 * Back-out -- remove only primary version (due to rollback).
 
-Usually we can associate purge with UPDATE operation, Expunge with DELETE, and Backout with rollback of INSERT or UPDATE.
+Usually we can associate purge with `UPDATE` operation, Expunge with `DELETE`, and Backout with rollback of `INSERT` or `UPDATE`.
 Many backouts could mean that there is a problem with transaction management in the application.
 
 ==== Memory usage
 
 "`Memory usage`" graph shows us total memory used by all active attachments now, and peak of allocated memory for them in the past.
 
-List of top attachments by memory usage shows us the biggest memory consumers among your attachments.
-It is useful to find applications or software modules with excessive memory usage.
+List of top attachments by memory usage shows us the biggest memory consumers among your attachments. It is useful to find applications or software modules with excessive memory usage.
 
 === Aggregated performance statistics for statements
 
@@ -267,20 +260,18 @@ At the second tab you can find aggregated performance statistics for statements.
 
 image::4.2.2.png[]
 
-This statistics better reflects the momentary situation in the database – since monitoring tables collect information since the beginning of each object life, statements you can see here are those which were running during the moment when snapshot was taken.
+This statistics better reflects the momentary situation in the database -- since monitoring tables collect information since the beginning of each object life, statements you can see here are those which were running during the moment when snapshot was taken.
 
 ==== Sequential reads / Indexed reads
 
-In this list we can see top statements which perform many sequential reads from the database.
-Usually such statements require SQL tuning – either through indices tuning, or through SQL query redesign.
+In this list we can see top statements which perform many sequential reads from the database. Usually such statements require SQL tuning – either through indices tuning, or through SQL query redesign.
 
 To tune the query, check its execution plan: usually it is possible to improve query speed by eliminating NATURAL in plans with new indices or query redesign.
 Click on the statement in this list to open tab "`Statements`", where you can find more details about selected statement, and jump to associated transaction or attachment.
 
 ==== Page reads/page writes
 
-This graphs and list shows brief information about top statements which perform many reads – it means that they consume significant IO and can affect performance of other queries.
-SQL statements with peak values should be carefully checked for optimal performance.
+This graphs and list shows brief information about top statements which perform many reads -- it means that they consume significant IO and can affect performance of other queries. SQL statements with peak values should be carefully checked for optimal performance.
 
 ==== Write details for statements
 
@@ -296,17 +287,15 @@ Unlike aggregated memory usage statistics for attachment, statements' memory usa
 
 === Attachments
 
-The third tab is "`Attachments`".
-You can open this tab directly to jump there by clicking one of the records at "`Aggregated performance statistics`".
+The third tab is "`Attachments`". You can open this tab directly to jump there by clicking one of the records at "`Aggregated performance statistics`".
 
 image::4.2.3.png[]
 
-"`Attachments`" shows the list of users connected to the Firebird database, with many useful details: USER and ROLE of attachment, start time and ID of attachment, is there garbage collection enabled for the attachment, name of remote process which established an attachment, and several accumulated performance counters for the attachment: number of sequential reads [done by attachment since its start], number of indexed reads, number of inserts, updates and deletes, as well records backouts, purges and expunges.
+"`Attachments`" shows the list of users connected to the Firebird database, with many useful details: `USER` and `ROLE` of attachment, start time and ID of attachment, is there garbage collection enabled for the attachment, name of remote process which established an attachment, and several accumulated performance counters for the attachment: number of sequential reads [done by attachment since its start], number of indexed reads, number of inserts, updates and deletes, as well records backouts, purges and expunges.
 
 By default, some of columns of attachment are switched off, to show only most important information.
 
-Of course, every time you click on attachment, you can jump to transactions running inside it, and then to statements.
-There is a checkbox in the left upper corner of Transactions and Statements tabs, which controls the behavior -- when checked, only transactions and statements marked by selected attachment ID, will be shown.
+Of course, every time you click on attachment, you can jump to transactions running inside it, and then to statements. There is a checkbox in the left upper corner of Transactions and Statements tabs, which controls the behavior -- when checked, only transactions and statements marked by selected attachment ID, will be shown.
 
 === Transactions
 
@@ -316,12 +305,9 @@ image::4.2.4.png[]
 
 If checkbox "`Link to selected attachment`" is enabled, only transactions for selected attachment will be shown, otherwise all transactions are shown.
 
-One of the most important characteristics is a lifetime of transactions: since Firebird is designed to work with short write transactions, it is important to keep them as short as possible.
-MonLogger highlights transactions with isolation modes and read-write settings which hold Oldest Active transaction and therefore provoke excessive record versions to be not cleared.
-If you see such transaction and it started a while ago, it means that it can be responsible for excessive records versions.
+One of the most important characteristics is a lifetime of transactions: since Firebird is designed to work with short write transactions, it is important to keep them as short as possible. MonLogger highlights transactions with isolation modes and read-write settings which hold Oldest Active transaction and therefore provoke excessive record versions to be not cleared. If you see such transaction and it started a while ago, it means that it can be responsible for excessive records versions.
 
-Sort on "`started at`" column and look for old transactions, marked in red: all writeable transactions and read only snapshots stuck Oldest Active Transaction and provoke excessive record versions to be hold.
-Identify where these transactions started (right-click and select "`View parent attachment`") and fix your code to commit this transaction earlier.
+Sort on "`started at`" column and look for old transactions, marked in red: all writeable transactions and read only snapshots stuck Oldest Active Transaction and provoke excessive record versions to be hold. Identify where these transactions started (right-click and select "`View parent attachment`") and fix your code to commit this transaction earlier.
 
 === Statements
 
@@ -338,12 +324,11 @@ Some statements have no associated transaction id (=0): these queries are prepar
 [[_hqbird_advanced_monitor_viewer]]
 == Advanced Monitor Viewer
 
-Advanced Monitor Viewer allows graphical display of additional performance counters.
-They are based on both trace data and data from monitoring tables, plus additional system utilities such as wmic (Windows) are used.
+Advanced Monitor Viewer allows graphical display of additional performance counters. They are based on both trace data and data from monitoring tables, plus additional system utilities such as wmic (Windows) are used.
 
-To launch the "Advanced Monitor Viewer" click on the corresponding item of the Start menu "IBSurgeon/HQbird Server Side 2022/Advanced Monitor Viewer" or run the script [path]_AVM/quick_start.cmd_.
+To launch the "Advanced Monitor Viewer" click on the corresponding item of the Start menu "IBSurgeon/HQbird Server Side 2024/Advanced Monitor Viewer" or run the script `AVM/quick_start.cmd`.
 
-After successful launch, the page http://127.0.0.1:8083 will open in your default browser.
+After successful launch, the page `http://127.0.0.1:8083` will open in your default browser.
 
 You will be prompted to log in:
 
@@ -412,6 +397,7 @@ image::4.4.8.png[]
 === What is FBScanner?
 
 FBScanner (Firebird Scanner) is a tool included in HQbird advanced distribution of Firebird, which can monitor and view all traffic between Firebird and InterBase servers and their client applications.
+
 It shows the real-time activity of connected clients:
 
 * Connections (IP/Name, duration, CPU load),
@@ -444,7 +430,7 @@ FBScanner consume approximately 50-150Mb of memory (for 30-100 active clients), 
 
 === How to configure FBScanner for local computer?
 
-To configure FBScanner start "`FBScanner Service Settings`" from Start menu ([path]_IBSurgeon\HQbird Server Side\Firebird SQL Scanner\_).This tool will help you to setup both basic and advanced configuration parameters for FBScanner.
+To configure FBScanner start "`FBScanner Service Settings`" from Start menu (`IBSurgeon\HQbird Server Side\Firebird SQL Scanner\`).This tool will help you to setup both basic and advanced configuration parameters for FBScanner.
 
 The basic configuration parameters are shown at the main screen of "`FBScanner Configuration`".
 It scans Windows registry for installed Firebird services and show them in the grid.
@@ -452,10 +438,10 @@ It scans Windows registry for installed Firebird services and show them in the g
 image::4.3.1.png[]
 
 By default Firebird uses port 3050 for network connections.
-FBScanner works as a transparent TCP proxy – it redirects all SQL traffic from and to Firebird clients to another.
 
-FBScanner offers to change Firebird port to 3053, in order to start its own instance at 3050.
-FBScanner checks for the port usage and if either 3050 or 3053 are used by other software (not Firebird), it will warn you with red caption "`Port used`" near new "`Port`" text box.
+FBScanner works as a transparent TCP proxy -- it redirects all SQL traffic from and to Firebird clients to another.
+
+FBScanner offers to change Firebird port to 3053, in order to start its own instance at 3050. FBScanner checks for the port usage and if either 3050 or 3053 are used by other software (not Firebird), it will warn you with red caption "`Port used`" near new "`Port`" text box.
 
 The green figure in the center of "`FBScanner Configuration`" main screen briefly shows how client applications SQL traffic will be passed.
 
@@ -467,14 +453,12 @@ To approve the changes, click "`Ok`", otherwise "`Cancel`".
 
 [IMPORTANT]
 ====
-If FBScanner settings were changed, FBScanner Service will be restarted, and all existing Firebird connections will be dropped! Be careful with changing FBScanner settings in production environment.
-FBScanner will ask your permission to restart, please decide carefully.
+If FBScanner settings were changed, FBScanner Service will be restarted, and all existing Firebird connections will be dropped! Be careful with changing FBScanner settings in production environment. FBScanner will ask your permission to restart, please decide carefully.
 ====
 
 === How to setup FBScanner for remote computer?
 
-FBScanner can route SQL traffic not only as local proxy, but from another computer too.
-To understand the difference and discover consequences, let's walk though details.
+FBScanner can route SQL traffic not only as local proxy, but from another computer too. To understand the difference and discover consequences, let's walk though details.
 
 The basic (and default) configuration of FBScanner implies that it works on the same computer where Firebird is working, and process all SQL traffic from Firebird clients (i.e., end-user applications) which use default connection string (and, therefore, port 3050).
 
@@ -488,8 +472,7 @@ Sometimes it's not convenient to setup FBScanner to process all requests, for ex
 * Heavy load (too many workstations). In case of heavy load FBScanner can consume resources of the main server, and it's better to move FBScanner (as well as FBScanner log, if it's enabled, to the dedicated computer).
 * Linux server. If Firebird works on Linux, it's possible to route SQL traffic through remote instance of FBScanner on Windows.
 
-In these cases the good idea is to setup FBScanner at the remote computer and pass only part of SQL traffic through it.
-It also makes possible to perform necessary analysis of SQL without changing ports or other configuration at server -- the only needed adjustment will be change host name in client applications' connections strings.
+In these cases the good idea is to setup FBScanner at the remote computer and pass only part of SQL traffic through it. It also makes possible to perform necessary analysis of SQL without changing ports or other configuration at server -- the only needed adjustment will be change host name in client applications' connections strings.
 
 One of the frequent use cases for setting up FBScanner in remote configuration is using it as debug console for developer computer, so developer can see in real-time (with FBScanner LogViewer) or afterwards (with FBScanner LogAnalyzer) all SQLs from own computer to the Firebird server.
 
@@ -503,16 +486,13 @@ At the bottom of the main screen of "`FBScanner Configuration`" you can see the 
 
 image::4.3.4.png[]
 
-In order to setup FBScanner to route SQL traffic to the remote Firebird, we need to change "`Server Type`" from "`Local...`" to "`Remote`".
-It will change the main screen of the configuration tool.
+In order to setup FBScanner to route SQL traffic to the remote Firebird, we need to change "`Server Type`" from "`Local...`" to "`Remote`". It will change the main screen of the configuration tool.
 
 First of all, we need to specify network name (or IP) of the computer with Firebird instance and port where it will be used -- it should be entered into "`Interface`" text box.
 
-Then we need to specify Firebird version – in our example it's Firebird 1.5.
+Then we need to specify Firebird version -- in our example it's Firebird 1.5.
 
-FBScanner instance also has "`Interface`" -- it's the list of network adapters found at the computer.
-If you need to bind FBScanner to one of them and disable connections from other network adapters, choose one of the adapters from the drop-down list.
-By default FBScanner will accept Firebird clients`' requests from all network adapters.
+FBScanner instance also has "`Interface`" -- it's the list of network adapters found at the computer. If you need to bind FBScanner to one of them and disable connections from other network adapters, choose one of the adapters from the drop-down list. By default FBScanner will accept Firebird clients`' requests from all network adapters.
 
 Below you can see the example of FBScanner configuration to route SQL traffic to remote Firebird instance, which resides on *myserver1* computer and works on default port 3050.
 
@@ -522,9 +502,7 @@ Click "`Ok`" to confirm new settings, and FBScanner will route SQL requests to t
 
 [IMPORTANT]
 ====
-If you need to pass SQL traffic from client applications through remote FBScanner, please change Firebird appropriate connection string.
-For example, if originally client applications have connected with "`*myserver1:C:\Database\data.fdb*`", in order to pass SQL traffic through FBScanner in this example you need to change connection string to "`*computer1:
-                        C:\Database\data.fdb*`" (where computer1 is the network name of the computer where FBScanner works).
+If you need to pass SQL traffic from client applications through remote FBScanner, please change Firebird appropriate connection string. For example, if originally client applications have connected with "`*myserver1:C:\Database\data.fdb*`", in order to pass SQL traffic through FBScanner in this example you need to change connection string to "`*computer1:C:\Database\data.fdb*`" (where computer1 is the network name of the computer where FBScanner works).
 ====
 
 === How to setup logging?
@@ -541,18 +519,14 @@ By default logging is disabled.
 
 [IMPORTANT]
 ====
-It's important to understand that logging to SQL database will write all SQL operations, including transactions, connects, etc.
-It means that SQL log database will consume the same amount of resources (CPU, HDD, etc) as the main database does.
-Due to this fact for heavy load environments we recommend to use remote configuration of FBScanner for SQL logging.
+It's important to understand that logging to SQL database will write all SQL operations, including transactions, connects, etc. It means that SQL log database will consume the same amount of resources (CPU, HDD, etc) as the main database does. Due to this fact for heavy load environments we recommend to use remote configuration of FBScanner for SQL logging.
 ====
 
 There are 2 options for logging -- to file and to Firebird log database.
 
 ==== Logging to text files
 
-File logging creates text file for each connection where FBScanner writes SQL and transactions operators.
-We recommend file logging for debug purposes and during development -- it's suitable to investigate linear SQL code.
-If there are a lot of connections, file logging becomes not very suitable.
+File logging creates text file for each connection where FBScanner writes SQL and transactions operators. We recommend file logging for debug purposes and during development -- it's suitable to investigate linear SQL code. If there are a lot of connections, file logging becomes not very suitable.
 
 To enable file logging, click radio button near "`File`" option and set folder where to store file logs (check that specified folder exists first!):
 
@@ -562,15 +536,15 @@ Then click "`Ok`".
 
 [IMPORTANT]
 ====
-Enabling logging will require restart of FBScanner Service, so all current connections will be dropped.
-FBScanner will ask your permission to do it immediately.
+Enabling logging will require restart of FBScanner Service, so all current connections will be dropped. FBScanner will ask your permission to do it immediately.
 ====
 
 ==== Example of text file logging
 
 For the following isql commands
-----
 
+[listing]
+----
 Use CONNECT or CREATE DATABASE to specify a database
 
 SQL> connect "localhost:E:\Temp\TEST15_2.FDB";
@@ -595,9 +569,9 @@ SQL> exit;
 ----
 
 FBScanner created the following log:
-[source]
-----
 
+[listing]
+----
 /* Log created by FBScanner v2.7.19
 14.01.2011 16:06:07
 	  Client IP      = 127.0.0.1
@@ -688,8 +662,7 @@ As you can see, file log is useful to understand how SQL commands were run insid
 
 Before you start with SQL log, it's necessary to understand some implementation details, which can be important for production systems.
 
-In general logging to Firebird database is implemented in the straightforward way: FBScanner service writes all traffic to the external Firebird database.
-Firebird database with log can be at the same computer where FBScanner resides, or at the remote computer.
+In general logging to Firebird database is implemented in the straightforward way: FBScanner service writes all traffic to the external Firebird database. Firebird database with log can be at the same computer where FBScanner resides, or at the remote computer.
 
 Please consider the following requirements for SQL log configuration:
 
@@ -698,9 +671,7 @@ Please consider the following requirements for SQL log configuration:
 * Log database can consume significant amount of resources in case of heavy load. For many connections it`'s recommended to setup FBScanner and Firebird log database at dedicated computer.
 * In many cases it`'s not necessary to log all connections, because they repeat the same set of SQL queries. Careful investigation of the single connection can be the most effective way to find performance problems.
 
-
-To enable SQL logging, click on "`SQL`" radio button.
-It will enable appropriate text boxes and controls.
+To enable SQL logging, click on "`SQL`" radio button. It will enable appropriate text boxes and controls.
 
 image::4.3.9.png[]
 
@@ -711,15 +682,14 @@ image::4.3.10.png[]
 [IMPORTANT]
 ====
 If you intend to use the same Firebird instance to log SQL traffic, you need to specify connections string with explicit and direct port.
-In our example it will be port 3053, and connection string looks like *127.0.0.1/3053:C:\FBScanner_log.fdb*
+In our example it will be port 3053, and connection string looks like `127.0.0.1/3053:C:\FBScanner_log.fdb`
 ====
 
 In this dialog you also need to specify how to connect to database with log.
 
 If there is no database with specified name, create new database -- click "`Create database log`".
 
-Test connection with log database -- click "`Test
-                    connection`".
+Test connection with log database -- click "`Test connection`".
 
 Click "`Ok`" to save settings.
 
@@ -727,7 +697,7 @@ Click "`Ok`" to save settings.
 
 FBScanner can gather information about transactions markers (in the same way like IBSurgeon Transaction Monitors does). Gathered information will be shown as graphs in FBScanner Log Analyzer.
 
-For this purpose, FBScanner runs separate connect, which requires Login, Password and path to the appropriate client dll (if you track Firebird 1.5 with FBScanner, [path]_fbclient.dll_ from 1.5 will be required).
+For this purpose, FBScanner runs separate connect, which requires Login, Password and path to the appropriate client dll (if you track Firebird 1.5 with FBScanner, `fbclient.dll` from 1.5 will be required).
 
 If you decide to gather transactions markers information, mark checkbox "`Collect transactions counters info`" and fill out Login, Password and Client DLL fields.
 
@@ -737,45 +707,36 @@ If you need to use SQL log at the computer where old Firebird is used (1.0, 1.5,
 
 You can download Firebird 2.5 Embedded from https://www.firebirdsql.org[www.firebirdsql.org].
 
-Unpack the archive right into the FBScanner folder
-([path]_C:\Program Files\IBSurgeon\Firebird Scanner_ by default) and
-rename [path]_fbembed.dll_ into [path]_fbclient.dll_.
+Unpack the archive right into the FBScanner folder (`C:\Program Files\IBSurgeon\Firebird Scanner` by default) and rename `fbembed.dll` into `fbclient.dll`.
 
 Folder structure will look like this
 
 image::4.3.11.png[]
 
-After that run "`Advanced options`", tab "`SQL logging`", radio button "`SQL`"
-and click "`Edit`", then in the "`Client library`" point to the
-renamed [path]_fbclient.dll_, as it shown below.
+After that run "`Advanced options`", tab "`SQL logging`", radio button "`SQL`" and click "`Edit`", then in the "`Client library`" point to the renamed `fbclient.dll`, as it shown below.
 
 image::4.3.12.png[]
 
 [TIP]
 ====
-In Embedded Firebird fbclient.dll represents the whole engine.
+In Embedded Firebird `fbclient.dll` represents the whole engine.
 It works inside the process of FBScanner and there is no interaction with other installed Firebird instances, both full and embedded.
 ====
 
 === How to analyze FBScanner log?
 
-Many users told us that they did not realize how many queries, transactions and other operations are performed by their software.
-As you remember, FBScanner stores all information into the single table.
-It uses self-links to reduce the amount of stored information and it makes raw log hard to read and understand.
+Many users told us that they did not realize how many queries, transactions and other operations are performed by their software. As you remember, FBScanner stores all information into the single table. It uses self-links to reduce the amount of stored information and it makes raw log hard to read and understand.
 
-To facilitate log analysis we have created new module in FBScanner -- LogAnalyzer.
-It's available in IBSurgeon Deploy Center for all FBScanner users (inside "`Download`" section).
+To facilitate log analysis we have created new module in FBScanner -- LogAnalyzer. It's available in IBSurgeon Deploy Center for all FBScanner users (inside "`Download`" section).
 
-LogAnalyzer requires Firebird 2.5 to work with log database.
-It also creates new indices and runs heavy reporting queries, so it's recommended the following procedure:
+LogAnalyzer requires Firebird 2.5 to work with log database. It also creates new indices and runs heavy reporting queries, so it's recommended the following procedure:
 
 . Setup logging and gather statistics for at least 1 day
 . Copy log database to another computer with Firebird 2.5
 . Connect to the copy of log database and perform analysis at the developer's computers
 . Copy updated versions of log databases as necessary
 
-To analyze log database, start LogAnalyzer and click "`Connect to FBScanner log base`",
-then fill out connection parameters and select log database.
+To analyze log database, start LogAnalyzer and click "`Connect to FBScanner log base`", then fill out connection parameters and select log database.
 
 image::4.3.13.png[]
 
@@ -785,8 +746,7 @@ After that LogAnalyzer will show the last available day in the log at the "`Serv
 
 image::4.3.14.png[]
 
-"`Server Load`" tab shows how many SQL queries were run per minute, and how much time they took to execute.
-Effectively it shows server load, i.e., number of queries and their execution times.
+"`Server Load`" tab shows how many SQL queries were run per minute, and how much time they took to execute. Effectively it shows server load, i.e., number of queries and their execution times.
 
 Zoom in (button in the top left corner of the tab "`Server load`"), drag graph by holding right-button of the mouse and select the peak you are interested to investigate -- click right-button to show popup-menu
 
@@ -816,9 +776,10 @@ image::4.3.20.png[]
 
 === How to track 10054 errors, disconnects and failed login attempts?
 
-FBScanner automatically logs all 10054 errors, disconnects and failed login attempts with detailed description in the [path]_FBScanner.log_ file, which is in FBScanner main directory.
-----
+FBScanner automatically logs all 10054 errors, disconnects and failed login attempts with detailed description in the `FBScanner.log` file, which is in FBScanner main directory.
 
+[listing]
+----
 19.08.2010 21:43:09
 	Connect Error
 	  Client IP      = 192.10.1.2
@@ -848,28 +809,30 @@ To perform operations which do not require monitoring or debugging, like backup 
 
 If FBScanner is installed in default recommended configuration, i.e., on port 3050 and Firebird is on port 3053, connection strings should be like this
 
+[listing]
 ----
 server_name/3053:Disk:\Path\database.fdb
 ----
+
 example of connection string
 
+[listing]
 ----
 connect "localhost/3053:C:\TEMP\database.fdb" user "SYSDBA" password "masterkey";
 ----
 
 Example of using backup command
 
+[listing]
 ----
-gbak.exe -b -g -v -user SYSDBA -pass masterkey
-localhost/3053:C:\TEMP\database.fdb C:\temp\backup.gbk
+gbak.exe -b -g -v -user SYSDBA -pass masterkey localhost/3053:C:\TEMP\database.fdb C:\temp\backup.gbk
 ----
 
 and, of course, using local connection string will always bypass FBScanner:
 
-
+[listing]
 ----
-gbak.exe -b -g -v -user SYSDBA -pass masterkey
-C:\TEMP\database.fdb C:\temp\backup.gbk
+gbak.exe -b -g -v -user SYSDBA -pass masterkey C:\TEMP\database.fdb C:\temp\backup.gbk
 ----
 
 === Real-Time Monitoring: FBScanner Viewer
@@ -891,36 +854,30 @@ In the table below you can find description of all columns at main page of FBSca
 
 
 |! (first column)
-|
-
-Indicates type of record in FBScanner Viewer -- there are separate set of values for SQL statements, transactions and connections.
+|Indicates type of record in FBScanner Viewer -- there are separate set of values for SQL statements, transactions and connections.
 They are described in the next table below.
 
 Sign "`!`" in the title of this column means active filter -- click on the triangle at right side of sign "`!`" to adjust it.
 
 |Tag
-|
-
-Green/red background shows CPU Usage in % (red -- Kernel, green -- Firebird).
+a|Green/red background shows CPU Usage in % (red -- Kernel, green -- Firebird).
 
 Text is shows tags value (if it was specified in SQL query).
 
 Example how to set tag values:
-[source]
-----
 
+[listing]
+----
 SELECT * FROM RDB$DATABASE
 /*FBSCANNER$CON_NAME=MyConnect;
 FBSCANNER$TR_NAME=MyTransaction;
 FBSCANNER$ST_NAME=SomeImportantQuery; */;
 ----
 
-Also in this column you will see execution of [app]``gbak`` and [app]``gfix`` tools.
+Also in this column you will see execution of `gbak` and `gfix` tools.
 
 |Transaction Count
-|
-
-Applicable for connection row.
+|Applicable for connection row.
 Number of active transactions in the connection is shown.
 
 It's very useful to find applications with auto-commit and other ineffective transaction management issues.
@@ -935,41 +892,34 @@ It's very useful to find applications with auto-commit and other ineffective tra
 |DNS of connection (if possible to resolve)
 
 |Client Process Name
-|Starting from Firebird 2.1, [path]_fbclient.dll_
-    shows name of client application. For example,
-    [path]_C:\Program Files\Firebird\Firebird_2_1\bin\isql.exe_
+|Starting from Firebird 2.1, `fbclient.dll` shows name of client application. For example, `C:\Program Files\Firebird\Firebird_2_1\bin\isql.exe`
 
 |Priority
 |Priority of Firebird instance (Classic only)
 
 |Database
-|Database name or its alias, as it appears in the connection
-                                string
+|Database name or its alias, as it appears in the connection string
 
 |User
-|Users name -- for example, SYSDBA (it does not supported Trusted
-                                Authentication)
+|Users name -- for example, SYSDBA (it does not supported Trusted Authentication)
 
 |Role
 |Role of user
 
 |Start
-|For connection row -- connection time, for transaction -- start
-    time of transaction, for statement -- query start time.
+|For connection row -- connection time, for transaction -- start time of transaction, for statement -- query start time.
 
 |Time
 |'NOW' -- Start; Time from the start moment
 
 |Last Activity
-|Time of last action for current
-    connect/transaction/statement.
+|Time of last action for current connect/transaction/statement.
 
 |Inactive
 |'NOW' -- Last Activity; Period of inactivity
 
 |Latest Retaining
-|Time of the most recent "`COMMIT RETAINING`" or "`ROLLBACK RETAINING`" in the current
-                                transaction
+|Time of the most recent "`COMMIT RETAINING`" or "`ROLLBACK RETAINING`" in the current transaction
 
 |Retaining
 |'NOW' -- Latest Retaining
@@ -981,26 +931,22 @@ It's very useful to find applications with auto-commit and other ineffective tra
 |Bytes, sent by client
 
 |CPU Time
-|Shows overall time consumed in
-                                connection/transaction/query. If there is more than 1 query in
-                                transactions, execution time of all queries will be summarized. The
-                                same rule is for connection time calculation.
+|Shows overall time consumed in connection/transaction/query. If there is more than 1 query in transactions, execution time of all queries will be summarized. The same rule is for connection time calculation.
 
 |Prepare Time
+|
 
 |Execute Time
+|
 
 |Fetch Count
-|Applicable only for statements. Number of rows, as it's reported
-                                by [path]_fbclient.dll_
+|Applicable only for statements. Number of rows, as it's reported by `fbclient.dll`
 
 |Protocol
 |Firebird protocol version for current session.
 
 |Version
-|
-
-Version of [path]_fbclient.dll_/[path]_gds32.dll_.
+|Version of `fbclient.dll`/`gds32.dll`.
 
 Version detection is not 100% correct: minor versions are considered as the same, JayBird and .NET Provider are considered as the same, InterBase 8.x = InterBase 9.x
 |===
@@ -1032,8 +978,7 @@ In the following table you can see details for the values appeared in the first 
 |Fetching is in progress
 
 |f
-|Fetching is in progress, but suspended at the moment (recordset
-                                is not fetched)
+|Fetching is in progress, but suspended at the moment (recordset is not fetched)
 
 |c
 |Closed cursor. All data was fetched.
@@ -1042,10 +987,11 @@ In the following table you can see details for the values appeared in the first 
 ==== Tags
 
 Tags allow assigning readable identifiers (names) to Connections, Queries and Transactions.
-You just need to add these commentaries:
-[source]
-----
 
+You just need to add these commentaries:
+
+[listing]
+----
 SELECT COUNT(*) FROM RDB$DATABASE
 /* FBSCANNER$CON_NAME=My_application;
    FBSCANNER$TR_NAME=Read_only_transaction_N1;
@@ -1108,16 +1054,14 @@ FBScanner Viewer offers wide range of options to make debugging and optimization
 ==== Server
 
 To connect to the FBScanner Service select Service\Connect To.
+
 The following dialog will appear:
 
 image::4.3.22.png[]
 
-After selecting the server FBScanner Viewer will ask for password.
-There are 2 passwords -- for read-only access and for administrator (full) access.
-By default the password for read-only access is blank.
+After selecting the server FBScanner Viewer will ask for password. There are 2 passwords -- for read-only access and for administrator (full) access. By default the password for read-only access is blank.
 
 image::4.3.23.png[]
-
 
 [TIP]
 ====
@@ -1132,13 +1076,11 @@ To setup passwords for FBScanner Viewer access you need to go to "`FBScanner Con
 
 ==== Connections
 
-"`Disconnect`", "`Disconnect clients`" and "`Kill
-                        Process`" menu options are available only when connected to FBScanner Service with administrative rights.
+"`Disconnect`", "`Disconnect clients`" and "`Kill Process`" menu options are available only when connected to FBScanner Service with administrative rights.
 
 *Disconnect* will ask to close the current connection (highlighted in the main FBScanner Viewer grid):
 
 image::4.3.24.png[]
-
 
 "`*Disconnect clients*`" runs the following dialog:
 
@@ -1148,7 +1090,7 @@ In the right side there is a list of connections, represented by databases names
 
 Using > and < buttons, administrator can select connections to be disconnected and then click "`Disconnect`" button.
 
-Disconnect will be done by emulation of 10054 error -- there will be appropriate record(s) in the [path]_firebird.log_ ([path]_interbase.log_) and in [path]_FBScanner.log_.
+Disconnect will be done by emulation of 10054 error -- there will be appropriate record(s) in the `firebird.log` (`interbase.log`) and in `FBScanner.log`.
 
 ==== Kill
 
@@ -1180,10 +1122,8 @@ It enables to set process priority for Classic instances.
 
 "`*Ping All Clients*`" checks all connections in the same way.
 
-"`*Extract plans*`" starts plan extracting for selected connect.
-Extracted plans are shown in the grid, and also stored in the SQL (or text) log.
-If logging is not enabled, nothing happens.
-To enable plan extraction for all connects, use appropriate setting in "`FBScanner Configuration`".
+"`*Extract plans*`" starts plan extracting for selected connect. Extracted plans are shown in the grid, and also stored in the SQL (or text) log.
+If logging is not enabled, nothing happens. To enable plan extraction for all connects, use appropriate setting in "`FBScanner Configuration`".
 
 ==== Transactions
 
@@ -1192,6 +1132,7 @@ The single option *Transactions\OAT* will put selection in the grid to the oldes
 ==== Tools
 
 In menu "`Tools`" we can see several options.
+
 With "`*View Style*`" user can select the most suitable representation of grid data:
 
 * Database Administrator (connections only)
@@ -1199,11 +1140,13 @@ With "`*View Style*`" user can select the most suitable representation of grid d
 * Database Developer (with transactions)
 
 FBScanner Viewer is localized in 4 languages.
+
 Use *Tools\Language* to switch between languages:
 
 image::4.3.28.png[]
 
 "`*Plugins*`" option enables plugins.
+
 For more information please contact link:mailto:support@ib-aid.com[support@ib-aid.com]
 
 "`*Options*`" is another way to change some of FBScanner Service parameters.
@@ -1215,9 +1158,9 @@ Please consider appropriate session of this guide for details of FBScanner Servi
 ==== SQL log structure
 
 FBScanner stores SQL traffic in the following table:
+
 [source,sql]
 ----
-
 CREATE TABLE FBSCANNER$LOG
 (
     ID                   BIGINT NOT NULL,
@@ -1257,8 +1200,6 @@ There are 3 levels of hierarchy in this table:
 * IDATTACHMENT and IDTRANSACTION -- foreign keys referenced to FBSCANNER$LOG.ID
 * ROW_TYPE -- hierarchy level (0, 1, 2 )
 
-
-
 .Level 1. Connection.ROW_TYPE = 0
 [cols="1,1", frame="all"]
 |===
@@ -1278,8 +1219,7 @@ There are 3 levels of hierarchy in this table:
 |Connection tag (if assigned in query text)
 
 |SUBNET_NAME
-|Logical name of subnet. See file
-                                        FBScanner.subnets
+|Logical name of subnet. See file `FBScanner.subnets`
 
 |DB_FILENAME
 |Database alias or full database path
@@ -1296,7 +1236,6 @@ There are 3 levels of hierarchy in this table:
 |END_TIME
 |End of connection
 |===
-
 
 
 .Level 2. Connection.ROW_TYPE = 1
@@ -1318,8 +1257,7 @@ There are 3 levels of hierarchy in this table:
 |Transaction end time
 
 |LAST_RETAINING
-|Time of most recent commit retaining or rollback
-                                        retaining
+|Time of most recent commit retaining or rollback retaining
 
 |RESULT
 |
@@ -1367,8 +1305,7 @@ There are 3 levels of hierarchy in this table:
 |Number of records, returned by query
 
 |RESULT
-|0 – query executed successfully, otherwise this field
-                                        contains SQLCODE of error
+|0 -- query executed successfully, otherwise this field contains SQLCODE of error
 
 |SQL_TEXT
 |Query text (with parameters)
@@ -1377,8 +1314,7 @@ There are 3 levels of hierarchy in this table:
 |Original query text(NULL if equal to SQL_TEXT)
 
 |SQL_PLAN
-|Query execution plan (if "`Extract plans`" setting is
-                                        enabled)
+|Query execution plan (if "`Extract plans`" setting is enabled)
 
 |**PREPARE_TIME**
 |Prepare time
@@ -1390,11 +1326,10 @@ There are 3 levels of hierarchy in this table:
 ==== Indices in the log
 
 Initially log database contains only primary key index.
+
 FBScanner Log Analyzer creates necessary indices at the first connect.
 
 === FBScanner Feature Matrix
-
-
 
 [cols="1,4,1,1"]
 |===
@@ -1492,16 +1427,12 @@ h| Remote
 |
 
 |
-|Safe disconnect of one or several connections using TCP/IP
-    connection interruption (imitation of 10054 error)
+|Safe disconnect of one or several connections using TCP/IP connection interruption (imitation of 10054 error)
 |X
 |X
 
 |
-|Changing of processes priority in Classic architecture (for
-                                    example, to adjust priority of long running report or something
-                                    like this. Using tags administrator can recognize connection
-                                    where report is working -- see below in "`Tags`").
+|Changing of processes priority in Classic architecture (for example, to adjust priority of long running report or something like this. Using tags administrator can recognize connection where report is working -- see below in "`Tags`").
 |X
 |
 
@@ -1520,20 +1451,17 @@ Specified user login name – set priority X
 |
 
 |
-|Killing of Classic processes, not recommended to use, but
-                                    sometimes it is helpful
+|Killing of Classic processes, not recommended to use, but sometimes it is helpful
 |X
 |
 
 |
-|Ability to restrict all connections (to perform some
-                                    operations which require exclusive access)
+|Ability to restrict all connections (to perform some operations which require exclusive access)
 |X
 |X
 
 |
-|Filtering connections viewing using all connections
-                                    parameters (except time information)
+|Filtering connections viewing using all connections parameters (except time information)
 |X
 |X
 
@@ -1548,34 +1476,27 @@ Specified user login name – set priority X
 |X
 
 |
-|Restriction of connections # -- administrator can limit the
-                                    number of connections
+|Restriction of connections # -- administrator can limit the number of connections
 |X
 |X
 
 |
-|Emulation of "`Wrong login/password`" error for
-                                    denied connections
+|Emulation of "`Wrong login/password`" error for denied connections
 |X
 |
 
 |
-|Detection of old/incorrect versions of
-                                    fbclient.dll/gds32.dll
+|Detection of old/incorrect versions of fbclient.dll/gds32.dll
 |X
 |X
 
 |**__1.3__**
-|**__Logging events
-                                            related with connections__**
+|**__Logging events related with connections__**
 |X
 |X
 
 |
-|FBScanner logs unsuccessful login attempts in the [path]_FBScanner.log_. For each unsuccessful
-                                    login attempt FBScanner writes the following information:
-                                    IP-address, login name, database and time of login
-                                    attempt.
+|FBScanner logs unsuccessful login attempts in the `FBScanner.log`. For each unsuccessful login attempt FBScanner writes the following information: IP-address, login name, database and time of login attempt.
 |X
 |X
 
@@ -1606,9 +1527,7 @@ This is very useful feature to find and eliminate 10054 errors.
 |
 
 |**__2.1.__**
-|**__Transactions
-                                            are shown inside appropriate
-                                        connections__**
+|**__Transactions are shown inside appropriate connections__**
 |
 |
 
@@ -1623,8 +1542,7 @@ This is very useful feature to find and eliminate 10054 errors.
 |X
 
 |
-|Using OAT button you can find the oldest active transaction
-                                    in real-time and review related connection/queries.
+|Using OAT button you can find the oldest active transaction in real-time and review related connection/queries.
 |X
 |X
 
@@ -1634,8 +1552,7 @@ This is very useful feature to find and eliminate 10054 errors.
 |
 
 |**__3.1__**
-|**__Information
-                                            about queries(statements)__**
+|**__Information about queries(statements)__**
 |
 |
 
@@ -1660,8 +1577,7 @@ This is very useful feature to find and eliminate 10054 errors.
 |X
 
 |
-|Filtering by statement status (by default Closed statements
-                                    are hidden)
+|Filtering by statement status (by default Closed statements are hidden)
 |X
 |X
 
@@ -1671,14 +1587,12 @@ This is very useful feature to find and eliminate 10054 errors.
 |X
 
 |
-|If query PREPARE or execution caused error, FBScanner writes
-                                    SQLCODE to the log (for example, primary key violation)
+|If query PREPARE or execution caused error, FBScanner writes SQLCODE to the log (for example, primary key violation)
 |
 |
 
 |**__3.2__**
-|**__Additional
-                                            operations with queries__**
+|**__Additional operations with queries__**
 |
 |
 
@@ -1701,32 +1615,26 @@ In both cases plans will be logged to the overall log if logging is ON.
 |
 
 |
-|
+a|Tags allow assigning readable identifiers (names) to Connections, Queries and Transactions. You just need to add these commentaries:
 
-Tags allow assigning readable identifiers (names) to Connections, Queries and Transactions.
-You just need to add these commentaries:
 [source]
 ----
-
 SELECT COUNT(*) FROM RDB$DATABASE
 /* FBSCANNER$CON_NAME=My_application;
 FBSCANNER$TR_NAME=Read_only_transaction_N1;
 FBSCANNER$ST_NAME=Customers_list_query; */
 ----
+
 |X
 |X
 
 |
-|FBSCANNER$CON_NAME= sets the name of connection. After the
-                                    first assignment this name will be kept during the whole
-                                    connection life.
+|FBSCANNER$CON_NAME= sets the name of connection. After the first assignment this name will be kept during the whole connection life.
 |X
 |X
 
 |
-|FBSCANNER$TR_NAME= sets the name of transaction. After the
-                                    first assignment this name will be used during the whole life of
-                                    transaction
+|FBSCANNER$TR_NAME= sets the name of transaction. After the first assignment this name will be used during the whole life of transaction
 |X
 |X
 
@@ -1764,10 +1672,7 @@ What is this very long query? (developer can mark long queries with readable nam
 |
 
 |
-|Logging allows intercepting all queries and writing them to
-                                    the external Firebird database. FYI, logging cannot be replaced
-                                    with Firebird 2.1 or InterBase system tables, because they
-                                    provide only snapshots of programs.
+|Logging allows intercepting all queries and writing them to the external Firebird database. FYI, logging cannot be replaced with Firebird 2.1 or InterBase system tables, because they provide only snapshots of programs.
 |X
 |X
 
@@ -1777,27 +1682,22 @@ What is this very long query? (developer can mark long queries with readable nam
 |X
 
 |
-|All executed queries are logged (only prepared quires
-                                    skipped)
+|All executed queries are logged (only prepared quires skipped)
 |X
 |X
 
 |
-|Queries are stored with information about their connection
-                                    and transaction
+|Queries are stored with information about their connection and transaction
 |X
 |X
 
 |
-|All transactions are logged, even rolled back. Transaction
-                                    log record has column RESULT which shows was transaction
-                                    committed or rolled back.
+|All transactions are logged, even rolled back. Transaction log record has column RESULT which shows was transaction committed or rolled back.
 |X
 |X
 
 |
-|If plan extraction is on, queries plans are logged
-                                    too
+|If plan extraction is on, queries plans are logged too
 |X
 |X
 
@@ -1807,8 +1707,7 @@ What is this very long query? (developer can mark long queries with readable nam
 |X
 
 |
-|Automatic creation of tables to logging in any Firebird
-                                    database
+|Automatic creation of tables to logging in any Firebird database
 |X
 |X
 |===

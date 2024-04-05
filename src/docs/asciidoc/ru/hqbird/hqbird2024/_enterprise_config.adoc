@@ -7,15 +7,12 @@ HQbird Enterprise is the advanced distribution of Firebird for big databases wit
 
 === Compatibility
 
-HQbird Enterprise is 100% compatible with Firebird 2.5.5+, Firebird 3.0 and Firebird 4.0 – no changes in ODS are needed.
-To switch to HQbird and back no backup/restore is required, just stop/start Firebird and replace binaries.
-The replication is possible between nodes with the same version, i.e., not possible between 3.0 and 2.5.
+HQbird Enterprise is 100% compatible with Firebird 2.5.5+, Firebird 3.0 and Firebird 4.0 – no changes in ODS are needed. To switch to HQbird and back no backup/restore is required, just stop/start Firebird and replace binaries. The replication is possible between nodes with the same version, i.e., not possible between 3.0 and 2.5.
 
 === How the replication works
 
 HQbird replication works on the logical level: it replicates DML statements (INSERT/UPDATE/DELETE, stored procedures, etc)
-and DDL (CREATE/ALTER TABLE, etc) changes; **no additional triggers needed**.
-The only requirement for the current version of replication is to have unique or primary keys for all tables that need to be replicated.
+and DDL (CREATE/ALTER TABLE, etc) changes; **no additional triggers needed**. The only requirement for the current version of replication is to have unique or primary keys for all tables that need to be replicated.
 
 In order to use the replication, you need to install HQbird instead of Firebird, register it (with trial or with the full license) and configure replication.
 HQbird should be running on the master server and on all replica servers.
@@ -28,8 +25,7 @@ _You can use HQbird on Windows and Linux, with Firebird 2.5, 3.0 and 4.0, 32 bit
 
 == Installation
 
-Please install HQbird Enterprise from the supplied distributive.
-If you have other version of Firebird installed, uninstall it first.
+Please install HQbird Enterprise from the supplied distributive. If you have other version of Firebird installed, uninstall it first.
 
 To enable replication you need to have working and registered (trial or full) copy of HQbird 2022 or higher on your master and replica servers.
 
@@ -39,8 +35,7 @@ Please refer to the section 2 of this guide for details of HQbird Server install
 
 == Asynchronous replication for Firebird
 
-HQbird supports 2 types of replication: asynchronous and synchronous.
-In the case of an asynchronous replication, the master server stores committed changes from the master database to the files (replication segments), which can be consumed asynchronously by one or more replica servers.
+HQbird supports 2 types of replication: asynchronous and synchronous. In the case of an asynchronous replication, the master server stores committed changes from the master database to the files (replication segments), which can be consumed asynchronously by one or more replica servers.
 
 image::6.1.png[]
 
@@ -77,6 +72,7 @@ The following steps will be required to setup the asynchronous replication:
 To setup replication, open HQbird FBDataGuard: run modern browser (Chrome, Firefox, etc) and open this local URL: http://127.0.0.1:8082/[http://127.0.0.1:8082](port if configurable in HQBird ini files)
 
 Enter default name and password: **admin/strong password**.
+
 Register Firebird server, and the following picture will appear:
 
 image::6.2.png[]
@@ -98,6 +94,7 @@ After the successful registration of the database click on the icon in the heade
 image::6.4.png[]
 
 After that the main configuration dialog for master and replica databases will appear.
+
 When replication is not configured, this dialog is almost empty:
 
 image::6.5.png[]
@@ -105,14 +102,13 @@ image::6.5.png[]
 
 ==== Asynchronous replication at master
 
-Asynchronous replication writes all changes in the master database to the replication log: the set of files called "`replication segments`".
-Replica server pulls these segments and inserts into the replica database.
+Asynchronous replication writes all changes in the master database to the replication log: the set of files called "`replication segments`". Replica server pulls these segments and inserts into the replica database.
 
-Previously we have registered [path]_H:\dbwmaster.fdb_, it is the asynchronous master database in this example.
-To configure the asynchronous replication on the master side: select replication role: "`Master`", then "`Asynchronous`", and click "`Save`".
+Previously we have registered `H:\dbwmaster.fdb`, it is the asynchronous master database in this example. To configure the asynchronous replication on the master side: select replication role: "`Master`", then "`Asynchronous`", and click "`Save`".
 
 Starting with Firebird 4.0, you need to enable publication at the database level. Clicking on the "Enable publications (and grant it for all tables)" button enables publication and adds all tables to the list for publication. The list of tables for publication can be manipulated in SQL using the following statements:
 
+[listing]
 ----
 ALTER DATABASE INCLUDE {TABLE <table_list> | ALL} TO PUBLICATION
 
@@ -134,55 +130,48 @@ image::6.7.png[]
 
 Let's consider all parameters in this dialog -- just to give you idea what they do, **no need to change them**:
 
-* "`Log directory`" -- folder where operational logs will be stored. It is a system folder, completely operated by Firebird. By default, *no need to change its default value*[path]_${db.path}.ReplLog_ (db.path is where the database is located).
-* "`Log archive directory`" -- folder, where archived logs will be stored. According the default value [path]_${db.path}.LogArch_, HQbird will create folder [path]_DatabaseName.LogArch_ in the folder with the database, so there is **no need to change this parameter**.
+* "`Log directory`" -- folder where operational logs will be stored. It is a system folder, completely operated by Firebird. By default, *no need to change its default value* `${db.path}.ReplLog` (`db.path` is where the database is located).
+* "`Log archive directory`" -- folder, where archived logs will be stored. According the default value `${db.path}.LogArch`, HQbird will create folder `DatabaseName.LogArch` in the folder with the database, so there is **no need to change this parameter**.
 * The third parameter ("`Override log archive command`") is optional, **leave it empty**.
 
 
 [NOTE]
 ====
-Please note that replication parameters are initialized at the first connection to the database.
-That's why you need restart Firebird service (or all connections in case of Classic) after the replication configuration -- such restart ensures that replication will start properly.
+Please note that replication parameters are initialized at the first connection to the database. That's why you need restart Firebird service (or all connections in case of Classic) after the replication configuration -- such restart ensures that replication will start properly.
 ====
 
-In this case, the replication log segments will be written first to [path]_${db.path}.ReplLog_ (db.path is where the database is located -- in our example it will be [path]_H:\DBWMaster.fdb.ReplLog_), and after reaching the maximum segment size, or commit, or another trigger, the default archive command will be started – it will copy archived replication segments to [path]_${db.path}.LogArch_ (in our example it will be [path]_H:\DBWMaster.fdb.LogArch_).
+In this case, the replication log segments will be written first to `${db.path}.ReplLog` (`db.path` is where the database is located -- in our example it will be `H:\DBWMaster.fdb.ReplLog`), and after reaching the maximum segment size, or commit, or another trigger, the default archive command will be started – it will copy archived replication segments to `${db.path}.LogArch` (in our example it will be `H:\DBWMaster.fdb.LogArch`).
 
 After replication's start, you should be able to see replication segment files in the folder specified in "`Log directory`" immediately after any operation at master database:
 
 image::6.8.png[]
 
-The operational segments are rotated by the engine, and once each segment is completed, it is copied to archive log.
-Default segment size is 16Mb.
+The operational segments are rotated by the engine, and once each segment is completed, it is copied to archive log. Default segment size is 16Mb.
+
 Please note -- you don't need to do anything with operational segments!
 
-After the commit and/or specified timeout of committed data, you will see archived segments in the folder, specified by "`Log archive
-                        directory`".
+After the commit and/or specified timeout of committed data, you will see archived segments in the folder, specified by "`Log archive directory`".
 
-Archive replication log is essentially the chronologically ordered list of completed operational segments.
-These files should be imported by replica server into the replica database.
+Archive replication log is essentially the chronologically ordered list of completed operational segments. These files should be imported by replica server into the replica database.
 
 .Important!
 [IMPORTANT]
 ====
-For Linux users -- make sure that folder with the database is owned by firebird user.
-HQbird runs under "`firebird`" user in Linux, and the folder with the database must have permissions for "`firebird`" to create logs folder (``chown firebird -R /your/database/folder``).
+For Linux users -- make sure that folder with the database is owned by firebird user. HQbird runs under "`firebird`" user in Linux, and the folder with the database must have permissions for "`firebird`" to create logs folder (`chown firebird -R /your/database/folder`).
 ====
 
-==== How to copy replication segments from master server to the replicaserver?
+==== How to copy replication segments from master server to the replica server?
 
 There are 2 popular ways to copy archived segments from the master server to the replica server(s): through network share and using Cloud Backup on master and Cloud Backup Receiver on replica.
 
 ===== Network share
 
-You can share the folder with archived segments as a network share.
-In this case, Firebird service should have enough rights to read, write and delete files on that network share.
-Normally Firebird and HQbird services are started under LocalSystem account, which do not have access to the network shares.
+You can share the folder with archived segments as a network share. In this case, Firebird service should have enough rights to read, write and delete files on that network share. Normally Firebird and HQbird services are started under LocalSystem account, which do not have access to the network shares.
 Change it to some powerful account (like Domain Admin).
 
 ===== Cloud Backup/Cloud Backup Receiver
 
-We recommend using HQbird FBDataGuard to send replication segments from the master server to the replica through FTP: it compresses, encrypts and uploads segments to the specified FTP server.
-On that server, another HQbird FBDataGuard unpacks segments and copies to the necessary folder for further consumption by the replica.
+We recommend using HQbird FBDataGuard to send replication segments from the master server to the replica through FTP: it compresses, encrypts and uploads segments to the specified FTP server. On that server, another HQbird FBDataGuard unpacks segments and copies to the necessary folder for further consumption by the replica.
 
 [NOTE]
 ====
@@ -191,15 +180,13 @@ Please read about CloudBackup job for more details how to setup transfer of arch
 
 === Step 2: Create a copy of master database
 
-To start replication we need to create an initial copy of the database file, which will be used as a target for the replication process.
-Let's refer to such database file as "`replica`".
+To start replication we need to create an initial copy of the database file, which will be used as a target for the replication process. Let's refer to such database file as "`replica`".
 
 Starting with HQbird 2018 R2, the replica will be created automatically in the folder which will you specify in the dialog after clicking on "`Reinitialize replica database`".
 
 image::6.9.png[]
 
-If you have enough space in the folder with the database, **just leave the path empty**, and click Ok, and replica will be created near the database.
-Or, you can specify other destination on the local drives with enough free space.
+If you have enough space in the folder with the database, **just leave the path empty**, and click Ok, and replica will be created near the database. Or, you can specify other destination on the local drives with enough free space.
 
 .Important!
 [IMPORTANT]
@@ -207,13 +194,11 @@ Or, you can specify other destination on the local drives with enough free space
 If there will be not enough free space (less than 105% of the database size), HQbird will not create replica copy -- there will be an appropriate error message.
 ====
 
-If you click Ok, HQbird will start the process of replica creation.
-There will be an appropriate message about it:
+If you click Ok, HQbird will start the process of replica creation. There will be an appropriate message about it:
 
 image::6.10.png[]
 
-In case of default action, the resulted database will be in the same folder with the database.
-The name of the replica will be DATABASE_NAME.EXT.DD-MMM-YYYY_NNNN.4replica -- for example, [path]_employee30.fdb.17-Apr-2018_142507.4replica_
+In case of default action, the resulted database will be in the same folder with the database. The name of the replica will be `DATABASE_NAME.EXT.DD-MMM-YYYY_NNNN.4replica` -- for example, `employee30.fdb.17-Apr-2018_142507.4replica`
 
 [NOTE]
 ====
@@ -234,19 +219,17 @@ Please make sure that replica creation process was completed successfully -- che
 
 After completing the configuration of asynchronous replication on the master server, we need to configure it for the replica database at the replica server instance.
 
-First of all, we assume that you have successfully installed HQbird Enterprise on the replica server.
-We recommend to use on replica server SuperClassic for Firebird 2.5 and SuperServer for Firebird 3.0 (these are default configurations of HQbird Enterprise).
+First of all, we assume that you have successfully installed HQbird Enterprise on the replica server. We recommend to use on replica server SuperClassic for Firebird 2.5 and SuperServer for Firebird 3.0 (these are default configurations of HQbird Enterprise).
 
 **Firebird Classic Linux users**: If you run Firebird on replica server in Classic mode on Linux, you need to run additional Firebird replicator process with the command `fb_smp_server -r.`
 
-Second, the replica database should be registered in HQbird FBDataGuard.
-If you intend to use automatic re-initialization, you can register some small database ([path]_employee.fdb_) with the required name, and the do re-initialization: as a result, replica database will be automatically transferred from the master server.
+Second, the replica database should be registered in HQbird FBDataGuard. If you intend to use automatic re-initialization, you can register some small database (`employee.fdb`) with the required name, and the do re-initialization: as a result, replica database will be automatically transferred from the master server.
 
 Third, we assume that you have managed to setup transfer of logs with Cloud Backup/Cloud Backup Receiver, or with network share.
 
 [NOTE]
 ====
-Please note: the database should have replica database GUID before the registration! This GUID is created automatically if you have used link «Reinitialize replica database», but if you are performing manual re-initialization, don't forget to set it, otherwise will be an error about missing database GUID.
+Please note: the database should have replica database GUID before the registration! This GUID is created automatically if you have used link "`Reinitialize replica database`", but if you are performing manual re-initialization, don't forget to set it, otherwise will be an error about missing database GUID.
 ====
 
 Then complete the replication setup -- the only required parameter is a path to the folder with archived replication segments, and by default it is already set -- HQbird will create folder with logs near the database:
@@ -255,12 +238,12 @@ image::6.12.png[]
 
 So, no need to change anything here, just click Save.
 
-Assuming the replica database is configured in [path]_D:\DATABASE\DBWREPLICA.FDB_, the HQBird will create folder [path]_D:\DATABASE\DBWREPLICA.FDB.LogArch_, and replica will import replication segment files from it.
+Assuming the replica database is configured in `D:\DATABASE\DBWREPLICA.FDB`, the HQBird will create folder `D:\DATABASE\DBWREPLICA.FDB.LogArch`, and replica will import replication segment files from it.
 
 Click "`Save`" and restart Firebird service (to ensure that replication parameters were applied).
 
 After restart, the replica server will start to consume the replication segments from the folder -- please note, after the import all processed segments will be deleted.
-Also, it will create file with the name {[replaceable]``DATABASE-GUIDE``} -- Firebird stores there some internal information about replication progress.
+Also, it will create file with the name `{DATABASE-GUIDE}` -- Firebird stores there some internal information about replication progress.
 
 [NOTE]
 ====
@@ -271,14 +254,13 @@ It is not recommended to store archived replication segments from the different 
 
 == Automatic initialization and re-initialization of replica
 
-We recommend using Cloud Backup on the master and Cloud Backup Receiver on the replica to implement the transfer and check integrity of the replication segments through FTP.
-In this case, it is also possible to implement 1-click re-initialization for the replica database.
+We recommend using Cloud Backup on the master and Cloud Backup Receiver on the replica to implement the transfer and check integrity of the replication segments through FTP. In this case, it is also possible to implement 1-click re-initialization for the replica database.
 
 If Cloud Backup and Cloud Backup Receiver have the following options enabled (by default), HQbird perform the re-initialization automatically, including restart of replica database:
 
 image::6.13.png[]
 
-Parameter "`Prefix to name uploaded reini files`" should be changed if you intend to initialize several copies of the master database through the single folder – in this case set it should be unique for each database.
+Parameter "`Prefix to name uploaded reini files`" should be changed if you intend to initialize several copies of the master database through the single folder -- in this case set it should be unique for each database.
 
 In case of the single database, no changes are required.
 
@@ -289,7 +271,7 @@ If Cloud Backup/Cloud Backup Receiver are configured, it is possible to perform 
 Once clicked, the master HQbird will do the following:
 
 . Ask you where to store copy of the database (by default it is near the master database, click Ok to store database there).
-. Master database will be copied (with [app]``nbackup``)
+. Master database will be copied (with `nbackup`)
 . The created copy of the database will be set to the replica mode
 . md5 hash-sum will be calculated for the copy
 . According the settings in Cloud Backup (Enable replication should be Enabled), master HQbird will upload database to the specified FTP
@@ -307,13 +289,11 @@ Replica is back to the normal mode.
 
 === Troubleshooting asynchronous replication
 
-If you have setup asynchronous replication, but it does not work, the first thing is to enable job "`Replication Log`" on the master and on the replica.
-This job parses [path]_replication.log_ files, and if there are errors, creates the appropriate alert.
+If you have setup asynchronous replication, but it does not work, the first thing is to enable job "`Replication Log`" on the master and on the replica. This job parses `replication.log` files, and if there are errors, creates the appropriate alert.
 
 image::6.14.png[]
 
-Also, the good thing is to enable "`Verbose`" option on the replica, and restart Firebird.
-Verbose will make Firebird to write a lot of details about replication into the [path]_replication.log_ file (near [path]_firebird.log_).
+Also, the good thing is to enable "`Verbose`" option on the replica, and restart Firebird. Verbose will make Firebird to write a lot of details about replication into the `replication.log` file (near `firebird.log`).
 
 image::6.15.png[]
 
@@ -325,66 +305,36 @@ Usually the text of the error is self-explanatory, but since there are some popu
 | Possible reasons and how to resolve
 
 
-|Master part of replication was configured, but folders for
-                                    operational or archived segments
-                                        ([path]_${dbpath}.LogRepl_ or [path]_${dbpath}.LogArch_) are not
-                                    created
-|
+|Master part of replication was configured, but folders for operational or archived segments (`${dbpath}.LogRepl` or `${dbpath}.LogArch`) are not created
+|HQbird creates these folders automatically, but it requires permissions.
 
-HQbird creates these folders automatically, but it requires permissions.
-
-On Windows: these folders should be on local drives, or HQbird and Firebird services must run with "`Run
-                                            As`" with the powerful account (Domain Admin?).
+On Windows: these folders should be on local drives, or HQbird and Firebird services must run with "`Run As`" with the powerful account (Domain Admin?).
 
 On Linux: folders must have permissions for "`firebird`" user.
 
-|Master part of replication was configured; folders for
-                                    ReplLog and LogArch were created, but nothing appear there. [path]_Replication.log_ is empty.
-|Firebird does not see the replication configuration. Restart
-                                    Firebird service (all connections in case of Classic) to make
-                                    read the new configuration.
+|Master part of replication was configured; folders for `ReplLog` and `LogArch` were created, but nothing appear there. `Replication.log` is empty.
+|Firebird does not see the replication configuration. Restart Firebird service (all connections in case of Classic) to make read the new configuration.
 
-|Master part of replication was configured; there are files [path]_databasename.log-000_ in ReplLog folder,
-                                    but no files in LogArch. Also, could be errors about
-                                    insufficient space or out of space in [path]_replication.log_
-|
+|Master part of replication was configured; there are files `databasename.log-000` in ReplLog folder, but no files in `LogArch`. Also, could be errors about insufficient space or out of space in `replication.log`
+|It means that there is no permission for Firebird to access the `LogArch` folder and create replication segment files (`databasename-logarch.000XXX`) there.
 
-It means that there is no permission for Firebird to access the LogArch folder and create replication segment files ([path]_databasename-logarch.000XXX_) there.
+If `LogArch` folder on the network share or mounted drive, make sure that Firebird has rights (full access) to access it.
 
-If LogArch folder on the network share or mounted drive, make sure that Firebird has rights (full access)to access it.
+|"`Verbose`" option on replica is enabled, but `replication.log` is empty or nor created.
+|Sometimes Firebird cannot create `replication.log` or even write to already created file. Try to create it manually and apply necessary permissions to it (especially on Linux). Verbose output should be written to the `replication.log` every 60 seconds even if there is no segments to import.
 
-|"`Verbose`" option on replica is enabled, but [path]_replication.log_ is empty or nor
-                                    created.
-|Sometimes Firebird cannot create [path]_replication.log_ or even write to
-                                    already created file. Try to create it manually and apply
-                                    necessary permissions to it (especially on Linux). Verbose
-                                    output should be written to the [path]_replication.log_ every 60 seconds even
-                                    if there is no segments to import.
+|Master part of replication is Ok, but replica does not consume replication segments. `replication.log` file is empty.
+|Replica did not read the new replication configuration. Restart Firebird.
 
-|Master part of replication is Ok, but replica does not
-                                    consume replication segments. [path]_Replication.log_ file is empty.
-|Replica did not read the new replication configuration.
-                                    Restart Firebird.
+|Master part of replication is Ok, but replica does not consume replication segments. `replication.log` contains errors about permissions.
+|Replica does not have enough permissions to read from the `LogArch` folder. Set necessary permissions or run replica under powerful account.
 
-|Master part of replication is Ok, but replica does not
-                                    consume replication segments. [path]_Replication.log_ contains errors about
-                                    permissions.
-|Replica does not have enough permissions to read from the
-                                    LogArch folder. Set necessary permissions or run replica under
-                                    powerful account.
+|Replica has errors in `replication.log` "`Segment NNN is missing`"
+|Check is there such segment on the replica side, and if it is on the master size. If segment has size = 0 on replica, copy it manually or use "`Perform fresh backup`" checkmark in Cloud Backup.
 
-|Replica has errors in [path]_replication.log_"`Segment NNN is missing`"
-|Check is there such segment on the replica side, and if it is
-                                    on the master size. If segment has size = 0 on replica, copy it
-                                    manually or use "`Perform fresh backup`" checkmark in
-                                    Cloud Backup.
+|Replica has errors in `replication.log` about wrong foreign keys and stopped consume segments
+|It means that replica copy is desynchronized, so some records do not have the appropriate values in referenced tables for the specified Foreign Key. Replica should be reinitialized. If you see this errors often, please contact IBSurgeon support.
 
-|Replica has errors in [path]_replication.log_
-                                    about wrong foreign keys and stopped consume segments
-|It means that replica copy is desynchronized, so some records
-                                    do not have the appropriate values in referenced tables for the
-                                    specified Foreign Key. Replica should be reinitialized. If you
-                                    see this errors often, please contact IBSurgeon support.
 |===
 
 <<<
@@ -419,8 +369,6 @@ When to use synchronous replication:
 
 === Steps to setup synchronous replication
 
-
-
 . Stop Firebird
 . Create a copy of master database file, switch it to replica mode and copy it to the replica server(s)
 . Setup replica server(s) and database(s) for replication with HQbird FBDataGuard
@@ -432,14 +380,13 @@ As you can see, the downtime required for initialization the synchronous replica
 
 === Synchronous replication at master and replica
 
-Synchronous replication is designed to write changes from the master database directly to the replica database.
-The big advantage of synchronous replication that replication delay can be very small, but the disadvantage is that in the case of the lost connection between master and replica servers there will be gaps in transmitted data.
+Synchronous replication is designed to write changes from the master database directly to the replica database. The big advantage of synchronous replication that replication delay can be very small, but the disadvantage is that in the case of the lost connection between master and replica servers there will be gaps in transmitted data.
 
 image::6.17.png[]
 
-In this example, the synchronous replica database is on the remote server with IP address *replica server* and path [path]_/data/test2.fdb_.
+In this example, the synchronous replica database is on the remote server with IP address *replica server* and path `/data/test2.fdb`.
 
-No setup is necessary for synchronous replication on the replica server, except `gfix –replica {[replaceable]``master-guid``}` for the replica database to switch it to the replica mode.
+No setup is necessary for synchronous replication on the replica server, except `gfix –replica <master-guid>` for the replica database to switch it to the replica mode.
 
 === Replication parameters for testing synchronous replication
 
@@ -459,16 +406,11 @@ image::6.19.png[]
 
 == How to manually create replica of the database?
 
-_Of course, it is always possible to create replica with the
-                simple copy process: stop Firebird on master, copy database file, complete setup of
-                replication on the replica, then start Firebird. However, HQbird supports online
-                replica creation – see details below._
+_Of course, it is always possible to create replica with the simple copy process: stop Firebird on master, copy database file, complete setup of replication on the replica, then start Firebird. However, HQbird supports online replica creation -- see details below._
 
-If, for some reason, you cannot use the automatic replica creation (which is available since v.
-2018 R2), you can create replica copy of the master database manually.
+If, for some reason, you cannot use the automatic replica creation (which is available since v. 2018 R2), you can create replica copy of the master database manually.
 
-Starting with HQbird 2018, it is possible to create replica file without stopping the master server, with [app]``nbackup``.
-It is easy for asynchronous replication, and it also makes possible to create additional replicas online -- i.e., without stopping a master.
+Starting with HQbird 2018, it is possible to create replica file without stopping the master server, with `nbackup`. It is easy for asynchronous replication, and it also makes possible to create additional replicas online -- i.e., without stopping a master.
 
 === Creating copy online (with nbackup)
 
@@ -476,38 +418,40 @@ Let's consider how to create replica for asynchronous replication using nbackup:
 
 . apply nbackup lock
 +
+[listing]
 ----
-
 nbackup –l database_path_name -user SYSDBA –pass masterkey
 ----
 . copy locked database file to create a replica
 +
+[listing]
 ----
-
 copy database_path_name replica_path_name
 ----
 . unlock master database
 +
+[listing]
 ----
-
 nbackup –n database_path_name -user SYSDBA –pass masterkey
 ----
 . Fixup replica database
 +
+[listing]
 ----
-
 nbackup –f replica_path_name_name
 ----
 . Switch database to replica mode
 +
 for Firebird 2.5 and 3.0
 +
+[listing]
 ----
 gfix replica_path_name –replica {DATABASEGUID} –user SYSDBA –pass masterkey
 ----
 +
 for Firebird 4.0
 +
+[listing]
 ----
 gfix replica_path_name –replica <replica_mode> –user SYSDBA –pass masterkey
 
@@ -518,20 +462,22 @@ gfix replica_path_name –replica <replica_mode> –user SYSDBA –pass masterke
 
 === What is {DATABASEGUID}?
 
-Database GUID is the unique identifier of a master database.
-To find out {DATABASEGUIDE}, run command ``gstat –h``:
+Database GUID is the unique identifier of a master database. 
+
+To find out {DATABASEGUIDE}, run command `gstat –h`:
 
 image::6.20.png[]
 
 To switch database to the replica mode run the following command:
 
+[listing]
 ----
 gfix disk:\path\mydatabase.fdb -replica {guid} -user SYSDBA -pass masterkey
 ----
 
 [NOTE]
 ====
-If you don't see Database GUID in `gstat –h` output, connect to the master database using Firebird binaries from HQbird distribution (with [app]``isql`` or any other application), and run `gstat –h` again.
+If you don't see Database GUID in `gstat –h` output, connect to the master database using Firebird binaries from HQbird distribution (with `isql` or any other application), and run `gstat –h` again.
 ====
 
 === How to set replica database to the master mode
@@ -539,11 +485,15 @@ If you don't see Database GUID in `gstat –h` output, connect to the master dat
 To switch database to the normal (master) mode run the same command with the empty {} instead of database GUID:
 
 for Firebird 2.5 and 3.0
+
+[listing]
 ----
 gfix disk:\path\mydatabase.fdb -replica {} -user SYSDBA -pass masterkey
 ----
 
 for Firebird 4.0
+
+[listing]
 ----
 gfix replica_path_name –replica none –user SYSDBA –pass masterkey
 ----
@@ -554,9 +504,10 @@ gfix replica_path_name –replica none –user SYSDBA –pass masterkey
 
 === Using gstat -h
 
-If you run ``gstat –h database_name``, the output will contain the keyword "`replica`" in Attributes section for database configured as replica:
-----
+If you run `gstat –h database_name`, the output will contain the keyword "`replica`" in Attributes section for database configured as replica:
 
+[listing]
+----
 Database "D:\O30.FDB"
 Gstat execution time Mon Nov 26 17:47:07 2018
 
@@ -595,7 +546,7 @@ For master database there is no special marks in Attributes.
 
 In Firebird 2.5 and 3.0, there is a context variable `REPLICA` in the `SYSTEM` area that contains information about database status:
 
-
+[listing]
 ----
 SQL> select RDB$GET_CONTEXT('SYSTEM', 'REPLICA') from rdb$database;
 
@@ -606,6 +557,7 @@ FALSE
 
 In Firebird 4.0 use another context variable `REPLICA_MODE`:
 
+[listing]
 ----
 SQL> select RDB$GET_CONTEXT('SYSTEM', 'REPLICA_MODE') from rdb$database;
 
@@ -616,6 +568,7 @@ READ-ONLY
 
 Also in Firebird 4.0 you can use the `MON$DATABASE` monitoring table:
 
+[listing]
 ----
 SQL> SELECT MON$REPLICA_MODE FROM MON$DATABASE;
 
@@ -626,34 +579,32 @@ MON$REPLICA_MODE
 
 Database replica mode:
 
-* 0 - not a replica
-* 1 - read-only replica
-* 2 - read-write replica
+* 0 -- not a replica
+* 1 -- read-only replica
+* 2 -- read-write replica
 
 <<<
 
 == Optional parameters for replication
 
-It is possible to specify several additional parameters for fine tuning of the replication process.
-These parameters can be specified in the "`Optional
-                parameters`" of replication setup dialog.
+It is possible to specify several additional parameters for fine tuning of the replication process. These parameters can be specified in the "`Optional parameters`" of replication setup dialog.
 
 . Size of the local buffer used to accumulate replication events that can be deferred until the transaction commit/rollback. The bigger this value the less network round-trips between master and slave hosts are performed. However, it costs longer replication "`checkpoints`" (time to synchronize the original database with its replica).
 +
+[listing]
 ----
-
 buffer_size = 1048576
 ----
 . If enabled, any error during replication causes the master to stop replicating changes and continue working normally. Otherwise (the default behavior), the master reports an error.
 +
+[listing]
 ----
-
 disable_on_error = false
 ----
 . If enabled, replicated records are RLE-compressed before transmission and decompressed on the slave side. It reduces the traffic and (indirectly) a number of round-trips at the cost of extra CPU cycles on both sides.
 +
+[listing]
 ----
-
 compress_records = false
 ----
 . If enabled, conflicting records in the target database are modified to match records in the master database. In particular:
@@ -662,51 +613,51 @@ compress_records = false
 ** if there's an update and the target record does not exist, it gets inserted;
 ** if there's a delete and the target record does not exist, it gets ignored.
 
+[listing]
 ----
-
 master_priority = false
 ----
 . Pattern (regular expression) that defines what tables must be included into replication. By default, all tables are replicated.
 +
+[listing]
 ----
-
 include_filter
 ----
 . Pattern (regular expression) that defines what tables must be excluded from replication. By default, all tables are replicated.
 +
+[listing]
 ----
-
 exclude_filter
 ----
 . If enabled, tables without primary key (or unique index) excluded from replication. By default, all tables are replicated.
 +
+[listing]
 ----
-
 exclude_without_pk = false
 ----
 . Program (complete command line with arguments) that is executed when the current replication session notices a critical error. This command is executed once per every failed replication session. Please note that the program is executed synchronously and the server is waiting for its completion before continuing its operations.
 +
+[listing]
 ----
-
 alert_command
 ----
 . Prefix for replication log file names. It will be automatically suffixed with an ordinal sequential number. If not specified, database filename (without path) is used as a prefix.
 +
+[listing]
 ----
-
 log_file_prefix
 ----
 . Maximum allowed size for a single replication segment. It must at least double the specified __buffer_size__.
 +
+[listing]
 ----
-
 log_segment_size = 16777216
 ----
 . Maximum allowed number of full replication segments. Once this limit is reached, the replication process is delayed for _log_archive_timeout_ seconds (see below) to allow the archiving to catch up. If any of the full segments is not archived and marked for reuse during the timeout, the replication fails with an error.
 +
 Zero means an unlimited number of segments pending archiving.
 +
+[listing]
 ----
-
 log_segment_count = 8
 ----
