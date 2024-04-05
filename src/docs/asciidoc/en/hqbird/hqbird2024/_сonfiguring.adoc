@@ -567,32 +567,19 @@ If you are monitoring more than one database, it is highly recommended splitting
 
 This job also utilizes nbackup functionality in Firebird, but unlike multilevel backups, it always performs a full copy (level 0) of the database. Such job is useful to quickly create a copy of working database.
 
-The configuration of Database: Dump backup is trivial:
+The configuration of "`Database: Dump backup`" is trivial:
 
 image::3.2.42.png[]
 
 You just need to setup when and where DataGuard should copy a full copy (level 0 incremental backup), and how many copies it should keep.
 
-=== Database: Delta
-
-If you are using incremental backups (or Dump backup), this job is critically important. It watches for delta-files lifetime and size, and warns if something goes wrong. Forgotten delta-files are the often reason of corruptions and significant losses of data.
-
-This jobs finds all delta files associated with database and check their age and size. If one of these parameters exceeds thresholds "`Maximum delta size`" or "`Maximum delta age`", administrator will receive the alert and database status will be set to CRITICAL.
-
-[NOTE]
-====
-If delta file of the protected database was corrupted, it is possible to extract data from it using metadata from the original database file or repository from "`Low-level metadata backup`" job.
-====
-
-image::3.2.56.png[]
-
 === Database: RestoreDB
 
-One of the often tasks of the database administrators is restoring database from the backup. There could be many reason to do restore, the most popular reasons are regular check of the stored backups and necessity to have fresh restored copy for quick rollback. HQbird FBDataGuard can automate restoring of backups (which were created with gbak or Database: Verified backup) with *Database: RestoreDB* job. Let's consider the options and parameters of this job.
+One of the often tasks of the database administrators is restoring database from the backup. There could be many reason to do restore, the most popular reasons are regular check of the stored backups and necessity to have fresh restored copy for quick rollback. HQbird FBDataGuard can automate restoring of backups (which were created with gbak or "`Database: Verified`" backup) with *Database: RestoreDB* job. Let's consider the options and parameters of this job.
 
 image::3.2.43.png[]
 
-By default, restore is disabled – and, since restoring can be long and resource-consuming job, please plan when to restore carefully.
+By default, restore is disabled -- and, since restoring can be long and resource-consuming job, please plan when to restore carefully.
 
 The database can be restored from different types of backups. To specify which types of backups are used during recovery, use the *Restore Source* switch.
 
@@ -605,27 +592,27 @@ In **gbak** mode, the configuration dialog for **Database: RestoreDB** looks lik
 image::3.2.44.png[]
 
 * "`*Scheduled*`" field contains <<_hqbird_config_cron_expr,CRON expression>> which defines when to run restore.
-* "`*Get backup from folder*`" - specify the location of backup file(s) to be restored. If you are restoring backups at the same computer where they have been created, specify the same folder as it is in Database: Verified backup job. If you are restoring backups from the another computer, specify the folder where those backups are located.
-* "`*Take backup not older than, hours*`" - this parameter specifies the maximum age of backup to be restored. If the latest backup file will be older than specified number of hours, RestoreDB job will send the alert with warning that backup is too old. This is useful for automatic checking of backups created on the remote computer.
+* "`*Get backup from folder*`" -- specify the location of backup file(s) to be restored. If you are restoring backups at the same computer where they have been created, specify the same folder as it is in "`Database: Verified backup`" job. If you are restoring backups from the another computer, specify the folder where those backups are located.
+* "`*Take backup not older than, hours*`" -- this parameter specifies the maximum age of backup to be restored. If the latest backup file will be older than specified number of hours, RestoreDB job will send the alert with warning that backup is too old. This is useful for automatic checking of backups created on the remote computer.
 * "`*Restore source*`" specifies what types of backups will be used to restore the database.
 * "`*Datatime pattern for nbackup*`" contains the template for backup names made with nbackup. It should be the same as *Backup name pattern* see <<_hqbird_config_incremental_backup,Database: Incremental Backup>>.
 * "`*Template for gbak backup file name*`" contains the template for backup names. It should be the same as *Backup name pattern* see <<_hqbird_config_verified_backup, Verified backup>>.
-* "`*Backup gbak file extension*`" - by default it is fbk
-* "`*Use NN CPU cores to restore*`" - only available in gbak mode.
-* "`*Restore options*`" - only available in gbak mode.
-* "`*Restore to directory*`" - folder where FBDataGuard will restore backups.
-* "`*Restore with filename*`" - template for the restored database file. By default it contains the following parts
+* "`*Backup gbak file extension*`" -- by default it is `.fbk`.
+* "`*Use NN CPU cores to restore*`" -- only available in gbak mode.
+* "`*Restore options*`" -- only available in gbak mode.
+* "`*Restore to directory*`" -- folder where FBDataGuard will restore backups.
+* "`*Restore with filename*`" -- template for the restored database file. By default it contains the following parts
 +
-** ${db.id}_{0,date, yyyyMMdd_HH-mm}_testrestore.fdb
-** Db.id – internal identifier of the database (GUID)
-** 0,date, yyyyMMdd_HH-mm – timestamp
-** testrestore.fdb – description (You can set there any filename you need).
-* "`*When existing database found*`" - if FBDataGuard will encounter a file with the same name as restored database in the destination folder, by default it will rename the existing file. If you want to replace old restored file with new one, choose "`Replace existing file`".
-* "`*Append suffix to filename when rename*`" - if you have chosen "`Rename existing file`", this suffix will be used to rename it. If you have chosen "`Replace existing file`", this suffix also will be used to rename, but after that the old file will be deleted.
-* "`*Execute command after restore*`" - in this field you can specify an optional path to the command file or another utility to be started after the restore. There will be 2 parameters passed: the first is the path to the backup which was just restored, and the second is the path to the restored file.
-* "`*Restore timeout, minutes*`" - here you can set the time limit for restore operation. If this limit will be exceeded, the warning will be sent, saying that restore takes too long.
-* "`*Check available space before restore (bytes)*`" - here you can set the limit for the minimal free space in the restore destination – if there is less free space than specified, restore will not start, and associated warning will be sent.
-* "`*Notify on successful restore*`" - send email about successful restore (by default it is off, only alerts about problems will be sent).
+** `${db.id}_{0,date, yyyyMMdd_HH-mm}_testrestore.fdb`
+** `db.id` -- internal identifier of the database (GUID)
+** `0,date, yyyyMMdd_HH-mm` -- timestamp
+** `testrestore.fdb` -- description (You can set there any filename you need).
+* "`*When existing database found*`" -- if FBDataGuard will encounter a file with the same name as restored database in the destination folder, by default it will rename the existing file. If you want to replace old restored file with new one, choose "`Replace existing file`".
+* "`*Append suffix to filename when rename*`" -- if you have chosen "`Rename existing file`", this suffix will be used to rename it.
+* "`*Execute command after restore*`" -- in this field you can specify an optional path to the command file or another utility to be started after the restore. There will be 2 parameters passed: the first is the path to the backup which was just restored, and the second is the path to the restored file.
+* "`*Restore timeout, minutes*`" -- here you can set the time limit for restore operation. If this limit will be exceeded, the warning will be sent, saying that restore takes too long.
+* "`*Check available space before restore (bytes)*`" -- here you can set the limit for the minimal free space in the restore destination -- if there is less free space than specified, restore will not start, and associated warning will be sent.
+* "`*Notify on successful restore*`" -- send email about successful restore (by default it is off, only alerts about problems will be sent).
 
 
 [[_hqbird_config_cloud_backup]]
@@ -968,7 +955,7 @@ Descriptions of some of the properties you can set here:
 
 * "`*Installation name*`" is some readable name for your convenience; it will be referred in emails and alerts.
 * "`*Installation GUID*`" is a service field; there is no need to change it.
-* "`*Web console background color*`" – often it is useful to adjust the color of HQbird web interface to distinguish them easily.
+* "`*Web console background color*`" -- often it is useful to adjust the color of HQbird web interface to distinguish them easily.
 
 It's a good idea to enable setup email alerts. To do this you need to click on the envelope button in the top of the web-console:
 
@@ -981,7 +968,7 @@ image::3.1.8.png[]
 
 First of all, you need to enable alerts sending by enabling checkbox "`Send alerts by e-mail`".
 
-* "`*Send alerts by email*`" - enable email alerts and configure email settings below.
+* "`*Send alerts by email*`" -- enable email alerts and configure email settings below.
 * "`*Send alerts to*`" specify where to send emails.
 * "`*From field*`" is what will be set as sender in the email.
 * "`SMTP server address`", "`SMTP server port`", "`SMTP server login`" and "`SMTP server password`" are data which will be used to send emails.
