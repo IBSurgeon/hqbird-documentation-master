@@ -990,32 +990,33 @@ Click "`Save`" to save email alerts settings.
 
 <<<
 
-== FBDataGuard tips&tricks
+== Советы и рекомендации FBDataGuard
 
-FBDataGuard allows changing its setting not only through web-console, but also using direct modification of configuration files. This can be useful when you need to install FBDataGuard in silent mode (no interaction with user), to bundle it with third-party software, or to perform some fine configuration adjustments.
+FBDataGuard позволяет менять его настройки не только через веб-консоль, но и путем прямого изменения файлов конфигурации. Это может быть полезно, когда вам нужно установить FBDataGuard в автоматическом режиме (без взаимодействия с пользователем), связать его со сторонним программным обеспечением или выполнить некоторые тонкие настройки конфигурации.
 
-=== Path to FBDataGuard configuration
+=== Путь к конфигурации FBDataGuard
 
-During the start FBDataGuard looks for in registry for configuration and output paths:
+При запуске FBDataGuard ищет в реестре пути конфигурации и вывода:
 
 image::3.2.61.png[]
 
-These values specify the paths to FBDataGuard configuration and output folder -- these values are chosen during installation.
+Эти значения указывают пути к конфигурации FBDataGuard и выходной папке. Они выбираются во время установки.
 
 [[_hqbird_config_fbdataguard_port]]
-=== Adjusting web-console port
+=== Настройка порта веб-консоли
 
-One of the most frequently asked questions is how to adjust port for web-console application (by default it is 8082), It can be done by changing port setting in file `%config%\agent\agent.properties` (`%config%` is `C:\HQbirdData\config` or `/opt/hqbird/conf`).
+Один из наиболее часто задаваемых вопросов -- как настроить порт для приложения веб-консоли (по умолчанию это 8082). Это можно сделать, изменив настройку порта в файле `%config%\agent\agent.properties` (`%config %` -- это `C:\HQbirdData\config` или `/opt/hqbird/conf`).
 
+[listing]
 ----
 server.port = 8082  #change it
 ----
 
-`%config%` -- folder to store configuration information, it is specified in.
+`%config%` -- папка для хранения информации о конфигурации, в которой она указана.
 
-=== How to change password for Admin user
+=== Как изменить пароль администратора
 
-You can specify its password in the file `access.properties` (in `C:\HQbirdData\config` or `/opt/hqbird/conf`)
+Вы можете указать этот пароль в файле `access.properties` (в `C:\HQbirdData\config` или `/opt/hqbird/conf`)
 
 [listing]
 ----
@@ -1024,11 +1025,11 @@ access.login=admin
 access.password=youradminpasswordforhqbird
 ----
 
-After setting the password, restart FBDataGuard, and new password will be encrypted and applied.
+После установки пароля перезапустите FBDataGuard, и новый пароль будет зашифрован и применен.
 
-=== Guest user for HQbird FBDataGuard
+=== Гостевой пользователь HQbird FBDataGuard
 
-There is read-only user to access HQbird FBDataGuard, with the name guest.
+Для доступа к HQbird FBDataGuard существует пользователь только для чтения с именем `guest`.
 
 [listing]
 ----

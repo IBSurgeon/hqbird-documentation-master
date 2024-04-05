@@ -1009,7 +1009,7 @@ These values specify the paths to FBDataGuard configuration and output folder --
 [[_hqbird_config_fbdataguard_port]]
 === Adjusting web-console port
 
-One of the most frequently asked questions is how to adjust port for web-console application (by default it is 8082), It can be done by changing port setting in file `%config%\agent\agent.properties` (`%config%` is `C:\HQbirdData\config` or `/opt/hqbird/conf`).
+One of the most frequently asked questions is how to adjust port for web-console application (by default it is 8082). It can be done by changing port setting in file `%config%\agent\agent.properties` (`%config%` is `C:\HQbirdData\config` or `/opt/hqbird/conf`).
 
 [listing]
 ----
@@ -1033,7 +1033,7 @@ After setting the password, restart FBDataGuard, and new password will be encryp
 
 === Guest user for HQbird FBDataGuard
 
-There is read-only user to access HQbird FBDataGuard, with the name guest.
+There is read-only user to access HQbird FBDataGuard, with the name `guest`.
 
 [listing]
 ----
