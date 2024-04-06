@@ -622,7 +622,7 @@ The purpose of "Transfer Replication Segments" job is to send replication segmen
 
 Below we will consider how to setup Cloud Backup for this task.
 
-First, the asynchronous replication master should be configured to save replication segments into the some local folder – by default, it will be `${db.path}.LogArch` – as it is shown in the example below:
+First, the asynchronous replication master should be configured to save replication segments into the some local folder -- by default, it will be `${db.path}.LogArch` -- as it is shown in the example below:
 
 image::3.2.45.png[]
 
@@ -632,15 +632,21 @@ image::3.2.46.png[]
 
 Then we can setup *Transfer Replication Segments* job to monitor this folder for the new replication segments and upload them to the remote FTP server.
 
-As you can see at the screenshot above, Cloud backup job checks folder, specified in "`*Monitor this folder*`" with an interval, specified in "`*Check period, seconds*`".
+As you can see at the screenshot above, *Transfer Replication Segments* job checks folder, specified in "`*Monitor this folder*`" with an interval, specified in "`*Check period, seconds*`".
 
-Please note – Cloud Backup sends files in the order of their names, not dates.
+Please note -- *Transfer Replication Segments* sends files in the order of their names, not dates.
 
-To check that transferred files are valid replication segments, and to support automatic re-initialization of the replica databases, the checkmark "`*Enable/disable replication cloud backup job*`" must be enabled.
+To check that transferred files are valid replication segments, and to support automatic re-initialization of the replica databases, the checkmark "`*Enable/disable*`" must be enabled.
 
-By default, Cloud Backup compresses and encrypts replication segments before send them. The default password is "`*zipmasterkey*`" (without quotes), which can be specified in the field "`*Compress with optional password*`". FBDataGuard creates the compressed and encrypted copy of the replication segment and upload it to the specified target server.
+By default, Cloud Backup compresses and encrypts replication segments before send them. The default password is "`*zipmasterkey*`" (without quotes), which can be specified in the field  next to the "`*Compress segments*`" checkbox. FBDataGuard creates the compressed and encrypted copy of the replication segment and upload it to the specified target server.
 
-To disable packing and encryption, uncheck the "`*Compress with optional password*`" checkmark.
+To disable packing and encryption, uncheck the "`*Compress segments*`" checkmark.
+
+Checkbox "`*Send Ok report*`" -- send email to the specified in Alerts address every time when replication segment is uploaded. By default it is off.
+
+As a result, FBDataGuard will upload encrypted and compressed replication segments to the remote server. To decompress and decrypt them into the regular replication segments, another instance of HQbird FBDataGuard should be installed on the replica server, and Cloud Backup Receiver job should be configured -- see more details in the section <<_hqbird_config_cloud_backup_receiver>>.
+
+Next, let's look at the settings for each file transfer protocol.
 
 ==== FTP/FTPS/FTPS over SSH
 
@@ -650,15 +656,14 @@ You can select up to 5 simultaneous remote servers to upload backups. Below you 
 
 image::3.2.47.png[]
 
+[NOTE]
+====
+If you don't have FTP installed on the target server with Windows, install Filezilla -- it is very popular fast and lightweight FTP-server for Windows.
+====
 
 [NOTE]
 ====
-If you don't have FTP installed on the target server with Windows, install Filezilla – it is very popular fast and lightweight FTP-server for Windows.
-====
-
-[NOTE]
-====
-Replication segments will be uploaded to the subdirectory specified in the "`Upload to folder`". By default, this is `/dababase0/${db.id}`, where `db.id` is the identifier of the database inside the DataGuard. The replica about this `db.id` does not know anything, so you need to register it manually in "`Unpack to directory`" (see <<_hqbird_config_cloud_backup_receiver,File  Receiver>>).
+Replication segments will be uploaded to the subdirectory specified in the "`Upload to folder`". By default, this is `/dababase0/${db.id}`, where `db.id` is the identifier of the database inside the DataGuard. The replica about this `db.id` does not know anything, so you need to register it manually in "`Unpack to directory`" (see <<_hqbird_config_cloud_backup_receiver>>).
 ====
 
 ===== FTP over SSL/TLS
@@ -667,21 +672,17 @@ image::3.2.48.png[]
 
 In order to send files to FTPS, it is necessary to create jks storage with private key file, and specify path to it in the field "`Key store file`" and password for it in "`Key store password`".
 
-See details and example how to create jks file and password here: http://xacmlinfo.org/2014/06/13/how-to-keystore-creating-jks-file-from-existing-private-key-and-certificate/
-
-The last part of parameters in Cloud Backup dialog allows controlling the behavior of Cloud backup.
-
-* *Delete local prepared copy* – by default it is On. This parameter specify that Cloud backup job deletes compressed copy of the replication segment after the successful upload to the target server. If you don't want to keep these copies on the master server, keep the parameter enabled.
-* *Delete local prepared file copy* – by default is Off. It means status means that replication segment will be not deleted by FBDataGuard after uploading. It can be useful if you want to keep the full history of changes in replication segments, but, be careful; in case of an intensive write activity replication segments can occupy a lot of space (Terabytes).
-* *Send Ok report* – send email to the specified in Alerts address every time when replication segment is uploaded. By default it is off.
-
-As a result, FBDataGuard will upload encrypted and compressed replication segments to the remote server. To decompress and decrypt them into the regular replication segments, another instance of HQbird FBDataGuard should be installed on the replica server, and Cloud Backup Receiver job should be configured – see more details in the section <<_hqbird_config_cloud_backup_receiver,Database: File Receiver>>.
+See details and example how to create jks file and password here: http://xacmlinfo.org/2014/06/13/how-to-keystore-creating-jks-file-from-existing-private-key-and-certificate/[]
 
 ===== FTP over SSH
 
 image::3.2.49.png[]
 
 To use FTP over SSH with private key authentication, please specify the full path to it in "`Key store file`", other parameters are similar to usual FTP.
+
+===== Socket
+
+image::3.2.49-0.png[]
 
 [[_hqbird_config_transfer_files]]
 === Database: Transfer Files
@@ -690,19 +691,22 @@ The purpose of "Transfer Files" job is to send backup files from master to repli
 
 Below we will consider how to setup "Transfer Files" for this task.
 
-First, the database server should be configured to save backup files into the some local folder — by default, it will be `${db.default-directory}/backup` — as it is shown in the example below:
+First, the database server should be configured to save backup files into the some local folder -- by default, it will be `${db.default-directory}/backup` -- as it is shown in the example below:
 
 .Transfer File configuration
 image::3.2.49-1.png[]
 
 Then we can setup *Transfer Files* job to monitor this folder for the new backup files and upload them to the remote FTP server.
 
-As you can see at the screenshot above, *Transfer Files* job checks folder, specified in “Monitor this folder” with an interval, specified in **“Check period, seconds”**. Please note – Transfer Files sends files in the order of their names, not dates.
+As you can see at the screenshot above, *Transfer Files* job checks folder, specified in "`Monitor this folder`" according to the schedule specified in "`Activate cron expression`". Please note -- Transfer Files sends files in the order of their names, not dates.
 
-By default, Transfer Files compresses and encrypts backup files before send them. The default password is “**zipmasterkey**” (without quotes), which can be specified in the field “**Encrypt when compressing**”. FBDataGuard creates the compressed and encrypted copy of the backup and upload it to the specified target server.
+By default, "`*Transfer Files*`" compresses and encrypts backup files before send them. The default password is "`*zipmasterkey*`" (without quotes), which can be specified in the field "`*Encrypt when compressing*`". FBDataGuard creates the compressed and encrypted copy of the backup and upload it to the specified target server.
 
-To disable encryption, uncheck the “**Encrypt when compressing**” checkmark.
+To disable encryption, uncheck the "`*Encrypt when compressing*`" checkmark.
 
+As a result, FBDataGuard will upload encrypted and compressed files to the remote server. To decompress and decrypt them into the regular files, another instance of HQbird FBDataGuard should be installed on the replica server, and File Receiver job should be configured -- see more details in the section <<_hqbird_config_cloud_backup_receiver>>.
+
+Next, let's look at the settings for each file transfer protocol.
 
 ==== FTP/FTPS/FTPS over SSH
 
@@ -720,25 +724,16 @@ If you don't have FTP installed on the target server with Windows, install Filez
 
 [NOTE]
 ====
-Replication segments will be uploaded to the subdirectory specified in the "`Upload to folder`". By default, this is `/database0/${db.id}`, where `db.id` is the identifier of the database inside the DataGuard. The replica about this `db.id` does not know anything, so you need to register it manually in "`Unpack to directory`" (see <<_hqbird_config_cloud_backup_receiver,File Receiver>>).
+Replication segments will be uploaded to the subdirectory specified in the "`Upload to folder`". By default, this is `${db.id}/`, where `db.id` is the identifier of the database inside the DataGuard. The replica about this `db.id` does not know anything, so you need to register it manually in "`Unpack to directory`" (see <<_hqbird_config_cloud_backup_receiver>>).
 ====
 
 ===== FTP over SSL/TLS
 
-image::3.2.49-2.png[]
+image::3.2.49-3.png[]
 
 In order to send files to FTPS, it is necessary to create jks storage with private key file, and specify path to it in the field "`Key store file`" and password for it in "`Key store password`".
 
-See details and example how to create jks file and password here: http://xacmlinfo.org/2014/06/13/how-to-keystore-creating-jks-file-from-existing-private-key-and-certificate/
-
-The last part of parameters in Cloud Backup dialog allows controlling the behavior of Cloud backup.
-
-* *Delete local prepared copy* -- by default it is On. This parameter specifies that Transfer Files job deletes compressed copy of the file after the successful upload to the target server. If you don't want to keep these copies on the master server, keep the parameter enabled.
-* *Delete local prepared file copy* -- by default is Off. It means status means that file will be not deleted by FBDataGuard after uploading. It can be useful if you want to keep the full history of changes in files, but, be careful; in case of an intensive write activity such files can occupy a lot of space (Terabytes).
-* *Send Ok report* -- send email to the specified in Alerts address every time when replication segment is uploaded. By default, it is off.
-* *Perform fresh backup* -- disabled by default. Transfer Files remembers the last number of file it sends. If you need to start again from scratch, from file 1, enable this parameter. Please note that it will automatically become disabled after the resetting of the counter.
-
-As a result, FBDataGuard will upload encrypted and compressed files to the remote server. To decompress and decrypt them into the regular files, another instance of HQbird FBDataGuard should be installed on the replica server, and File Receiver job should be configured -- see more details in the section <<_hqbird_config_cloud_backup_receiver,Database: File Receiver>>.
+See details and example how to create jks file and password here: http://xacmlinfo.org/2014/06/13/how-to-keystore-creating-jks-file-from-existing-private-key-and-certificate/[]
 
 ===== FTP over SSH
 
