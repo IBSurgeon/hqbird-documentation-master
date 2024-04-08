@@ -812,7 +812,7 @@ In order to enable embedded FTP server, it is necessary to edit the `ftpsrv.prop
 
 By default, it contains the following:
 
-[source]
+[listing]
 ----
 #path in ftpsrv.homedir must be escaped "ftpsrv.homedir=c:\\ftp\\pub"
 
@@ -829,14 +829,14 @@ ftpsrv.defpsw=strong password2
 ftpsrv.homedir=
 ----
 
-It is necessary to change **ftpsrv.enabled **to *true* and specify the home directory for FTP in *ftpsrv.homedir* parameter. Also, it is recommended to use non-default username and password.
+It is necessary to change `ftpsrv.enabled` to `true` and specify the home directory for FTP in `ftpsrv.homedir` parameter. Also, it is recommended to use non-default username and password.
 
 After that, restart FBDataGuard service, and check availability of the FTP.
 
 .Attention -- Linux users!
 [IMPORTANT]
 ====
-On the Linux, FBDataGuard service runs under *firebird* user, so FTP home directory also should have permission for user **firebird**.
+On the Linux, FBDataGuard service runs under *firebird* user, so FTP home directory also should have permission for user *firebird*.
 ====
 
 === Database: Low-level metadata backup
@@ -849,7 +849,7 @@ The second purpose of this job is to constantly check all important system table
 
 The third purpose is to warn administrator about too many formats for each tables.
 
-There is an implementation limit in Firebird to have 256 formats per table, however even several formats can greatly increase a chance of hard corruption and can slow down the performance. It is recommended do not change tables structure at production database and keep only one format per each table. If it`'s not possible, administrator should try to perform backup/restore more often to transform all formats into the single one.
+There is an implementation limit in Firebird to have 256 formats per table, however even several formats can greatly increase a chance of hard corruption and can slow down the performance. It is recommended do not change tables structure at production database and keep only one format per each table. If it's not possible, administrator should try to perform backup/restore more often to transform all formats into the single one.
 
 image::3.2.52.png[]
 

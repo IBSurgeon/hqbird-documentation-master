@@ -803,15 +803,15 @@ After setup of Cloud Backup Receiver, configure the replica to look for replicat
 
 image::3.2.51.png[]
 
-==== Embedded FTP server
+==== Встроенный FTP-сервер
 
-HQbird has embedded FTP server, which is off by default. It is suitable to use embedded FTP server to receive replication segments.
+HQbird имеет встроенный FTP-сервер, который по умолчанию отключен. Для получения сегментов репликации удобно использовать встроенный FTP-сервер.
 
-In order to enable embedded FTP server, it is necessary to edit the `ftpsrv.properties` configuration file, which is located in `C:\HQbirdData\config` or `/opt/hqbird/ftpsrv.properties`
+Чтобы включить встроенный FTP-сервер, необходимо отредактировать файл конфигурации `ftpsrv.properties`, который находится в папке `C:\HQbirdData\config` или `/opt/hqbird/ftpsrv.properties`
 
-By default, it contains the following:
+По умолчанию он содержит следующее:
 
-[source]
+[listing]
 ----
 #path in ftpsrv.homedir must be escaped "ftpsrv.homedir=c:\\ftp\\pub"
 
@@ -828,14 +828,14 @@ ftpsrv.defpsw=strong password2
 ftpsrv.homedir=
 ----
 
-It is necessary to change **ftpsrv.enabled **to *true* and specify the home directory for FTP in *ftpsrv.homedir* parameter. Also, it is recommended to use non-default username and password.
+Необходимо изменить `ftpsrv.enabled` на `true` и указать домашний каталог для FTP в параметре `ftpsrv.homedir`. Кроме того, рекомендуется использовать имя пользователя и пароль, отличные от заданных по умолчанию.
 
-After that, restart FBDataGuard service, and check availability of the FTP.
+После этого перезапустите службу FBDataGuard и проверьте доступность FTP.
 
-.Attention -- Linux users!
+.Внимание -- пользователи Linux!
 [IMPORTANT]
 ====
-On the Linux, FBDataGuard service runs under *firebird* user, so FTP home directory also should have permission for user **firebird**.
+В Linux служба FBDataGuard работает под пользователем *firebird*, поэтому домашний каталог FTP также должен иметь разрешения для пользователя *firebird*.
 ====
 
 === Database: Low-level metadata backup
@@ -848,8 +848,7 @@ The second purpose of this job is to constantly check all important system table
 
 The third purpose is to warn administrator about too many formats for each tables.
 
-There is an implementation limit in Firebird to have 256 formats per table, however even several formats can greatly increase a chance of hard corruption and can slow down the performance. It is recommended do not change tables structure at production database and keep only one format per each table.
-If it`'s not possible, administrator should try to perform backup/restore more often to transform all formats into the single one.
+There is an implementation limit in Firebird to have 256 formats per table, however even several formats can greatly increase a chance of hard corruption and can slow down the performance. It is recommended do not change tables structure at production database and keep only one format per each table. If it's not possible, administrator should try to perform backup/restore more often to transform all formats into the single one.
 
 image::3.2.52.png[]
 
