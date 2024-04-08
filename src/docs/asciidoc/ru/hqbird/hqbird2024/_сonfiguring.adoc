@@ -746,60 +746,54 @@ Cloud Backup также можно использовать для отправ�
 То же самое можно сделать и для инкрементных резервных копий.
 
 [[_hqbird_config_pump_files]]
-=== Database: Pump Files
+=== База данных: Выгрузка Файлов
 
-The purpose of the "Pump Files" task is to transfer files from one directory accessible to the DataGuard to some other location, usually remote, with the possibility of using various methods that can be connected to the DataGuard in the form of plugins and selectable in the task configuration with the ability to set unique for each plugin parameters. HQbird includes two file transfer plugins: fpt and sftp. There are other file transfer plugins. Transfer plugins are jar files and are located in the `Firebird DataGuard/plugins` folder.
+Целью задачи "`Выгрузка Файлов`" является перенос файлов из одной директории, доступной DataGuard, в какое-то другое место, обычно удаленное, с возможностью использования различных методов, которые можно подключить к DataGuard в виде плагинов и выбирается в конфигурации задачи с возможностью установки уникальных для каждого плагина параметров. HQbird включает в себя два плагина для передачи файлов: fpt и sftp. Есть и другие плагины для передачи файлов. Плагины передачи представляют собой файлы `jar` и расположены в папке `Firebird DataGuard/plugins`.
 
-Let's consider the options and parameters of this job.
+Рассмотрим варианты и параметры данной задачи.
 
-.Options available for the ftp file transfer plugin.
+.Опции, доступные для плагина передачи файлов по FTP.
 image::3.2.62.png[]
 
-* *Filemask to pump* -- whitelist, according to which files are selected for copying. Represent masks of file names. Must be separated by comma.
-* *Exclude file-mask* -- blacklist is a mask of file names that should be excluded from the transfer. The blacklist takes precedence over the whitelist.
-* *Pump method* -- file transfer method (plugin).
+* *Шаблон файлов* -- белый список, по которому выбираются файлы для копирования. Представляют маски имен файлов. Должно быть разделено запятой.
+* *Исключить файлы* -- черный список представляет собой маску имен файлов, которые следует исключить из передачи. Черный список имеет приоритет над белым списком.
+* *Метод отсылки* -- метод передачи файлов (плагин).
 
-.Options available for the sftp file transfer plugin.
+.Опции, доступные для плагина передачи файлов по SFTP.
 image::3.2.63.png[]
 
-The algorithm of this task is as follows:
+Алгоритм выполнения этой задачи следующий:
 
-. At each iteration of the task, a list of files is generated for the directory for monitoring files to be sent. Masks are used to select the list of files: "Filemask to pump" and "Exclude file-mask".
-. For each selected file (from the list from step 1, in ascending date order from the lastModified file), the following is performed:
-.. If the packing option is set, the file is packed (if the file is not of zero size).
-The name of the packed file is formed by adding a hardcoded extension: `.zipfilepump`. The file is packed in the same directory.
-If the file turns out to be of zero size, the algorithm will consider that the file has not been completed yet and will interrupt sending the rest of the files with a corresponding message.
-.. The file sending task is configured for one of several possible sending options using optional plugins (see below).
-Depending on whether the packing option was enabled or not, the original or packed file is sent using the specified algorithm (in the current version it is ftp or sftp).
-.. After sending, if the packing option was selected, the packed file is deleted.
-.. The original file is renamed by adding the extension `.fuploaded`.
-. The algorithm proceeds to send the next file from the list. The total number of files sent during the iteration and their original (unpacked) size are summed up for display in the widget
-. Upon completion of sending all files from the generated list, the directory is revolving cleaned, from which files are deleted by mask `*.fuploaded`.
-That is, a list of all such files is created, it is sorted by the time of the last modification, and all old ones are deleted, except for the last "Keep NN files".
+. На каждой итерации задачи формируется список файлов для каталога для отправки файлов мониторинга. Для выбора списка файлов используются маски: "`Шаблон файлов`" и "`Исключить файлы`".
+. Для каждого выбранного файла (из списка с шага 1, в порядке возрастания даты последней модификации файла) выполняются следующие действия:
+.. Если установлена опция сжатия, файл архивируется (если размер файла не нулевой). Имя сжатого файла формируется путем добавления жестко запрограммированного расширения: `.zipfilepump`. Файл будет архивирован в ту же директорию. Если файл окажется нулевого размера, алгоритм посчитает, что файл еще не завершен и прервет отправку остальных файлов с соответствующим сообщением.
+.. Задача отправки файла настраивается на один из нескольких возможных вариантов отправки с помощью дополнительных плагинов (см. ниже). В зависимости от того, включена опция сжатия или нет, исходный или сжатый файл отправляется по заданному алгоритму (в текущей версии это ftp или sftp).
+.. После отправки, если был выбран вариант сжатия, архивный файл удаляется.
+.. TИсходный файл переименовывается путем добавления расширения `.fuploaded`.
+. Алгоритм переходит к отправке следующего файла из списка. Общее количество отправленных за итерацию файлов и их исходный (распакованный) размер суммируются для отображения в виджете.
+. По завершении отправки всех файлов из сформированного списка происходит поочередная очистка каталога, из которой файлы удаляются по маске `*.fuploaded`. То есть создается список всех таких файлов, он сортируется по времени последней модификации, а все старые файлы удаляются, кроме последних "`Хранить NN файлы`".
 +
-Upon completion of sending, if the "Send OK-report on every pump" checkbox is checked, then the user will be sent a report on the number and size of files sent at the current iteration.
+По завершении отправки, если установлен флажок "`Отправлять Ok уведомление`", то пользователю будет отправлен отчет о количестве и размере файлов, отправленных на текущей итерации.
 
 
 [[_hqbird_config_cloud_backup_receiver]]
-=== Database: File Receiver
+=== База данных: Приемник файлов
 
-In general, Cloud Backup Receiver is designed to decompress files from zip archives, and the most often it is used in the pair with Cloud Backup to transfer archived replication segments.
+В основном "`Приемник файлов`" предназначен для распаковки файлов из zip-архивов и чаще всего используется в паре с "`Передача сегментов репликации`" для передачи заархивированных сегментов репликации.
 
-Cloud Backup Receiver checks files in the folder specified in "`*Monitor directory*`", with interval equal to "`*Check periods, minutes*`".
-Its checks only files with specified mask according "`*Filename template*`" (*arch* by default) and specified extension (`.replpacked` by default), and if it encounters such files, it decompresses and decrypts them with the password, specified in "`*Decrypt password*`", and copies to the folder, specified in "`*Unpack to directory*`".
+"`Приемник файлов`" проверяет файлы в папке, указанной в "`*Проверять папку*`", с интервалом, равным "`*Период проверки, секунды*`". Он проверяет только файлы с указанной маской в соответствии с "`*Шаблон имён файлов*`" (`*.journal**` по умолчанию) и указанным расширением (`.replpacked` по умолчанию). Если он встречает такие файлы, то он распаковывает и расшифровывает их с помощью пароля, указанный в "`*Пароль для расшифровки*`", и копирует в папку, указанную в "`*Распаковывать файлы в папку*`".
 
-If parameter "`*Monitor for replication*`" is enabled, Cloud Backup Receiver also will check that received file is actually a replication segment (it has specific header), and if it is not, it will raise an appropriate warning.
+Если параметр "`*Наблюдать за реинициализацией*`" включен, то "`Приемник файлов`" также будет отслеживать файлы предназначенные для реинициализации реплики, такие файлы имеют префикс указанный в "`Префикс для имён входящих файлов реинициализации`".
 
 image::3.2.50.png[]
 
-There are the following additional parameters:
+Имеются следующие дополнительные параметры:
 
-* *Alert if number of unpacked files more than* – by default is 30. If there is a long queue of replication segments to be unpacked, it can be a problem with a replica database, so HQbird sends alert to attract administrator`'s attention.
-* *Warn if the newest file in unpack folder is older than (minutes)* – if the most recent file (usually, replication segment) is too old (more than 360 minutes), the replication process can be broken, and HQbird sends an appropriate alert.
-* *Send Ok report* – by default it is Off. If it is On, HQbird sends an email about each successful unpacking of the segment. It can be too often for replication segments, because they are arriving every 30-180 seconds, and Ok for normal files like verified or incremental backups.
-* *Perform fresh unpack* – disabled by default. Cloud Backup Receiver remembers the last number of replication segment it unpacked. If you need to start unpacking from scratch, from segment 1 (for example, after re-initialization of replication), enable this parameter. Please note that it will automatically become disabled after the resetting of the counter.
+* *Предупреждать если файлов больше* -- по умолчанию 30. Если существует длинная очередь сегментов репликации, которые необходимо распаковать, то возможно это проблема с репликой базы данных, поэтому HQbird отправляет предупреждение для привлечения внимания администратора.
+* *Предупредить если новый файл старше чем (минут)* -- если самый последний файл (обычно сегмент репликации) слишком старый (более 360 минут), процесс репликации может быть прерван, и HQbird отправит соответствующее предупреждение.
+* *Send Ok report* -- о умолчанию отключено. Если он включен, HQbird отправляет электронное письмо о каждой успешной распаковке сегмента. Это может быть слишком часто для сегментов репликации, поскольку они поступают каждые 30–180 секунд, и это нормально для обычных файлов, таких как проверенные или инкрементные резервные копии.
 
-After setup of Cloud Backup Receiver, configure the replica to look for replication segments: set in the "`Log archive directory`" the same path as in "`Cloud Backup Receiver`" -> "`Unpack to directory`".
+После настройки "`Приемник файлов`" настройте реплику на поиск сегментов репликации: задайте в "`Папка архивных логов`" тот же путь, что и в "`Приемник файлов`" -> "`Распаковывать файлы в папку`".
 
 image::3.2.51.png[]
 
@@ -838,17 +832,17 @@ ftpsrv.homedir=
 В Linux служба FBDataGuard работает под пользователем *firebird*, поэтому домашний каталог FTP также должен иметь разрешения для пользователя *firebird*.
 ====
 
-=== Database: Low-level metadata backup
+=== База данных: Сбор метаданных
 
-"`Database: Low level metadata backup`" is one of the key jobs of DataGuard, it ensures database protection at low level.
+"`База данных: Сбор метаданных`" -- одна из ключевых задач DataGuard, обеспечивающая защиту базы данных на низком уровне.
 
-First of all, this job stores raw metadata in special repository, so in case of heavy corruption (due to hardware failure, for example) of database it is possible to use this repository to recover database.
+Прежде всего, это задание сохраняет "`сырые`" метаданные в специальном репозитории, поэтому в случае серьезного повреждения (например, из-за аппаратного сбоя) базы данных можно использовать этот репозиторий для восстановления базы данных.
 
-The second purpose of this job is to constantly check all important system tables for consistency. Every 20 minutes it walks through all important system tables in the database and ensures that there are no errors at metadata level.
+Вторая цель этого задания -- постоянная проверка всех важных системных таблиц на целостность. Каждые 20 минут оно просматривает все важные системные таблицы в базе данных и гарантирует отсутствие ошибок на уровне метаданных.
 
-The third purpose is to warn administrator about too many formats for each tables.
+Третья цель -- предупредить администратора о слишком большом количестве форматов для каждой таблицы.
 
-There is an implementation limit in Firebird to have 256 formats per table, however even several formats can greatly increase a chance of hard corruption and can slow down the performance. It is recommended do not change tables structure at production database and keep only one format per each table. If it's not possible, administrator should try to perform backup/restore more often to transform all formats into the single one.
+В Firebird существует ограничение на количество форматов (256 на таблицу), однако даже несколько форматов могут значительно увеличить вероятность серьезного повреждения и замедлить производительность. Рекомендуется не изменять структуру таблиц в производственной базе данных и сохранять только один формат для каждой таблицы. Если это невозможно, администратору следует чаще выполнять резервное копирование/восстановление, чтобы преобразовать все форматы в один.
 
 image::3.2.52.png[]
 

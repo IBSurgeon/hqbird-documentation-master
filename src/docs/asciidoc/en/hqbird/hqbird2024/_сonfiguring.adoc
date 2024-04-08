@@ -752,7 +752,7 @@ The same can be done for incremental backups.
 [[_hqbird_config_pump_files]]
 === Database: Pump Files
 
-The purpose of the "Pump Files" task is to transfer files from one directory accessible to the DataGuard to some other location, usually remote, with the possibility of using various methods that can be connected to the DataGuard in the form of plugins and selectable in the task configuration with the ability to set unique for each plugin parameters. HQbird includes two file transfer plugins: fpt and sftp. There are other file transfer plugins. Transfer plugins are jar files and are located in the `Firebird DataGuard/plugins` folder.
+The purpose of the "`Pump Files`" task is to transfer files from one directory accessible to the DataGuard to some other location, usually remote, with the possibility of using various methods that can be connected to the DataGuard in the form of plugins and selectable in the task configuration with the ability to set unique for each plugin parameters. HQbird includes two file transfer plugins: fpt and sftp. There are other file transfer plugins. Transfer plugins are `jar` files and are located in the `Firebird DataGuard/plugins` folder.
 
 Let's consider the options and parameters of this job.
 
@@ -775,8 +775,7 @@ The algorithm of this task is as follows:
 .. After sending, if the packing option was selected, the packed file is deleted.
 .. The original file is renamed by adding the extension `.fuploaded`.
 . The algorithm proceeds to send the next file from the list. The total number of files sent during the iteration and their original (unpacked) size are summed up for display in the widget
-. Upon completion of sending all files from the generated list, the directory is revolving cleaned, from which files are deleted by mask `*.fuploaded`.
-That is, a list of all such files is created, it is sorted by the time of the last modification, and all old ones are deleted, except for the last "Keep NN files".
+. Upon completion of sending all files from the generated list, the directory is revolving cleaned, from which files are deleted by mask `*.fuploaded`. That is, a list of all such files is created, it is sorted by the time of the last modification, and all old ones are deleted, except for the last "`Keep NN files`".
 +
 Upon completion of sending, if the "Send OK-report on every pump" checkbox is checked, then the user will be sent a report on the number and size of files sent at the current iteration.
 
@@ -784,21 +783,19 @@ Upon completion of sending, if the "Send OK-report on every pump" checkbox is ch
 [[_hqbird_config_cloud_backup_receiver]]
 === Database: File Receiver
 
-In general, Cloud Backup Receiver is designed to decompress files from zip archives, and the most often it is used in the pair with Cloud Backup to transfer archived replication segments.
+In general, "`File Receiver`" is designed to decompress files from zip archives, and the most often it is used in the pair with "`Transfer Replication Segments`" to transfer archived replication segments.
 
-Cloud Backup Receiver checks files in the folder specified in "`*Monitor directory*`", with interval equal to "`*Check periods, minutes*`".
-Its checks only files with specified mask according "`*Filename template*`" (*arch* by default) and specified extension (`.replpacked` by default), and if it encounters such files, it decompresses and decrypts them with the password, specified in "`*Decrypt password*`", and copies to the folder, specified in "`*Unpack to directory*`".
+"`File Receiver`" checks files in the folder specified in "`*Watch for incoming files in*`", with interval equal to "`*Check periods, seconds*`". Its checks only files with specified mask according "`*Filename template*`" (`*.journal**` by default) and specified extension (`.replpacked` by default). If it encounters such files, it decompresses and decrypts them with the password, specified in "`*Decrypt password*`", and copies to the folder, specified in "`*Unpack to directory*`".
 
-If parameter "`*Monitor for replication*`" is enabled, Cloud Backup Receiver also will check that received file is actually a replication segment (it has specific header), and if it is not, it will raise an appropriate warning.
+If the `*Monitor for reinitialization*` parameter is enabled, then the `File Listener` will also monitor files intended for replica reinitialization, such files have the prefix specified in "`Prefix for incoming reini- files`".
 
 image::3.2.50.png[]
 
 There are the following additional parameters:
 
-* *Alert if number of unpacked files more than* – by default is 30. If there is a long queue of replication segments to be unpacked, it can be a problem with a replica database, so HQbird sends alert to attract administrator`'s attention.
-* *Warn if the newest file in unpack folder is older than (minutes)* – if the most recent file (usually, replication segment) is too old (more than 360 minutes), the replication process can be broken, and HQbird sends an appropriate alert.
-* *Send Ok report* – by default it is Off. If it is On, HQbird sends an email about each successful unpacking of the segment. It can be too often for replication segments, because they are arriving every 30-180 seconds, and Ok for normal files like verified or incremental backups.
-* *Perform fresh unpack* – disabled by default. Cloud Backup Receiver remembers the last number of replication segment it unpacked. If you need to start unpacking from scratch, from segment 1 (for example, after re-initialization of replication), enable this parameter. Please note that it will automatically become disabled after the resetting of the counter.
+* *Alert if number of unpacked files more than* -- by default is 30. If there is a long queue of replication segments to be unpacked, it can be a problem with a replica database, so HQbird sends alert to attract administrator`'s attention.
+* *Warn if the newest file in unpack folder is older than (minutes)* -- if the most recent file (usually, replication segment) is too old (more than 360 minutes), the replication process can be broken, and HQbird sends an appropriate alert.
+* *Send Ok report* -- by default it is Off. If it is On, HQbird sends an email about each successful unpacking of the segment. It can be too often for replication segments, because they are arriving every 30-180 seconds, and Ok for normal files like verified or incremental backups.
 
 After setup of Cloud Backup Receiver, configure the replica to look for replication segments: set in the "`Log archive directory`" the same path as in "`Cloud Backup Receiver`" -> "`Unpack to directory`".
 
