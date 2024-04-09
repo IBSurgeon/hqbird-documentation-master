@@ -5,19 +5,19 @@
 
 Please follow these steps:
 
-. Make sure that you have Firebird 2.5.5 or later (Firebird 2.1 is also supported with some limitation), and it is working;
+. Make sure that you have Firebird 2.5.5 or later, and it is working;
 . HQbird FBDataGuard service is installed and running
 +
 .. You can check it using Services applet in Control Panel (right-click on "`My Computer`", choose "`Manage`", then "`Services and Applications`", "`Services`" and find in the list "`FBDataGuard Agent`")
 .. At Linux you can check it with command `ps aux | grep dataguard`.
-. Make sure the FBDataGuard port is accessible (8082) and it is not blocked by firewall or any other antivirus tools. If necessary, adjust port in FBDataGuard configuration file (see <<_hqbird_config_fbdataguard_port,Web-console port>>).
+. Make sure the FBDataGuard port is accessible (8082) and it is not blocked by firewall or any other antivirus tools. If necessary, adjust port in FBDataGuard configuration file (see <<_hqbird_config_fbdataguard_port>>).
 
 
 == Launch web-console
 
 To open web-console type in your browser `http://localhost:8082` or use IP address of your server with installed HQbird ServerSide.
 
-Or you can choose in "`Start`" menu IBSurgeon\FBDataGuard.
+Or you can choose in "`Start`" menu menu:IBSurgeon[FBDataGuard].
 
 === Supported browsers
 
@@ -129,6 +129,7 @@ When installing under Windows, if the option to automatically register the maste
 
 Let's consider what can you see in the Server dialog (and, normally, you don't need to change them):
 
+[horizontal]
 Installed in:: Firebird installation folder
 Binary folder:: Firebird bin folder (for Firebird 3 or higher on Windows Binary folder is the same as the installation folder)
 Log:: location of `firebird.log`
@@ -163,8 +164,7 @@ Below we will consider in details each monitored objects and its settings.
 
 [NOTE]
 ====
-Note: you cannot delete registered Firebird server in FBDataGuard web-console.
-The only way to unregister server is to delete its configuration files.
+Note: you cannot delete registered Firebird server in FBDataGuard web-console. The only way to unregister server is to delete its configuration files.
 In general, there is no reason for deleting registered server, until you want completely uninstall FBDataGuard.
 ====
 
@@ -186,19 +186,19 @@ In general, there is no need to edit Firebird server details after the registrat
 
 image::3.2.11.png[]
 
-FBDataGuard check `replication.log` for errors.
-In case of error it sends an appropriate alert (by email) to the administrator.
+FBDataGuard check `replication.log` for errors. In case of error it sends an appropriate alert (by email) to the administrator.
 
 To enable this job please check "`Enabled`".
 
 image::3.2.12.png[]
 
-* Check period, minutes -- how often to check `replication.log` for changes
-* Size to roll, bytes -- if `replication.log` will exceed will value, it will be renamed according date-time pattern
-* Date pattern for rolling -- how to rename `replication.log`
-* Keep N rolled old log files -- how many errors will be stored in the list of the recent errors.
+* "`Check period, minutes`" -- how often to check `replication.log` for changes
+* "`Size to roll, bytes`" -- if `replication.log` will exceed will value, it will be renamed according date-time pattern
+* "`Date pattern for rolling`"-- how to rename `replication.log`
+* "`Keep N rolled old log files`" -- how many errors will be stored in the list of the recent errors.
 
 
+[[_hqbird_config_serverlog]]
 === Server: Server log
 
 image::3.2.13.png[]
@@ -297,7 +297,7 @@ image::3.1.5.png[]
 * "`*DB alias*`" is a database alias from `aliases.conf` or in `databases.conf`. If you specify both "`DB Alias`" and "`Path to database`", "`DB Alias`" will be used.
 * "`*Path to database*`" is the local path to database (remember that FBDataGuard should work at the same computer with Firebird). If you are putting database on external drive, it can raise error "`File... has unknown partition`". To fix it you need to click on "`Configure`" at Server widget and click "`Save`" to make FBDataGuard re-read partitions.
 * "`*Output folder (backups and logs)*`" is the folder where FBDataGuard will store backups, logs and statistics for this database. If you do not select HQbirdData folder during the installation, and if you do not specify output folder for the server, it's a good idea to specify "`Output folder`" to some explicit location like `F:\mydatabasedata`.
-* "`*Enable advanced monitoring*`" -- see <<_hqbird_advanced_monitor_viewer,Advanced Monitor Viewer>>
+* "`*Enable advanced monitoring*`" -- see <<_hqbird_advanced_monitor_viewer>>
 
 
 [NOTE]
@@ -342,7 +342,7 @@ If these intervals are out of the frames of the specified threshold, it means pr
 
 image::3.2.23.png[]
 
-These logs can be analyzed to get helpful insight regarding database performance and application quality (see more information here http://ib-aid.com/en/articles/ibanalyst-what-you-can-see-at-summary-view/).
+These logs can be analyzed to get helpful insight regarding database performance and application quality (see more information here http://ib-aid.com/en/articles/ibanalyst-what-you-can-see-at-summary-view/[]).
 
 This job also monitors the implementation limit in Firebird: maximum transactions number in Firebird versions before 3.0 should be less than 2^31^-1. Near this number database should be backup and restored. It will throw an alert if transaction number will be close to the restrictions. 
 
@@ -442,7 +442,7 @@ It is very important to carefully review database backups settings and adjust th
 Let`'s consider the configuration dialog for backup in more details:
 
 * *"`Enabled`"* is obvious – it enables or disables scheduled backups
-* In the *"`Schedule`"* field you can set the time when backup should be run. Scheduler uses CRON expression and this is a right place to apply all the power of CRON (see <<_hqbird_config_cron_expr,CRON Expressions>>).
+* In the *"`Schedule`"* field you can set the time when backup should be run. Scheduler uses CRON expression and this is a right place to apply all the power of CRON (see <<_hqbird_config_cron_expr>>).
 * *"`Backups folder`"* specifies the folder to store backups. This folder should be at the same computer where database is. By default, it is situated inside database default directory. Usually it's a good idea to set the explicit path to the folders with backups.
 * *"`Maximum number of backup files in folder`"* specifies how many previous backups should be stored. FBDataGuard stores backups in revolver order: when the maximum number will be reached (i.e., 5 backups will be created), FBDataGuard will delete the oldest backup and create the new backup. In combination with CRON expressions it gives a powerful ability to create necessary history of backups.
 * *"`Backup name pattern`"* specifies how backup files will be named. Also this name pattern allows FBDataGuard to recognize old backups with the same name pattern.
@@ -583,20 +583,20 @@ By default, restore is disabled -- and, since restoring can be long and resource
 
 The database can be restored from different types of backups. To specify which types of backups are used during recovery, use the *Restore Source* switch.
 
-Below you can see the configuration dialog for **Database: RestoreDB** in **nbackup** mode:
+Below you can see the configuration dialog for *Database: RestoreDB* in *nbackup* mode:
 
 image::3.2.44-0.png[]
 
-In **gbak** mode, the configuration dialog for **Database: RestoreDB** looks like this:
+In *gbak* mode, the configuration dialog for *Database: RestoreDB* looks like this:
 
 image::3.2.44.png[]
 
-* "`*Scheduled*`" field contains <<_hqbird_config_cron_expr,CRON expression>> which defines when to run restore.
+* "`*Scheduled*`" field contains <<_hqbird_config_cron_expr>> which defines when to run restore.
 * "`*Get backup from folder*`" -- specify the location of backup file(s) to be restored. If you are restoring backups at the same computer where they have been created, specify the same folder as it is in "`Database: Verified backup`" job. If you are restoring backups from the another computer, specify the folder where those backups are located.
 * "`*Take backup not older than, hours*`" -- this parameter specifies the maximum age of backup to be restored. If the latest backup file will be older than specified number of hours, RestoreDB job will send the alert with warning that backup is too old. This is useful for automatic checking of backups created on the remote computer.
 * "`*Restore source*`" specifies what types of backups will be used to restore the database.
-* "`*Datatime pattern for nbackup*`" contains the template for backup names made with nbackup. It should be the same as *Backup name pattern* see <<_hqbird_config_incremental_backup,Database: Incremental Backup>>.
-* "`*Template for gbak backup file name*`" contains the template for backup names. It should be the same as *Backup name pattern* see <<_hqbird_config_verified_backup, Verified backup>>.
+* "`*Datatime pattern for nbackup*`" contains the template for backup names made with nbackup. It should be the same as *Backup name pattern* see <<_hqbird_config_incremental_backup>>.
+* "`*Template for gbak backup file name*`" contains the template for backup names. It should be the same as *Backup name pattern* see <<_hqbird_config_verified_backup>>.
 * "`*Backup gbak file extension*`" -- by default it is `.fbk`.
 * "`*Use NN CPU cores to restore*`" -- only available in gbak mode.
 * "`*Restore options*`" -- only available in gbak mode.
@@ -836,6 +836,7 @@ After that, restart FBDataGuard service, and check availability of the FTP.
 On the Linux, FBDataGuard service runs under *firebird* user, so FTP home directory also should have permission for user *firebird*.
 ====
 
+[[_hqbird_config_low_level_metabackup]]
 === Database: Low-level metadata backup
 
 "`Database: Low level metadata backup`" is one of the key jobs of DataGuard, it ensures database protection at low level.
@@ -865,7 +866,7 @@ Using configuration dialog, you can enable/disable this job, set time to run, se
 
 "`Database: Validate DB`" will send alert with critical status if there will be any errors.
 
-Also, Firebird will write errors into [path]_firebird.log_, and they will appear in the alerts generated by "`Server log`" job.
+Also, Firebird will write errors into `firebird.log`, and they will appear in the alerts generated by <<>> job.
 
 === Database: Sweep Schedule
 
@@ -882,7 +883,7 @@ image::3.2.55.png[]
 Please note: by default, check mark "`*Disconnect connections with long-running active transactions before sweep*`" is enabled. It means that HQbird will find and disconnect long-running transactions (more than 300 minutes) before sweep -- in order to make sweep efficient. If long-running active transactions will be not disconnected, sweep cannot clean old records versions.
 
 "`*Do not disconnect processes with name pattern*`" -- in this parameter specify SIMILAR TO expression for processes names which will be not disconnected.
-By default, we exclude `gbak`, `gstat` and `fbsvcmgr` processes.
+By default, we exclude `gfix`, `gbak`, `gstat` and `fbsvcmgr` processes.
 
 "`*Disconnect processes older than (min)*`" -- HQbird will disconnect processes which have long-running active writeable transactions, by default threshold is 300 minutes. The practical upper limit for this parameter is 1440 minutes (it is highly unlikely that transaction does something useful more than 1 day).
 
@@ -903,6 +904,15 @@ By default, this job is enabled.
 Using configuration dialog, you can specify check period and thresholds for free space. The first reached threshold will be alerted. To set threshold only in % of disk space, you need to set explicit space in bytes to 0.
 
 image::3.2.57.png[]
+
+If you are using incremental backups (or Dump backup), this job is critically important. It watches for delta-files lifetime and size, and warns if something goes wrong. Forgotten delta-files are the often reason of corruptions and significant losses of data.
+
+This jobs finds all delta files associated with database and check their age and size. If one of these parameters exceeds thresholds "`Maximum delta size`" or "`Maximum delta age`", administrator will receive the alert and database status will be set to CRITICAL.
+
+[NOTE]
+====
+If delta file of the protected database was corrupted, it is possible to extract data from it using metadata from the original database file or repository from <<_hqbird_config_low_level_metabackup>> job.
+====
 
 === Database: Database statistics
 
