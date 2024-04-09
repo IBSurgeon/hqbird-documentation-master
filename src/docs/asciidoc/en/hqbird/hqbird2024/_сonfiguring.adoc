@@ -875,20 +875,18 @@ image::3.2.54.png[]
 
 The recommendation is to schedule explicit sweep with disconnection of long-running transactions for all databases where such transactions are detected. The recommended period is once per day (usually during the night, after backup's completing).
 
-By default, sweep is set to 23-00, which can be not a good time, because default verified backup starts at the same time, so better change it.
+By default, sweep is set to 00-15, which can be not a good time, because default verified backup starts at the same time, so better change it.
 
 image::3.2.55.png[]
 
-Please note: by default, check mark "`*Disconnect all connections with long-running active transactions before sweep*`" is enabled.
-It means that HQbird will find and disconnect long-running transactions (more than 30 minutes) before sweep -- in order to make sweep efficient.
-If long-running active transactions will be not disconnected, sweep cannot clean old records versions.
+Please note: by default, check mark "`*Disconnect connections with long-running active transactions before sweep*`" is enabled. It means that HQbird will find and disconnect long-running transactions (more than 300 minutes) before sweep -- in order to make sweep efficient. If long-running active transactions will be not disconnected, sweep cannot clean old records versions.
 
 "`*Do not disconnect processes with name pattern*`" -- in this parameter specify SIMILAR TO expression for processes names which will be not disconnected.
 By default, we exclude `gbak`, `gstat` and `fbsvcmgr` processes.
 
-"`*Disconnect all processes older than (minutes)*`" -- HQbird will disconnect processes which have long-running active writeable transactions, by default threshold is 30 minutes. The practical upper limit for this parameter is 1440 minutes (it is highly unlikely that transaction does something useful more than 1 day).
+"`*Disconnect processes older than (min)*`" -- HQbird will disconnect processes which have long-running active writeable transactions, by default threshold is 300 minutes. The practical upper limit for this parameter is 1440 minutes (it is highly unlikely that transaction does something useful more than 1 day).
 
-"`*Use multiple cores to sweep*`" -- HQbird Enterprise can use multiple cores to perform sweep operation, in order to make sweep 4-6 times faster. We recommend to specify no more than 1/2 CPU cores in case of the single database on the server, or 1/4 of CPU cores if there are several databases. For example, if you have 16 cores and 1 big database, set this parameter to 8, if there are several big databases, set 4.
+"`*Use NN CPU cores to sweep*`" -- HQbird Enterprise can use multiple cores to perform sweep operation, in order to make sweep 4-6 times faster. We recommend to specify no more than 1/2 CPU cores in case of the single database on the server, or 1/4 of CPU cores if there are several databases. For example, if you have 16 cores and 1 big database, set this parameter to 8, if there are several big databases, set 4.
 
 === Database: Disk space
 
@@ -898,7 +896,7 @@ This job watches for all objects related with database: database files (includin
 
 It generates several types of alerts. Problems with disk space are in the top list of corruption reasons, so please pay attention to the alerts from this job.
 
-This job also contributes data to the server space analysis graph ().
+This job also contributes data to the server space analysis graph.
 
 By default, this job is enabled.
 
