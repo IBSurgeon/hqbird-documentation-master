@@ -1,15 +1,13 @@
 [[_hqbird_enterprise_config]]
-= HQbird Enterprise configuration: Native Firebird replication and PerformanceEnhancements
+= Native replication configuration in HQBird
 
-== What is HQbird Enterprise?
+HQbird -- это расширенный дистрибутив Firebird для больших баз данных с инструментами мониторинга, оптимизации и администрирования, он также включает в себя плагин для встроенной репликации master-slave и различные улучшения производительности.
 
-HQbird Enterprise is the advanced distribution of Firebird for big databases with monitoring, optimization and administration tools, it also includes the plugin for native master-slave replication and various performance improvements.
+В HQbird встроенная репликация доступна начиная с версии 2.5. В "`ванильном`" Firebird она появилась позже и доступна начиная с версии 4.0. 
 
-=== Compatibility
+HQbird на 100% совместим с Firebird 2.5, 3.0, 4.0 и 5.0 -- никаких изменений в ODS не требуется. Чтобы переключиться на HQbird и обратно, резервное копирование/восстановление не требуется, просто остановите/запустите Firebird и замените двоичные файлы. Репликация возможна между узлами с одинаковой версией, т.е. невозможна между версиями 3.0 и 2.5.
 
-HQbird Enterprise is 100% compatible with Firebird 2.5.5+, Firebird 3.0 and Firebird 4.0 – no changes in ODS are needed. To switch to HQbird and back no backup/restore is required, just stop/start Firebird and replace binaries. The replication is possible between nodes with the same version, i.e., not possible between 3.0 and 2.5.
-
-=== How the replication works
+== How the replication works
 
 HQbird replication works on the logical level: it replicates DML statements (INSERT/UPDATE/DELETE, stored procedures, etc)
 and DDL (CREATE/ALTER TABLE, etc) changes; **no additional triggers needed**. The only requirement for the current version of replication is to have unique or primary keys for all tables that need to be replicated.
@@ -19,7 +17,7 @@ HQbird should be running on the master server and on all replica servers.
 
 Below we will consider how to setup Firebird replication with HQbird Enterprise.
 
-_You can use HQbird on Windows and Linux, with Firebird 2.5, 3.0 and 4.0, 32 bit and 64 bit._
+_You can use HQbird on Windows and Linux, with Firebird 2.5, 3.0, 4.0 and 5.0, 32 bit and 64 bit._
 
 <<<
 
