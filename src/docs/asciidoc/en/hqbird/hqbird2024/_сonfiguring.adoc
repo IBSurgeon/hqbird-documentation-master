@@ -937,6 +937,90 @@ image::3.2.58-1.png[]
 
 *Min diff to alert* -- the difference between the values of the generator on the master and replica side, after which alter are sent.
 
+=== Database: Backup,Restore,Replace
+
+Many administrators use the following pattern to solve performance problems -- backup-restore-replace. This is usually necessary if the application does not manage transactions well, which leads to garbage accumulation. With proper application design, there is no need to constantly perform backup and restore with replacement. Nevertheless, HQbird provides the ability to automate this process and run it both manually (via the Web console) and automatically (according to a schedule).
+
+The backup-restore-replace pattern consists of the following steps:
+
+. executing the copy command `gbak -b -g ... database.fdb backup.fbk`
+. executing the restore command to a new DB file `gbak.exe -c ... backup.fbk database_new.fdb`
+. renaming `database_new.fdb` to the original database name
+
+However, there are many pitfalls in this seemingly simple process:
+
+. Insufficient Disk Space: There's a risk of depleting disk space during backup or restore operations.
+. Unexpected Interruptions: Server reboots, often triggered by Windows updates, can disrupt backup or restore tasks at any time.
+. Corruption of Original Database: If the original database is damaged, it may render the backup incomplete.
+. Corruption Post-Restoration: Various issues, such as inadequate space for sorting large indexes, can lead to corruption of the restored database.
+. Performance Issues: Backup and restore procedures may suffer from severe slowdowns due to neglected maintenance, hardware malfunctions, or concurrent tasks like full VM backups.
+. Access Control: It's crucial to block user write operations to the original database once the backup-restore process begins to ensure changes post-backup are not omitted in the restoration.
+
+In case of any of the above problems, it is necessary to cancel the backup-restore process, that is, a rollback to the original state of the database is required.
+
+HQbird fully automates the process and avoids most problems. It monitors disk space, disconnects active users before starting backup, and monitors the performance and integrity of the backup and restored database.
+
+==== Running Backup/Restore in one click
+
+To start backup-restore immediately, open dialog Properties for database – click on the appropriate icon:
+
+image::3.2.64.png[]
+
+After that, the "`Database properties`" dialog will appear:
+
+image::3.2.65.png[]
+
+Click button "`Do backup, restore and replace original database`", it will open the following dialog.
+
+image::3.2.66.png[]
+
+All parameters are optional:
+
+* *Remove fbk file after restore* -- by default it is enabled, keep it, unless you want to keep intermediate `fbk` file.
+* *Additional backup options* -- add some standard backup option, for example, to exclude some tables from backup.
+* *Additional restore options* --  standard restore options, for example, to set new page size.
+* *Execute before backup* -- specify an executable (`cmd` file, `sh` file, `exe`), to be executed right before the backup process.
+* *Parameters for execute before backup* -- specify parameters for executable above.
+* *Execute after restore* -- specify an executable (`cmd` file, `sh` file, `exe`), to be executed right after the restore process. The path to restore database is set as first parameter.
+* *Parameters for execute after* -- These are the arguments or settings that will be passed to the executable file or script that is scheduled to run after the restoration process is complete. They help in customizing the behavior of the post-restore actions according to the specific needs of the environment or the database. For example, you might have a script that needs to know the path of the restored database or requires certain flags to be set for its operation. These details would be provided through these parameters.
+* *Override login name* -- use another Firebird user instead of user name specified in HQbird.
+* *Override login password* – use another Firebird password instead of password specified in HQbird.
+
+You can skip all these parameters and just click btn:[Submit] to proceed.
+The process will start immediately. HQbird will do all necessary checks, and start process. In case of any error, the process will be stopped, and original database will be put back.
+
+As a result, HQbird generate the following report:
+
+[listing]
+----
+gbakreplace: backup, restore and replace database is complete
+task files are:
+Original database file: "C:\HQbird\Firebird40\examples\empbuild\EMPLOYEE.FDB" (2834432)
+Replication operational log directory: ""
+Replication archive log directory: ""
+Temporary renamed original database file: "C:\HQbird\Firebird40\examples\empbuild\EMPLOYEE.FDB.Apr-08--14-32-06.ORIGINAL.FOR_MAINTAIN"
+Resulted fbk file: "C:\HQbird\Firebird40\examples\empbuild\EMPLOYEE.FDB.Apr-08--14-32-06.FBK" (80896)
+Temporary restored database file: "C:\HQbird\Firebird40\examples\empbuild\EMPLOYEE.FDB.Apr-08--14-32-06.restored" (2834432)
+backup log: "C:\HQbird\Firebird40\examples\empbuild\EMPLOYEE.FDB.Apr-08--14-32-06.bkp.log"
+restore log: "C:\HQbird\Firebird40\examples\empbuild\EMPLOYEE.FDB.Apr-08--14-32-06.rst.log"
+Stage report file: "C:\HQbird\Firebird40\examples\empbuild\EMPLOYEE.FDB.Apr-08--14-32-06.hqbirdgbakreplace.report"
+----
+
+==== Scheduled Backup,Restore,Replace
+
+Also, it is possible to schedule backup-restore as any desired time, and optionally perform the replication initialization immediately after that.
+In order to schedule it, click on setting for widget *Backup, Restore, Replace*.
+
+image::3.2.67.png[]
+
+The following dialog will appear:
+
+image::3.2.68.png[]
+
+As you can see, the dialog closely mirrors that of an immediate backup-restore.
+However, it additionally incorporates steps for the automatic reinitialization of replicas post-restore. This is essential due to the change in database GUID upon restoration. With active replication in place, HQbird will seamlessly reinitialize replicas following a successful restore.
+
+
 <<<
 
 == Email alerts in HQbird FBDataGuard
