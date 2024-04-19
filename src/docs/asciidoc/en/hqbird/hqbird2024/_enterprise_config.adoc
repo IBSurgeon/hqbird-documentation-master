@@ -9,13 +9,11 @@ HQbird Enterprise is 100% compatible with Firebird 2.5, 3.0, 4.0 and 5.0 -- no c
 
 == How the replication works
 
-HQbird replication works on the logical level: it replicates DML statements (INSERT/UPDATE/DELETE, stored procedures, etc)
-and DDL (CREATE/ALTER TABLE, etc) changes; **no additional triggers needed**. The only requirement for the current version of replication is to have unique or primary keys for all tables that need to be replicated.
+HQbird replication works on the logical level: it replicates DML statements (`INSERT`/`UPDATE`/`DELETE`, `EXECUTE PROCEDURE`, etc) and DDL (`CREATE`/`ALTER`/`DROP`) changes; *no additional triggers needed*. The only requirement for the current version of replication is to have unique or primary keys for all tables that need to be replicated.
 
-In order to use the replication, you need to install HQbird instead of Firebird, register it (with trial or with the full license) and configure replication.
-HQbird should be running on the master server and on all replica servers.
+In order to use the replication, you need to install HQbird, register it (with trial or with the full license) and configure replication. HQbird should be running on the master server and on all replica servers.
 
-Below we will consider how to setup Firebird replication with HQbird Enterprise.
+Below we will consider how to setup Firebird replication with HQbird.
 
 _You can use HQbird on Windows and Linux, with Firebird 2.5, 3.0, 4.0 and 5.0, 32 bit and 64 bit._
 
@@ -23,9 +21,9 @@ _You can use HQbird on Windows and Linux, with Firebird 2.5, 3.0, 4.0 and 5.0, 3
 
 == Installation
 
-Please install HQbird Enterprise from the supplied distributive. If you have other version of Firebird installed, uninstall it first.
+Please install HQbird from the supplied distributive. If you have other version of Firebird (2.5, 3.0) installed, uninstall it first.
 
-To enable replication you need to have working and registered (trial or full) copy of HQbird 2022 or higher on your master and replica servers.
+To enable replication you need to have working and registered (trial or full) copy of HQbird on your master and replica servers.
 
 Please refer to the section 2 of this guide for details of HQbird Server installation.
 
@@ -50,12 +48,12 @@ Important things to consider:
 * Delay between master and replica can grow in case of heavy load (due to the delayed processing of replication segments)
 * Replica can be switched to the master (i.e., normal) mode with 1 command
 
-**Asynchronous replication is the recommended choice for HQbird Enterprise**:
+*Asynchronous replication is the recommended choice for HQbird*:
 
-* it provides stability and anti-corruption protection of Firebird database,
-* it can be configured quickly and easily,
-* it does not require downtime to setup,
-* it has online re-initialization (in HQbird 2020 and higher),
+* it provides stability and anti-corruption protection of Firebird database;
+* it can be configured quickly and easily;
+* it does not require downtime to setup;
+* it has online re-initialization;
 * it is suitable for distributed environments (when the replica is located in the cloud or at the remote location).
 
 The following steps will be required to setup the asynchronous replication:
@@ -67,7 +65,7 @@ The following steps will be required to setup the asynchronous replication:
 
 === Step 1: Configure HQbird for replication at the master
 
-To setup replication, open HQbird FBDataGuard: run modern browser (Chrome, Firefox, etc) and open this local URL: http://127.0.0.1:8082/[http://127.0.0.1:8082](port if configurable in HQBird ini files)
+To setup replication, open HQbird FBDataGuard: run modern browser (Chrome, Firefox, etc) and open this local URL: http://127.0.0.1:8082/[http://127.0.0.1:8082] (port if configurable in HQBird ini files)
 
 Enter default name and password: **admin/strong password**.
 
@@ -102,7 +100,7 @@ image::6.5.png[]
 
 Asynchronous replication writes all changes in the master database to the replication log: the set of files called "`replication segments`". Replica server pulls these segments and inserts into the replica database.
 
-Previously we have registered `H:\dbwmaster.fdb`, it is the asynchronous master database in this example. To configure the asynchronous replication on the master side: select replication role: "`Master`", then "`Asynchronous`", and click "`Save`".
+Previously we have registered `H:\dbwmaster.fdb`, it is the master database in this example. To configure the asynchronous replication on the master side: select replication role: "`Master`", then "`Asynchronous`", and click "`Save`".
 
 Starting with Firebird 4.0, you need to enable publication at the database level. Clicking on the "Enable publications (and grant it for all tables)" button enables publication and adds all tables to the list for publication. The list of tables for publication can be manipulated in SQL using the following statements:
 
@@ -122,15 +120,15 @@ The only parameter you can change is "`*Write commited data every NN seconds*`",
 
 By default, it is set to 90 seconds.
 
-There are several optional parameters which you can change if you open detailed dialog with button "`more>>`":
+There are several optional parameters which you can change if you open detailed dialog with button btn:[more>>]:
 
 image::6.7.png[]
 
 Let's consider all parameters in this dialog -- just to give you idea what they do, **no need to change them**:
 
 * "`Log directory`" -- folder where operational logs will be stored. It is a system folder, completely operated by Firebird. By default, *no need to change its default value* `${db.path}.ReplLog` (`db.path` is where the database is located).
-* "`Log archive directory`" -- folder, where archived logs will be stored. According the default value `${db.path}.LogArch`, HQbird will create folder `DatabaseName.LogArch` in the folder with the database, so there is **no need to change this parameter**.
-* The third parameter ("`Override log archive command`") is optional, **leave it empty**.
+* "`Log archive directory`" -- folder, where archived logs will be stored. According the default value `${db.path}.LogArch`, HQbird will create folder `DatabaseName.LogArch` in the folder with the database, so there is *no need to change this parameter*.
+* The third parameter ("`Override log archive command`") is optional, *leave it empty*.
 
 
 [NOTE]
@@ -155,7 +153,7 @@ Archive replication log is essentially the chronologically ordered list of compl
 .Important!
 [IMPORTANT]
 ====
-For Linux users -- make sure that folder with the database is owned by firebird user. HQbird runs under "`firebird`" user in Linux, and the folder with the database must have permissions for "`firebird`" to create logs folder (`chown firebird -R /your/database/folder`).
+For Linux users -- make sure that folder with the database is owned by `firebird` user. HQbird runs under "`firebird`" user in Linux, and the folder with the database must have permissions for "`firebird`" to create logs folder (`chown firebird -R /your/database/folder`).
 ====
 
 ==== How to copy replication segments from master server to the replica server?
