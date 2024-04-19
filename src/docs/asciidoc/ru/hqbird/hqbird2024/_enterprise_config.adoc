@@ -159,96 +159,95 @@ image::6.8.png[]
 
 ==== Как скопировать сегменты репликации с мастера на реплику?
 
-Существует 2 популярных способа скопировать архивные сегменты с главного сервера на серверы-реплики: через общий сетевой ресурс и с помощью Cloud Backup на главном сервере и Cloud Backup Receiver на реплике.
+Существует 2 популярных способа скопировать архивные сегменты с главного сервера на серверы-реплики: через общий сетевой ресурс и с помощью задания <<_hqbird_config_cloud_backup>> на главном сервере и <<_hqbird_config_cloud_backup_receiver>> на реплике.
 
 ===== Общий сетевой ресурс
 
 Вы можете предоставить общий доступ к папке с архивированными сегментами в качестве общего сетевого ресурса. В этом случае у службы Firebird должно быть достаточно прав для чтения, записи и удаления файлов на этом общем сетевом ресурсе. Обычно службы Firebird и HQbird запускаются под учетной записью LocalSystem, у которой нет доступа к общим сетевым ресурсам. Замените ее на какую-нибудь более мощную учетную запись (например, Администратора домена).
 
-===== Cloud Backup/Cloud Backup Receiver
+===== Отправка/приём сегментов репликации 
 
-We recommend using HQbird FBDataGuard to send replication segments from the master server to the replica through FTP: it compresses, encrypts and uploads segments to the specified FTP server. On that server, another HQbird FBDataGuard unpacks segments and copies to the necessary folder for further consumption by the replica.
+Мы рекомендуем использовать HQbird FBDataGuard для отправки сегментов репликации с главного сервера на реплику по FTP: он сжимает, шифрует и загружает сегменты на указанный FTP-сервер. На этом сервере другой HQbird FBDataGuard распаковывает сегменты и копирует их в необходимую папку для дальнейшего использования репликой.
 
 [NOTE]
 ====
-Please read about CloudBackup job for more details how to setup transfer of archived segments between master and replica(s).
+Пожалуйста, ознакомьтесь с заданием <<_hqbird_config_cloud_backup>> для получения более подробной информации о том, как настроить передачу архивированных сегментов между мастером и репликами.
 ====
 
-=== Step 2: Create a copy of master database
+=== Шаг 2: Создание копии файла базы данных master
 
-To start replication we need to create an initial copy of the database file, which will be used as a target for the replication process. Let's refer to such database file as "`replica`".
+Чтобы начать репликацию, нам необходимо создать копию исходного файла базы данных, которая будет использоваться в качестве целевой для процесса репликации. Давайте будем называть такой файл базы данных `"реплика"`.
 
-Starting with HQbird 2018 R2, the replica will be created automatically in the folder which will you specify in the dialog after clicking on "`Reinitialize replica database`".
+Начиная с HQbird 2018 R2, реплика будет автоматически создаваться в папке, которую вы укажете в диалоговом окне после нажатия на "`Reinitialize replica database`".
 
 image::6.9.png[]
 
-If you have enough space in the folder with the database, **just leave the path empty**, and click Ok, and replica will be created near the database. Or, you can specify other destination on the local drives with enough free space.
+Если у вас достаточно места в папке с базой данных, *просто оставьте путь пустым* и нажмите btn:[Ок], и рядом с базой данных будет создана реплика. Или вы можете указать другое место назначения на локальных дисках с достаточным количеством свободного места.
 
-.Important!
+.Важно!
 [IMPORTANT]
 ====
-If there will be not enough free space (less than 105% of the database size), HQbird will not create replica copy -- there will be an appropriate error message.
+Если свободного места будет недостаточно (менее 105% от размера базы данных), HQbird не будет создавать копию -- появится соответствующее сообщение об ошибке.
 ====
 
-If you click Ok, HQbird will start the process of replica creation. There will be an appropriate message about it:
+Если вы нажмете кнопку btn:[Ок], HQbird запустит процесс создания реплики. Об этом появится соответствующее сообщение:
 
 image::6.10.png[]
 
-In case of default action, the resulted database will be in the same folder with the database. The name of the replica will be `DATABASE_NAME.EXT.DD-MMM-YYYY_NNNN.4replica` -- for example, `employee30.fdb.17-Apr-2018_142507.4replica`
+В случае действия по умолчанию результирующая база данных будет находиться в той же папке, что и база данных. Имя реплики будет  `DATABASE_NAME.EXT.DD-MMM-YYYY_NNNN.4replica` -- например, `employee30.fdb.17-Apr-2018_142507.4replica`
 
 [NOTE]
 ====
-Please note -- creating of replica may take significant time in a case of the big database!
+Обратите внимание! Создание реплики может занять значительное время в случае большой базы данных!
 ====
 
-All stages of replica creation are listed as alerts in HQbird (also sent by email):
+Все этапы создания реплики отображаются в виде оповещений в HQbird (также отправляются по электронной почте):
 
 image::6.11.png[]
 
 
 [NOTE]
 ====
-Please make sure that replica creation process was completed successfully -- check Alerts tab!
+Убедитесь, что процесс создания реплики был успешно завершен -- проверьте вкладку "`Alerts`"!
 ====
 
-=== Step 3: Setup database for async replication at the replica(slave) server
+=== Шаг 3: Настройка базы данных для асинхронной репликации на сервере-реплике (подчиненном сервере)
 
-After completing the configuration of asynchronous replication on the master server, we need to configure it for the replica database at the replica server instance.
+После завершения настройки асинхронной репликации на главном сервере нам необходимо настроить ее для базы данных-реплики на экземпляре сервера-реплики.
 
-First of all, we assume that you have successfully installed HQbird Enterprise on the replica server. We recommend to use on replica server SuperClassic for Firebird 2.5 and SuperServer for Firebird 3.0 (these are default configurations of HQbird Enterprise).
+Прежде всего, мы предполагаем, что вы успешно установили HQbird на сервер-реплику. Мы рекомендуем использовать на сервере-реплике SuperClassic для Firebird 2.5 и SuperServer для Firebird 3.0 и выше (это конфигурации HQbird по умолчанию).
 
-**Firebird Classic Linux users**: If you run Firebird on replica server in Classic mode on Linux, you need to run additional Firebird replicator process with the command `fb_smp_server -r.`
+**Пользователи Firebird Classic Linux**: Если вы запускаете Firebird на сервере-реплике в классическом режиме в Linux, вам необходимо запустить дополнительный процесс Firebird replicator с помощью команды "fb_smp_server -r`.
 
-Second, the replica database should be registered in HQbird FBDataGuard. If you intend to use automatic re-initialization, you can register some small database (`employee.fdb`) with the required name, and the do re-initialization: as a result, replica database will be automatically transferred from the master server.
+Во-вторых, база данных реплик должна быть зарегистрирована в HQbird FBDataGuard. Если вы намерены использовать автоматическую повторную инициализацию, вы можете зарегистрировать какую-нибудь небольшую базу данных (`employee.fdb`) с требуемым именем и выполнить повторную инициализацию: в результате реплика базы данных будет автоматически перенесена с главного сервера.
 
-Third, we assume that you have managed to setup transfer of logs with Cloud Backup/Cloud Backup Receiver, or with network share.
+В-третьих, мы предполагаем, что вам удалось настроить передачу журналов с помощью заданий <<_hqbird_config_cloud_backup>>/<<_hqbird_config_cloud_backup_receiver>> или с помощью сетевого общего доступа.
 
 [NOTE]
 ====
-Please note: the database should have replica database GUID before the registration! This GUID is created automatically if you have used link "`Reinitialize replica database`", but if you are performing manual re-initialization, don't forget to set it, otherwise will be an error about missing database GUID.
+Обратите внимание: перед регистрацией база данных должна иметь GUID реплики базы данных! Этот GUID создается автоматически, если вы воспользовались ссылкой "`Reinitialize replica database`", но если вы выполняете повторную инициализацию вручную, не забудьте установить его, иначе будет выдана ошибка об отсутствии GUID базы данных.
 ====
 
-Then complete the replication setup -- the only required parameter is a path to the folder with archived replication segments, and by default it is already set -- HQbird will create folder with logs near the database:
+Затем завершите настройку репликации -- единственным обязательным параметром является путь к папке с архивированными сегментами репликации, и по умолчанию он уже установлен -- HQbird создаст папку с журналами рядом с базой данных:
 
 image::6.12.png[]
 
-So, no need to change anything here, just click Save.
+Итак, здесь не нужно ничего менять, просто нажмите btn:[Сохранить].
 
-Assuming the replica database is configured in `D:\DATABASE\DBWREPLICA.FDB`, the HQBird will create folder `D:\DATABASE\DBWREPLICA.FDB.LogArch`, and replica will import replication segment files from it.
+Предполагая, что база данных реплики настроена как `D:\DATABASE\DBWREPLICA.FDB`, HQbird создаст папку `D:\DATABASE\DBWREPLICA.FDB.LogArch`, и replica импортирует из нее файлы сегментов репликации.
 
-Click "`Save`" and restart Firebird service (to ensure that replication parameters were applied).
+Нажмите btn:[Сохранить] и перезапустите службу Firebird (чтобы убедиться, что параметры репликации были применены).
 
-After restart, the replica server will start to consume the replication segments from the folder -- please note, after the import all processed segments will be deleted.
-Also, it will create file with the name `{DATABASE-GUIDE}` -- Firebird stores there some internal information about replication progress.
+После перезапуска сервер-реплика начнет использовать сегменты репликации из папки -- обратите внимание, что после импорта все обработанные сегменты будут удалены. Также будет создан файл с именем `{DATABASE-GUIDE}` -- это так называемый контрольный файл. Firebird хранит в нем некоторую внутреннюю информацию о ходе репликации.
 
 [NOTE]
 ====
-It is not recommended to store archived replication segments from the different databases into the same folder! Always allocate the separate folder for each pair of master-replica databases!
+Не рекомендуется хранить архивные сегменты репликации из разных баз данных в одной папке! Всегда выделяйте отдельную папку для каждой пары баз данных мастер-реплика!
 ====
 
 <<<
 
-== Automatic initialization and re-initialization of replica
+== Автоматическая инициализация и переинициализация реплики
 
 We recommend using Cloud Backup on the master and Cloud Backup Receiver on the replica to implement the transfer and check integrity of the replication segments through FTP. In this case, it is also possible to implement 1-click re-initialization for the replica database.
 

@@ -158,7 +158,7 @@ For Linux users -- make sure that folder with the database is owned by `firebird
 
 ==== How to copy replication segments from master server to the replica server?
 
-There are 2 popular ways to copy archived segments from the master server to the replica server(s): through network share and using Cloud Backup on master and Cloud Backup Receiver on replica.
+There are 2 popular ways to copy archived segments from the master server to the replica server(s): through network share and using job <<_hqbird_config_cloud_backup>> on master and <<_hqbird_config_cloud_backup_receiver>> on replica.
 
 ===== Network share
 
@@ -171,7 +171,7 @@ We recommend using HQbird FBDataGuard to send replication segments from the mast
 
 [NOTE]
 ====
-Please read about CloudBackup job for more details how to setup transfer of archived segments between master and replica(s).
+Please read about <<_hqbird_config_cloud_backup>> job for more details how to setup transfer of archived segments between master and replica(s).
 ====
 
 === Step 2: Create a copy of master database
@@ -182,7 +182,7 @@ Starting with HQbird 2018 R2, the replica will be created automatically in the f
 
 image::6.9.png[]
 
-If you have enough space in the folder with the database, **just leave the path empty**, and click Ok, and replica will be created near the database. Or, you can specify other destination on the local drives with enough free space.
+If you have enough space in the folder with the database, *just leave the path empty*, and click btn:[Ok], and replica will be created near the database. Or, you can specify other destination on the local drives with enough free space.
 
 .Important!
 [IMPORTANT]
@@ -190,7 +190,7 @@ If you have enough space in the folder with the database, **just leave the path 
 If there will be not enough free space (less than 105% of the database size), HQbird will not create replica copy -- there will be an appropriate error message.
 ====
 
-If you click Ok, HQbird will start the process of replica creation. There will be an appropriate message about it:
+If you click btn:[Ок], HQbird will start the process of replica creation. There will be an appropriate message about it:
 
 image::6.10.png[]
 
@@ -208,20 +208,20 @@ image::6.11.png[]
 
 [NOTE]
 ====
-Please make sure that replica creation process was completed successfully -- check Alerts tab!
+Please make sure that replica creation process was completed successfully -- check "`Alerts`" tab!
 ====
 
 === Step 3: Setup database for async replication at the replica(slave) server
 
 After completing the configuration of asynchronous replication on the master server, we need to configure it for the replica database at the replica server instance.
 
-First of all, we assume that you have successfully installed HQbird Enterprise on the replica server. We recommend to use on replica server SuperClassic for Firebird 2.5 and SuperServer for Firebird 3.0 (these are default configurations of HQbird Enterprise).
+First of all, we assume that you have successfully installed HQbird on the replica server. We recommend to use on replica server SuperClassic for Firebird 2.5 and SuperServer for Firebird 3.0 (these are default configurations of HQbird).
 
 **Firebird Classic Linux users**: If you run Firebird on replica server in Classic mode on Linux, you need to run additional Firebird replicator process with the command `fb_smp_server -r.`
 
 Second, the replica database should be registered in HQbird FBDataGuard. If you intend to use automatic re-initialization, you can register some small database (`employee.fdb`) with the required name, and the do re-initialization: as a result, replica database will be automatically transferred from the master server.
 
-Third, we assume that you have managed to setup transfer of logs with Cloud Backup/Cloud Backup Receiver, or with network share.
+Third, we assume that you have managed to setup transfer of logs with <<_hqbird_config_cloud_backup>>/<<_hqbird_config_cloud_backup_receiver>>, or with network share.
 
 [NOTE]
 ====
@@ -232,11 +232,11 @@ Then complete the replication setup -- the only required parameter is a path to 
 
 image::6.12.png[]
 
-So, no need to change anything here, just click Save.
+So, no need to change anything here, just click btn:[Save].
 
 Assuming the replica database is configured in `D:\DATABASE\DBWREPLICA.FDB`, the HQBird will create folder `D:\DATABASE\DBWREPLICA.FDB.LogArch`, and replica will import replication segment files from it.
 
-Click "`Save`" and restart Firebird service (to ensure that replication parameters were applied).
+Click btn:[Save] and restart Firebird service (to ensure that replication parameters were applied).
 
 After restart, the replica server will start to consume the replication segments from the folder -- please note, after the import all processed segments will be deleted.
 Also, it will create file with the name `{DATABASE-GUIDE}` -- Firebird stores there some internal information about replication progress.
