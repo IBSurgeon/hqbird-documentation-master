@@ -182,7 +182,7 @@ Starting with HQbird 2018 R2, the replica will be created automatically in the f
 
 image::6.9.png[]
 
-If you have enough space in the folder with the database, *just leave the path empty*, and click btn:[Ok], and replica will be created near the database. Or, you can specify other destination on the local drives with enough free space.
+If you have enough space in the folder with the database, *just leave the path empty*, and click btn:[Submit], and replica will be created near the database. Or, you can specify other destination on the local drives with enough free space.
 
 .Important!
 [IMPORTANT]
@@ -190,7 +190,7 @@ If you have enough space in the folder with the database, *just leave the path e
 If there will be not enough free space (less than 105% of the database size), HQbird will not create replica copy -- there will be an appropriate error message.
 ====
 
-If you click btn:[Ок], HQbird will start the process of replica creation. There will be an appropriate message about it:
+If you click btn:[Submit], HQbird will start the process of replica creation. There will be an appropriate message about it:
 
 image::6.10.png[]
 
@@ -266,7 +266,7 @@ If Cloud Backup/Cloud Backup Receiver are configured, it is possible to perform 
 
 Once clicked, the master HQbird will do the following:
 
-. Ask you where to store copy of the database (by default it is near the master database, click Ok to store database there).
+. Ask you where to store copy of the database (by default it is near the master database, click btn:[Submit] to store database there).
 . Master database will be copied (with `nbackup`)
 . The created copy of the database will be set to the replica mode
 . md5 hash-sum will be calculated for the copy
@@ -386,7 +386,7 @@ No setup is necessary for synchronous replication on the replica server, except 
 
 === Replication parameters for testing synchronous replication
 
-In the case of testing synchronous replication of HQbird Enterprise on the production system, we recommend setting parameter _disable_on_error_ to true.
+In the case of testing synchronous replication of HQbird on the production system, we recommend setting parameter `disable_on_error` to `true`.
 
 image::6.18.png[]
 
@@ -404,15 +404,15 @@ image::6.19.png[]
 
 _Of course, it is always possible to create replica with the simple copy process: stop Firebird on master, copy database file, complete setup of replication on the replica, then start Firebird. However, HQbird supports online replica creation -- see details below._
 
-If, for some reason, you cannot use the automatic replica creation (which is available since v. 2018 R2), you can create replica copy of the master database manually.
+If, for some reason, you cannot use the automatic replica creation, you can create replica copy of the master database manually.
 
 Starting with HQbird 2018, it is possible to create replica file without stopping the master server, with `nbackup`. It is easy for asynchronous replication, and it also makes possible to create additional replicas online -- i.e., without stopping a master.
 
 === Creating copy online (with nbackup)
 
-Let's consider how to create replica for asynchronous replication using nbackup:
+Let's consider how to create replica for asynchronous replication using `nbackup`:
 
-. apply nbackup lock
+. apply `nbackup` lock
 +
 [listing]
 ----
@@ -478,7 +478,7 @@ If you don't see Database GUID in `gstat –h` output, connect to the master dat
 
 === How to set replica database to the master mode
 
-To switch database to the normal (master) mode run the same command with the empty {} instead of database GUID:
+To switch database to the normal (master) mode run the same command with the empty `{}` instead of database GUID:
 
 for Firebird 2.5 and 3.0
 

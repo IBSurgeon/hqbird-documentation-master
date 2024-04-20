@@ -182,6 +182,7 @@ image::3.2.7.png[]
 
 In general, there is no need to edit Firebird server details after the registration, until you are not reinstalling Firebird -- but in this case we recommend reinstalling HQBird too.
 
+[[_hqbird_config_repllog]]
 === Server: Replication Log
 
 image::3.2.11.png[]

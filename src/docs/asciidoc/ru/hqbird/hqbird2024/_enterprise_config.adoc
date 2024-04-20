@@ -117,7 +117,7 @@ ALTER DATABASE EXCLUDE {TABLE <table_list> | ALL} FROM PUBLICATION
 .Диалог настройки репликации для асинхронной репликации
 image::6.6.png[]
 
-Единственный параметр, который вы можете изменить, -- это "`*Write commited data every NN seconds*`", он определяет, как часто должны перемещаться зафиксированные данные в архивные сегменты репликации.
+Единственный параметр, который вы можете изменить, -- это "`*Записывать закоммиченные данные каждые NN секунд*`", он определяет, как часто должны перемещаться зафиксированные данные в архивные сегменты репликации.
 
 По умолчанию это значение равно 90 секундам.
 
@@ -127,9 +127,9 @@ image::6.7.png[]
 
 Давайте рассмотрим все параметры в этом диалоговом окне -- просто чтобы дать вам представление о том, что они делают, *их не нужно изменять*:
 
-* "`Log directory`" -- папка, в которой будут храниться операционные журналы. Это системная папка, полностью управляемая Firebird. По умолчанию `${db.path}.ReplLog` (`db.path` -- это место, где находится база данных). *Нет необходимости изменять значение по умолчанию*.
-* "`Log archive directory`" -- папка, в которой будут храниться архивированные журналы. В соответствии со значением по умолчанию `${db.path}.LogArch`, HQbird создаст папку `DatabaseName.LogArch` в папке с базой данных, поэтому *нет необходимости изменять этот параметр*.
-* Третий параметр ("`Override log archive command`") необязательный, *оставьте его пустым*.
+* "`Папка оперативных логов`" -- папка, в которой будут храниться операционные журналы. Это системная папка, полностью управляемая Firebird. По умолчанию `${db.path}.ReplLog` (`db.path` -- это место, где находится база данных). *Нет необходимости изменять значение по умолчанию*.
+* "`Папка архивных логов`" -- папка, в которой будут храниться архивированные журналы. В соответствии со значением по умолчанию `${db.path}.LogArch`, HQbird создаст папку `DatabaseName.LogArch` в папке с базой данных, поэтому *нет необходимости изменять этот параметр*.
+* Третий параметр ("`Переопределить команду архивации`") необязательный, *оставьте его пустым*.
 
 
 [NOTE]
@@ -139,7 +139,7 @@ image::6.7.png[]
 
 В этом случае сегменты журнала репликации сначала будут записаны в `${db.path}.ReplLog` (`db.path` -- это место, где находится база данных -- в нашем примере это будет `H:\DBWMaster.fdb.ReplLog`), а после достижения максимального размера сегмента, или количество коммитов, или после другого триггера, будет запущена команда архивирования по умолчанию -- она скопирует заархивированные сегменты репликации в `${db.path}.LogArch` (в нашем примере это будет `H:\DBWMaster.fdb.LogArch`).
 
-После запуска репликации вы сможете увидеть файлы сегментов репликации в папке, указанной в  "`Log directory`" , сразу после выполнения любой операции с главной базой данных:
+После запуска репликации вы сможете увидеть файлы сегментов репликации в папке, указанной в  "`Папка оперативных логов`", сразу после выполнения любой операции с главной базой данных:
 
 image::6.8.png[]
 
@@ -147,7 +147,7 @@ image::6.8.png[]
 
 Пожалуйста, обратите внимание - вам не нужно ничего делать с операционными сегментами!
 
-После подтверждения транзакции и/или указанного времени ожидания сохраненных данных вы увидите заархивированные сегменты в папке, указанной в "`Log archive directory`".
+После подтверждения транзакции и/или указанного времени ожидания сохраненных данных вы увидите заархивированные сегменты в папке, указанной в "`Папка архивных логов`".
 
 Архив логов репликации это набор файлов в хронологическом порядке. Эти файлы должны быть импортированы сервером реплики в базу данных реплики.
 
@@ -178,11 +178,11 @@ image::6.8.png[]
 
 Чтобы начать репликацию, нам необходимо создать копию исходного файла базы данных, которая будет использоваться в качестве целевой для процесса репликации. Давайте будем называть такой файл базы данных `"реплика"`.
 
-Начиная с HQbird 2018 R2, реплика будет автоматически создаваться в папке, которую вы укажете в диалоговом окне после нажатия на "`Reinitialize replica database`".
+В HQbird реплика будет автоматически создаваться в папке, которую вы укажете в диалоговом окне после нажатия на "`Создать заново БД реплику и оправить на реплику-сервер`".
 
 image::6.9.png[]
 
-Если у вас достаточно места в папке с базой данных, *просто оставьте путь пустым* и нажмите btn:[Ок], и рядом с базой данных будет создана реплика. Или вы можете указать другое место назначения на локальных дисках с достаточным количеством свободного места.
+Если у вас достаточно места в папке с базой данных, *просто оставьте путь пустым* и нажмите btn:[Submit], и рядом с базой данных будет создана реплика. Или вы можете указать другое место назначения на локальных дисках с достаточным количеством свободного места.
 
 .Важно!
 [IMPORTANT]
@@ -190,7 +190,7 @@ image::6.9.png[]
 Если свободного места будет недостаточно (менее 105% от размера базы данных), HQbird не будет создавать копию -- появится соответствующее сообщение об ошибке.
 ====
 
-Если вы нажмете кнопку btn:[Ок], HQbird запустит процесс создания реплики. Об этом появится соответствующее сообщение:
+Если вы нажмете кнопку btn:[Submit], HQbird запустит процесс создания реплики. Об этом появится соответствующее сообщение:
 
 image::6.10.png[]
 
@@ -249,202 +249,203 @@ image::6.12.png[]
 
 == Автоматическая инициализация и переинициализация реплики
 
-We recommend using Cloud Backup on the master and Cloud Backup Receiver on the replica to implement the transfer and check integrity of the replication segments through FTP. In this case, it is also possible to implement 1-click re-initialization for the replica database.
+Мы рекомендуем использовать <<_hqbird_config_cloud_backup>> на мастере и <<_hqbird_config_cloud_backup_receiver>> на реплике, чтобы реализовать передачу и проверку целостности сегментов репликации через FTP. В этом случае также можно выполнить повторную инициализацию базы данных-реплики в один клик.
 
-If Cloud Backup and Cloud Backup Receiver have the following options enabled (by default), HQbird perform the re-initialization automatically, including restart of replica database:
+Если в <<_hqbird_config_cloud_backup>> и <<_hqbird_config_cloud_backup_receiver>> включены следующие параметры (по умолчанию), HQbird автоматически выполняет повторную инициализацию, включая перезапуск базы данных реплики:
 
 image::6.13.png[]
 
-Parameter "`Prefix to name uploaded reini files`" should be changed if you intend to initialize several copies of the master database through the single folder -- in this case set it should be unique for each database.
+Параметр "`Префикс для переименования файлов репликации`" следует изменить, если вы собираетесь инициализировать несколько копий главной базы данных через одну папку -- в этом случае он должен быть уникальным для каждой базы данных.
 
-In case of the single database, no changes are required.
+В случае единой базы данных никаких изменений не требуется.
 
-=== How re-initialization works
+=== Как работает повторная инициализация
 
-If Cloud Backup/Cloud Backup Receiver are configured, it is possible to perform the complete re-initialization with 1 click to "`Reinitialize replica database`".
+Если настроены <<_hqbird_config_cloud_backup>>/<<_hqbird_config_cloud_backup_receiver>>, то можно выполнить полную повторную инициализацию одним щелчком мыши по "`Создать заново БД реплику и отправить на реплику сервер`".
 
-Once clicked, the master HQbird will do the following:
+После кнопки на главной БД HQbird выполнит следующее:
 
-. Ask you where to store copy of the database (by default it is near the master database, click Ok to store database there).
-. Master database will be copied (with `nbackup`)
-. The created copy of the database will be set to the replica mode
-. md5 hash-sum will be calculated for the copy
-. According the settings in Cloud Backup (Enable replication should be Enabled), master HQbird will upload database to the specified FTP
+. Спросит у вас, где хранить копию базы данных (по умолчанию она находится рядом с основной базой данных, нажмите btn:[Submit], чтобы сохранить базу данных там).
+. Основная база данных будет скопирована (с помощью `nbackup`)
+. Созданная копия базы данных будет переведена в режим реплики.
+. для копии будет рассчитана хеш-сумма md5
+. В соответствии с настройками <<_hqbird_config_cloud_backup>> главный HQbird загрузит базу данных на указанный FTP.
 
-Next steps will be done by replica HQbird instance:
+Следующие шаги будут выполняться экземпляром HQbird репликой:
 
-. Once replica HQbird will notice the reini* files in the incoming FTP folder, Cloud Backup Receiver will start the procedure of re-initialization.
-. Processing if usual arch-segments will be stopped
-. The arrived database will be checked -- md5 hash-sum will be calculated and compared with the value in the accompanied report file.
-. The existing replica database will be shutdown to disconnect all users
-. New replica database will be copied over the existing database
-. The replica server may require restart to see new replica.
+. Как только реплика HQbird заметит файлы `reini*` во входящей папке FTP, <<_hqbird_config_cloud_backup_receiver>> начнет процедуру повторной инициализации.
+. Обработка архивных сегментов будет приостановлена
+. Полученная база данных будет проверена -- будет рассчитана хеш-сумма md5 и сравнена со значением в прилагаемом файле отчета.
+. Существующая реплика базы данных будет отключена, чтобы отключить всех пользователей.
+. Новая база данных-реплика будет скопирована поверх существующей базы данных.
+. Серверу реплики может потребоваться перезагрузка, чтобы увидеть новую реплику.
 
-Replica is back to the normal mode.
+Реплика вернулась в обычный режим.
 
-=== Troubleshooting asynchronous replication
+=== Устранение неполадок асинхронной репликации
 
-If you have setup asynchronous replication, but it does not work, the first thing is to enable job "`Replication Log`" on the master and on the replica. This job parses `replication.log` files, and if there are errors, creates the appropriate alert.
+Если вы настроили асинхронную репликацию, но она не работает, первым делом включите задание <<[[_hqbird_config_repllog]]>> на мастере и на реплике. Это задание анализирует файлы `replication.log` и в случае наличия ошибок создает соответствующее предупреждение.
 
 image::6.14.png[]
 
-Also, the good thing is to enable "`Verbose`" option on the replica, and restart Firebird. Verbose will make Firebird to write a lot of details about replication into the `replication.log` file (near `firebird.log`).
+
+Кроме того, полезно включить опцию "`Подробный лог`" на реплике и перезапустить Firebird. "`Подробный лог`" заставит Firebird записывать много подробностей о репликации в файл `replication.log` (рядом `с firebird.log`).
 
 image::6.15.png[]
 
-Usually the text of the error is self-explanatory, but since there are some popular questions which occur regularly, we decide to create the table with the list of main problems with asynchronous replication and ways to resolve it.
+Обычно текст ошибки не требует пояснений, но поскольку некоторые популярные вопросы возникают регулярно, мы решили создать таблицу со списком основных проблем с асинхронной репликацией и способами их решения.
 
 [cols="1,1", options="header"]
 |===
-| Problem
-| Possible reasons and how to resolve
+| Проблема
+| Возможные причины и способы решения
 
 
-|Master part of replication was configured, but folders for operational or archived segments (`${dbpath}.LogRepl` or `${dbpath}.LogArch`) are not created
-|HQbird creates these folders automatically, but it requires permissions.
+|Репликация на стороне мастера настроена, но папки для оперативных или архивных сегментов (`${dbpath}.LogRepl` или `${dbpath}.LogArch`) не создаются.
+|HQbird создает эти папки автоматически, но для этого требуются разрешения.
 
-On Windows: these folders should be on local drives, or HQbird and Firebird services must run with "`Run As`" with the powerful account (Domain Admin?).
+В Windows: эти папки должны находиться на локальных дисках, или службы HQbird и Firebird должны запускаться с помощью "`Запуск от имени`" с учетной записью с повышенными привилегиями (Администратор домена?).
 
-On Linux: folders must have permissions for "`firebird`" user.
+В Linux: папки должны иметь разрешения для пользователя "`firebird`".
 
-|Master part of replication was configured; folders for `ReplLog` and `LogArch` were created, but nothing appear there. `Replication.log` is empty.
-|Firebird does not see the replication configuration. Restart Firebird service (all connections in case of Classic) to make read the new configuration.
+|Репликация на стороне мастера настроена; папки `ReplLog` и `LogArch` созданы, но в них ничего нет. `Replication.log` пуст.
+|Firebird не видит конфигурацию репликации. Перезапустите службу Firebird (все соединения в случае Classic), чтобы прочитать новую конфигурацию.
 
-|Master part of replication was configured; there are files `databasename.log-000` in ReplLog folder, but no files in `LogArch`. Also, could be errors about insufficient space or out of space in `replication.log`
-|It means that there is no permission for Firebird to access the `LogArch` folder and create replication segment files (`databasename-logarch.000XXX`) there.
+|Репликация на стороне мастера настроена; в папке `ReplLog` присутствую файл вида `databasename.log-000`, но нет файлов в `LogArch`. Кроме того, могут быть ошибки о нехватке места в `replication.log`.
+|Это означает, что у Firebird нет разрешения на доступ к папке `LogArch` и создание там файлов сегментов репликации (`databasename-logarch.000XXX`).
 
-If `LogArch` folder on the network share or mounted drive, make sure that Firebird has rights (full access) to access it.
+Если папка `LogArch` находится на сетевом ресурсе или подключенном диске, убедитесь, что у Firebird есть права (полный доступ) на доступ к ней.
 
-|"`Verbose`" option on replica is enabled, but `replication.log` is empty or nor created.
-|Sometimes Firebird cannot create `replication.log` or even write to already created file. Try to create it manually and apply necessary permissions to it (especially on Linux). Verbose output should be written to the `replication.log` every 60 seconds even if there is no segments to import.
+|Опция "`Подробный лог`" для реплики включена, но `replication.log` пуст или не создаётся.
+|Иногда Firebird не может создать `replication.log` ли даже записать в уже созданный файл. Попробуйте создать его вручную и применить к нему необходимые разрешения (особенно в Linux).  Подробный вывод должен записываться в `replication.log` каждые 60 секунд, даже если нет сегментов для импорта.
 
-|Master part of replication is Ok, but replica does not consume replication segments. `replication.log` file is empty.
-|Replica did not read the new replication configuration. Restart Firebird.
+|Репликация на стороне мастера в порядке, но реплика не использует сегменты репликации. Файл `replication.log` пуст.
+|Реплика не прочитала новую конфигурацию репликации. Перезапустите Firebird.
 
-|Master part of replication is Ok, but replica does not consume replication segments. `replication.log` contains errors about permissions.
-|Replica does not have enough permissions to read from the `LogArch` folder. Set necessary permissions or run replica under powerful account.
+|Репликация на стороне мастера в порядке, но реплика не использует сегменты репликации. Файл `replication.log` содержит ошибки прав доступа.
+|У реплики недостаточно прав для чтения из папки `LogArch`. Установите необходимые разрешения или запустите реплику под привилегированной учетной записью.
 
-|Replica has errors in `replication.log` "`Segment NNN is missing`"
-|Check is there such segment on the replica side, and if it is on the master size. If segment has size = 0 on replica, copy it manually or use "`Perform fresh backup`" checkmark in Cloud Backup.
+|Реплика имеет ошибки в `replication.log` "`Segment NNN is missing`"
+|Проверьте, есть ли такой сегмент на стороне реплики и соответствует ли он размеру мастера. Если размер сегмента в реплике равен 0, скопируйте его вручную или инициализируйте реплику заново.
 
-|Replica has errors in `replication.log` about wrong foreign keys and stopped consume segments
-|It means that replica copy is desynchronized, so some records do not have the appropriate values in referenced tables for the specified Foreign Key. Replica should be reinitialized. If you see this errors often, please contact IBSurgeon support.
+|Реплика имеет ошибки в `replication.log` о неправильных внешних ключах и перестала использовать сегменты.
+|Это означает, что копия реплики десинхронизирована, поэтому некоторые записи не имеют соответствующих значений в ссылочных таблицах для указанного внешнего ключа. Реплику следует повторно инициализировать. Если вы часто видите эти ошибки, обратитесь в службу поддержки IBSurgeon.
 
 |===
 
 <<<
 
-== Synchronous replication for Firebird
+== Синхронная репликация в Firebird
 
-In case of synchronous replication, master server directly inserts committed changes of the master database to one or more replicas databases:
+В случае синхронной репликации главный сервер напрямую вставляет зафиксированные изменения главной базы данных в одну или несколько баз данных-реплик:
 
 image::6.16.png[]
 
-The main features of the synchronous replication are the following:
+Основными особенностями синхронной репликации являются следующие:
 
-* Changes are buffered per transaction, transferred in batches, synchronized at commit
-* Practical delay is below1 second
-* Follows the master priority of locking
-* Replication errors can either interrupt operations or just detach replica
-* Replica is available for read-only queries (with caveats)
-* Automatic fail-over can be implemented (with HQbird Cluster Manager)
+* Изменения буферизуются для каждой транзакции, передаются пакетами и синхронизируются при фиксации.
+* Практическая задержка менее 1 секунды.
+* Мастер база блокируется до применения изменений репликой
+* Ошибки репликации могут либо прерывать операции, либо просто отсоединять реплику.
+* Реплика доступна для запросов только для чтения (с оговорками).
+* Может быть реализован автоматическое переключение между сервера (с помощью HQbird Cluster Manager).
 
-Issues to be considered
+На что обратит внимание:
 
-* Additional CPU and I/O load on the replica side
-* Requires direct and permanent network connection from master to replica(s), 1+Gbps recommended
-* Replica can be recreated online, re-initialization of synchronous replication requires stop of master
+* Дополнительная нагрузка на ЦП и ввод-вывод на стороне реплики.
+* Требуется прямое и постоянное сетевое соединение от мастера к репликам, рекомендуется 1+Гбит/с.
+* Реплику можно воссоздать онлайн, повторная инициализация синхронной репликации требует остановки мастера
 
-When to use synchronous replication:
+Когда использовать синхронную репликацию:
 
-* Custom fail-over cluster solutions with 3+ nodes (especially for web applications)
-* Scale performance by moving reads to the separate replica server (report servers, data marts or read-only web representation)
-* In combination with asynchronous replication for performance scaling
+* Пользовательские отказоустойчивые кластерные решения с более чем 3 узлами (особенно для веб-приложений).
+* Для масштабирования производительности, перемещая операции чтения на отдельный сервер реплик (серверы отчетов, витрины данных или веб-представления, доступные только для чтения).
+* В сочетании с асинхронной репликацией для масштабирования производительности.
 
 
-=== Steps to setup synchronous replication
+=== Шаги по настройке синхронной репликации
 
-. Stop Firebird
-. Create a copy of master database file, switch it to replica mode and copy it to the replica server(s)
-. Setup replica server(s) and database(s) for replication with HQbird FBDataGuard
-. Start replica server(s) -- before master server!
-. Setup master server and master database for replication with HQBird FBDataGuard
-. Start master server
+. Остановите Firebird
+. Создайте копию главного файла базы данных, переключите ее в режим реплики и скопируйте на сервер(ы) реплики.
+. Настройте серверы реплик и базы данных для репликации с помощью HQbird FBDataGuard.
+. Запускайте серверы-реплики -- перед главным сервером!
+. Настройте главный сервер и главную базу данных для репликации с помощью HQBird FBDataGuard.
+. Запустить главный сервер
 
-As you can see, the downtime required for initialization the synchronous replication is bigger than downtime to configure asynchronous replication, because replica database must be online before master's start.
+Как видите, время простоя, необходимое для инициализации синхронной репликации, больше, чем время простоя для настройки асинхронной репликации, поскольку база данных реплики должна быть онлайн до запуска мастера.
 
-=== Synchronous replication at master and replica
+=== Синхронная репликация на мастере и реплике
 
-Synchronous replication is designed to write changes from the master database directly to the replica database. The big advantage of synchronous replication that replication delay can be very small, but the disadvantage is that in the case of the lost connection between master and replica servers there will be gaps in transmitted data.
+Синхронная репликация предназначена для записи изменений из главной базы данных непосредственно в базу данных-реплику. Большим преимуществом синхронной репликации является то, что задержка репликации может быть очень небольшой, но недостатком является то, что в случае потери соединения между мастер-сервером и сервером-репликой часть передаваемых данных будет потеряно.
 
 image::6.17.png[]
 
-In this example, the synchronous replica database is on the remote server with IP address *replica server* and path `/data/test2.fdb`.
+В этом примере база данных синхронной реплики находится на удаленном сервере с IP-адресом *сервер реплики* и путем `/data/test2.fdb`.
 
-No setup is necessary for synchronous replication on the replica server, except `gfix –replica <master-guid>` for the replica database to switch it to the replica mode.
+Для синхронной репликации на сервере реплики не требуется никакой настройки, за исключением `gfix –replica <master-guid>` для переключения базы данных реплики в режим реплики.
 
-=== Replication parameters for testing synchronous replication
+=== Параметры репликации для тестирования синхронной репликации
 
-In the case of testing synchronous replication of HQbird Enterprise on the production system, we recommend setting parameter _disable_on_error_ to true.
+В случае тестирования синхронной репликации HQbird в производственной системе мы рекомендуем установить для параметра `disable_on_error` значение `true`.
 
 image::6.18.png[]
 
-It will switch off replication in case of replication error, and the master server will continue to work without replication.
+В случае ошибки репликации он отключит репликацию, и главный сервер продолжит работать без репликации.
 
-To reinitialize replication the replication log should be analyzed and all initialization steps should be done again.
+Для повторной инициализации репликации необходимо проанализировать журнал репликации и повторить все шаги инициализации.
 
-Also, please enable job "`Replication log`" in HQbird FBDataGuard to monitor replication log for errors and warnings:
+Кроме того, включите задание "`Лог репликации`" в HQbird FBDataGuard, чтобы отслеживать журнал репликации на наличие ошибок и предупреждений:
 
 image::6.19.png[]
 
 <<<
 
-== How to manually create replica of the database?
+== Как вручную создать реплику базы данных?
 
-_Of course, it is always possible to create replica with the simple copy process: stop Firebird on master, copy database file, complete setup of replication on the replica, then start Firebird. However, HQbird supports online replica creation -- see details below._
+_Конечно, всегда можно создать реплику с помощью простого процесса копирования: остановите Firebird на мастере, скопируйте файл базы данных, завершите настройку репликации на реплике, затем запустите Firebird. Однако HQbird поддерживает создание онлайн-реплик -- подробности см. ниже._
 
-If, for some reason, you cannot use the automatic replica creation (which is available since v. 2018 R2), you can create replica copy of the master database manually.
+Если по каким-то причинам вы не можете использовать автоматическое создание реплики, вы можете создать реплику-копию главной базы данных вручную.
 
-Starting with HQbird 2018, it is possible to create replica file without stopping the master server, with `nbackup`. It is easy for asynchronous replication, and it also makes possible to create additional replicas online -- i.e., without stopping a master.
+Начиная с HQbird 2018, можно создать файл реплики без остановки главного сервера с помощью `nbackup`. Это просто для асинхронной репликации, кроме того возможно создавать дополнительные реплики онлайн, т. е. без остановки мастера.
 
-=== Creating copy online (with nbackup)
+=== Создание копии онлайн (с помощью nbackup)
 
-Let's consider how to create replica for asynchronous replication using nbackup:
+Рассмотрим, как создать реплику для асинхронной репликации с помощью `nbackup`:
 
-. apply nbackup lock
+. заблокировать файл базы данных с помощью `nbackup`
 +
 [listing]
 ----
 nbackup –l database_path_name -user SYSDBA –pass masterkey
 ----
-. copy locked database file to create a replica
+. скопировать заблокированный файл базы данных, чтобы создать реплику
 +
 [listing]
 ----
 copy database_path_name replica_path_name
 ----
-. unlock master database
+. разблокировать основную базу данных
 +
 [listing]
 ----
 nbackup –n database_path_name -user SYSDBA –pass masterkey
 ----
-. Fixup replica database
+. Исправление реплики базы данных
 +
 [listing]
 ----
 nbackup –f replica_path_name_name
 ----
-. Switch database to replica mode
+. Переключить базу данных в режим реплики
 +
-for Firebird 2.5 and 3.0
+для Firebird 2.5 и 3.0
 +
 [listing]
 ----
 gfix replica_path_name –replica {DATABASEGUID} –user SYSDBA –pass masterkey
 ----
 +
-for Firebird 4.0
+для Firebird 4.0 и выше
 +
 [listing]
 ----
@@ -455,15 +456,15 @@ gfix replica_path_name –replica <replica_mode> –user SYSDBA –pass masterke
 +
 
 
-=== What is {DATABASEGUID}?
+=== Что такое {DATABASEGUID}?
 
-Database GUID is the unique identifier of a master database. 
+GUID базы данных -- это уникальный идентификатор главной базы данных.
 
-To find out {DATABASEGUIDE}, run command `gstat –h`:
+Его можно получить {DATABASEGUIDE}, выполнив команду `gstat –h`:
 
 image::6.20.png[]
 
-To switch database to the replica mode run the following command:
+Чтобы переключить базу данных в режим реплики, выполните следующую команду:
 
 [listing]
 ----
@@ -472,21 +473,21 @@ gfix disk:\path\mydatabase.fdb -replica {guid} -user SYSDBA -pass masterkey
 
 [NOTE]
 ====
-If you don't see Database GUID in `gstat –h` output, connect to the master database using Firebird binaries from HQbird distribution (with `isql` or any other application), and run `gstat –h` again.
+Если вы не видите GUID базы данных в выводе `gstat –h`, подключитесь к главной базе данных, используя двоичные файлы Firebird из дистрибутива HQbird (через `isql` или любым другим приложением), и снова запустите `gstat –h`.
 ====
 
-=== How to set replica database to the master mode
+=== Как перевести базу данных реплики в мастер режим
 
-To switch database to the normal (master) mode run the same command with the empty {} instead of database GUID:
+Чтобы переключить базу данных в обычный (главный) режим, выполните ту же команду с пустым `{}` вместо GUID базы данных:
 
-for Firebird 2.5 and 3.0
+для Firebird 2.5 и 3.0
 
 [listing]
 ----
 gfix disk:\path\mydatabase.fdb -replica {} -user SYSDBA -pass masterkey
 ----
 
-for Firebird 4.0
+для Firebird 4.0 и выше
 
 [listing]
 ----
@@ -495,11 +496,11 @@ gfix replica_path_name –replica none –user SYSDBA –pass masterkey
 
 <<<
 
-== How to distinguish master database from replica
+== Как отличить главную базу данных от реплики
 
-=== Using gstat -h
+=== Используйте gstat -h
 
-If you run `gstat –h database_name`, the output will contain the keyword "`replica`" in Attributes section for database configured as replica:
+Если вы запустите `gstat –h database_name`, выходные данные будут содержать ключевое слово "`replica`" в разделе Attributes для базы данных, настроенной как реплика:
 
 [listing]
 ----
@@ -535,11 +536,11 @@ Replication master GUID: {BBBD2881-ACDE-4636-CEB2-7EE31AF66CC3}
 Gstat completion time Mon Nov 26 17:47:07 2018
 ----
 
-For master database there is no special marks in Attributes.
+Для основной базы данных в атрибутах нет специальных отметок.
 
-=== With SQL query to the context variable
+=== Через SQL-запрос к контекстной переменной
 
-In Firebird 2.5 and 3.0, there is a context variable `REPLICA` in the `SYSTEM` area that contains information about database status:
+В Firebird 2.5 и 3.0 в пространстве `SYSTEM` есть контекстная переменная `REPLICA, содержащая информацию о состоянии базы данных:
 
 [listing]
 ----
@@ -550,7 +551,7 @@ RDB$GET_CONTEXT
 FALSE
 ----
 
-In Firebird 4.0 use another context variable `REPLICA_MODE`:
+В Firebird 4.0 используйте другую контекстную переменную `REPLICA_MODE`:
 
 [listing]
 ----
@@ -561,7 +562,7 @@ RDB$GET_CONTEXT
 READ-ONLY
 ----
 
-Also in Firebird 4.0 you can use the `MON$DATABASE` monitoring table:
+Также в Firebird 4.0 и выше вы можете использовать таблицу мониторинга `MON$DATABASE`:
 
 [listing]
 ----
@@ -572,85 +573,85 @@ MON$REPLICA_MODE
                1
 ----
 
-Database replica mode:
+Режимы реплики базы данных:
 
-* 0 -- not a replica
-* 1 -- read-only replica
-* 2 -- read-write replica
+* 0 -- не реплика
+* 1 -- read-only реплика
+* 2 -- read-write реплика
 
 <<<
 
-== Optional parameters for replication
+== Дополнительные параметры репликации
 
-It is possible to specify several additional parameters for fine tuning of the replication process. These parameters can be specified in the "`Optional parameters`" of replication setup dialog.
+Есть возможность указать несколько дополнительных параметров для тонкой настройки процесса репликации. Эти параметры можно указать в "`Опции`" диалога настройки репликации.
 
-. Size of the local buffer used to accumulate replication events that can be deferred until the transaction commit/rollback. The bigger this value the less network round-trips between master and slave hosts are performed. However, it costs longer replication "`checkpoints`" (time to synchronize the original database with its replica).
+. Размер локального буфера, используемого для накопления событий репликации, которые можно отложить до фиксации/отката транзакции. Чем больше это значение, тем меньше сетевых обменов между главным и подчиненным хостами. Однако это требует больше времени на "`контрольные точки`" репликации (время на синхронизацию исходной базы данных с ее репликой).
 +
 [listing]
 ----
 buffer_size = 1048576
 ----
-. If enabled, any error during replication causes the master to stop replicating changes and continue working normally. Otherwise (the default behavior), the master reports an error.
+. Если этот параметр включен, любая ошибка во время репликации приводит к тому, что мастер прекращает репликацию изменений и продолжает работать в обычном режиме. В противном случае (поведение по умолчанию) мастер сообщает об ошибке.
 +
 [listing]
 ----
 disable_on_error = false
 ----
-. If enabled, replicated records are RLE-compressed before transmission and decompressed on the slave side. It reduces the traffic and (indirectly) a number of round-trips at the cost of extra CPU cycles on both sides.
+. Если этот параметр включен, реплицированные записи сжимаются с помощью RLE перед передачей и распаковываются на подчиненной стороне. Это уменьшает трафик и (косвенно) количество round-trips за счет дополнительных циклов ЦП с обеих сторон.
 +
 [listing]
 ----
 compress_records = false
 ----
-. If enabled, conflicting records in the target database are modified to match records in the master database. In particular:
+. Если этот параметр включен, конфликтующие записи в целевой базе данных изменяются в соответствии с записями в основной базе данных. В частности:
 +
-** if there's an insert and the target record exists, it gets updated;
-** if there's an update and the target record does not exist, it gets inserted;
-** if there's a delete and the target record does not exist, it gets ignored.
+** если происходит вставка и существует целевая запись, то она обновляется;
+** если происходит обновление и целевая запись не существует, она вставляется;
+** если произошло удаление, а целевая запись не существует, она игнорируется.
 
 [listing]
 ----
 master_priority = false
 ----
-. Pattern (regular expression) that defines what tables must be included into replication. By default, all tables are replicated.
+. Шаблон (регулярное выражение), определяющий, какие таблицы необходимо включать в репликацию. По умолчанию все таблицы реплицируются.
 +
 [listing]
 ----
 include_filter
 ----
-. Pattern (regular expression) that defines what tables must be excluded from replication. By default, all tables are replicated.
+. Шаблон (регулярное выражение), определяющий, какие таблицы необходимо исключить из репликации. По умолчанию все таблицы реплицируются.
 +
 [listing]
 ----
 exclude_filter
 ----
-. If enabled, tables without primary key (or unique index) excluded from replication. By default, all tables are replicated.
+. Если этот параметр включен, таблицы без первичного ключа (или уникального индекса) исключаются из репликации. По умолчанию все таблицы реплицируются.
 +
 [listing]
 ----
 exclude_without_pk = false
 ----
-. Program (complete command line with arguments) that is executed when the current replication session notices a critical error. This command is executed once per every failed replication session. Please note that the program is executed synchronously and the server is waiting for its completion before continuing its operations.
+. Программа (команда оболочки с аргументами), которая выполняется, когда текущий сеанс репликации обнаруживает критическую ошибку. Эта команда выполняется один раз для каждого неудачного сеанса репликации. Обратите внимание, что программа выполняется синхронно, и сервер ожидает ее завершения, прежде чем продолжить свою работу.
 +
 [listing]
 ----
 alert_command
 ----
-. Prefix for replication log file names. It will be automatically suffixed with an ordinal sequential number. If not specified, database filename (without path) is used as a prefix.
+. Префикс для имен файлов журнала репликации. К нему автоматически будет добавлен порядковый последовательный номер. Если не указано, в качестве префикса используется имя файла базы данных (без пути).
 +
 [listing]
 ----
 log_file_prefix
 ----
-. Maximum allowed size for a single replication segment. It must at least double the specified __buffer_size__.
+. Максимально допустимый размер для одного сегмента репликации. Он должен как минимум вдвое превышать указанный __buffer_size__.
 +
 [listing]
 ----
 log_segment_size = 16777216
 ----
-. Maximum allowed number of full replication segments. Once this limit is reached, the replication process is delayed for _log_archive_timeout_ seconds (see below) to allow the archiving to catch up. If any of the full segments is not archived and marked for reuse during the timeout, the replication fails with an error.
+. Максимально допустимое количество полных сегментов репликации. По достижении этого предела процесс репликации задерживается на _log_archive_timeout_ секунд (см. ниже), чтобы архивирование могло наверстать упущенное. Если какой-либо из полных сегментов не заархивирован и не помечен для повторного использования в течение таймаута, репликация завершится ошибкой.
 +
-Zero means an unlimited number of segments pending archiving.
+Ноль означает неограниченное количество сегментов, ожидающих архивирования.
 +
 [listing]
 ----
