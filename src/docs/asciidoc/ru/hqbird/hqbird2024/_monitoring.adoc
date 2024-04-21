@@ -1,323 +1,284 @@
 [[_hqbird_monitoring]]
-= Monitoring
+= Мониторинг
 
-== Monitoring with HQbird FBDataGuard
+== Мониторинг с помощью HQbird FBDataGuard
 
-=== Overview
+=== Обзор
 
-HQbird monitors all aspects of Firebird server and database functioning, and includes continuous monitoring and detailed monitoring.
+HQbird контролирует все аспекты функционирования сервера и базы данных Firebird, включая непрерывный и детальный мониторинг.
 
-The continuous monitoring is performed by HQbird FBDataGuard.
-It is low-invasive, but very effective monitoring which can help to find and resolve the majority of issues with databases performance and stability.
+Непрерывный мониторинг осуществляет HQbird FBDataGuard. Это малоинвазивный, но очень эффективный мониторинг, который может помочь найти и устранить большинство проблем с производительностью и стабильностью баз данных.
 
-FBDataGuard performs the following monitoring activities:
+FBDataGuard выполняет следующие действия по мониторингу:
 
-* Optional performance monitoring with TraceAPI and MON$
-* Monitoring of transactions markers dynamics (Next, OAT, OIT, OST, active transactions)
-* Monitoring of lock table activity (queues, deadlocks, mutexes)
-* Monitoring of Firebird log (errors, warnings, messages)
-* Number of connected users
-* Free space monitoring for server, databases and their backups
-* Health monitoring through analysis of database metadata and general availability of server and databases
-* Number and size of Firebird temporary files (sorting, etc)
-* Indices monitoring: health and activity check
-* General validation of Firebird database
-* Backups statuses monitoring
-* Replica availability monitoring
+* Дополнительный мониторинг производительности с помощью TraceAPI и MON$
+* Мониторинг динамики маркеров транзакций (Next, OAT, OIT, OST, активные транзакции)
+* Мониторинг активности таблицы блокировок (queues, deadlocks, mutexes)
+* Мониторинг журнала Firebird (errors, warnings, messages)
+* Количество подключенных пользователей
+* Мониторинг свободного места для сервера, баз данных и их резервных копий
+* Мониторинг работоспособности посредством анализа метаданных базы данных и общей доступности сервера и баз данных.
+* Количество и размер временных файлов Firebird (сортировка и т. д.)
+* Мониторинг индексов: целостность и активность
+* Общая проверка базы данных Firebird
+* Мониторинг статусов резервных копий
+* Мониторинг доступности реплик
 
-FBDataGuard can graphically represent information gathered during the monitoring, for example, transactions and number of users:
+FBDataGuard может графически представлять информацию, собранную в ходе мониторинга, например о транзакциях и количестве пользователей:
 
-.Transaction dynamics in FBDataGuard.
+.Динамика транзакций в FBDataGuard.
 image::4.1.1.png[]
 
 
-.Number of users.
+.Количество пользователей.
 image::4.1.2.png[]
 
 
-=== Automatic monitoring with FBDataGuard (Trace API and MON$)
+=== Автоматический мониторинг с помощью FBDataGuard (Trace API)
 
-In the version 2020, HQBird introduces the new approach for the automatic performance monitoring with Firebird MON$ tables and TraceAPI.
+В HQBird 2020 представляет новый подход к автоматическому мониторингу производительности с помощью таблиц Firebird TraceAPI.
 
-Now it is possible to schedule the regular check of database performance for every HQBird (Standard, Professional, Enterprise) in less than 1 minute.
+Теперь регулярную проверку работоспособности базы данных можно запланировать менее чем за 1 минуту.
 
-For this just open tab Performance and setup monitoring for transactions and queries:
+Для этого просто откройте вкладку "`Производительность`" и настройте мониторинг транзакций и запросов:
 
 image::4.1.3.png[]
 
-In order to setup Performance monitoring, specify its mandatory parameters in the dialog:
+Чтобы настроить Мониторинг производительности, укажите в диалоге его обязательные параметры:
 
 image::4.1.4.png[]
 
-The first mandatory parameter is "`*Enable performance monitoring*`" -- it must be enabled to run traces by schedule.
+Первый обязательный параметр -- "`*Включить мониторинг производительности*`" -- его необходимо включить для запуска трассировок по расписанию.
 
-The next important parameters are "`Start trace session at`" and "`Stop trace session`".
-They contain CRON expressions which specify when tracing starts and stops.
+Следующие важные параметры -- "`Запустить трассировку в`"  и "`Остановить трассировку в`"
+Они содержат выражения CRON, которые определяют, когда начинается и заканчивается трассировка.
 
-**By default, trace is set to start at 10-30 and to end at 11-00**.
-It is recommended to adopt tracing schedule for your needs.
-Below you can see the table with some popular options.
+*По умолчанию трассировка начинается в 10:30 и заканчивается в 11:00*. Рекомендуется принять график отслеживания в соответствии с вашими потребностями. Ниже вы можете увидеть таблицу с некоторыми популярными вариантами.
 
 [cols="1,1,3"]
 |===
-2+h| CRON expression for
-.2+h| Description
+2+h| Выражения CRON
+.2+h| Описание
 
-h| Start
-h| End
+h| Старт
+h| Завершение
 
 |0 0 * ? * *
 |0 10 * ?* *
-|Run trace every hour from 0 to 10 minutes
+|Запускать трассировку каждый час с 0 до 10 минут
 
 |0 0 8 ? * *
 |0 0 17 ?* *
-|Run trace every day from 8-00 to 17-00
+|Запускать трассировку каждый день с 8:00 до 17:00
 
 |0 30 10,13,15 ? * *
 |0 0 11,14,16 ? * *
-|Run trace sessions every day from 10-30 to 11-00, 13-30 to 14-00 and from 15-30 to 16-00
+|Запускать трассировку каждый день с 10:30 до 11:00, с 13:30 до 14:00 и с 15:30 до 16:00
 
 |===
 
-The next important parameter is time threshold for the slow queries, it is set in the field "`Log SQLs with execution time more than`".
-In this field you need to set time threshold (in milliseconds), after exceeding it logs will be stored and analyzed.
+Следующий важный параметр -- порог времени для медленных запросов, он задается в поле "`Логировать SQL-запросы с временем выполнения более чем (ms)`". В этом поле необходимо установить порог времени выполнения запросов (в миллисекундах), после его превышения запросы будут сохраняться и анализироваться.
 
-By default, the time is set to 1000 milliseconds, or 1 second.
-It means, that only queries which take more than 1 seconds, will be logged and analyzed.
+По умолчанию время установлено на 1000 миллисекунд или 1 секунду. Это означает, что будут регистрироваться и анализироваться только запросы, которые выполняются более 1 секунды.
 
-We recommend keeping 1000 ms as a basic value, until your database is very slow: in this case 3000-5000 ms can be a good start.
+Мы рекомендуем использовать базовое значение 1000 мс, пока ваша база данных не станет очень медленной: в этом случае 3000-5000 мс могут быть хорошим началом.
 
-"`Send email`" check mark indicates if there necessity to send the performance report.
-The email settings from Alerts configuration will be used to send performance report.
+Флажок "`Отправить e-mail`" указывает на необходимость отправки отчета о производительности. Настройки электронной почты из конфигурации оповещений будут использоваться для отправки отчета о производительности.
 
-For more advanced settings, "`Performance Monitoring`" dialog has additional parameters (normally, you don't need to adjust them).
+Для более сложных настроек в диалоговом окне "`Мониторинг производительности`" есть дополнительные параметры (обычно их настраивать не требуется).
 
 image::4.1.5.png[]
 
-* "`*Configuration template*`" -- name of the configuration template file which should be used for trace settings
-* "`*Database filter*`" -- how the database should be identified. Usually AUTO is enough, it will trace specified database. In case of Filename or Alias it will use filename or alias to filter database events. «Manual» provides an ability to set any regular expression, to trace several databases, for example, or more than one alias for the single database.
-* "`*Database name filter*`" it is used in case of "`MANUAL`" selection.
-* "`*Trace format*`" -- AUTO means automatic selection, 2.5 or 3.0 will force format for 2.5 or 3.0. Usually there is no need to change it.
-* "`*Keep recent reports*`" -- it specifies how many reports should be kept in the "`Output folder`" for possible retrospective usage.
+* "`*Образец имени файла конфигурации*`" -- мя файла шаблона конфигурации, который следует использовать для настроек трассировки.
+* "`*Фильтр выбора БД*`" -- как должна идентифицироваться база данных. Обычно "`АВТО`" достаточно, он отслеживает указанную базу данных. В случае "`ИМЯ_БД`" или "`ПСЕВДОНИМ`" для фильтрации событий базы данных будет использоваться имя файла или псевдоним. "`ВРУЧНУЮ`" предоставляет возможность задать любое регулярное выражение, например, для трассировки нескольких баз данных или более одного псевдонима для одной базы данных.
+* "`*Database name filter*`" -- используется если выбран фильтр "`MANUAL`".
+* "`*Сохранять N последних отчетов*`" -- указывает, сколько отчетов должно храниться в "`Каталог для хранения отчета`" для возможного ретроспективного использования.
 
-As a result of this job, HQbird will generate the performance report, which will be stored in the Output folder as a file with the extension **html**, and it will be sent by email (in case if "`Send email`" is enabled). Also the most recent performance is available for review and download in the HQBird interface.
+В результате этого задания HQbird сформирует отчет о производительности, который будет сохранен в папке "`Каталог для хранения отчета`" в виде файла с расширением **html** и отправлен по электронной почте (в случае, если "`Отправить e-mail`" включен). Также самые последние отчёты доступны для просмотра и скачивания в интерфейсе HQBird.
 
 image::4.1.6.png[]
 
-=== What can we see in the performance report?
+=== Что показывает отчёт о производительности?
 
-The HQbird FBDataGuard performance analysis provides 3 types of reports:
+Анализ производительности HQbird FBDataGuard предоставляет 3 типа отчетов:
 
-. list of queries sorted by their time -- "`Sort by duration`";
-. list of queries sorted by its frequency -- "`Sort by frequency`";
-. list of queries sorted by the total time (i.e., summary execution time for queries with the same text and various parameters) -- "`Sort by summary`".
+. список запросов, отсортированный по времени -- "`Sort by duration`";
+. список запросов, отсортированный по частоте -- "`Sort by frequency`";
+. список запросов, отсортированный по общему времени (т. е. суммарное время выполнения запросов с одинаковым текстом и различными параметрами) -- "`Sort by summary`".
 
-In the beginning of the report you will see the graphical representation of most problematic SQL queries:
+В начале отчета вы увидите графическое представление наиболее проблемных SQL-запросов:
 
 image::4.1.7.png[]
 
-When you click "`Sort by duration`" (it is a default option), you will see SQL queries and stored procedures which took the longest time to execute first.
+image::4.1.7-1.png[]
 
-Normally there will be long-running reports and other big SQLs.
+Когда вы нажмете "`Sort by duration`" (это опция по умолчанию), вы увидите SQL-запросы и хранимые процедуры, выполнение которых в первую очередь заняло больше всего времени.
+
+Обычно они возникают на длительных отчетах и других больших SQL-запросов.
 
 image::4.1.8.png[]
 
-When you click on "`Sort by frequency`" link in the header of the report, you will see most frequent queries: i.e., those queries which started frequently (among logged queries).
+При нажатии на ссылку "`Sort by frequency`" в шапке отчета вы увидите наиболее частые запросы: т.е. те запросы, которые запускались часто (среди зарегистрированных запросов).
 
 image::4.1.9.png[]
 
-For example, in this case the statement `SP_GETINVOICE_REPORT` was run 46 times.
-It means that this query heavily affects the overall performance, and it should be optimized first.
+Например, если процедура `SP_GET_INVOICE_REPORT` (или другой запрос) была выполнена 46 раз, то это означает, что данный запрос сильно влияет на общую производительность, и его следует оптимизировать в первую очередь.
 
-When you click on Sort by summary, you will see the queries which took the most part of the time (among logged queries). These queries usually are the best candidates for the optimization.
+При нажатии на "`Sort by summary`" вы увидите запросы, которые заняли большую часть времени (среди зарегистрированных запросов). Эти запросы обычно являются лучшими кандидатами на оптимизацию.
 
 image::4.1.10.png[]
 
-==== Detailed information for the problematic SQL queries
+==== Подробная информация по проблемным SQL-запросам.
 
-To see details of the most frequent query, click in the link "`View details`" in the bottom of the query text:
+Чтобы просмотреть детали наиболее частого запроса, нажмите ссылку "`View details`" внизу текста запроса:
 
 image::4.1.11.png[]
 
-As a result, you will see the longest query among the queries with the same SQL text, with its execution plan, execution statistics and input parameters.
+В результате вы увидите самый длинный запрос среди запросов с одинаковым текстом SQL, с его планом выполнения, статистикой выполнения и входными параметрами.
 
-This information is enough to analyze and optimize SQL query in Firebird SQL Studio or other developer IDE.
+Этой информации достаточно для анализа и оптимизации SQL-запроса в Firebird SQL Studio или другой IDE для разработчиков.
 
-=== Automatic monitoring of long-running active transactions
+=== Как выбрать инструмент для детального мониторинга
 
-On the "`Performance`" tab you can find the option to enable automatic monitoring of long active transactions:
+FBDataGuard -- это первая линия защиты базы данных Firebird; как только FBDataGuard обнаруживает что-то подозрительное внутри контролируемых областей, он отправляет предупреждение с описанием проблемы.
 
-image::4.1.12.png[]
-
-By default, this monitoring is off.
-To enable it, click on «Enable transactions monitoring». In general, it is enough, this monitoring does not require further setup.
-
-Let's consider it's settings:
-
-* When to log transactions: This parameter defines when to check MON$ tables for long-running active transactions. By default, it is set to run every 5 minutes (see CRON statement). You can make less often on heavy loaded databases, up to once per hour.
-* Output folder: it is a service parameter.
-* Show transactions older then (minutes): it specifies the time threshold to show the transaction (and associated connection) in the list of long-running-transactions. By default, this threshold is 60 minutes: it means that writeable transactions which started more than 1 hour ago, will be considered as long-running.
-* Send alert if oldest active transaction is older then (minutes): the same, but it triggers alert and, if email notifications are enabled, the automatic email with the details of long running active transaction. The text of the alert looks like the following:
-+
-[listing]
-----
-There is a long running active transactions: it was started at 11/13/17 1:19 PM
-(and run at least 107 minutes}) from ::1/51068 by C:\HQbird\Firebird30\isql.exe.
-Such transactions block garbage collection, please perform transactions analysis
-with HQbird MonLogger.
-----
-* Show only NN oldest active transactions: it specifies how many records will be shown in the list with long-running transactions.
-
-The list of long-running active transactions is shown on the screenshot below:
-
-image::4.1.13.png[]
-
-Here you can see that `isql.exe` started 2 long-running active transactions to the database `h:\employee_30.fdb` at November 13, 18-05.
-
-=== How to select a tool for detailed monitoring
-
-FBDataGuard is the first line of a defense for Firebird database; once FBDataGuard encounters something suspicious inside the monitored areas, it sends an alert with description of the issue.
-
-.Important!
+.Важно!
 [IMPORTANT]
 ====
-If you have several Firebird servers, we offer HQbird Control Center application which gathers alerts data from the Firebird servers and databases and shows them at the single screen. Contact our for more details.
+Если у вас есть несколько серверов Firebird, мы предлагаем приложение HQbird Control Center, которое собирает данные оповещений с серверов и баз данных Firebird и отображает их на одном экране. Свяжитесь с нами для получения более подробной информации.
 ====
 
-After receiving such alert from FBDataGuard the database administrator should proceed with detailed investigation of the problem.
+После получения такого предупреждения от FBDataGuard администратор базы данных должен приступить к детальному изучению проблемы.
 
-The choice of tool for detailed monitoring depends on the type of detected problem.
+Выбор инструмента для детального мониторинга зависит от типа обнаруженной проблемы.
 
-If FBDataGuard reports long-running active transaction (Next-OAT), it is necessary to use *HQbird Mon$Logger* to detect the source of currently running active transaction.
+Если FBDataGuard сообщает о длительно выполняемой активной транзакции (Next-OAT), необходимо использовать *HQbird Mon$Logger* для обнаружения источника текущей активной транзакции.
 
-If stuck of oldest interesting transaction is reported, database administrator must plan an explicit sweep to clean uncollected garbage with FBDataGuard sweep job (if it is necessary) and then plan tracking of forced rollbacks with Performance Monitoring in FBDataGuard, or, if it is an old version of Firebird (2.1 or older), with **FBScanner**.
+Если сообщается о зависании oldest interesting транзакции, администратор базы данных должен запланировать явный sweep для очистки несобранного мусора с помощью задания Sweep FBDataGuard (если это необходимо), а затем запланировать отслеживание принудительных откатов с помощью Мониторинга производительности в FBDataGuard.
 
-If users report slowness problem with some queries, Perfusion or FBScanner should be used.
+Если пользователи сообщают о проблеме медленности выполнения некоторых запросов, следует использовать Perfusion или FBScanner.
 
-If there is unusual spikes in transaction behavior, *IBTransactionMonitor* can be a good addition to HQbird FBDataGuard to clarify the situation.
+Если в поведении транзакций наблюдаются необычные скачки, *IBTransactionMonitor* может стать хорошим дополнением к HQbird FBDataGuard для прояснения ситуации.
 
-The problems with general database performance and occasional or periodic slowness require an analysis of database structure, which can be done only with HQbird Database Analyst.
+Проблемы с общей производительностью базы данных и периодические или периодические замедления требуют анализа структуры базы данных, который можно выполнить только с помощью HQbird Database Analyst.
 
-Below we will consider how to work with HQbird monitoring tools in more details.
+Ниже мы рассмотрим более подробно, как работать с инструментами мониторинга HQbird.
 
 <<<
 
-== Monitoring with MON$ tables: HQbird MonLogger
+== Мониторинг с помощью MON$ таблиц: HQbird MonLogger
 
-HQbird MonLogger is a tool to analyze monitoring tables output in Firebird and find problems with slow SQL queries, wrongly designed transactions (long-running transactions, transactions with incorrect isolation level, etc) and identify problematic applications.
+HQbird MonLogger -- это инструмент для анализа вывода таблиц мониторинга в Firebird, поиска проблем с медленными SQL-запросами, неправильно спроектированных транзакций (длительно выполняемых транзакций, транзакций с неправильным уровнем изоляции и т. д.), а также выявления проблемных приложений.
 
-MonLogger can connect to Firebird database with performance problems and identify what is the reason of slowness: is it some user attachment, slow SQL query or long-running transaction?
+MonLogger может подключиться к базе данных Firebird с проблемами производительности и определить причину медленности: какое пользовательское подключение, медленный SQL-запрос или длительная транзакция?
 
-MonLogger supports Firebird 2.1, 2.5, 3.0, 4.0 and 5.0 -- for older Firebird versions or InterBase please use FBScanner.
+MonLogger поддерживает Firebird 2.1, 2.5, 3.0, 4.0 и 5.0 -- для более старых версий Firebird или InterBase используйте FBScanner.
 
-MonLogger can show you:
+MonLogger может показать вам:
 
-* Top attachments with highest number of IO operations, non-indexed and indexed reads
-* Top SQL statements with highest number of IO operations, non-indexed and indexed reads
-* Problematic transactions: long-running transactions, transactions with erroneous isolation level, read/write transactions, and related information: when they started, what applications started these transactions, from what IP address, etc
-* Attachments and statements with the most intensive garbage collection actions
-* Read/write ratio, INSERTS/UPDATE/DELETE ratio, and more.
+* Топ соединений с наибольшим количеством операций ввода-вывода, не индексированных и индексированных чтений
+* Топ SQL запросов с наибольшим количеством операций ввода-вывода, не индексированных и индексированных чтений
+* PПроблемные транзакции: длительные транзакции, транзакции с ошибочным уровнем изоляции, транзакции чтения/записи и сопутствующая информация: когда они начались, какие приложения запустили эти транзакции, с какого IP-адреса и т. д.
+* Соединения и запросы с наиболее интенсивными действиями по сборке мусора
+* Соотношение Read/write, соотношение INSERTS/UPDATE/DELETE и другое.
 
-After connection to the database where you want to find performance problems, several snapshots of monitoring tables should be done – click on "`Get Snapshot`" to take snapshot.
+После подключения к базе данных, в которой вы хотите обнаружить проблемы с производительностью, необходимо сделать несколько снимков таблиц мониторинга -- нажмите "`Get Snapshot`", чтобы сделать снимок
 
-=== Aggregated performance statistics for users attachments
+=== Агрегированная статистика производительности для пользовательских соединений
 
-At the first screen we can see aggregated statistics for database connections, and identify connections with the biggest problems:
+На первом экране мы можем увидеть агрегированную статистику подключений к базе данных и выявить соединения с наибольшими проблемами:
 
 image::4.2.1.png[]
 
 ==== Sequential reads / Indexed reads
 
-"`Sequential reads / Indexed reads`" shows us total ratio between sequential (non-indexed) reads and indexed reads in application. Usually number of non-indexed reads should be low, so big percent of sequential reads is sign that many SQL queries have `NATURAL` execution plans, and they could be a reason of slow response time.
+"`Sequential reads / Indexed reads`" показывает нам общее соотношение между последовательными (неиндексированными) чтениями и индексированными чтениями в приложении. Обычно количество неиндексированных чтений должно быть небольшим, поэтому большой процент последовательных чтений является признаком того, что многие SQL-запросы имею план выполнения `NATURAL`, и они могут быть причиной медленного времени ответа.
 
-Click on record in "`TOP attachments: sequential/indexed reads`" will bring you to tab "`Attachments`", where you can see more details about Attachment, and then jump to tab "`Transactions`" or "`Statements`", where you will see transactions and attachments linked with selected attachment (if checkmark "`Link to selected attachment`" is on, otherwise all transactions/statements for all attachments will be shown).
+Щелкните на записи в разделе "`TOP attachments: sequential/indexed reads`" , чтобы перейти на вкладку "`Attachments`",, где можно просмотреть более подробную информацию о соединениях с БД, а затем перейти на вкладку  "`Transactions`" или "`Statements`", где вы увидите транзакции и запросы, связанные с выбранным соединением (если установлен флажок "`Link to selected attachment`", в противном случае будут показаны все транзакции/запросы для всех соединений).
 
 ==== Write details
 
-"`Write details`" gives you an overview of write operations: ratio between INSERTs/UPDATEs/DELETEs among all database attachments. In the table of top writers you can see attachments with the biggest number of write operations. It is useful to identify applications or software modules which performs excessive number of update or deletes (which are the most dangerous operations in terms of garbage collections).
+"`Write details`" дает вам обзор операций записи: соотношение между INSERT/UPDATE/DELETE среди всех соединений базы данных. В таблице top writes вы можете увидеть соединения с наибольшим количеством операций записи. Полезно выявить приложения или программные модули, которые выполняют чрезмерное количество обновлений или удалений (которые являются наиболее опасными операциями с точки зрения сборки мусора).
 
 ==== Garbage collection details
 
-What garbage collection operations mean?
+Что означают операции по сборке мусора?
 
-* Purge -- engine removes back-versions, only primary version is in database.
-* Expunge -- both primary version and all back-versions were deleted.
-* Back-out -- remove only primary version (due to rollback).
+* Purge -- движок удаляет бэк-версии, в базе данных находится только основная версия.
+* Expunge -- как основная версия, так и все бэк-версии были удалены.
+* Back-out -- удалена только основную версию (из-за rollback).
 
-Usually we can associate purge with `UPDATE` operation, Expunge with `DELETE`, and Backout with rollback of `INSERT` or `UPDATE`.
-Many backouts could mean that there is a problem with transaction management in the application.
+Обычно мы можем связать Purge с операцией `UPDATE`, Expunge с `DELETE`, и Backout с откатом `INSERT` или `UPDATE`. Множество backouts могут означать, что в приложении возникла проблема с управлением транзакциями.
 
 ==== Memory usage
 
-"`Memory usage`" graph shows us total memory used by all active attachments now, and peak of allocated memory for them in the past.
+График "`Memory usage`" показывает общий объем памяти, используемый всеми активными соединениями сейчас, и пик выделенной памяти для них в прошлом.
 
-List of top attachments by memory usage shows us the biggest memory consumers among your attachments. It is useful to find applications or software modules with excessive memory usage.
+Топ соединений по объему использования памяти показывает, какие ваши соединения больше всего потребляют память. Полезно найти приложения или программные модули с чрезмерным использованием памяти.
 
 === Aggregated performance statistics for statements
 
-At the second tab you can find aggregated performance statistics for statements.
+На второй вкладке вы можете найти агрегированную статистику производительности SQL запросов.
 
 image::4.2.2.png[]
 
-This statistics better reflects the momentary situation in the database -- since monitoring tables collect information since the beginning of each object life, statements you can see here are those which were running during the moment when snapshot was taken.
+Эта статистика лучше отражает текущую ситуацию в базе данных -- поскольку таблицы мониторинга собирают информацию с начала жизни каждого объекта, здесь вы можете увидеть операторы, которые выполнялись в момент создания моментального снимка.
 
 ==== Sequential reads / Indexed reads
 
-In this list we can see top statements which perform many sequential reads from the database. Usually such statements require SQL tuning – either through indices tuning, or through SQL query redesign.
+В этом списке мы видим топ запросов, которые выполняют множество операций последовательного чтения из базы данных. Обычно такие запросы требуют настройки SQL -- либо путем создания индексов индексов, либо путем изменения конструкции SQL-запроса.
 
-To tune the query, check its execution plan: usually it is possible to improve query speed by eliminating NATURAL in plans with new indices or query redesign.
-Click on the statement in this list to open tab "`Statements`", where you can find more details about selected statement, and jump to associated transaction or attachment.
+Чтобы настроить запрос, проверьте план его выполнения: обычно можно повысить скорость запроса, исключив из планов `NATURAL` с помощью новых индексов или переписывания запроса. Щёлкните по запросу в этом списке, чтобы открыть вкладку "`Statements`", где вы сможете найти более подробную информацию о выбранном запросе и перейти к соответствующей транзакции или соединению.
 
 ==== Page reads/page writes
 
-This graphs and list shows brief information about top statements which perform many reads -- it means that they consume significant IO and can affect performance of other queries. SQL statements with peak values should be carefully checked for optimal performance.
+На этих графиках и в списке представлена краткая информация о топе SQL запросов, которые выполняют много операций чтения -- это означает, что они потребляют значительный объем операций ввода-вывода и могут повлиять на производительность других запросов. SQL запросы с пиковыми значениями следует тщательно проверять на предмет оптимальной производительности.
 
-==== Write details for statements
+==== Write details для запросов
 
-At this graph you can see what writing SQL statements were doing at the moment when snapshot of monitoring tables was taken, and identify UPDATES and DELETEs which made many changes in the database.
+На этом графике вы можете увидеть, что записывали SQL операторы в момент создания снимка таблиц мониторинга, а также определить UPDATEs и DELETEs, которые внесли много изменений в базу данных.
 
-==== Garbage collection details for statements
+==== Garbage collection details для запросов
 
-At this graph we can see how many garbage collection operations were done by statements running at the moment of snapshot.
+На этом графике мы видим, сколько операций по сборке мусора было выполнено SQL запросами, выполнявшимися в момент создания снимка.
 
-==== Memory usage for statements
+==== Memory usage для запросов
 
-Unlike aggregated memory usage statistics for attachment, statements' memory usage can show us list of exact statements which consume a lot of memory at the moment.
+В отличие от агрегированной статистики использования памяти для соединений, использование памяти SQL запросами может показать нам список точных операторов, которые в данный момент потребляют много памяти.
 
 === Attachments
 
-The third tab is "`Attachments`". You can open this tab directly to jump there by clicking one of the records at "`Aggregated performance statistics`".
+Третья вкладка -- "`Attachments`". Вы можете открыть эту вкладку и перейти туда, щелкнув одну из записей в разделе "`Aggregated performance statistics`".
 
 image::4.2.3.png[]
 
-"`Attachments`" shows the list of users connected to the Firebird database, with many useful details: `USER` and `ROLE` of attachment, start time and ID of attachment, is there garbage collection enabled for the attachment, name of remote process which established an attachment, and several accumulated performance counters for the attachment: number of sequential reads [done by attachment since its start], number of indexed reads, number of inserts, updates and deletes, as well records backouts, purges and expunges.
+"`Attachments`" показывает список пользователей, подключенных к базе данных Firebird, со многими полезными подробностями: `USER` и `ROLE` для соединения, время начала и идентификатор соединения, включена ли сборка мусора для соединения, имя удаленного процесса, установившего соединение, и несколько накопленных счетчиков производительности для соединения: количество последовательных чтений (выполненных соединений с момента его запуска), количество индексированных чтений, количество вставок, обновлений и удалений, а также количество backouts, purges и expunges.
 
-By default, some of columns of attachment are switched off, to show only most important information.
+По умолчанию некоторые столбцы соединения отключены, чтобы отображалась только самая важная информация.
 
-Of course, every time you click on attachment, you can jump to transactions running inside it, and then to statements. There is a checkbox in the left upper corner of Transactions and Statements tabs, which controls the behavior -- when checked, only transactions and statements marked by selected attachment ID, will be shown.
+Конечно, каждый раз, когда вы щёлкаете по соединению, вы можете перейти к транзакциям, выполняемым внутри него, а затем к запросам. В левом верхнем углу вкладок "`Transactions`" и "`Statements`" есть флажок, который управляет поведением: если этот флажок установлен, будут отображаться только транзакции и запросы, по выделенному идентификатору соединения.
 
 === Transactions
 
-Tab "`Transactions`" shows active transactions at the moment when snapshot was taken.
+Закладка "`Transactions`" показывает активные транзакции на момент создания снимка.
 
 image::4.2.4.png[]
 
-If checkbox "`Link to selected attachment`" is enabled, only transactions for selected attachment will be shown, otherwise all transactions are shown.
+Если установлен флажок "`Link to selected attachment`" будут показаны только транзакции для выбранного соединения, в противном случае показаны все транзакции.
 
-One of the most important characteristics is a lifetime of transactions: since Firebird is designed to work with short write transactions, it is important to keep them as short as possible. MonLogger highlights transactions with isolation modes and read-write settings which hold Oldest Active transaction and therefore provoke excessive record versions to be not cleared. If you see such transaction and it started a while ago, it means that it can be responsible for excessive records versions.
+Одной из наиболее важных характеристик является время жизни транзакций: поскольку Firebird предназначен для работы с короткими пишущими транзакциями, важно сделать их как можно более короткими. MonLogger выделяет транзакции с режимами изоляции и read-write настройками, которые содержат Oldest Active транзакцию и, следовательно, приводят к тому, что они накапливают чрезмерное количество версий записей. Если вы видите такую транзакцию и она началась некоторое время назад, это означает, что она может быть ответственна за чрезмерное накопление версий записей.
 
-Sort on "`started at`" column and look for old transactions, marked in red: all writeable transactions and read only snapshots stuck Oldest Active Transaction and provoke excessive record versions to be hold. Identify where these transactions started (right-click and select "`View parent attachment`") and fix your code to commit this transaction earlier.
+Выполните сортировку по столбцу "`started at`" и найдите старые транзакции, отмеченные красным: все транзакции, доступные для записи, и snapshot транзакции, доступные только для чтения, приводят к застреванию в Oldest Active Transaction и вызывают удержание чрезмерного количества версий записей. Определите, где начались эти транзакции (щелкните правой кнопкой мыши и выберите "`View parent attachment`") и исправьте свой код, чтобы фиксировать эту транзакцию раньше.
 
 === Statements
 
 image::4.2.5.png[]
 
-Tab "`Statements`" shows statements active at the moment of snapshot: if you need to catch all statements FBPerfMon or FBScanner should be used (all these tools are part of IBSurgeon Optimization Pack).
+На вкладке "`Statements`" показаны SQL операторы, активные на момент создания снимка: если вам нужно перехватить все операторы, то следует использовать FBPerfMon или FBScanner (все эти инструменты являются частью IBSurgeon Optimization Pack).
 
-If "`Link to selected attachment`" is enabled, only statements for specific attachment will be shown, otherwise all active statements are in the list.
+Если включена опция "`Link to selected attachment`", то будут показаны только SQL запросы для конкретного соединения, в противном случае в списке будут все активные запросы.
 
-Some statements have no associated transaction id (=0): these queries are prepared, but not executed.
+Некоторые операторы не имеют связанного идентификатора транзакции (=0): эти запросы подготавливаются, но не выполняются.
 
 <<<
 

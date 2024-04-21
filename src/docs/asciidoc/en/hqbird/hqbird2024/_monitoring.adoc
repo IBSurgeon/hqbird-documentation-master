@@ -7,8 +7,7 @@
 
 HQbird monitors all aspects of Firebird server and database functioning, and includes continuous monitoring and detailed monitoring.
 
-The continuous monitoring is performed by HQbird FBDataGuard.
-It is low-invasive, but very effective monitoring which can help to find and resolve the majority of issues with databases performance and stability.
+The continuous monitoring is performed by HQbird FBDataGuard. It is low-invasive, but very effective monitoring which can help to find and resolve the majority of issues with databases performance and stability.
 
 FBDataGuard performs the following monitoring activities:
 
@@ -39,7 +38,7 @@ image::4.1.2.png[]
 
 In the version 2020, HQBird introduces the new approach for the automatic performance monitoring with Firebird MON$ tables and TraceAPI.
 
-Now it is possible to schedule the regular check of database performance for every HQBird (Standard, Professional, Enterprise) in less than 1 minute.
+Now it is possible to schedule the regular check of database performance in less than 1 minute.
 
 For this just open tab Performance and setup monitoring for transactions and queries:
 
@@ -54,9 +53,7 @@ The first mandatory parameter is "`*Enable performance monitoring*`" -- it must 
 The next important parameters are "`Start trace session at`" and "`Stop trace session`".
 They contain CRON expressions which specify when tracing starts and stops.
 
-**By default, trace is set to start at 10-30 and to end at 11-00**.
-It is recommended to adopt tracing schedule for your needs.
-Below you can see the table with some popular options.
+*By default, trace is set to start at 10-30 and to end at 11-00*. It is recommended to adopt tracing schedule for your needs. Below you can see the table with some popular options.
 
 [cols="1,1,3"]
 |===
@@ -80,11 +77,9 @@ h| End
 
 |===
 
-The next important parameter is time threshold for the slow queries, it is set in the field "`Log SQLs with execution time more than`".
-In this field you need to set time threshold (in milliseconds), after exceeding it logs will be stored and analyzed.
+The next important parameter is time threshold for the slow queries, it is set in the field "`Log SQLs with execution time more than`". In this field you need to set time threshold (in milliseconds), after exceeding it logs will be stored and analyzed.
 
-By default, the time is set to 1000 milliseconds, or 1 second.
-It means, that only queries which take more than 1 seconds, will be logged and analyzed.
+By default, the time is set to 1000 milliseconds, or 1 second. It means, that only queries which take more than 1 seconds, will be logged and analyzed.
 
 We recommend keeping 1000 ms as a basic value, until your database is very slow: in this case 3000-5000 ms can be a good start.
 
@@ -96,9 +91,8 @@ For more advanced settings, "`Performance Monitoring`" dialog has additional par
 image::4.1.5.png[]
 
 * "`*Configuration template*`" -- name of the configuration template file which should be used for trace settings
-* "`*Database filter*`" -- how the database should be identified. Usually AUTO is enough, it will trace specified database. In case of Filename or Alias it will use filename or alias to filter database events. «Manual» provides an ability to set any regular expression, to trace several databases, for example, or more than one alias for the single database.
+* "`*Database filter*`" -- how the database should be identified. Usually "`AUTO`" is enough, it will trace specified database. In case of "`FILENAME`" or "`ALIAS`" it will use filename or alias to filter database events. "`MANUAL`" provides an ability to set any regular expression, to trace several databases, for example, or more than one alias for the single database.
 * "`*Database name filter*`" it is used in case of "`MANUAL`" selection.
-* "`*Trace format*`" -- AUTO means automatic selection, 2.5 or 3.0 will force format for 2.5 or 3.0. Usually there is no need to change it.
 * "`*Keep recent reports*`" -- it specifies how many reports should be kept in the "`Output folder`" for possible retrospective usage.
 
 As a result of this job, HQbird will generate the performance report, which will be stored in the Output folder as a file with the extension **html**, and it will be sent by email (in case if "`Send email`" is enabled). Also the most recent performance is available for review and download in the HQBird interface.
@@ -117,6 +111,8 @@ In the beginning of the report you will see the graphical representation of most
 
 image::4.1.7.png[]
 
+image::4.1.7-1.png[]
+
 When you click "`Sort by duration`" (it is a default option), you will see SQL queries and stored procedures which took the longest time to execute first.
 
 Normally there will be long-running reports and other big SQLs.
@@ -127,10 +123,9 @@ When you click on "`Sort by frequency`" link in the header of the report, you wi
 
 image::4.1.9.png[]
 
-For example, in this case the statement `SP_GETINVOICE_REPORT` was run 46 times.
-It means that this query heavily affects the overall performance, and it should be optimized first.
+For example, in this case the statement `SP_GET_INVOICE_REPORT` was run 46 times. It means that this query heavily affects the overall performance, and it should be optimized first.
 
-When you click on Sort by summary, you will see the queries which took the most part of the time (among logged queries). These queries usually are the best candidates for the optimization.
+When you click on "`Sort by summary`", you will see the queries which took the most part of the time (among logged queries). These queries usually are the best candidates for the optimization.
 
 image::4.1.10.png[]
 
@@ -143,37 +138,6 @@ image::4.1.11.png[]
 As a result, you will see the longest query among the queries with the same SQL text, with its execution plan, execution statistics and input parameters.
 
 This information is enough to analyze and optimize SQL query in Firebird SQL Studio or other developer IDE.
-
-=== Automatic monitoring of long-running active transactions
-
-On the "`Performance`" tab you can find the option to enable automatic monitoring of long active transactions:
-
-image::4.1.12.png[]
-
-By default, this monitoring is off.
-To enable it, click on «Enable transactions monitoring». In general, it is enough, this monitoring does not require further setup.
-
-Let's consider it's settings:
-
-* When to log transactions: This parameter defines when to check MON$ tables for long-running active transactions. By default, it is set to run every 5 minutes (see CRON statement). You can make less often on heavy loaded databases, up to once per hour.
-* Output folder: it is a service parameter.
-* Show transactions older then (minutes): it specifies the time threshold to show the transaction (and associated connection) in the list of long-running-transactions. By default, this threshold is 60 minutes: it means that writeable transactions which started more than 1 hour ago, will be considered as long-running.
-* Send alert if oldest active transaction is older then (minutes): the same, but it triggers alert and, if email notifications are enabled, the automatic email with the details of long running active transaction. The text of the alert looks like the following:
-+
-[listing]
-----
-There is a long running active transactions: it was started at 11/13/17 1:19 PM
-(and run at least 107 minutes}) from ::1/51068 by C:\HQbird\Firebird30\isql.exe.
-Such transactions block garbage collection, please perform transactions analysis
-with HQbird MonLogger.
-----
-* Show only NN oldest active transactions: it specifies how many records will be shown in the list with long-running transactions.
-
-The list of long-running active transactions is shown on the screenshot below:
-
-image::4.1.13.png[]
-
-Here you can see that `isql.exe` started 2 long-running active transactions to the database `h:\employee_30.fdb` at November 13, 18-05.
 
 === How to select a tool for detailed monitoring
 
@@ -191,7 +155,7 @@ The choice of tool for detailed monitoring depends on the type of detected probl
 
 If FBDataGuard reports long-running active transaction (Next-OAT), it is necessary to use *HQbird Mon$Logger* to detect the source of currently running active transaction.
 
-If stuck of oldest interesting transaction is reported, database administrator must plan an explicit sweep to clean uncollected garbage with FBDataGuard sweep job (if it is necessary) and then plan tracking of forced rollbacks with Performance Monitoring in FBDataGuard, or, if it is an old version of Firebird (2.1 or older), with **FBScanner**.
+If stuck of oldest interesting transaction is reported, database administrator must plan an explicit sweep to clean uncollected garbage with FBDataGuard sweep job (if it is necessary) and then plan tracking of forced rollbacks with Performance Monitoring in FBDataGuard.
 
 If users report slowness problem with some queries, Perfusion or FBScanner should be used.
 
@@ -219,7 +183,7 @@ MonLogger can show you:
 * Attachments and statements with the most intensive garbage collection actions
 * Read/write ratio, INSERTS/UPDATE/DELETE ratio, and more.
 
-After connection to the database where you want to find performance problems, several snapshots of monitoring tables should be done – click on "`Get Snapshot`" to take snapshot.
+After connection to the database where you want to find performance problems, several snapshots of monitoring tables should be done -- click on "`Get Snapshot`" to take snapshot.
 
 === Aggregated performance statistics for users attachments
 
@@ -231,7 +195,7 @@ image::4.2.1.png[]
 
 "`Sequential reads / Indexed reads`" shows us total ratio between sequential (non-indexed) reads and indexed reads in application. Usually number of non-indexed reads should be low, so big percent of sequential reads is sign that many SQL queries have `NATURAL` execution plans, and they could be a reason of slow response time.
 
-Click on record in "`TOP attachments: sequential/indexed reads`" will bring you to tab "`Attachments`", where you can see more details about Attachment, and then jump to tab "`Transactions`" or "`Statements`", where you will see transactions and attachments linked with selected attachment (if checkmark "`Link to selected attachment`" is on, otherwise all transactions/statements for all attachments will be shown).
+Click on record in "`TOP attachments: sequential/indexed reads`" will bring you to tab "`Attachments`", where you can see more details about Attachment, and then jump to tab "`Transactions`" or "`Statements`", where you will see transactions and statements linked with selected attachment (if checkmark "`Link to selected attachment`" is on, otherwise all transactions/statements for all attachments will be shown).
 
 ==== Write details
 
@@ -245,8 +209,7 @@ What garbage collection operations mean?
 * Expunge -- both primary version and all back-versions were deleted.
 * Back-out -- remove only primary version (due to rollback).
 
-Usually we can associate purge with `UPDATE` operation, Expunge with `DELETE`, and Backout with rollback of `INSERT` or `UPDATE`.
-Many backouts could mean that there is a problem with transaction management in the application.
+Usually we can associate purge with `UPDATE` operation, Expunge with `DELETE`, and Backout with rollback of `INSERT` or `UPDATE`. Many backouts could mean that there is a problem with transaction management in the application.
 
 ==== Memory usage
 
@@ -264,10 +227,9 @@ This statistics better reflects the momentary situation in the database -- since
 
 ==== Sequential reads / Indexed reads
 
-In this list we can see top statements which perform many sequential reads from the database. Usually such statements require SQL tuning – either through indices tuning, or through SQL query redesign.
+In this list we can see top statements which perform many sequential reads from the database. Usually such statements require SQL tuning -- either through indices tuning, or through SQL query redesign.
 
-To tune the query, check its execution plan: usually it is possible to improve query speed by eliminating NATURAL in plans with new indices or query redesign.
-Click on the statement in this list to open tab "`Statements`", where you can find more details about selected statement, and jump to associated transaction or attachment.
+To tune the query, check its execution plan: usually it is possible to improve query speed by eliminating `NATURAL` in plans with new indices or query redesign. Click on the statement in this list to open tab "`Statements`", where you can find more details about selected statement, and jump to associated transaction or attachment.
 
 ==== Page reads/page writes
 
@@ -291,11 +253,11 @@ The third tab is "`Attachments`". You can open this tab directly to jump there b
 
 image::4.2.3.png[]
 
-"`Attachments`" shows the list of users connected to the Firebird database, with many useful details: `USER` and `ROLE` of attachment, start time and ID of attachment, is there garbage collection enabled for the attachment, name of remote process which established an attachment, and several accumulated performance counters for the attachment: number of sequential reads [done by attachment since its start], number of indexed reads, number of inserts, updates and deletes, as well records backouts, purges and expunges.
+"`Attachments`" shows the list of users connected to the Firebird database, with many useful details: `USER` and `ROLE` of attachment, start time and ID of attachment, is there garbage collection enabled for the attachment, name of remote process which established an attachment, and several accumulated performance counters for the attachment: number of sequential reads (done by attachment since its start), number of indexed reads, number of inserts, updates and deletes, as well records backouts, purges and expunges.
 
 By default, some of columns of attachment are switched off, to show only most important information.
 
-Of course, every time you click on attachment, you can jump to transactions running inside it, and then to statements. There is a checkbox in the left upper corner of Transactions and Statements tabs, which controls the behavior -- when checked, only transactions and statements marked by selected attachment ID, will be shown.
+Of course, every time you click on attachment, you can jump to transactions running inside it, and then to statements. There is a checkbox in the left upper corner of "`Transactions`" and "`Statements`" tabs, which controls the behavior -- when checked, only transactions and statements marked by selected attachment ID, will be shown.
 
 === Transactions
 

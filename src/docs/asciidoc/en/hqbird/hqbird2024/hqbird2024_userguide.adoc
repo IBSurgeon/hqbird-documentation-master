@@ -20,11 +20,11 @@ include::_installation.adoc[leveloffset=1]
 
 include::_сonfiguring.adoc[leveloffset=1]
 
-include::_enterprise_config.adoc[leveloffset=1]
+include::_replication_config.adoc[leveloffset=1]
 
-#include::_performance_enhancements.adoc[leveloffset=1]
+include::_performance_enhancements.adoc[leveloffset=1]
 
-#include::_monitoring.adoc[leveloffset=1]
+include::_monitoring.adoc[leveloffset=1]
 
 #include::_struct_analyze.adoc[leveloffset=1]
 
