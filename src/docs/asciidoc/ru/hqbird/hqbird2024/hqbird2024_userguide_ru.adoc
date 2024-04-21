@@ -25,29 +25,29 @@ include::_replication_config.adoc[leveloffset=1]
 
 include::_performance_enhancements.adoc[leveloffset=1]
 
-include::_monitoring.adoc[leveloffset=1]
+#include::_monitoring.adoc[leveloffset=1]
 
-#include::_struct_analyze.adoc[leveloffset=1]
+include::_struct_analyze.adoc[leveloffset=1]
 
-#include::_encryption.adoc[leveloffset=1]
+include::_encryption.adoc[leveloffset=1]
 
-#include::_auth_esoe.adoc[leveloffset=1]
+include::_auth_esoe.adoc[leveloffset=1]
 
-#include::_eds_other_dbms.adoc[leveloffset=1]
+include::_eds_other_dbms.adoc[leveloffset=1]
 
-#include::_rsa_udr.adoc[leveloffset=1]
+include::_rsa_udr.adoc[leveloffset=1]
 
-#include::_split_udr.adoc[leveloffset=1]
+include::_split_udr.adoc[leveloffset=1]
 
-#include::_ocr_udr.adoc[leveloffset=1]
+include::_ocr_udr.adoc[leveloffset=1]
 
-#include::_lk_json_udr.adoc[leveloffset=1]
+include::_lk_json_udr.adoc[leveloffset=1]
 
-#include::_nanodbc_udr.adoc[leveloffset=1]
+include::_nanodbc_udr.adoc[leveloffset=1]
 
-#include::_http_client_udr.adoc[leveloffset=1]
+include::_http_client_udr.adoc[leveloffset=1]
 
-#include::_fbstreaming.adoc[leveloffset=1]
+include::_fbstreaming.adoc[leveloffset=1]
 
 :sectnums!:
 
