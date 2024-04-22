@@ -33,7 +33,110 @@
 
 В будущих версиях планируется также добавить поддержку сериализации событий в формате AVRO, а также поддержку реестра схем.
 
-Далее подробно расскажем о событиях изменения данных.
+== Наименование топиков
+
+По умолчанию `kafka_cdc_plugin` записывает события изменения для всех операций `INSERT`, `UPDATE` и `DELETE`, в одну тему Apache Kafka. `kafka_cdc_plugin` использует для имён топиков события изменения данных схему описанную в параметре `kafka_topic_cdc_event`, равную `$[topicPrefix].cdc`.
+
+Здесь `$[topicPrefix]` -- это подстановка, которая заменятся префиксом для топиков. Этот префикс задаётся параметром `kafka_topic_prefix`, по умолчанию он равен `fb_streaming`. Таким образом, по умолчанию все события изменения данных записываются в топик `fb_streaming.cdc` (после применения подстановки).
+
+Существуют и другие подстановки. Подстановка `$[tableName]` обозначает имя таблицы, для которой генерируется событие. Таким образом, указав в конфигурации
+
+[listing]
+----
+kafka_topic_cdc_event = $[topicPrefix].cdc.$[tableName]
+----
+
+мы получаем для каждой таблицы свой топик событий изменения данных. 
+
+Примеры полученных топиков с событиями изменения данных:
+
+[listing]
+----
+fb_streaming.cdc.products
+fb_streaming.cdc.products_on_hand
+fb_streaming.cdc.customers
+fb_streaming.cdc.orders
+----
+
+Имя топика для события изменения метаданных указывается в параметре `kafka_topic_transaction`. В этом параметре доступна только подстановка `$[topicPrefix]`.
+
+== Метаданные транзакции
+
+Плагин `kafka_cdc_plugin` может генерировать события, которые представляют границы транзакций и дополняют сообщения о событиях изменения данных. По умолчанию генерация событий границ транзакций отключено. Её можно включить установив параметр `transaction_metadata_enable` в значение `true`.
+
+Плагин `kafka_cdc_plugin` генерирует события границ транзакций `BEGIN` и `END` для каждой транзакции. События границ транзакций содержат следующие поля:
+
+`status`:: `BEGIN` или `END`;
+`id`:: идентификатор транзакции;
+`ts_ms`:: время события границы транзакции (событие `BEGIN` или `END`). Поскольку в журналах репликации данного времени нет, то записывается время когда событие обрабатывается плагином `kafka_cdc_plugin`;
+`event_count` (для события `END`):: общее количество событий, созданных транзакцией;
+`data_collections` (для события `END`):: массив пар элементов `data_collection` и `event_count`, указывающий количество событий, которые `kafka_cdc_plugin` генерирует для изменений, происходящих для коллекции данных.
+
+.Пример
+[example]
+====
+[source,json]
+----
+{
+    "status": "BEGIN",
+    "id": 901,
+    "ts_ms": 1713099401529,
+    "event_count": null,
+    "data_collections": null
+}
+
+{
+    "status": "END",
+    "id": 901,
+    "ts_ms": 1713099404605,
+    "event_count": 2,
+    "data_collections": [
+        {
+            "data_collection": "fbstreaming.cdc.CUSTOMERS",
+            "event_count": 2
+        }
+    ]
+}
+----
+====
+
+Если это не переопределено с помощью параметра `kafka_topic_transaction`, то `kafka_cdc_plugin` отправляет события транзакции в тему `$[topicPrefix].transaction`.
+
+=== Расширение события изменения данных
+
+Когда метаданные транзакции включены (`transaction_metadata_enable = true`), `Envelope` сообщения с данными пополняется новым полем `transaction`. Это поле предоставляет информацию о каждом событии в виде совокупности полей:
+
+[horizontal]
+`id`:: идентификатор транзакции;
+`total_order`:: абсолютная позиция события среди всех событий, созданных транзакцией;
+`data_collection_order`:: позиция события в коллекции, среди всех событий созданных транзакцией.
+
+.Пример
+[example]
+====
+[listing]
+----
+{
+    "before": null,
+    "after": {
+        "ID": 20,
+        "FIRST_NAME": "Anne",
+        "LAST_NAME": "Kretchmar",
+        "EMAIL": "annek@noanswer.org"
+    },
+    "source": {
+       ...
+    },
+    "op": "c",
+    "ts_ms": 1713099401533,
+    "transaction": {
+        "id": 901,
+        "total_order": 1,
+        "data_collection_order": 1
+    }
+}
+----
+====
 
 == Data Change Events (События изменения данных)
 
@@ -774,9 +877,12 @@ task = d:\fbdata\5.0\replication\test\kafka_source
     plugin = kafka_cdc_plugin
     dumpBlobs = true
     kafka_brokers = localhost:9092
-    kafka_topic = cdc
+    kafka_topic_prefix = fb_streaming
+    kafka_topic_cdc_event = $[topicPrefix].cdc
+    kafka_topic_transaction = $[topicPrefix].transaction
     key_converter_schemas_enable = true
     value_converter_schemas_enable = true
+    transaction_metadata_enable = true
 }
 ----
 
@@ -793,9 +899,12 @@ task = /mnt/d/fbdata/5.0/replication/test/kafka_source
     plugin = kafka_cdc_plugin
     dumpBlobs = true
     kafka_brokers = localhost:9092
-    kafka_topic = cdc
+    kafka_topic_prefix = fb_streaming
+    kafka_topic_cdc_event = $[topicPrefix].cdc
+    kafka_topic_transaction = $[topicPrefix].transaction
     key_converter_schemas_enable = true
     value_converter_schemas_enable = true
+    transaction_metadata_enable = true
 }
 ----
 
@@ -813,9 +922,12 @@ task = /mnt/d/fbdata/5.0/replication/test/kafka_source
 - `exclude_tables` -- регулярное выражение, определяющие имена таблиц для которых не надо отслеживать события;
 - `dumpBlobs` -- публиковать ли новые значения BLOB полей (по умолчанию `false`);
 - `kafka_brokers` -- адреса брокеров Kafka. Можно указать несколько адресов. Адреса разделяются запятой;
-- `kafka_topic` -- имя топика Kafka, в которой сохраняются события изменения данных;
+- `kafka_topic_prefix` -- префикс топиков Kafka. Он задаёт макроподстановку `$[topicPrefix]`, которая может использоваться для имён топиков; 
+- `kafka_topic_cdc_event` -- имя топика(ов) Kafka, в которой сохраняются события изменения данных. Могут использоваться макроподстановки `$[topicPrefix]` и `$[tableName]`;
+- `kafka_topic_transaction` -- имя топика Kafka, в которой сохраняются метаданные транзакций. Может использоваться макроподстановка `$[topicPrefix]`;
 - `key_converter_schemas_enable` -- включать ли в ключ события обновления данных схему;
-- `value_converter_schemas_enable` -- включать ли в значение события обновления данных схему.
+- `value_converter_schemas_enable` -- включать ли в значение события обновления данных схему;
+- `transaction_metadata_enable` -- отправлять ли события старта и завершения транзакции.
 
 === Запуск Kafka
 
@@ -869,4 +981,4 @@ sudo systemctl start fb_streaming
 ALTER DATABASE ENABLE PUBLICATION;
 ----
 
-С этого момента служба `fb_streaming` будет отслеживать изменения в указанных таблицах и публиковать из в топике `cdc`, на серверах указных в `kafka_brokers`.
+С этого момента служба `fb_streaming` будет отслеживать изменения в указанных таблицах и публиковать в топике `fb_streaming.cdc, на серверах указных в `kafka_brokers`.
