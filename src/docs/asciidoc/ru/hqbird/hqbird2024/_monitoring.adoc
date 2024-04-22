@@ -367,7 +367,7 @@ It shows the real-time activity of connected clients:
 
 FBScanner can log all SQL traffic to text files and external Firebird database, it includes FBScanner LogAnalyzer module to analyze SQL performance.
 
-FBScanner can be used to profile database applications, monitor user activity, and manage database connections (including client disconnects on Classic, SuperClassic and SuperServer architectures). It`'s also ideal for troubleshooting INET errors, as well as auditing existing applications and performance tuning.
+FBScanner can be used to profile database applications, monitor user activity, and manage database connections (including client disconnects on Classic, SuperClassic and SuperServer architectures). It's also ideal for troubleshooting INET errors, as well as auditing existing applications and performance tuning.
 
 FBScanner supports Firebird (V1.x, V2.0, V2.1 and V.2.5), InterBase (V4.0 to 2009/XE3). It is a useful tool for analyzing production databases, especially if the application has been developed by third-party and there is no source code available.
 
@@ -453,7 +453,7 @@ First of all, we need to specify network name (or IP) of the computer with Fireb
 
 Then we need to specify Firebird version -- in our example it's Firebird 1.5.
 
-FBScanner instance also has "`Interface`" -- it's the list of network adapters found at the computer. If you need to bind FBScanner to one of them and disable connections from other network adapters, choose one of the adapters from the drop-down list. By default FBScanner will accept Firebird clients`' requests from all network adapters.
+FBScanner instance also has "`Interface`" -- it's the list of network adapters found at the computer. If you need to bind FBScanner to one of them and disable connections from other network adapters, choose one of the adapters from the drop-down list. By default FBScanner will accept Firebird clients requests from all network adapters.
 
 Below you can see the example of FBScanner configuration to route SQL traffic to remote Firebird instance, which resides on *myserver1* computer and works on default port 3050.
 
@@ -629,8 +629,8 @@ Please consider the following requirements for SQL log configuration:
 
 * Log database (and appropriate Firebird instance) should be in Firebird 2.5 format (since FBScanner 2.7.15). If you are forced to use FBScanner at the computer with another Firebird version, you need to use embedded Firebird 2.5 to store log.
 * SQL traffic from all logged connections is written into the single table, with appropriate markers (from what computer, application, user, etc. this particular record was created).
-* Log database can consume significant amount of resources in case of heavy load. For many connections it`'s recommended to setup FBScanner and Firebird log database at dedicated computer.
-* In many cases it`'s not necessary to log all connections, because they repeat the same set of SQL queries. Careful investigation of the single connection can be the most effective way to find performance problems.
+* Log database can consume significant amount of resources in case of heavy load. For many connections it's recommended to setup FBScanner and Firebird log database at dedicated computer.
+* In many cases it's not necessary to log all connections, because they repeat the same set of SQL queries. Careful investigation of the single connection can be the most effective way to find performance problems.
 
 To enable SQL logging, click on "`SQL`" radio button. It will enable appropriate text boxes and controls.
 
@@ -963,7 +963,7 @@ SELECT COUNT(*) FROM RDB$DATABASE
 * FBSCANNER$TR_NAME= sets the name of transaction. After the first assignment this name will be used during the whole life of transaction.
 * FBSCANNER$ST_NAME= sets the name of query.
 
-Tags are showed in the first column in FBScanner Viewer grid, and it`'s possible to filter tags by their names.
+Tags are showed in the first column in FBScanner Viewer grid, and it's possible to filter tags by their names.
 
 Tags are useful to quickly answer the following frequent questions:
 
@@ -1049,7 +1049,7 @@ image::4.3.25.png[]
 
 In the right side there is a list of connections, represented by databases names, or clients, or user, according the filter above.
 
-Using > and < buttons, administrator can select connections to be disconnected and then click "`Disconnect`" button.
+Using &gt; and &lt; buttons, administrator can select connections to be disconnected and then click "`Disconnect`" button.
 
 Disconnect will be done by emulation of 10054 error -- there will be appropriate record(s) in the `firebird.log` (`interbase.log`) and in `FBScanner.log`.
 
@@ -1468,7 +1468,7 @@ If connection was broken (10054 error), FBScanner determines and logs one of the
 
 Client application was closed improperly (for instance, application was closed by Task Manager)
 
-Connection was closed by time-out (it`'s possible to set forced disconnect in FBScanner to close connect by time-out too)
+Connection was closed by time-out (it's possible to set forced disconnect in FBScanner to close connect by time-out too)
 
 Server crashed (fbserver or fb_inet_server crashed)
 
