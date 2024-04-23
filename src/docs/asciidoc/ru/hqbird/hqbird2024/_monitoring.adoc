@@ -504,7 +504,7 @@ Enabling logging will require restart of FBScanner Service, so all current conne
 
 For the following isql commands
 
-[listing]
+[listing,subs="+verbatim"]
 ----
 Use CONNECT or CREATE DATABASE to specify a database
 
