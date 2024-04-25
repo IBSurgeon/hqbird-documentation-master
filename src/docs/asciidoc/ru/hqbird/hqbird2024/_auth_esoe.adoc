@@ -1,4 +1,4 @@
-[[_hqbird_auth_esoe]]
+[[hqbird-auth-esoe]]
 = Authentication plugin for EXECUTE STATEMENT ON EXTERNAL
 
 В Firebird есть удобный механизм запросов к другим базам данных: `EXECUTE STATEMENT ON EXTERNAL` (ESOE). Например, типовой ESOE может выглядеть так:
@@ -58,6 +58,7 @@ AuthClient = Srp, Srp256, Legacy_Auth, Cluster
 
 Чтобы сгенерировать файл ключа cluster.conf, выполните следующую команду:
 
+[listing]
 ----
 C:\HQbird\Firebird30>clusterkeygen.exe > cluster.conf
 ----
@@ -117,6 +118,7 @@ administrator to set up a Firebird login.
 Вы можете создать столько отображений, сколько вам нужно.
 Существующее отображения можно найти в таблице `RDB$AUTH_MAPPING` с помощью следующего запроса:
 
+[listing]
 ----
  SQL> select rdb$map_name, rdb$map_from, rdb$map_to from RDB$AUTH_MAPPING
  CON> where RDB$MAP_PLUGIN ='CLUSTER';
@@ -138,6 +140,7 @@ FROM USER MYUSER TO user MYUSER2;
 
 В этом случае отображения будут храниться в базе данных безопасности, чтобы увидеть их, используйте следующий запрос:
 
+[listing]
 ----
  SQL> select SEC$MAP_NAME, SEC$MAP_USING, SEC$MAP_FROM, SEC$MAP_TO
  CON> from SEC$GLOBAL_AUTH_MAPPING  where SEC$MAP_PLUGIN ='CLUSTER';

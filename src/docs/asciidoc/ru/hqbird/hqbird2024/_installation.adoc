@@ -1,4 +1,4 @@
-[[_hqbird_install]]
+[[hqbird-install]]
 = Установка HQbird
 
 
@@ -16,13 +16,14 @@ HQbird Server 2024 включает в себя Firebird 2.5, 3.0, 4.0 и 5.0 с
 Обратите внимание, что в HQbird полностью поддерживаются только Firebird 2.5, 3.0, 4.0 и 5.0, старые версии Firebird поддерживаются частично.
 Мы предлагаем комплексную https://ib-aid.com/en/firebird-database-migration/[службу миграции Firebird] с гарантированным и быстрым результатом для миграции Firebird на последнюю версию.
 
-[[_hqbird_install_silent]]
+[[hqbird-install-silent]]
 === Тихая установка в Windows
 
 Самый быстрый способ установить HQbird — использовать команду тихой установки.
 
 В приведенном ниже примере мы установим HQbird с Firebird 5.0 в `c:\HQbird2024`, конфигурация будет `c:\HQbirdData\config`, выходные файлы в `c:\HQbirdData\output`.
 
+[listing]
 ----
 HQBird2024.exe /VERYSILENT /SP- /TYPE="hqbird50x64" /DIR="C:\HQbird2024"
 /CONFIGDIR=C:\HQBirdData\config /OUTPUTDIR=C:\HQBirdData\output
@@ -204,7 +205,7 @@ image::2.1.13.png[]
 .Нажмите Install для завершения установки.
 image::2.1.14.png[]
 
-После этого вам необходимо активировать HQbird (<<_hqbird_install_activate,Как активировать HQbird>>) и перейти к настройке компонентов HQbird.
+После этого вам необходимо активировать HQbird (<<hqbird-install-activate,Как активировать HQbird>>) и перейти к настройке компонентов HQbird.
 
 В конце процесса установки вас спросят о следующих шагах:
 
@@ -246,12 +247,12 @@ image::2.2.2.png[]
 
 Чтобы установить Firebird отдельно, загрузите zip-архив Firebird с http://www.firebirdsql.org/[www.firebirdsql.org]
 
-Распакуйте файл архива в подходящее место (например, `C:\Firebird25`), после чего скопируйте в эту папку оптимизированный файл конфигурации `firebird.conf` (см. <<_hqbird_config_optimize,Оптимизированная конфигурация>>) в эту папку.
+Распакуйте файл архива в подходящее место (например, `C:\Firebird25`), после чего скопируйте в эту папку оптимизированный файл конфигурации `firebird.conf` (см. <<hqbird-config-optimize,Оптимизированная конфигурация>>) в эту папку.
 
 Затем для Firebird 2.5 перейдите в папку `bin` (в 3.0 и выше это не нужно), после чего используйте *Запуск от имени Администратора* для запуска пакетного файла с нужной вам архитектурой.
 
-* Для Firebird 2.5 – запустите `install-superclassic.bat`.
-* Для Firebird 3.0 и старше – установите `ServerMode=Super` и запустите `install_service.bat`.
+* Для Firebird 2.5 -- запустите `install-superclassic.bat`.
+* Для Firebird 3.0 и старше -- установите `ServerMode=Super` и запустите `install_service.bat`.
 
 Конечно, вы можете выбрать архитектуру SuperServer для версии 2.5 или ClassicServer для версии 3.0, если считаете, что вам это нужно.
 
@@ -266,7 +267,7 @@ image::2.2.3.png[]
 
 <<<
 
-[[_hqbird_install_linux]]
+[[hqbird-install-linux]]
 == Установка HQbird Server в Linux
 
 Чтобы установить HQbird Server Side в Linux, вам необходимо скачать HQbird ServerSide для Linux со встроенным Firebird соответствующей версии по ссылке https://ib-aid.com/en/download-hqbird/[]
@@ -418,7 +419,7 @@ install_fb4_hqbird2024.sh –-nofirebird
 
 <<<
 
-[[_hqbird_update]]
+[[hqbird-update]]
 == Обновление существующей версии HQbird
 
 Установщик HQbird в Windows (начиная с версии 2018R2) и на Linux (начиная с версии 2018R3) поддерживает автоматическое обновление конфигурации уже установленной версии HQbird 2017R2 и выше.
@@ -460,7 +461,7 @@ image::2.4.4.png[]
 
 == Регистрация HQbird
 
-[[_hqbird_install_activate]]
+[[hqbird-install-activate]]
 === Как активировать HQbird
 
 Для активации HQbird можно либо использовать отдельную утилиту, входящую в пакеты сервера и администратора для Windows, либо воспользоваться механизмом регистрации, встроенным в веб-интерфейс HQbird Firebird DataGuard (для Windows и Linux), либо запустить любой инструмент из программ администрирования HQbird и воспользуйтесь встроенным мастером активации.
@@ -527,7 +528,7 @@ image::2.5.5.png[]
 
 <<<
 
-[[_hqbird_config_optimize]]
+[[hqbird-config-optimize]]
 == Настройка firebird.conf для лучшей производительности
 
 HQbird включает набор оптимизированных конфигурационных файлов для всех версий Firebird от 1.5 до 5.0 — они находятся в `HQbird\Configurations`.

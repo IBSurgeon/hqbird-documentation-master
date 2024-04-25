@@ -1,4 +1,5 @@
-== Плагин mongodb_events_plugin
+[[hqbird-fbstreaming-mongodb-plugin]]
+= Плагин mongodb_events_plugin
 
 Плагин `mongodb_events_plugin` предназначен для регистрации событий в базе данных Firebird и их запись в NoSQL СУБД MongoDB.
 

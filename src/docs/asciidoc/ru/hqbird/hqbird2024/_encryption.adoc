@@ -1,4 +1,4 @@
-[[_hqbird_encryption]]
+[[hqbird-encryption]]
 = Поддержка шифрования
 
 HQbird включает плагин шифрования и обеспечивает поддержку работы с базами данных шифрования в веб-интерфейсе. Эта функция поддерживается только в HQBird с Firebird 3.0 и выше.
@@ -34,6 +34,7 @@ HQbird для Windows уже включает в себя необходимые
 
 . Создайте следующий псевдоним в `databases.conf`
 +
+[listing]
 ----
 crypt = C:\Temp\EMPLOYEE30\EMPLOYEE30.FDB
 {
@@ -43,6 +44,7 @@ crypt = C:\Temp\EMPLOYEE30\EMPLOYEE30.FDB
 +
 Также вы можете объявить плагин `KeyHolder` для всех баз на сервере, для этого добавьте в `firebird.conf` следующий параметр:
 +
+[listing]
 ----
 KeyHolderPlugin = KeyHolder
 ----
@@ -67,6 +69,7 @@ KeyHolderPlugin = KeyHolder
 
 . Подключитесь к незашифрованной базе данных с помощью `isql` и зашифруйте базу данных:
 +
+[listing]
 ----
 isql localhost:C:\Temp\EMPLOYEE30\EMPLOYEE30.FDB -user SYSDBA -pass masterkey
 SQL>alter database encrypt with dbcrypt key red;
@@ -185,7 +188,6 @@ image::8.1.png[]
 
 image::8.2.png[]
 
-
 === Этап 3 — резервное копирование и восстановление зашифрованной базы данных.
 
 Полная проверенная резервная копия сделанная с помощью `gbak.exe` является основным методом резервного копирования баз данных Firebird. В стандартный дистрибутив Firebird входит инструмент командной строки `gbak.exe` для её выполнения, однако он не будет работать с зашифрованной базой данных в рабочем режиме (без ключей на сервере). После шифрования только авторизованные приложения могут получить доступ к зашифрованной базе данных, а стандартный `gbak` не является авторизованным приложением.
@@ -196,6 +198,7 @@ image::8.2.png[]
 
 Если вы запустите `gbak.exe` из файлов плагина с ключом `-?`, вы увидите новые параметры `gbak.exe`, которые используются для работы с зашифрованными базами данных:
 
+[listing]
 ----
   -KEYFILE              name of a file with DB and backup crypt key(s)
   -KEYNAME              name of a key to be used for encryption
@@ -211,7 +214,9 @@ image::8.2.png[]
 Есть два способа предоставить ключ для `gbak.exe`: сохранить ключ в файле ключей или явно указать его в командной строке:
 
 .Пример создания резервной копии с ключом шифрования в файле ключей
+[example]
 ====
+[listing]
 ----
 gbak.exe -b -KEYFILE h:\Firebird\Firebird-3.0.3.32900-0_Win32\examplekeyfile.txt
   -KEYNAME RED localhost:h:\employee_30.fdb h:\testenc4.fbk -user SYSDBA
@@ -224,7 +229,9 @@ gbak.exe -b -KEYFILE h:\Firebird\Firebird-3.0.3.32900-0_Win32\examplekeyfile.txt
 ====
 
 .Пример резервного копирования с явным ключом
+[example]
 ====
+[listing]
 ----
 gbak -b -KEY 0xec,0xa1,0x52,0xf6,0x4d,0x27,0xda,0x93,0x53,0xe5,0x48,0x86,0xb9,
   0x7d,0xe2,0x8f,0x3b,0xfa,0xb7,0x91,0x22,0x5b,0x59,0x15,0x82,0x35,0xf5,0x30,
@@ -244,6 +251,7 @@ gbak -b -KEY 0xec,0xa1,0x52,0xf6,0x4d,0x27,0xda,0x93,0x53,0xe5,0x48,0x86,0xb9,
 .Пример восстановления с использованием ключа шифрования в файле ключа
 [example]
 ====
+[listing]
 ----
 gbak -c -v -keyfile h:\Firebird\Firebird-3.0.3.32900-0_Win32\examplekeyfile.txt
   -keyname white  h:\testenc4.fbk localhost:h:\employeeenc4.fdb  -user SYSDBA
@@ -252,7 +260,9 @@ gbak -c -v -keyfile h:\Firebird\Firebird-3.0.3.32900-0_Win32\examplekeyfile.txt
 ====
 
 .Пример восстановления с явным ключом
+[example]
 ====
+[listing]
 ----
 gbak -c -v -key 0xec,0xa1,0x52,0xf6,0x4d,0x27,0xda,0x93,0x53,0xe5,0x48,0x86,
   0xb9,0x7d,0xe2,0x8f,0x3b,0xfa,0xb7,0x91,0x22,0x5b,0x59,0x15,0x82,0x35,0xf5,

@@ -1,4 +1,4 @@
-[[_http_client_udr]]
+[[hqbird-http-client-udr]]
 = HTTP Client UDR
 
 Библиотека IBSurgeon HTTP Client UDR предназначена для работы с HTTP сервисами, например через REST-API.
@@ -27,7 +27,6 @@ HTTP Client UDR является 100% бесплатной и с открыты�
 [source,bash]
 ----
 sudo apt-get install libcurl4-openssl-dev
-
 ----
 
 В CentOS
@@ -35,7 +34,6 @@ sudo apt-get install libcurl4-openssl-dev
 [source,bash]
 ----
 sudo yum install libcurl-devel
-
 ----
 
 Теперь можно производить саму сборку.
@@ -48,7 +46,6 @@ mkdir build; cd build
 cmake ..
 make
 sudo make install
-
 ----
 
 == Пакет `HTTP_UTILS`
@@ -76,7 +73,6 @@ sudo make install
     RESPONSE_BODY        BLOB,
     RESPONSE_HEADERS     BLOB SUB_TYPE TEXT
   );
-
 ----
 
 Входные параметры:
@@ -578,7 +574,12 @@ FROM RDB$DATABASE;
 
 Входные параметры:
 
-* `URL` - URL адрес, в формате `&lt;URL&gt; ::= &lt;scheme&gt;:[//[&lt;user&gt;:&lt;password&gt;@]&lt;host&gt;[:&lt;port&gt;]][/]&lt;path&gt;[?&lt;query&gt;][#&lt;fragment&gt;]`.
+* `URL` - URL адрес, в формате 
++
+[listing]
+----
+<URL> ::= <scheme>:[//[<user>:<password>@]<host>[:<port>]][/]<path>[?<query>][#<fragment>]
+----
 
 Выходные параметры:
 
@@ -640,7 +641,11 @@ FROM HTTP_UTILS.PARSE_URL('https://user:password@server:8080/part/put?a=1&b=2#fr
 * `URL_FRAGMENT` - фрагмент (якорь).
 
 Результат: URL строка согласно спецификации https://tools.ietf.org/html/rfc3986[RFC 3986], т.е. в формате
-`&lt;URL&gt; ::= &lt;scheme&gt;:[//[&lt;user&gt;:&lt;password&gt;@]&lt;host&gt;[:&lt;port&gt;]][/]&lt;path&gt;[?&lt;query&gt;][#&lt;fragment&gt;]`.
+
+[listing]
+----
+<URL> ::= <scheme>:[//[<user>:<password>@]<host>[:<port>]][/]<path>[?<query>][#<fragment>]
+----
 
 Пример использования:
 

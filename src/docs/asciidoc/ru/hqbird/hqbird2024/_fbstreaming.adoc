@@ -1,4 +1,4 @@
-[[_hqbird_fbstreaming]]
+[[hqbird-fbstreaming]]
 = Firebird Streaming
 
 Firebird streaming -- это технология асинхронной публикации событий возникающих в процессе анализа журнала репликации.

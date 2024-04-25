@@ -1,3 +1,4 @@
+[[hqbird-fbstreaming-kafka-cdc-plugin]]
 = Плагин kafka_cdc_plugin
 
 Плагин `kafka_cdc_plugin` предназначен для регистрации событий изменения данных в таблицах базы данных Firebird и их сохранения их в Kafka. Этот процесс также известен как Change Data Capture, далее CDC.

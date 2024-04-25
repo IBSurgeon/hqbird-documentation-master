@@ -1,7 +1,7 @@
-[[_hqbird_performance]]
+[[hqbird-performance]]
 = Улучшения производительности
 
-[[_hqbird_performance_extconn_pool]]
+[[hqbird-performance-extconn-pool]]
 == Пул внешних подключений
 
 HQbird поддерживает пул внешних подключений для Firebird 2.5 и Firebird 3. Стандартная сборка Firebird 4.0 и выше поддерживает создание внешних пулов соединений "`из коробки`". 
@@ -261,7 +261,7 @@ Select Expression
 
 <<<
 
-[[_hqbird_performance_multi_threaded]]
+[[hqbird-performance-multi-threaded]]
 == Многопоточные sweep, backup, restore
 
 В HQbird появилась возможность многопоточного выполнения очистки, резервного копирования и восстановления, что ускоряет их работу от 2х до 6 раз (в зависимости от конкретной базы). Многопоточные операции работают в HQbird для Firebird 2.5, 3.0 и 4.0 на любых архитектурах — Classic, SuperClassic, SuperServer. Для Firebird 5.0 многопоточные операции доступны в "`ванильной`" версии из коробки.
@@ -356,7 +356,7 @@ gfix –sweep
 
 <<<
 
-[[_hqbird_blob_append]]
+[[hqbird-blob-append]]
 == BLOB_APPEND function
 
 Обычный оператор `||` (конкатенация) с аргументами BLOB создает временный BLOB для каждой пары аргументов с BLOB. Это может привести к чрезмерному потреблению памяти и увеличению размера файла базы данных. Функция `BLOB_APPEND` предназначена для объединения BLOB-объектов без создания промежуточных BLOB-объектов.
@@ -503,7 +503,7 @@ END
 
 <<<
 
-[[_hqbird_performance_left_to_inner]]
+[[hqbird-performance-left-to-inner]]
 == Преобразование LEFT joins в INNER
 
 HQbird позволяет преобразовывать `LEFT JOIN` в `INNER JOIN`, если условие `WHERE` нарушает правила внешнего соединения.

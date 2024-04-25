@@ -1,4 +1,4 @@
-[[_hqbird_lk_json_udr]]
+[[hqbird-lk-json-udr]]
 = LK-JSON-UDR -- сборка и анализ JSON
 
 HQbird включает библиотеку UDR udr-lkJSON для создания и анализа JSON на стороне сервера.

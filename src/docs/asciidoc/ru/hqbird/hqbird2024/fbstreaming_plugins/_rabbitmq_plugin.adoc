@@ -1,3 +1,4 @@
+[[hqbird-fbstreaming-rabbitmq-plugin]]
 = Плагин rabbitmq_plugin
 
 Плагин `rabbitmq_plugin` предназначен для регистрации событий в базе данных Firebird и их отправки на сервер очередей RabbitMQ.

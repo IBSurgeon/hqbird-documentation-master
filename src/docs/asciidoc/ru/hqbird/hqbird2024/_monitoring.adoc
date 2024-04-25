@@ -1,4 +1,4 @@
-[[_hqbird_monitoring]]
+[[hqbird-monitoring]]
 = Мониторинг
 
 == Мониторинг с помощью HQbird FBDataGuard
@@ -281,7 +281,7 @@ image::4.2.5.png[]
 
 <<<
 
-[[_hqbird_advanced_monitor_viewer]]
+[[hqbird-advanced-monitor-viewer]]
 == Advanced Monitor Viewer
 
 Advanced Monitor Viewer allows graphical display of additional performance counters. They are based on both trace data and data from monitoring tables, plus additional system utilities such as wmic (Windows) are used.

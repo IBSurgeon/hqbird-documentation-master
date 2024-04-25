@@ -1,4 +1,5 @@
-== Плагин fts_lucene_plugin
+[[hqbird-fbstreaming-fts-lucene-plugin]]
+= Плагин fts_lucene_plugin
 
 Плагин `fts_lucene_plugin` предназначен для поддержания полнотекстовых индексов, созданных с помощью библиотеки  IBSurgeon Full Text Search UDR (см. https://github.com/IBSurgeon/lucene_udr[]), в актуальном состоянии.
 
