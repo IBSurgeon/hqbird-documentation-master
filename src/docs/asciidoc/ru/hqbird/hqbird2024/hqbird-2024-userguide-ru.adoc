@@ -1,0 +1,63 @@
+[[hqbird]]
+= Руководство пользователя HQbird 2024
+1.0, от 25.04.2024
+:doctype: book
+:sectnums:
+:sectanchors:
+:toc: left
+:toclevels: 3
+:outlinelevels: 6:0
+:icons: font
+:experimental:
+:imagesdir: images
+include::../../attributes-ru.adoc[]
+
+toc::[]
+
+#include::_hqbird-preface.adoc[leveloffset=1]
+
+#include::_hqbird-overview.adoc[leveloffset=1]
+
+include::_hqbird-installation.adoc[leveloffset=1]
+
+include::_hqbird-configuring.adoc[leveloffset=1]
+
+#include::_hqbird-replication-config.adoc[leveloffset=1]
+
+#include::_hqbird-performance-enhancements.adoc[leveloffset=1]
+
+include::_hqbird-monitoring.adoc[leveloffset=1]
+
+#include::_hqbird-struct-analyze.adoc[leveloffset=1]
+
+#include::_hqbird-encryption.adoc[leveloffset=1]
+
+#include::_hqbird-auth-esoe.adoc[leveloffset=1]
+
+#include::_hqbird-eds-other-dbms.adoc[leveloffset=1]
+
+#include::_hqbird-rsa-udr.adoc[leveloffset=1]
+
+#include::_hqbird-split-udr.adoc[leveloffset=1]
+
+#include::_hqbird-ocr-udr.adoc[leveloffset=1]
+
+#include::_hqbird-lk-json_udr.adoc[leveloffset=1]
+
+#include::_hqbird-nanodbc_udr.adoc[leveloffset=1]
+
+#include::_hqbird-http-client_udr.adoc[leveloffset=1]
+
+#include::_hqbird-fbstreaming.adoc[leveloffset=1]
+
+:sectnums!:
+
+[appendix]
+= Контакты поддержки
+
+Мы ответим на все ваши вопросы, касающиеся HQbird FBDataGuard.
+Пожалуйста, направляйте все ваши вопросы на link:mailto:support@ib-aid.com[support@ib-aid.com]
+
+Обратите внимание, что клиенты с активной поддержкой Firebird имеют приоритет в технической поддержке https://ib-aid.com/en/firebird-support-service/[]
+
+:sectnums:

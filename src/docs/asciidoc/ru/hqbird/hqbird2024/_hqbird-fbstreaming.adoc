@@ -215,8 +215,8 @@ journal_archive_command = "copy $(pathname) $(archivepathname) && copy $(pathnam
 
 Здесь `archiveDir` -- директория архивов для работы асинхронной репликации, `archiveDirTask` -- директория архивов для работы задачи службы `fb_streaming`.
 
-include::fbstreaming_plugins/_kafka_cdc_plugin.adoc[leveloffset=2]
-include::fbstreaming_plugins/_rabbitmq_plugin.adoc[leveloffset=2]
-include::fbstreaming_plugins/_mongodb_events_plugin.adoc[leveloffset=2]
-include::fbstreaming_plugins/_fts_lucene_plugin.adoc[leveloffset=2]
-include::fbstreaming_plugins/_simple_json_plugin.adoc[leveloffset=2]
+include::fbstreaming/_hqbird-fbstreaming-kafka-cdc-plugin.adoc[leveloffset=2]
+include::fbstreaming/_hqbird-fbstreaming-rabbitmq-plugin.adoc[leveloffset=2]
+include::fbstreaming/_hqbird-fbstreaming-mongodb-events-plugin.adoc[leveloffset=2]
+include::fbstreaming/_hqbird-fbstreaming-fts-lucene-plugin.adoc[leveloffset=2]
+include::fbstreaming/_hqbird-fbstreaming-simple-json-plugin.adoc[leveloffset=2]
