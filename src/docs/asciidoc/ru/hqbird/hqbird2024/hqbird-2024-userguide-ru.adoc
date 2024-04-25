@@ -28,27 +28,27 @@ include::_hqbird-performance-enhancements.adoc[leveloffset=1]
 
 include::_hqbird-monitoring.adoc[leveloffset=1]
 
-#include::_hqbird-struct-analyze.adoc[leveloffset=1]
+include::_hqbird-struct-analyze.adoc[leveloffset=1]
 
-#include::_hqbird-encryption.adoc[leveloffset=1]
+include::_hqbird-encryption.adoc[leveloffset=1]
 
-#include::_hqbird-auth-esoe.adoc[leveloffset=1]
+include::_hqbird-auth-esoe.adoc[leveloffset=1]
 
-#include::_hqbird-eds-other-dbms.adoc[leveloffset=1]
+include::_hqbird-eds-other-dbms.adoc[leveloffset=1]
 
-#include::_hqbird-rsa-udr.adoc[leveloffset=1]
+include::_hqbird-rsa-udr.adoc[leveloffset=1]
 
-#include::_hqbird-split-udr.adoc[leveloffset=1]
+include::_hqbird-split-udr.adoc[leveloffset=1]
 
-#include::_hqbird-ocr-udr.adoc[leveloffset=1]
+include::_hqbird-ocr-udr.adoc[leveloffset=1]
 
-#include::_hqbird-lk-json_udr.adoc[leveloffset=1]
+include::_hqbird-lk-json-udr.adoc[leveloffset=1]
 
-#include::_hqbird-nanodbc_udr.adoc[leveloffset=1]
+include::_hqbird-nanodbc-udr.adoc[leveloffset=1]
 
-#include::_hqbird-http-client_udr.adoc[leveloffset=1]
+include::_hqbird-http-client-udr.adoc[leveloffset=1]
 
-#include::_hqbird-fbstreaming.adoc[leveloffset=1]
+include::_hqbird-fbstreaming.adoc[leveloffset=1]
 
 include::_hqbird-appx-cron-expr.adoc[leveloffset=1]
 
