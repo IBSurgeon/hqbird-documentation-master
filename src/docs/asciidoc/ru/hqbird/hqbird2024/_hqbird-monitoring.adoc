@@ -970,113 +970,113 @@ SELECT COUNT(*) FROM RDB$DATABASE
 
 FBScanner Viewer предлагает широкий спектр опций, упрощающих отладку и оптимизацию, которые доступны через его меню:
 
-* *Server*
+* *Сервер*
 +
-** Connect To
-** Disconnect To
-** Recent Servers
-** Exit
-* *Connections*
+** Подключить...
+** Отключить
+** Последние сервера
+** Выход
+* *Подключения*
 +
-** Disconnect
-** Disconnect Clients...
-** Kill Process
-** Latest Queries
-** Oldest Connection
-** Process Priority...
-** Ping Client
-** Ping All Clients
-** Extract Plans
-* *Transactions*
+** Отключить
+** Отключение клиентов...
+** Завершить процесс...
+** Последние запросы
+** Старейшее подключение
+** Приоритет процесса...
+** Ping
+** Ping всех
+** Извлекать планы запросов
+* *Транзакции*
 +
 ** OAT
-* *Tools*
+* *Инструменты*
 +
-** *View Style*
+** *Визуализация*
 +
-*** Database Administrator (connections only)
-*** Database Developer (without transactions)
-*** Database Developer (with transactions)
-** Language -- English, Italian, Russian, Portuguese
-** Plugins
-** Options
-* *Columns* -- list of columns
-* *Help*
+*** Администратор СУБД (только подключения)
+*** Разработчик СУБД (без транзакций)
+*** Разработчик СУБД (детально)
+** Язык -- English, Italian, Русский, Portuguese
+** Дополнения
+** Настройки
+* *Колонки* -- список столбцов
+* *Помощь*
 
 
-==== Server
+===== Сервер
 
-To connect to the FBScanner Service select Service\Connect To.
+Для подключения к службе FBScanner выберите menu:Сервер[Подключить...].
 
-The following dialog will appear:
+Появится следующий диалог:
 
 image::4.3.22.png[]
 
-After selecting the server FBScanner Viewer will ask for password. There are 2 passwords -- for read-only access and for administrator (full) access. By default the password for read-only access is blank.
+После выбора сервера FBScanner Viewer запросит пароль. Существует 2 пароля -- для доступа только для чтения и для доступа администратора (полного). По умолчанию пароль для доступа только для чтения пуст.
 
 image::4.3.23.png[]
 
 [TIP]
 ====
-To setup passwords for FBScanner Viewer access you need to go to "`FBScanner Configuration`" -- "`Advanced Settings`".
+Чтобы настроить пароли для доступа к FBScanner Viewer, вам необходимо перейти в "`FBScanner Configuration`" -- "`Advanced Settings`".
 ====
 
-*Server\Disconnect* disconnects FBScanner Viewer from FBScanner Service.
+*Server\Disconnect* отключает FBScanner Viewer от службы FBScanner.
 
-*Server\Recent Servers* shows list of most recent FBScanner Services where FBScanner Viewer connected to.
+*Server\Recent Servers* показывает список последних служб FBScanner, к которым подключался FBScanner Viewer.
 
-*Exit* closes FBScanner Viewer.
+*Exit* закрывает FBScanner Viewer.
 
 ==== Connections
 
-"`Disconnect`", "`Disconnect clients`" and "`Kill Process`" menu options are available only when connected to FBScanner Service with administrative rights.
+Пункты меню "`Disconnect`", "`Disconnect clients`" и "`Kill Process`" доступны только при подключении к службе FBScanner с правами администратора.
 
-*Disconnect* will ask to close the current connection (highlighted in the main FBScanner Viewer grid):
+*Disconnect* предложит закрыть текущее соединение (выделено в основной таблицы FBScanner Viewer):
 
 image::4.3.24.png[]
 
-"`*Disconnect clients*`" runs the following dialog:
+"`*Disconnect clients*`" запускает следующий диалог:
 
 image::4.3.25.png[]
 
-In the right side there is a list of connections, represented by databases names, or clients, or user, according the filter above.
+В правой части находится список подключений, представленный именами баз данных, клиентов или пользователей в соответствии с фильтром выше.
 
-Using &gt; and &lt; buttons, administrator can select connections to be disconnected and then click "`Disconnect`" button.
+Используя кнопки &gt; и &lt;, администратор может выбрать соединения, которые нужно отключить, а затем нажать кнопку "`Disconnect`".
 
-Disconnect will be done by emulation of 10054 error -- there will be appropriate record(s) in the `firebird.log` (`interbase.log`) and in `FBScanner.log`.
+Отключение будет выполнено путем эмуляции ошибки 10054 -- соответствующие записи будут в `firebird.log` (`interbase.log`) и в `FBScanner.log`.
 
 ==== Kill
 
-There are few cases when you need to kill Firebird process, and we do not recommend it.
+Есть несколько случаев, когда вам нужно завершить процесс Firebird, но мы не рекомендуем это делать.
 
-"`Kill process...`" asks for explicit killing of Firebird process, and it works only at local FBScanner and Classic Architecture:
+"`Kill process...`" запрашивает явное завершение процесса Firebird и работает только на локальном FBScanner и с архитектурой Classic:
 
 image::4.3.26.png[]
 
-It will not work with SuperServer or SuperClassic architectures.
+Он не будет работать с архитектурами SuperServer и SuperClassic.
 
-"`*Latest Queries*`" shows list of 20 most recent queries in the selected connection:
+"`*Latest Queries*`" показывает список из 20 последних запросов в выбранном соединении:
 
 image::4.3.27.png[]
 
-It's useful for ad-hoc debugging, it works like "`Rewind`" button.
+Это полезно для специальной отладки, работает как кнопка "`Rewind`".
 
 [TIP]
 ====
-For full-fledged logging of SQL traffic enable SQL logging feature in FBScanner Service, and use FBScanner LogAnalyzer to look through the log.
+Для полноценной регистрации SQL-трафика включите функцию регистрации SQL в службе FBScanner и используйте FBScanner LogAnalyzer для просмотра журнала.
 ====
 
-"`*Oldest Connection*`" shows the oldest connection in the grid.
+"`*Oldest Connection*`" -- показывает самое старое соединение в таблице.
 
-"`*Process Priority*`" is applicable only for local FBScanner installation with Classic architecture.
-It enables to set process priority for Classic instances.
+"`*Process Priority*`" -- применим только для локальной установки FBScanner с классической архитектурой.
+Это позволяет установить приоритет процесса для экземпляров Classic.
 
-"`*Ping Client*`" allows to check – is selected connection still alive?
+"`*Ping Client*`" -- позволяет проверить -- активно ли выбранное соединение?
 
-"`*Ping All Clients*`" checks all connections in the same way.
+"`*Ping All Clients*`" -- проверяет все соединения тем же способом.
 
-"`*Extract plans*`" starts plan extracting for selected connect. Extracted plans are shown in the grid, and also stored in the SQL (or text) log.
-If logging is not enabled, nothing happens. To enable plan extraction for all connects, use appropriate setting in "`FBScanner Configuration`".
+"`*Extract plans*`" запускает извлечение планов для выбранного подключения. Извлеченные планы отображаются в таблице, а также сохраняются в журнале SQL (или текстовом журнале).
+Если ведение журнала не включено, ничего не происходит. Чтобы включить извлечение плана для всех подключений, используйте соответствующий параметр в "`FBScanner Configuration`".
 
 ==== Transactions
 
@@ -1084,7 +1084,7 @@ The single option *Transactions\OAT* will put selection in the grid to the oldes
 
 ==== Tools
 
-In menu "`Tools`" we can see several options.
+В меню "`Tools`" мы видим несколько опций.
 
 With "`*View Style*`" user can select the most suitable representation of grid data:
 
