@@ -14,17 +14,17 @@ include::../../attributes-ru.adoc[]
 
 toc::[]
 
-#include::_hqbird-preface.adoc[leveloffset=1]
+include::_hqbird-preface.adoc[leveloffset=1]
 
-#include::_hqbird-overview.adoc[leveloffset=1]
+include::_hqbird-overview.adoc[leveloffset=1]
 
 include::_hqbird-installation.adoc[leveloffset=1]
 
 include::_hqbird-configuring.adoc[leveloffset=1]
 
-#include::_hqbird-replication-config.adoc[leveloffset=1]
+include::_hqbird-replication-config.adoc[leveloffset=1]
 
-#include::_hqbird-performance-enhancements.adoc[leveloffset=1]
+include::_hqbird-performance-enhancements.adoc[leveloffset=1]
 
 include::_hqbird-monitoring.adoc[leveloffset=1]
 
@@ -49,6 +49,8 @@ include::_hqbird-monitoring.adoc[leveloffset=1]
 #include::_hqbird-http-client_udr.adoc[leveloffset=1]
 
 #include::_hqbird-fbstreaming.adoc[leveloffset=1]
+
+include::_hqbird-appx-cron-expr.adoc[leveloffset=1]
 
 :sectnums!:
 
