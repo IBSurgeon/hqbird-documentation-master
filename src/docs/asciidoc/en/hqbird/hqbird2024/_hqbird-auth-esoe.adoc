@@ -1,4 +1,4 @@
-[[_hqbird_auth_esoe]]
+[[hqbird-auth-esoe]]
 = Authentication plugin for EXECUTE STATEMENT ON EXTERNAL
 
 Firebird has a convenient mechanism of cross-database queries: `EXECUTE STATEMENT ON EXTERNAL` (ESOE). For example, the typical ESOE can look like this:

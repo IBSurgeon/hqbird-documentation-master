@@ -353,6 +353,7 @@ begin
 end#
 ----
 
+[listing]
 ----
 Statement failed, SQLSTATE = 42000
 Execute statement error at isc_dsql_prepare :

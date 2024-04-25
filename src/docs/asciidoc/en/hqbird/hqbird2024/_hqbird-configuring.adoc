@@ -1,6 +1,6 @@
 :imagesdir: images
 
-[[_hqbird_config]]
+[[hqbird-config]]
 = Jobs, monitoring and maintenance configuration in FBDataGuard
 
 Please follow these steps:
@@ -10,7 +10,7 @@ Please follow these steps:
 +
 .. You can check it using Services applet in Control Panel (right-click on "`My Computer`", choose "`Manage`", then "`Services and Applications`", "`Services`" and find in the list "`FBDataGuard Agent`")
 .. At Linux you can check it with command `ps aux | grep dataguard`.
-. Make sure the FBDataGuard port is accessible (8082) and it is not blocked by firewall or any other antivirus tools. If necessary, adjust port in FBDataGuard configuration file (see <<_hqbird_config_fbdataguard_port>>).
+. Make sure the FBDataGuard port is accessible (8082) and it is not blocked by firewall or any other antivirus tools. If necessary, adjust port in FBDataGuard configuration file (see <<hqbird-config-fbdataguard-port>>).
 
 
 == Launch web-console
@@ -182,7 +182,7 @@ image::3.2.7.png[]
 
 In general, there is no need to edit Firebird server details after the registration, until you are not reinstalling Firebird -- but in this case we recommend reinstalling HQBird too.
 
-[[_hqbird_config_repllog]]
+[[hqbird-config-repllog]]
 === Server: Replication Log
 
 image::3.2.11.png[]
@@ -199,7 +199,7 @@ image::3.2.12.png[]
 * "`Keep N rolled old log files`" -- how many errors will be stored in the list of the recent errors.
 
 
-[[_hqbird_config_serverlog]]
+[[hqbird-config-serverlog]]
 === Server: Server log
 
 image::3.2.13.png[]
@@ -298,7 +298,7 @@ image::3.1.5.png[]
 * "`*DB alias*`" is a database alias from `aliases.conf` or in `databases.conf`. If you specify both "`DB Alias`" and "`Path to database`", "`DB Alias`" will be used.
 * "`*Path to database*`" is the local path to database (remember that FBDataGuard should work at the same computer with Firebird). If you are putting database on external drive, it can raise error "`File... has unknown partition`". To fix it you need to click on "`Configure`" at Server widget and click "`Save`" to make FBDataGuard re-read partitions.
 * "`*Output folder (backups and logs)*`" is the folder where FBDataGuard will store backups, logs and statistics for this database. If you do not select HQbirdData folder during the installation, and if you do not specify output folder for the server, it's a good idea to specify "`Output folder`" to some explicit location like `F:\mydatabasedata`.
-* "`*Enable advanced monitoring*`" -- see <<_hqbird_advanced_monitor_viewer>>
+* "`*Enable advanced monitoring*`" -- see <<hqbird-advanced-monitor-viewer>>
 
 
 [NOTE]
@@ -403,7 +403,7 @@ To include indices into the list of recomputed, you need to specify indices name
 
 As you can see at configuration dialog screenshot, there are fields to enable/disable job, to set update mode, and to include or exclude indices. "`DB size to switch, bytes`" is to set limit where AUTO mode is working. "`Check index activity`" switch should be always on, until you are not performing special manipulations with inactive indices.
 
-[[_hqbird_config_verified_backup]]
+[[hqbird-config-verified-backup]]
 === Database: Verified Backup
 
 "`Database: Verified Backup`" is one of the key jobs to guarantee the safety of data stored in the protected database. During the development of HQbird we had in mind certain recovery scenario, and this scenario implies that the key goal of database protection is to minimize potential losses of data. If we have healthy backup, recovery can be concentrated on saving the most recent data (just entered into the database), and it greatly decreases the time of overall outage.
@@ -443,7 +443,7 @@ It is very important to carefully review database backups settings and adjust th
 Let`'s consider the configuration dialog for backup in more details:
 
 * *"`Enabled`"* is obvious – it enables or disables scheduled backups
-* In the *"`Schedule`"* field you can set the time when backup should be run. Scheduler uses CRON expression and this is a right place to apply all the power of CRON (see <<_hqbird_config_cron_expr>>).
+* In the *"`Schedule`"* field you can set the time when backup should be run. Scheduler uses CRON expression and this is a right place to apply all the power of CRON (see <<hqbird-config-cron-expr>>).
 * *"`Backups folder`"* specifies the folder to store backups. This folder should be at the same computer where database is. By default, it is situated inside database default directory. Usually it's a good idea to set the explicit path to the folders with backups.
 * *"`Maximum number of backup files in folder`"* specifies how many previous backups should be stored. FBDataGuard stores backups in revolver order: when the maximum number will be reached (i.e., 5 backups will be created), FBDataGuard will delete the oldest backup and create the new backup. In combination with CRON expressions it gives a powerful ability to create necessary history of backups.
 * *"`Backup name pattern`"* specifies how backup files will be named. Also this name pattern allows FBDataGuard to recognize old backups with the same name pattern.
@@ -485,14 +485,14 @@ So, to store Firebird backups to the network location on Windows, run Services a
 
 For Linux -- add necessary rights for "`firebird`" user.
 
-[[_hqbird_config_incremental_backup]]
+[[hqbird-config-incremental-backup]]
 === Database: Incremental Backup
 
 Incremental backup is a job to schedule and manage incremental backups in Firebird.
 
 Please note that we recommend to use incremental backups only in combination with verified backups, since incremental backup performs coping of database pages changed since the last backup (in case of multilevel incremental backup).
 
-HQbird FBDataGuard implements 2 types of multilevel incremental backup: Simple and Advanced incremental backups, and also Dump backup (see <<_hqbird_config_db_dump_backup,Database: Dump backup>>).
+HQbird FBDataGuard implements 2 types of multilevel incremental backup: Simple and Advanced incremental backups, and also Dump backup (see <<hqbird-config-db-dump-backup,Database: Dump backup>>).
 
 Multilevel backup in Firebird must follow the following steps:
 
@@ -554,7 +554,7 @@ image::3.2.41.png[]
 
 As you can see, the upper part of the configuration screen is the same as in Simple schedule, and the difference is in the way how backup levels are scheduled.
 
-Advanced schedule allows to setup up to 5 levels of backup, and plan them with flexible <<_hqbird_config_cron_expr,CRON expressions>>.
+Advanced schedule allows to setup up to 5 levels of backup, and plan them with flexible <<hqbird-config-cron-expr,CRON expressions>>.
 
 For example, you can setup it to create full copy (level 0) backup every 3 months, level 1 copy every month, level 2 -- every week, level 3 every day and level 4 -- every hour.
 
@@ -563,7 +563,7 @@ For example, you can setup it to create full copy (level 0) backup every 3 month
 If you are monitoring more than one database, it is highly recommended splitting the runtime of the backups.
 ====
 
-[[_hqbird_config_db_dump_backup]]
+[[hqbird-config-db-dump-backup]]
 === Database: Dump Backup
 
 This job also utilizes nbackup functionality in Firebird, but unlike multilevel backups, it always performs a full copy (level 0) of the database. Such job is useful to quickly create a copy of working database.
@@ -592,12 +592,12 @@ In *gbak* mode, the configuration dialog for *Database: RestoreDB* looks like th
 
 image::3.2.44.png[]
 
-* "`*Scheduled*`" field contains <<_hqbird_config_cron_expr>> which defines when to run restore.
+* "`*Scheduled*`" field contains <<hqbird-config-cron-expr>> which defines when to run restore.
 * "`*Get backup from folder*`" -- specify the location of backup file(s) to be restored. If you are restoring backups at the same computer where they have been created, specify the same folder as it is in "`Database: Verified backup`" job. If you are restoring backups from the another computer, specify the folder where those backups are located.
 * "`*Take backup not older than, hours*`" -- this parameter specifies the maximum age of backup to be restored. If the latest backup file will be older than specified number of hours, RestoreDB job will send the alert with warning that backup is too old. This is useful for automatic checking of backups created on the remote computer.
 * "`*Restore source*`" specifies what types of backups will be used to restore the database.
-* "`*Datatime pattern for nbackup*`" contains the template for backup names made with nbackup. It should be the same as *Backup name pattern* see <<_hqbird_config_incremental_backup>>.
-* "`*Template for gbak backup file name*`" contains the template for backup names. It should be the same as *Backup name pattern* see <<_hqbird_config_verified_backup>>.
+* "`*Datatime pattern for nbackup*`" contains the template for backup names made with nbackup. It should be the same as *Backup name pattern* see <<hqbird-config-incremental-backup>>.
+* "`*Template for gbak backup file name*`" contains the template for backup names. It should be the same as *Backup name pattern* see <<hqbird-config-verified-backup>>.
 * "`*Backup gbak file extension*`" -- by default it is `.fbk`.
 * "`*Use NN CPU cores to restore*`" -- only available in gbak mode.
 * "`*Restore options*`" -- only available in gbak mode.
@@ -616,7 +616,7 @@ image::3.2.44.png[]
 * "`*Notify on successful restore*`" -- send email about successful restore (by default it is off, only alerts about problems will be sent).
 
 
-[[_hqbird_config_cloud_backup]]
+[[hqbird-config-cloud-backup]]
 === Database: Transfer Replication Segments
 
 The purpose of "Transfer Replication Segments" job is to send replication segments produced by async replication from master to replica server. In the case of distributed environment of the asynchronous replication, when the network connection between master and replica server is unstable, or with high latency, or when servers are in the different geographical regions, the best way to transfer replication segments will be through FTP or FTP over SSH.
@@ -645,7 +645,7 @@ To disable packing and encryption, uncheck the "`*Compress segments*`" checkmark
 
 Checkbox "`*Send Ok report*`" -- send email to the specified in Alerts address every time when replication segment is uploaded. By default it is off.
 
-As a result, FBDataGuard will upload encrypted and compressed replication segments to the remote server. To decompress and decrypt them into the regular replication segments, another instance of HQbird FBDataGuard should be installed on the replica server, and Cloud Backup Receiver job should be configured -- see more details in the section <<_hqbird_config_cloud_backup_receiver>>.
+As a result, FBDataGuard will upload encrypted and compressed replication segments to the remote server. To decompress and decrypt them into the regular replication segments, another instance of HQbird FBDataGuard should be installed on the replica server, and Cloud Backup Receiver job should be configured -- see more details in the section <<hqbird-config-cloud-backup-receiver>>.
 
 Next, let's look at the settings for each file transfer protocol.
 
@@ -664,7 +664,7 @@ If you don't have FTP installed on the target server with Windows, install Filez
 
 [NOTE]
 ====
-Replication segments will be uploaded to the subdirectory specified in the "`Upload to folder`". By default, this is `/dababase0/${db.id}`, where `db.id` is the identifier of the database inside the DataGuard. The replica about this `db.id` does not know anything, so you need to register it manually in "`Unpack to directory`" (see <<_hqbird_config_cloud_backup_receiver>>).
+Replication segments will be uploaded to the subdirectory specified in the "`Upload to folder`". By default, this is `/dababase0/${db.id}`, where `db.id` is the identifier of the database inside the DataGuard. The replica about this `db.id` does not know anything, so you need to register it manually in "`Unpack to directory`" (see <<hqbird-config-cloud-backup-receiver>>).
 ====
 
 ===== FTP over SSL/TLS
@@ -685,7 +685,7 @@ To use FTP over SSH with private key authentication, please specify the full pat
 
 image::3.2.49-0.png[]
 
-[[_hqbird_config_transfer_files]]
+[[hqbird-config-transfer-files]]
 === Database: Transfer Files
 
 The purpose of "Transfer Files" job is to send backup files from master to replica server. In the case of distributed environment, when the network connection between master and replica server is unstable, or with high latency, or when servers are in the different geographical regions, the best way to transfer files will be through FTP or FTP over SSH.
@@ -705,7 +705,7 @@ By default, "`*Transfer Files*`" compresses and encrypts backup files before sen
 
 To disable encryption, uncheck the "`*Encrypt when compressing*`" checkmark.
 
-As a result, FBDataGuard will upload encrypted and compressed files to the remote server. To decompress and decrypt them into the regular files, another instance of HQbird FBDataGuard should be installed on the replica server, and File Receiver job should be configured -- see more details in the section <<_hqbird_config_cloud_backup_receiver>>.
+As a result, FBDataGuard will upload encrypted and compressed files to the remote server. To decompress and decrypt them into the regular files, another instance of HQbird FBDataGuard should be installed on the replica server, and File Receiver job should be configured -- see more details in the section <<hqbird-config-cloud-backup-receiver>>.
 
 Next, let's look at the settings for each file transfer protocol.
 
@@ -725,7 +725,7 @@ If you don't have FTP installed on the target server with Windows, install Filez
 
 [NOTE]
 ====
-Replication segments will be uploaded to the subdirectory specified in the "`Upload to folder`". By default, this is `${db.id}/`, where `db.id` is the identifier of the database inside the DataGuard. The replica about this `db.id` does not know anything, so you need to register it manually in "`Unpack to directory`" (see <<_hqbird_config_cloud_backup_receiver>>).
+Replication segments will be uploaded to the subdirectory specified in the "`Upload to folder`". By default, this is `${db.id}/`, where `db.id` is the identifier of the database inside the DataGuard. The replica about this `db.id` does not know anything, so you need to register it manually in "`Unpack to directory`" (see <<hqbird-config-cloud-backup-receiver>>).
 ====
 
 ===== FTP over SSL/TLS
@@ -750,7 +750,7 @@ It is necessary to remember that number of stored backups should be less than th
 
 The same can be done for incremental backups.
 
-[[_hqbird_config_pump_files]]
+[[hqbird-config-pump-files]]
 === Database: Pump Files
 
 The purpose of the "`Pump Files`" task is to transfer files from one directory accessible to the DataGuard to some other location, usually remote, with the possibility of using various methods that can be connected to the DataGuard in the form of plugins and selectable in the task configuration with the ability to set unique for each plugin parameters. HQbird includes two file transfer plugins: fpt and sftp. There are other file transfer plugins. Transfer plugins are `jar` files and are located in the `Firebird DataGuard/plugins` folder.
@@ -781,7 +781,7 @@ The algorithm of this task is as follows:
 Upon completion of sending, if the "Send OK-report on every pump" checkbox is checked, then the user will be sent a report on the number and size of files sent at the current iteration.
 
 
-[[_hqbird_config_cloud_backup_receiver]]
+[[hqbird-config-cloud-backup-receiver]]
 === Database: File Receiver
 
 In general, "`File Receiver`" is designed to decompress files from zip archives, and the most often it is used in the pair with "`Transfer Replication Segments`" to transfer archived replication segments.
@@ -837,7 +837,7 @@ After that, restart FBDataGuard service, and check availability of the FTP.
 On the Linux, FBDataGuard service runs under *firebird* user, so FTP home directory also should have permission for user *firebird*.
 ====
 
-[[_hqbird_config_low_level_metabackup]]
+[[hqbird-config-low-level-metabackup]]
 === Database: Low-level metadata backup
 
 "`Database: Low level metadata backup`" is one of the key jobs of DataGuard, it ensures database protection at low level.
@@ -912,7 +912,7 @@ This jobs finds all delta files associated with database and check their age and
 
 [NOTE]
 ====
-If delta file of the protected database was corrupted, it is possible to extract data from it using metadata from the original database file or repository from <<_hqbird_config_low_level_metabackup>> job.
+If delta file of the protected database was corrupted, it is possible to extract data from it using metadata from the original database file or repository from <<hqbird-config-low-level-metabackup>> job.
 ====
 
 === Database: Database statistics
@@ -1078,7 +1078,7 @@ image::3.2.61.png[]
 
 These values specify the paths to FBDataGuard configuration and output folder -- these values are chosen during installation.
 
-[[_hqbird_config_fbdataguard_port]]
+[[hqbird-config-fbdataguard-port]]
 === Adjusting web-console port
 
 One of the most frequently asked questions is how to adjust port for web-console application (by default it is 8082). It can be done by changing port setting in file `%config%\agent\agent.properties` (`%config%` is `C:\HQbirdData\config` or `/opt/hqbird/conf`).
@@ -1116,7 +1116,7 @@ access.guest-password=yournewpassword
 
 <<<
 
-[[_hqbird_config_cron_expr]]
+[[hqbird-config-cron-expr]]
 == Appendix: CRON Expressions
 
 All jobs in FBDataGuard have time settings in CRON format. CRON is very easy and powerful format to schedule execution times.

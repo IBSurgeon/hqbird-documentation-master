@@ -1,4 +1,4 @@
-[[_hqbird_enterprise_config]]
+[[hqbird-enterprise-config]]
 = Native replication configuration in HQBird
 
 HQbird is the advanced distribution of Firebird for big databases with monitoring, optimization and administration tools, it also includes the plugin for native master-slave replication and various performance improvements.
@@ -158,7 +158,7 @@ For Linux users -- make sure that folder with the database is owned by `firebird
 
 ==== How to copy replication segments from master server to the replica server?
 
-There are 2 popular ways to copy archived segments from the master server to the replica server(s): through network share and using job <<_hqbird_config_cloud_backup>> on master and <<_hqbird_config_cloud_backup_receiver>> on replica.
+There are 2 popular ways to copy archived segments from the master server to the replica server(s): through network share and using job <<hqbird-config-cloud-backup>> on master and <<hqbird-config-cloud-backup-receiver>> on replica.
 
 ===== Network share
 
@@ -171,7 +171,7 @@ We recommend using HQbird FBDataGuard to send replication segments from the mast
 
 [NOTE]
 ====
-Please read about <<_hqbird_config_cloud_backup>> job for more details how to setup transfer of archived segments between master and replica(s).
+Please read about <<hqbird-config-cloud-backup>> job for more details how to setup transfer of archived segments between master and replica(s).
 ====
 
 === Step 2: Create a copy of master database
@@ -221,7 +221,7 @@ First of all, we assume that you have successfully installed HQbird on the repli
 
 Second, the replica database should be registered in HQbird FBDataGuard. If you intend to use automatic re-initialization, you can register some small database (`employee.fdb`) with the required name, and the do re-initialization: as a result, replica database will be automatically transferred from the master server.
 
-Third, we assume that you have managed to setup transfer of logs with <<_hqbird_config_cloud_backup>>/<<_hqbird_config_cloud_backup_receiver>>, or with network share.
+Third, we assume that you have managed to setup transfer of logs with <<hqbird-config-cloud-backup>>/<<hqbird-config-cloud-backup-receiver>>, or with network share.
 
 [NOTE]
 ====
@@ -250,9 +250,9 @@ It is not recommended to store archived replication segments from the different 
 
 == Automatic initialization and re-initialization of replica
 
-We recommend using <<_hqbird_config_cloud_backup>>  on the master and <<_hqbird_config_cloud_backup_receiver>> on the replica to implement the transfer and check integrity of the replication segments through FTP. In this case, it is also possible to implement 1-click re-initialization for the replica database.
+We recommend using <<hqbird-config-cloud-backup>>  on the master and <<hqbird-config-cloud-backup-receiver>> on the replica to implement the transfer and check integrity of the replication segments through FTP. In this case, it is also possible to implement 1-click re-initialization for the replica database.
 
-If <<_hqbird_config_cloud_backup>> and <<_hqbird_config_cloud_backup_receiver>> have the following options enabled (by default), HQbird perform the re-initialization automatically, including restart of replica database:
+If <<hqbird-config-cloud-backup>> and <<hqbird-config-cloud-backup-receiver>> have the following options enabled (by default), HQbird perform the re-initialization automatically, including restart of replica database:
 
 image::6.13.png[]
 
@@ -262,7 +262,7 @@ In case of the single database, no changes are required.
 
 === How re-initialization works
 
-If <<_hqbird_config_cloud_backup>>/<<_hqbird_config_cloud_backup_receiver>> are configured, it is possible to perform the complete re-initialization with 1 click to "`Reinitialize replica database`".
+If <<hqbird-config-cloud-backup>>/<<hqbird-config-cloud-backup-receiver>> are configured, it is possible to perform the complete re-initialization with 1 click to "`Reinitialize replica database`".
 
 Once clicked, the master HQbird will do the following:
 
@@ -270,11 +270,11 @@ Once clicked, the master HQbird will do the following:
 . Master database will be copied (with `nbackup`)
 . The created copy of the database will be set to the replica mode
 . md5 hash-sum will be calculated for the copy
-. According the settings in <<_hqbird_config_cloud_backup>> (Enable replication should be Enabled), master HQbird will upload database to the specified FTP
+. According the settings in <<hqbird-config-cloud-backup>> (Enable replication should be Enabled), master HQbird will upload database to the specified FTP
 
 Next steps will be done by replica HQbird instance:
 
-. Once replica HQbird will notice the reini* files in the incoming FTP folder, <<_hqbird_config_cloud_backup_receiver>> will start the procedure of re-initialization.
+. Once replica HQbird will notice the reini* files in the incoming FTP folder, <<hqbird-config-cloud-backup-receiver>> will start the procedure of re-initialization.
 . Processing if usual arch-segments will be stopped
 . The arrived database will be checked -- md5 hash-sum will be calculated and compared with the value in the accompanied report file.
 . The existing replica database will be shutdown to disconnect all users
@@ -285,7 +285,7 @@ Replica is back to the normal mode.
 
 === Troubleshooting asynchronous replication
 
-If you have setup asynchronous replication, but it does not work, the first thing is to enable job <<_hqbird_config_repllog>> on the master and on the replica. This job parses `replication.log` files, and if there are errors, creates the appropriate alert.
+If you have setup asynchronous replication, but it does not work, the first thing is to enable job <<hqbird-config-repllog>> on the master and on the replica. This job parses `replication.log` files, and if there are errors, creates the appropriate alert.
 
 image::6.14.png[]
 
@@ -326,7 +326,7 @@ If `LogArch` folder on the network share or mounted drive, make sure that Firebi
 |Replica does not have enough permissions to read from the `LogArch` folder. Set necessary permissions or run replica under powerful account.
 
 |Replica has errors in `replication.log` "`Segment NNN is missing`"
-|Check is there such segment on the replica side, and if it is on the master size. If segment has size = 0 on replica, copy it manually or use "`Perform fresh backup`" checkmark in <<_hqbird_config_cloud_backup>>.
+|Check is there such segment on the replica side, and if it is on the master size. If segment has size = 0 on replica, copy it manually or use "`Perform fresh backup`" checkmark in <<hqbird-config-cloud-backup>>.
 
 |Replica has errors in `replication.log` about wrong foreign keys and stopped consume segments
 |It means that replica copy is desynchronized, so some records do not have the appropriate values in referenced tables for the specified Foreign Key. Replica should be reinitialized. If you see this errors often, please contact IBSurgeon support.

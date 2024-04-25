@@ -1,4 +1,4 @@
-[[_hqbird_split_udr]]
+[[hqbird-split-udr]]
 = SPLIT-UDR -- procedures to splitting strings by separator
 
 HQbird includes SPLIT-UDR which contains the set of useful stored procedures.

@@ -1,3 +1,4 @@
+[[hqbird-fbstreaming-rabbitmq-plugin]]
 = rabbitmq_plugin plugin
 
 The `rabbitmq_plugin` plugin is designed to register events in the Firebird database and send them to the RabbitMQ queue server.

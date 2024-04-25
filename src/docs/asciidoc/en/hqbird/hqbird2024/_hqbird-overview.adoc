@@ -1,3 +1,4 @@
+[[hqbird-overview]]
 = Overview of HQbird
 
 == What is HQbird
@@ -339,7 +340,7 @@ order by birth_date desc limit 5
 end
 ----
 
-See more <<_eds_other_dbms>>
+See more <<hqbird-eds-other-dbms>>
 
 === Caching blobs in temp space
 
@@ -385,7 +386,7 @@ HQbird provides ready-made plugins for Kafka, RabbitMQ, JSON files, and also sup
 
 CDC plugin available upon request. For more information, contact IBSurgeon support (support@ib-aid.com).
 
-See more <<_hqbird_fbstreaming>>
+See more <<hqbird-fbstreaming>>
 
 === Full-text search
 
@@ -434,7 +435,7 @@ The feature is controlled in the `firebird.conf` with `ExtConnPoolSize` and `Ext
 
 From the application perspective, no extra steps are needed to use or not use -- it is switched on or off in the server configuration, and completely transparent for the applications. It is also possible to disable garbage collection for queries executed in external connections. It is regulated through configuration parameter `ExtConnNoGarbageCollect`.
 
-See details: <<_hqbird_performance_extconn_pool>>
+See details: <<hqbird-performance-extconn-pool>>
 
 === Encryption
 
@@ -522,8 +523,8 @@ HQbirdServer2024.exe /VERYSILENT /SP- /TYPE="hqbird30x64" /DIR="C:\HQbird2020" /
 
 See also:
 
-* How to setup on Linux: <<_hqbird_install_linux>>
-* More details: <<_hqbird_install_silent>>
+* How to setup on Linux: <<hqbird-install-linux>>
+* More details: <<hqbird-install-silent>>
 
 === Tool to analyze database statistics
 
@@ -534,7 +535,7 @@ HQbird's Admin package (it runs on Windows), includes Database Analyst, a tool t
 * garbage collection,
 * indices effectiveness, etc
 
-More details: <<_hqbird_struct_analyze>>
+More details: <<hqbird-struct-analyze>>
 
 === Tool to analyze connections/transactions/memory consumption/IO operations
 

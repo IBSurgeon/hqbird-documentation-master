@@ -1,4 +1,4 @@
-[[_hqbird_fbstreaming]]
+[[hqbird-fbstreaming]]
 = Firebird Streaming
 
 Firebird streaming is a technology for asynchronously publishing events that occur during the analysis of the replication log.
@@ -214,8 +214,8 @@ journal_archive_command = "copy $(pathname) $(archivepathname) && copy $(pathnam
 
 Here `archiveDir` is the directory of archives for asynchronous replication, `archiveDirTask` is the directory of archives for the service task `fb_streaming`.
 
-include::fbstreaming_plugins/_kafka_cdc_plugin.adoc[leveloffset=2]
-include::fbstreaming_plugins/_rabbitmq_plugin.adoc[leveloffset=2]
-include::fbstreaming_plugins/_mongodb_events_plugin.adoc[leveloffset=2]
-include::fbstreaming_plugins/_fts_lucene_plugin.adoc[leveloffset=2]
-include::fbstreaming_plugins/_simple_json_plugin.adoc[leveloffset=2]
+include::fbstreaming/_hqbird-fbstreaming-kafka-cdc-plugin.adoc[leveloffset=2]
+include::fbstreaming/_hqbird-fbstreaming-rabbitmq-plugin.adoc[leveloffset=2]
+include::fbstreaming/_hqbird-fbstreaming-mongodb-events-plugin.adoc[leveloffset=2]
+include::fbstreaming/_hqbird-fbstreaming-fts-lucene-plugin.adoc[leveloffset=2]
+include::fbstreaming/_hqbird-fbstreaming-simple-json-plugin.adoc[leveloffset=2]

@@ -1,3 +1,4 @@
+[[hqbird-fbstreaming-simple-json-plugin]]
 = simple_json_plugin plugin
 
 The `simple_json_plugin` plugin is designed to automatically translate binary replication log files into the equivalent JSON format

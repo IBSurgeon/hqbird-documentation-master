@@ -1,4 +1,4 @@
-[[_eds_other_dbms]]
+[[hqbird-eds-other-dbms]]
 = Working with external data sources (other DBMS)
 
 In HQBird for Firebird 4.0 or higher, it became possible to work with external data sources, that is, not only with other Firebird DBMS databases, but also with other DBMS. The following plugins are used for this:
@@ -8,7 +8,7 @@ In HQBird for Firebird 4.0 or higher, it became possible to work with external d
 
 This feature is currently only available for Windows.
 
-[[_eds_other_dbms_mysql]]
+[[hqbird-eds-other-dbms-mysql]]
 == MySQLEngine
 
 The `MySQLEngine` plugin is designed to access MySQL and MariaDB databases.
@@ -354,6 +354,7 @@ begin
 end#
 ----
 
+[listing]
 ----
 Statement failed, SQLSTATE = 42000
 Execute statement error at isc_dsql_prepare :
@@ -390,7 +391,7 @@ When executing `prepare`, Firebird obtains the types, sizes, and other propertie
 
 Since it is impossible to know the types of input parameters, all parameters are assumed to be of type `VARCHAR(8191) CHARACTER SET UTF8`. Most Firebird types can be converted to and from a string. However, you cannot pass binary data (types `BINARY(N)`, `VARBINARY(N)`, and `BLOB SUB_TYPE BINARY`) to such parameters, as they will be malformed. Also, you cannot pass `BLOB SUB_TYPE TEXT` as parameters if the text is longer than 8191 characters.
 
-[[_eds_other_dbms_odbc]]
+[[hqbird-eds-other-dbms-odbc]]
 == ODBCEngine
 
 The `ODBCEngine` plugin is designed to access various databases through the ODBC interface.

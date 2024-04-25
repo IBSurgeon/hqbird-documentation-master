@@ -1,4 +1,4 @@
-[[_hqbird_nanodbc_udr]]
+[[hqbird-nanodbc-udr]]
 = NANODBC-UDR -- working with ODBC Data Sources
 
 Starting from version 2.5, Firebird DBMS has the ability to work with external data through the `EXECUTE STATEMENT .. ON EXTERNAL DATA SOURCE` statement. Unfortunately, working with external data sources is limited only to Firebird databases.
@@ -11,7 +11,7 @@ The library is based on a thin {cpp} wrapper around the native C ODBC API https:
 ====
 UDR nanodbc provides a low-level interface for interaction with ODBC drivers, which is difficult to use.
 
-Instead of UDR nanodbc, you can use the higher-level and more familiar `EXECUTE STATEMENT ON EXTERNAL` interface. For more details see <<_eds_other_dbms_odbc>>
+Instead of UDR nanodbc, you can use the higher-level and more familiar `EXECUTE STATEMENT ON EXTERNAL` interface. For more details see <<hqbird-eds-other-dbms-odbc>>
 ====
 
 == Install UDR nanodbc

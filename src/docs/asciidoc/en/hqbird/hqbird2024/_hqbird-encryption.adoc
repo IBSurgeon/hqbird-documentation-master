@@ -1,4 +1,4 @@
-[[_hqbird_encryption]]
+[[hqbird-encryption]]
 = Encryption support
 
 HQbird includes the encryption plugin and provides support to work with encryption databases in web interface. This feature is supported only in HQBird with Firebird 3.0 and higher.

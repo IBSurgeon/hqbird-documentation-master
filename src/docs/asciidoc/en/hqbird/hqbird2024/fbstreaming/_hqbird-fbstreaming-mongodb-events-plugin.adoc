@@ -1,3 +1,4 @@
+[[hqbird-fbstreaming-mongodb-plugin]]
 = Plugin mongodb_events_plugin
 
 The `mongodb_events_plugin` plugin is designed to register events in the Firebird database and write them to the MongoDB NoSQL DBMS.

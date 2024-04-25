@@ -1,7 +1,7 @@
-[[_hqbird_performance]]
+[[hqbird-performance]]
 = Performance enhancements
 
-[[_hqbird_performance_extconn_pool]]
+[[hqbird-performance-extconn-pool]]
 == Pool of external connections
 
 HQbird supports a pool of external connections for Firebird 2.5 and Firebird 3. The standard build of Firebird 4.0 and higher supports the creation of external connection pools out of the box.
@@ -265,7 +265,7 @@ It is not recommended to set `SortDataStorageThreshold` (`InlineSortThreshold`) 
 
 <<<
 
-[[_hqbird_performance_multi_threaded]]
+[[hqbird-performance-multi-threaded]]
 == Multi-thread sweep, backup, restore
 
 In HQbird, the possibility of multi-threaded execution of sweep, backup and restore has appeared, which speeds up their work from 2x to 6 times (depending on the specific database). Multi-threaded operations work in HQbird for Firebird 2.5, 3.0 and 4.0, in any architectures -- Classic, SuperClassic, SuperServer. For Firebird 5.0, multi-threaded operations are available in the "vanilla" version out of the box.
@@ -370,7 +370,7 @@ performance (IOPS). Therefore, the optimal value `–par n` for your system must
 
 <<<
 
-[[_hqbird_blob_append]]
+[[hqbird-blob-append]]
 == BLOB_APPEND function
 
 Regular operator `||` (concatenation) with BLOB arguments creates temporary BLOB per every pair of args
@@ -522,7 +522,7 @@ A similar example using the usual concatenation operator `||` is an order of mag
 
 <<<
 
-[[_hqbird_performance_left_to_inner]]
+[[hqbird-performance-left-to-inner]]
 == Transform LEFT joins into INNER
 
 HQbird allow transform `LEFT` joins into `INNER` ones if the `WHERE` condition violates the outer join rules.

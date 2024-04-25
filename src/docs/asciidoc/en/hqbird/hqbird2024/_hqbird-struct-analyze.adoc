@@ -1,4 +1,4 @@
-[[_hqbird_struct_analyze]]
+[[hqbird-struct-analyze]]
 = Database structure analysis
 
 == Overview of Firebird database structure

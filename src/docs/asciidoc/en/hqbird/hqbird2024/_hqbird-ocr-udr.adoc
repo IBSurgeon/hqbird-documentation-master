@@ -1,4 +1,4 @@
-[[_hqbird_ocr_udr]]
+[[hqbird-ocr-udr]]
 = OCR-UDR -- function to recognizing text from images
 
 HQbird includes OCR-UDR which contains function to recognizing text from images.

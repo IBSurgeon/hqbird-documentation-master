@@ -1,5 +1,6 @@
 {
     "cSpell.words": [
         "HQbird"
-    ]
+    ],
+    "asciidoc.antora.enableAntoraSupport": false
 }

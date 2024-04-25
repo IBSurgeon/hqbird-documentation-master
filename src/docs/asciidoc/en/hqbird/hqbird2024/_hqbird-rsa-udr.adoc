@@ -1,4 +1,4 @@
-[[_hqbird_rsa_udr]]
+[[hqbird-rsa-udr]]
 = RSA-UDR -- security functions to sign documents and verify signatures
 
 HQbird includes RSA-UDR which contains the set of useful security functions.

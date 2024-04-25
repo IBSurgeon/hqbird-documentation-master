@@ -1,4 +1,4 @@
-[[_http_client_udr]]
+[[hqbird-http-client-udr]]
 = HTTP Client UDR
 
 The IBSurgeon HTTP Client UDR library is designed to work with HTTP services, for example, via the REST-API.
