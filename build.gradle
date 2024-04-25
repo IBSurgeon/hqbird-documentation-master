@@ -87,7 +87,7 @@ def asciidocPdf = tasks.register('asciidocPdf', FbAsciidocPdfTask) {
     }
     jvm {
         if (JavaVersion.current() > JavaVersion.VERSION_1_8) {
-            jvmArgs "--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED"
+            jvmArgs "-Xmx2048m", "--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED"
         }
     }
 }
