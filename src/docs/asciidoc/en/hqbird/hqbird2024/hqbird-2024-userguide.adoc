@@ -49,6 +49,8 @@ include::_hqbird-monitoring.adoc[leveloffset=1]
 
 #include::_hqbird-fbstreaming.adoc[leveloffset=1]
 
+include::_hqbird-appx-cron-expr.adoc[leveloffset=1]
+
 :sectnums!:
 
 [appendix]
