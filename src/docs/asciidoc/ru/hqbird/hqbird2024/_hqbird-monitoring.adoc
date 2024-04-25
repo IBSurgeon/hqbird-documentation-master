@@ -284,226 +284,222 @@ image::4.2.5.png[]
 [[hqbird-advanced-monitor-viewer]]
 == Advanced Monitor Viewer
 
-Advanced Monitor Viewer allows graphical display of additional performance counters. They are based on both trace data and data from monitoring tables, plus additional system utilities such as wmic (Windows) are used.
+Advanced Monitor Viewer позволяет графически отображать дополнительные счетчики производительности. Они основаны как на данных трассировки, так и на данных таблиц мониторинга, плюс используются дополнительные системные утилиты, такие как wmic (Windows).
 
-To launch the "Advanced Monitor Viewer" click on the corresponding item of the Start menu "IBSurgeon/HQbird Server Side 2024/Advanced Monitor Viewer" or run the script `AVM/quick_start.cmd`.
+Для запуска "`Advanced Monitor Viewer`" нажмите на соответствующий пункт меню "`Пуск`" menu:IBSurgeon[HQbird Server Side 2024 > Advanced Monitor Viewer] или запустите скрипт `AVM/quick_start.cmd`.
 
-After successful launch, the page `http://127.0.0.1:8083` will open in your default browser.
+После успешного запуска в браузере по умолчанию откроется страница `http://127.0.0.1:8083`.
 
-You will be prompted to log in:
+Вам будет предложено войти в систему:
 
 image::4.4.1.png[]
 
-The default login and password are the same as for DataGuard: "admin / strong password".
+Логин и пароль по умолчанию такие же, как и для DataGuard: "admin / strong password".
 
-After successful authentication, a page will open with a panel on which various graphs are located, displaying the system load at different points in time.
+После успешной аутентификации откроется страница с панелью, на которой расположены различные графики, отображающие загрузку системы в разные моменты времени.
 
-On the left side of the page, you will see two buttons: "Properties" and "Databases". The first one opens a context menu for selecting counters that will be displayed on the charts.
-
-On the left side of the page, you will see two buttons: "Properties" and "Databases". The first one opens a context menu for selecting counters that will be displayed on the charts. The second, opens the context menu in which you can select the database for which these counters are displayed. The database must be registered for monitoring with DataGuard.
+В левой части страницы вы увидите две кнопки: "`Properties`" и "`Databases`". Первая открывает контекстное меню для выбора счетчиков, которые будут отображаться на графиках. Вторая, открывает контекстное меню, в котором можно выбрать базу данных, для которой отображаются эти счетчики. База данных должна быть зарегистрирована для мониторинга с помощью DataGuard.
 
 image::4.4.1-1.png[]
 
-At the top of the page, the name of the database, bookmarks with dates are displayed, as well as the time interval for which the performance counters are displayed. You can change the viewing date and select the desired interval.
+Вверху страницы отображается название базы данных, закладки с датами, а также интервал времени, за который отображаются счетчики производительности. Вы можете изменить дату просмотра и выбрать нужный интервал.
 
 image::4.4.2.png[]
 
-The following counters can be displayed graphically:
+Следующие счетчики могут быть отображены графически:
 
-=== FetchesReadsWritesMarks
+=== Fetches, Reads, Writes, Marks
 
-The graph displays the performance counters Fetches, Reads, Writes, Marks based on monitoring tables. You can drill down to each time point by clicking on it or selecting "Data for time" from the list.
+На графике отображаются счетчики производительности Fetches, Reads, Writes, Marks на основе таблиц мониторинга. Вы можете перейти к каждому моменту времени, щелкнув по нему или выбрав "`Data for time`" из списка.
 
 image::4.4.3.png[]
 
 === Users
 
-The graph displays the number of active users and requests, as well as the ping time. You can drill down to each time point by clicking on it or selecting "Data for time" from the list.
+На графике отображается количество активных пользователей и запросов, а также время пинга. Вы можете перейти к каждому моменту времени, щелкнув по нему или выбрав "`Data for time`" из списка.
 
 image::4.4.4.png[]
 
 === Traces
 
-The graph displays the performance counters Fetches, Reads, Writes, Marks and statement execute time based on data from trace logs. You can drill down to each time point by clicking on it or selecting "Data for time" from the list.
+На графике отображаются счетчики производительности:  Fetches, Reads, Writes, Marks и время выполнения запроса на основе данных из журналов трассировки. Вы можете перейти к каждому моменту времени, щелкнув по нему или выбрав "`Data for time`" из списка.
 
 image::4.4.5.png[]
 
 === RAM and CPU Windows
 
-The graph displays the consumed memory, as well as the processor load based on tracking by the wmic utility.
+На графике отображается потребляемая память, а также загрузка процессора на основе отслеживания утилитой wmic.
 
 image::4.4.6.png[]
 
 === RAM and LoadAvg Linux
 
-The same as "RAM and CPU Windows", only in Linux.
+То же, что "`RAM and CPU Windows`", только в Linux.
 
 === Transactions
 
-The graph displays the number of active transactions and the gap between the counters OST-OIT, Next-OAT.
+На графике отображается количество активных транзакций и разрыв между счетчиками OST-OIT, Next-OAT.
 
 image::4.4.7.png[]
 
 === Lock Table Info
 
-The graph displays data to the load on the lock manager (relevant in Classic and SuperClassic).
+На графике отображаются данные по нагрузке на менеджер блокировок (актуально в Classic и SuperClassic).
 
 image::4.4.8.png[]
 
 <<<
 
-== Monitoring with HQbird FBScanner
+== Мониторинг с помощью HQbird FBScanner
 
-=== What is FBScanner?
+=== Что такое FBScanner?
 
-FBScanner (Firebird Scanner) is a tool included in HQbird advanced distribution of Firebird, which can monitor and view all traffic between Firebird and InterBase servers and their client applications.
+FBScanner (Firebird Scanner) -- это инструмент, включенный в расширенный дистрибутив HQbird, который может отслеживать и просматривать весь трафик между серверами Firebird и InterBase и их клиентскими приложениями.
 
-It shows the real-time activity of connected clients:
+Он показывает активность подключенных клиентов в реальном времени:
 
-* Connections (IP/Name, duration, CPU load),
-* Queries (query text, status, parameters)
-* Transactions (with parameters).
+* Соединения (IP/имя, продолжительность, загрузка процессора),
+* Запросы (текст запроса, статус, параметры)
+* Транзакции (с параметрами).
 
-FBScanner can log all SQL traffic to text files and external Firebird database, it includes FBScanner LogAnalyzer module to analyze SQL performance.
+FBScanner может регистрировать весь SQL-трафик в текстовых файлах и во внешней базе данных Firebird. Он включает модуль FBScanner LogAnalyzer для анализа производительности SQL.
 
-FBScanner can be used to profile database applications, monitor user activity, and manage database connections (including client disconnects on Classic, SuperClassic and SuperServer architectures). It's also ideal for troubleshooting INET errors, as well as auditing existing applications and performance tuning.
+FBScanner можно использовать для профилирования приложений баз данных, мониторинга активности пользователей и управления подключениями к базе данных (включая отключения клиентов на архитектурах Classic, SuperClassic и SuperServer). Он также идеально подходит для устранения ошибок INET, а также для аудита существующих приложений и настройки производительности.
 
-FBScanner supports Firebird (V1.x, V2.0, V2.1 and V.2.5), InterBase (V4.0 to 2009/XE3). It is a useful tool for analyzing production databases, especially if the application has been developed by third-party and there is no source code available.
+FBScanner поддерживает Firebird (V1.x, V2.0, V2.1 и V2.5), InterBase (от V4.0 до 2009/XE3). Это полезный инструмент для анализа производственных баз данных, особенно если приложение разработано сторонней организацией и исходный код отсутствует.
 
-FBScanner is transparent as far as the database application is concerned and does not require any changes in application or database source code, logic or configuration.
+FBScanner прозрачен в отношении приложения базы данных и не требует каких-либо изменений в исходном коде, логике или конфигурации приложения или базы данных.
 
-=== Issues that FBScanner can help to resolve
+=== Проблемы, которые FBScanner может помочь решить
 
-* Real-time monitoring of connections. FBScanner shows all connections to the selected database server: the IP/DNS name of connected client, database and connection time.
-* Real-time monitoring of SQL queries. For each connection FBScanner shows all the currently running SQL queries along with their transaction parameters.
-* Detection of the oldest connection and the oldest active transaction to allow you to analyze that may have non-optimal transaction behavior or incorrect transaction design or show users who might be using the application in a manner that may be affecting performance.
-* Client disconnects. Check that disconnections are taking place correctly. You can also use FBScanner to disconnect users in order to perform maintenance or database upgrades.
-* FBScanner allows the routing of specific applications or particular users to allow you to zoom in on specific applications or users.
-* You can log SQL queries. For debugging or for security FBScanner can log all the selected traffic to a special database for further analysis. FBScanner includes LogAnalyzer tool to find bad queries and ineffective SQL plans.
+* Мониторинг соединений в режиме реального времени. FBScanner показывает все подключения к выбранному серверу базы данных: IP/DNS-имя подключенного клиента, базу данных и время подключения.
+* Мониторинг SQL-запросов в режиме реального времени. Для каждого соединения FBScanner показывает все текущие SQL-запросы вместе с параметрами их транзакций.
+* Обнаружение самого старого соединения и самой старой активной транзакции, что позволяет вам проанализировать, что транзакция может иметь неоптимальное поведение или неправильный дизайн транзакции, или показать пользователей, которые могут использовать приложение таким образом, который может повлиять на производительность.
+* Отключения клиентов. Проверка правильности выполнения отключений. Вы также можете использовать FBScanner для отключения пользователей для выполнения обслуживания или обновления базы данных.
+* FBScanner позволяет маршрутизировать определенные приложения или отдельных пользователей, чтобы вы могли увеличить масштабируемость конкретных приложений или пользователей.
+* Вы можете регистрировать SQL-запросы. Для отладки или в целях безопасности FBScanner может регистрировать весь выбранный трафик в специальную базу данных для дальнейшего анализа. FBScanner включает в себя инструмент LogAnalyzer для поиска плохих запросов и неэффективных планов SQL.
 
+=== Влияние на производительность
 
-=== Performance Impact
+FBScanner ничего не меняет в передаваемом SQL-трафике и работает просто как прозрачный прокси, поэтому все приложения будут работать нормально.
 
-FBScanner does not change anything in transferred SQL traffic and works simply like a transparent proxy, so all applications will work normally.
+FBScanner потребляет примерно 50-150Мб памяти (для 30-100 активных клиентов), известно, что FBScanner добавляет примерно 150мс на каждый оператор SQL.
 
-FBScanner consume approximately 50-150Mb of memory (for 30-100 active clients), it is known that FBScanner adds approximately 150ms for every SQL statement.
+=== Как настроить FBScanner на локальном компьютере?
 
-=== How to configure FBScanner for local computer?
+Чтобы настроить FBScanner, запустите "`FBScanner Service Settings`" из меню "`Пуск`" menu:IBSurgeon[HQbird Server Side > Firebird SQL Scanner]. тот инструмент поможет вам настроить как базовые, так и расширенные параметры конфигурации для FBScanner.
 
-To configure FBScanner start "`FBScanner Service Settings`" from Start menu (`IBSurgeon\HQbird Server Side\Firebird SQL Scanner\`).This tool will help you to setup both basic and advanced configuration parameters for FBScanner.
-
-The basic configuration parameters are shown at the main screen of "`FBScanner Configuration`".
-It scans Windows registry for installed Firebird services and show them in the grid.
+Основные параметры конфигурации отображаются на главном экране "`FBScanner Configuration`". Он сканирует реестр Windows на наличие установленных служб Firebird и отображает их в таблице.
 
 image::4.3.1.png[]
 
-By default Firebird uses port 3050 for network connections.
+По умолчанию Firebird использует порт 3050 для сетевых подключений.
 
-FBScanner works as a transparent TCP proxy -- it redirects all SQL traffic from and to Firebird clients to another.
+FBScanner работает как прозрачный TCP-прокси -- он перенаправляет весь SQL-трафик от клиентов к Firebird.
 
-FBScanner offers to change Firebird port to 3053, in order to start its own instance at 3050. FBScanner checks for the port usage and if either 3050 or 3053 are used by other software (not Firebird), it will warn you with red caption "`Port used`" near new "`Port`" text box.
+FBScanner предлагает изменить порт Firebird на 3053, чтобы запустить собственный экземпляр на порту 3050. FBScanner проверяет использование порта, и если 3050 или 3053 используются другим программным обеспечением (не Firebird), он предупредит вас красной надписью "`Port used`" рядом с полем "`Port`".
 
-The green figure in the center of "`FBScanner Configuration`" main screen briefly shows how client applications SQL traffic will be passed.
+Зеленый рисунок в центре главного экрана "`FBScanner Configuration`" кратко показывает, как будет передаваться SQL-трафик клиентских приложений.
 
-At the figure below you can see that FBScanner found Firebird 1.5 instance, and offers to change its port to 3053, in order to set own instance to listen at 3050.
+На рисунке ниже вы можете видеть, что FBScanner обнаружил экземпляр Firebird 1.5 и предлагает изменить его порт на 3053, чтобы настроить собственный экземпляр на прослушивание порта 3050.
 
-Such default scenario will give the maximum compatibility with existing Firebird clients (i.e., end-user applications).
+Такой сценарий по умолчанию обеспечит максимальную совместимость с существующими клиентами Firebird (т. е. приложениями конечного пользователя).
 
-To approve the changes, click "`Ok`", otherwise "`Cancel`".
+Чтобы утвердить изменения, нажмите "`Ok`", в противном случае -- "`Cancel`".
 
 [IMPORTANT]
 ====
-If FBScanner settings were changed, FBScanner Service will be restarted, and all existing Firebird connections will be dropped! Be careful with changing FBScanner settings in production environment. FBScanner will ask your permission to restart, please decide carefully.
+Если настройки FBScanner были изменены, служба FBScanner будет перезапущена, а все существующие соединения Firebird будут разорваны! Будьте осторожны при изменении настроек FBScanner в производственной среде. FBScanner запросит ваше разрешение на перезапуск, пожалуйста, принимайте решение обдуманно.
 ====
 
-=== How to setup FBScanner for remote computer?
+=== Как настроить FBScanner для удаленном компьютере?
 
-FBScanner can route SQL traffic not only as local proxy, but from another computer too. To understand the difference and discover consequences, let's walk though details.
+FBScanner может маршрутизировать SQL-трафик не только как локальный прокси, но и с другого компьютера. Чтобы понять разницу и обнаружить последствия, давайте разберемся в деталях.
 
-The basic (and default) configuration of FBScanner implies that it works on the same computer where Firebird is working, and process all SQL traffic from Firebird clients (i.e., end-user applications) which use default connection string (and, therefore, port 3050).
+Базовая (и по умолчанию) конфигурация FBScanner подразумевает, что он работает на том же компьютере, на котором работает Firebird, и обрабатывает весь SQL-трафик от клиентов Firebird (т. е. приложений конечного пользователя), которые используют строку подключения по умолчанию (и, следовательно, порт 3050).
 
 image::4.3.2.png[]
 
-Sometimes it's not convenient to setup FBScanner to process all requests, for example, in case of:
+Иногда не удобно настраивать FBScanner на обработку всех запросов, например, в случае:
 
-* Only several (may be, the single workstation) workstations need to be profiled/logged
-* Only certain application or narrow functionality need to be profiled
-* Developers need to check some SQL code on the live database -- gather SQL log with execution statistics, plans, etc.
-* Heavy load (too many workstations). In case of heavy load FBScanner can consume resources of the main server, and it's better to move FBScanner (as well as FBScanner log, if it's enabled, to the dedicated computer).
-* Linux server. If Firebird works on Linux, it's possible to route SQL traffic through remote instance of FBScanner on Windows.
+* Необходимо профилировать/логировать только несколько (возможно, одну) рабочих станций.
+* Необходимо профилировать только определенное приложение или узкую функциональность
+* Разработчикам необходимо проверить некоторый код SQL в действующей базе данных -- собрать статистику выполнения SQL, планы и т. д.
+* Большая нагрузка (слишком много рабочих станций). В случае большой нагрузки FBScanner может потреблять ресурсы основного сервера, поэтому лучше перенести FBScanner (а также журнал FBScanner, если он включен, на выделенный компьютер).
+* Linux-сервер. Если Firebird работает в Linux, можно маршрутизировать SQL-трафик через удаленный экземпляр FBScanner в Windows.
 
-In these cases the good idea is to setup FBScanner at the remote computer and pass only part of SQL traffic through it. It also makes possible to perform necessary analysis of SQL without changing ports or other configuration at server -- the only needed adjustment will be change host name in client applications' connections strings.
+В таких случаях хорошей идеей будет настроить FBScanner на удаленном компьютере и пропускать через него только часть SQL-трафика. Это также позволяет выполнить необходимый анализ SQL без изменения портов или другой конфигурации на сервере -- единственной необходимой корректировкой будет изменение имени хоста в строках подключения клиентских приложений.
 
-One of the frequent use cases for setting up FBScanner in remote configuration is using it as debug console for developer computer, so developer can see in real-time (with FBScanner LogViewer) or afterwards (with FBScanner LogAnalyzer) all SQLs from own computer to the Firebird server.
+Одним из частых вариантов использования FBScanner в удаленной конфигурации является использование его в качестве консоли отладки для компьютера разработчика, чтобы разработчик мог видеть в режиме реального времени (с помощью FBScanner LogViewer) или впоследствии (с помощью FBScanner LogAnalyzer) все SQL-запросы со своего компьютера на сервер Firebird.
 
-At the figure below you can see how it can look like:
+На рисунке ниже вы можете увидеть, как это может выглядеть:
 
 image::4.3.3.png[]
 
-Now let's back to the configuration and see how easy to setup FBScanner to route SQL traffic at the remote computer.
+Теперь вернемся к настройке и посмотрим, насколько легко настроить FBScanner для маршрутизации SQL-трафика на удаленном компьютере.
 
-At the bottom of the main screen of "`FBScanner Configuration`" you can see the following default settings (for Firebird 2.5 example we considered above):
+В нижней части главного экрана "`FBScanner Configuration`" вы можете увидеть следующие настройки по умолчанию (для примера Firebird 1.5, который мы рассматривали выше):
 
 image::4.3.4.png[]
 
-In order to setup FBScanner to route SQL traffic to the remote Firebird, we need to change "`Server Type`" from "`Local...`" to "`Remote`". It will change the main screen of the configuration tool.
+Чтобы настроить FBScanner для маршрутизации SQL-трафика на удаленный Firebird, нам нужно изменить "`Server Type`" с "`Local...`" на "`Remote`". Это изменит главный экран инструмента конфигурации.
 
-First of all, we need to specify network name (or IP) of the computer with Firebird instance and port where it will be used -- it should be entered into "`Interface`" text box.
+Прежде всего, нам необходимо указать сетевое имя (или IP) компьютера с экземпляром Firebird и порт, на котором он будет использоваться -- его необходимо ввести в текстовое поле "`Interface`".
 
-Then we need to specify Firebird version -- in our example it's Firebird 1.5.
+Затем нам нужно указать версию Firebird -- в нашем примере это Firebird 1.5.
 
-FBScanner instance also has "`Interface`" -- it's the list of network adapters found at the computer. If you need to bind FBScanner to one of them and disable connections from other network adapters, choose one of the adapters from the drop-down list. By default FBScanner will accept Firebird clients requests from all network adapters.
+Экземпляр FBScanner также имеет "`Interface`" -- это список сетевых адаптеров, обнаруженных на компьютере. Если вам нужно привязать FBScanner к одному из них и отключить подключения от других сетевых адаптеров, выберите один из адаптеров из раскрывающегося списка. По умолчанию FBScanner принимает запросы клиентов Firebird от всех сетевых адаптеров.
 
-Below you can see the example of FBScanner configuration to route SQL traffic to remote Firebird instance, which resides on *myserver1* computer and works on default port 3050.
+Ниже вы можете увидеть пример конфигурации FBScanner для маршрутизации SQL-трафика на удаленный экземпляр Firebird, который находится на компьютере *myserver1* и работает через порт 3050.
 
 image::4.3.5.png[]
 
-Click "`Ok`" to confirm new settings, and FBScanner will route SQL requests to the remote Firebird.
+Нажмите "`Ok`", чтобы подтвердить новые настройки, и FBScanner направит SQL-запросы на удаленный Firebird.
 
 [IMPORTANT]
 ====
-If you need to pass SQL traffic from client applications through remote FBScanner, please change Firebird appropriate connection string. For example, if originally client applications have connected with "`*myserver1:C:\Database\data.fdb*`", in order to pass SQL traffic through FBScanner in this example you need to change connection string to "`*computer1:C:\Database\data.fdb*`" (where computer1 is the network name of the computer where FBScanner works).
+Если вам необходимо передать трафик SQL от клиентских приложений через удаленный FBScanner, измените соответствующую строку подключения Firebird. Например, если изначально клиентские приложения подключались к "`*myserver1:C:\Database\data.fdb*`", чтобы передать SQL-трафик через FBScanner в этом примере, вам необходимо изменить строку подключения на "`*computer1:C:\Database\data.fdb*`" (где `computer1` -- сетевое имя компьютера, на котором работает FBScanner).
 ====
 
-=== How to setup logging?
+=== Как настроить логирование?
 
-From Start menu run "`Firebird Scanner\FBScanner Settings`", then click button "`Advanced options`" (in the right bottom of the main screen).
+В меню "`Пуск`" запустите "Firebird Scanner > FBScanner Settings", затем нажмите кнопку "`Advanced options`" (в правом нижнем углу главного экрана).
 
 image::4.3.6.png[]
 
-At the dialog click tab "`SQL log`".
+В диалоговом окне выберите вкладку "`SQL log`".
 
 image::4.3.7.png[]
 
-By default logging is disabled.
+По умолчанию ведение журнала отключено.
 
 [IMPORTANT]
 ====
-It's important to understand that logging to SQL database will write all SQL operations, including transactions, connects, etc. It means that SQL log database will consume the same amount of resources (CPU, HDD, etc) as the main database does. Due to this fact for heavy load environments we recommend to use remote configuration of FBScanner for SQL logging.
+Важно понимать, что при журналировании в базу данных SQL будут записываться все операции SQL, включая транзакции, соединения и т. д. Это означает, что база данных журналов SQL будет потреблять то же количество ресурсов (ЦП, жесткий диск и т. д.), что и основная база данных. В связи с этим для сред с высокой нагрузкой мы рекомендуем использовать удаленную настройку FBScanner для ведения журнала SQL.
 ====
 
-There are 2 options for logging -- to file and to Firebird log database.
+Есть два варианта ведения журнала: в файл и в базу данных журналов Firebird.
 
-==== Logging to text files
+==== Логирование в текстовые файлы
 
-File logging creates text file for each connection where FBScanner writes SQL and transactions operators. We recommend file logging for debug purposes and during development -- it's suitable to investigate linear SQL code. If there are a lot of connections, file logging becomes not very suitable.
+Логирование в файлы создает текстовый файл для каждого соединения, в котором FBScanner записывает операторы SQL и транзакции. Мы рекомендуем логирование в файлы в целях отладки и во время разработки -- оно подходит для исследования линейного кода SQL. Если подключений много, логирование в файлы становится не очень подходящим.
 
-To enable file logging, click radio button near "`File`" option and set folder where to store file logs (check that specified folder exists first!):
+Чтобы включить ведение журнала в файлы, установите переключатель рядом с опцией "`File`" и укажите папку, в которой будут храниться файлы журналов (сначала проверьте, существует ли указанная папка!):
 
 image::4.3.8.png[]
 
-Then click "`Ok`".
+Затем нажмите "`Ok`".
 
 [IMPORTANT]
 ====
-Enabling logging will require restart of FBScanner Service, so all current connections will be dropped. FBScanner will ask your permission to do it immediately.
+Включение ведения журнала потребует перезапуска службы FBScanner, поэтому все текущие соединения будут разорваны. FBScanner немедленно попросит вашего разрешения сделать это.
 ====
 
-==== Example of text file logging
+==== Пример логирования в текстовые файлы
 
-For the following isql commands
+Для следующих команд в `isql`
 
-[listing,subs="+verbatim"]
+[listing]
 ----
 Use CONNECT or CREATE DATABASE to specify a database
 
@@ -528,7 +524,7 @@ COUNT
 SQL> exit;
 ----
 
-FBScanner created the following log:
+FBScanner создал следующий журнал:
 
 [listing]
 ----
@@ -616,127 +612,127 @@ COMMIT;
 COMMIT;
 ----
 
-As you can see, file log is useful to understand how SQL commands were run inside the single connect.
+Как видите, лог в файл полезен для понимания того, как команды SQL выполнялись внутри одного соединения.
 
-==== Logging to Firebird database
+==== Логирование в базу данных Firebird
 
-Before you start with SQL log, it's necessary to understand some implementation details, which can be important for production systems.
+Прежде чем начать работу с журналом SQL, необходимо понять некоторые детали реализации, которые могут быть важны для производственных систем.
 
-In general logging to Firebird database is implemented in the straightforward way: FBScanner service writes all traffic to the external Firebird database. Firebird database with log can be at the same computer where FBScanner resides, or at the remote computer.
+В основном запись в базу данных Firebird осуществляется простым способом: служба FBScanner записывает весь трафик во внешнюю базу данных Firebird. База данных Firebird с журналом может находиться на том же компьютере, где находится FBScanner, или на удаленном компьютере.
 
-Please consider the following requirements for SQL log configuration:
+Примите во внимание следующие требования к настройке журнала SQL:
 
-* Log database (and appropriate Firebird instance) should be in Firebird 2.5 format (since FBScanner 2.7.15). If you are forced to use FBScanner at the computer with another Firebird version, you need to use embedded Firebird 2.5 to store log.
-* SQL traffic from all logged connections is written into the single table, with appropriate markers (from what computer, application, user, etc. this particular record was created).
-* Log database can consume significant amount of resources in case of heavy load. For many connections it's recommended to setup FBScanner and Firebird log database at dedicated computer.
-* In many cases it's not necessary to log all connections, because they repeat the same set of SQL queries. Careful investigation of the single connection can be the most effective way to find performance problems.
+* База данных журналов (и соответствующий экземпляр Firebird) должна быть в формате Firebird 2.5 (начиная с FBScanner 2.7.15). Если вы вынуждены использовать FBScanner на компьютере с другой версией Firebird, вам необходимо использовать Firebird 2.5 embedded для хранения журнала.
+* SQL-трафик от всех зарегистрированных соединений записывается в единую таблицу с соответствующими маркерами (с какого компьютера, приложения, пользователя и т.д. была создана данная конкретная запись).
+* База данных журналов может потреблять значительное количество ресурсов в случае большой нагрузки. В случае большого количества подключений рекомендуется настроить базу данных журналов FBScanner и Firebird на выделенном компьютере.
+* Во многих случаях протоколировать все соединения нет необходимости, поскольку они повторяют один и тот же набор SQL-запросов. Тщательное исследование отдельного соединения может оказаться наиболее эффективным способом обнаружения проблем с производительностью.
 
-To enable SQL logging, click on "`SQL`" radio button. It will enable appropriate text boxes and controls.
+Чтобы включить ведение журнала SQL, выберете "`SQL`" в переключателе. Это активирует соответствующие текстовые поля и элементы управления.
 
 image::4.3.9.png[]
 
-First of all, click button "`Edit`".
+Прежде всего, нажмите кнопку "`Edit`".
 
 image::4.3.10.png[]
 
 [IMPORTANT]
 ====
-If you intend to use the same Firebird instance to log SQL traffic, you need to specify connections string with explicit and direct port.
-In our example it will be port 3053, and connection string looks like `127.0.0.1/3053:C:\FBScanner_log.fdb`
+Если вы собираетесь использовать один и тот же экземпляр Firebird для регистрации трафика SQL, вам необходимо указать строку подключения с явным портом.
+В нашем примере это будет порт 3053, а строка подключения будет иметь вид `127.0.0.1/3053:C:\FBScanner_log.fdb`
 ====
 
-In this dialog you also need to specify how to connect to database with log.
+В этом диалоговом окне вам также необходимо указать, как подключиться к базе данных с журналом.
 
-If there is no database with specified name, create new database -- click "`Create database log`".
+Если базы данных с указанным именем нет, создайте новую базу данных -- нажмите "`Create database log`".
 
-Test connection with log database -- click "`Test connection`".
+Проверьте соединение с базой данных журналов -- нажмите "`Test connection`".
 
-Click "`Ok`" to save settings.
+Нажмите "`Ok`", чтобы сохранить настройки.
 
-==== Transactions markers
+==== Маркеры транзакций
 
-FBScanner can gather information about transactions markers (in the same way like IBSurgeon Transaction Monitors does). Gathered information will be shown as graphs in FBScanner Log Analyzer.
+FBScanner может собирать информацию о маркерах транзакций (так же, как это делает IBSurgeon Transaction Monitors). Собранная информация будет отображаться в виде графиков в FBScanner Log Analyzer.
 
-For this purpose, FBScanner runs separate connect, which requires Login, Password and path to the appropriate client dll (if you track Firebird 1.5 with FBScanner, `fbclient.dll` from 1.5 will be required).
+Для этой цели FBScanner запускает отдельное соединение, для которого требуются логин, пароль и путь к соответствующей клиентской библиотеке (если вы отслеживаете Firebird 1.5 с помощью FBScanner, потребуется `fbclient.dll` из 1.5).
 
-If you decide to gather transactions markers information, mark checkbox "`Collect transactions counters info`" and fill out Login, Password and Client DLL fields.
+Если вы решили собирать информацию о маркерах транзакций, отметьте флажок "`Collect transactions counters info`" и заполните поля "`Login`", "`Password`" и "`Client DLL`".
 
-==== Using Embedded Firebird 2.5 for SQL log
+==== Использование Firebird 2.5 embedded для журнала SQL
 
-If you need to use SQL log at the computer where old Firebird is used (1.0, 1.5, 2.0, 2.1 or even InterBase), it's recommended to use Firebird 2.5 Embedded to store log.
+Если вам необходимо использовать журнал SQL на компьютере, где используется старая версия Firebird (1.0, 1.5, 2.0, 2.1 или даже InterBase), для хранения журнала рекомендуется использовать Firebird 2.5 Embedded.
 
-You can download Firebird 2.5 Embedded from https://www.firebirdsql.org[www.firebirdsql.org].
+Вы можете загрузить Firebird 2.5 Embedded по адресу https://www.firebirdsql.org[www.firebirdsql.org].
 
-Unpack the archive right into the FBScanner folder (`C:\Program Files\IBSurgeon\Firebird Scanner` by default) and rename `fbembed.dll` into `fbclient.dll`.
+Распакуйте архив прямо в папку FBScanner (по умолчанию `C:\Program Files\IBSurgeon\Firebird Scanner`) и переименуйте `fbembed.dll` в `fbclient.dll`.
 
-Folder structure will look like this
+Структура папок будет выглядеть так
 
 image::4.3.11.png[]
 
-After that run "`Advanced options`", tab "`SQL logging`", radio button "`SQL`" and click "`Edit`", then in the "`Client library`" point to the renamed `fbclient.dll`, as it shown below.
+После этого запустите "`Advanced options`", вкладка "`SQL logging`", переключатель "`SQL`" и нажмите "`Edit`", затем в "`Client library`" укажите переменованный файл `fbclient.dll`, как показано ниже.
 
 image::4.3.12.png[]
 
 [TIP]
 ====
-In Embedded Firebird `fbclient.dll` represents the whole engine.
-It works inside the process of FBScanner and there is no interaction with other installed Firebird instances, both full and embedded.
+В Embedded Firebird `fbclient.dll` представляет собой весь движок.
+Он работает внутри процесса FBScanner и не взаимодействует с другими установленными экземплярами Firebird, как полными, так и встроенными.
 ====
 
-=== How to analyze FBScanner log?
+=== Как проанализировать журнал FBScanner?
 
-Many users told us that they did not realize how many queries, transactions and other operations are performed by their software. As you remember, FBScanner stores all information into the single table. It uses self-links to reduce the amount of stored information and it makes raw log hard to read and understand.
+Многие пользователи рассказали нам, что не осознают, сколько запросов, транзакций и других операций выполняет их программное обеспечение. Как вы помните, FBScanner хранит всю информацию в одной таблице. Эта таблица использует ссылки на саму себя для уменьшения объема хранимой информации, что затрудняет чтение и понимание необработанного журнала.
 
-To facilitate log analysis we have created new module in FBScanner -- LogAnalyzer. It's available in IBSurgeon Deploy Center for all FBScanner users (inside "`Download`" section).
+Для облегчения анализа журналов мы создали в FBScanner новый модуль -- LogAnalyzer. Он доступен в IBSurgeon Deploy Center для всех пользователей FBScanner (в разделе "`Download`").
 
-LogAnalyzer requires Firebird 2.5 to work with log database. It also creates new indices and runs heavy reporting queries, so it's recommended the following procedure:
+LogAnalyzer требует Firebird 2.5 для работы с базой данных журналов. Он также создает новые индексы и выполняет сложные запросы для отчетов, поэтому рекомендуется следующая процедура:
 
-. Setup logging and gather statistics for at least 1 day
-. Copy log database to another computer with Firebird 2.5
-. Connect to the copy of log database and perform analysis at the developer's computers
-. Copy updated versions of log databases as necessary
+. Настройте ведение журнала и сбор статистики минимум за 1 день.
+. Скопируйте базу данных журналов на другой компьютер с Firebird 2.5
+. Подключитесь к копии базы данных журналов и выполните анализ на компьютерах разработчика.
+. При необходимости скопируйте обновленные версии баз данных журналов.
 
-To analyze log database, start LogAnalyzer and click "`Connect to FBScanner log base`", then fill out connection parameters and select log database.
+Чтобы проанализировать базу данных журналов, запустите LogAnalyzer и нажмите "`Connect to FBScanner log base`", затем заполните параметры подключения и выберите базу данных журналов.
 
 image::4.3.13.png[]
 
-At first start LogAnalyzer will create necessary indices, it can take several minutes.
+При первом запуске LogAnalyzer создаст необходимые индексы, это может занять несколько минут.
 
-After that LogAnalyzer will show the last available day in the log at the "`Server Load`" tab:
+После этого LogAnalyzer отобразит последний доступный день в журнале на вкладке "`Server Load`":
 
 image::4.3.14.png[]
 
-"`Server Load`" tab shows how many SQL queries were run per minute, and how much time they took to execute. Effectively it shows server load, i.e., number of queries and their execution times.
+Вкладка "`Server Load`" показывает, сколько SQL-запросов было выполнено в минуту и сколько времени потребовалось для их выполнения. Фактически он показывает загрузку сервера, то есть количество запросов и время их выполнения.
 
-Zoom in (button in the top left corner of the tab "`Server load`"), drag graph by holding right-button of the mouse and select the peak you are interested to investigate -- click right-button to show popup-menu
+Увеличьте масштаб (кнопка в левом верхнем углу вкладки "`Server load`"), перетащите график, удерживая правую кнопку мыши, и выберите пик, который вы хотите исследовать -- щелкните правой кнопкой мыши, чтобы открыть всплывающее меню.
 
 image::4.3.15.png[]
 
-It will show you tab "`All statements`", where you can browse SQL queries
+Он покажет вам вкладку "`All statements`", где вы можете просматривать SQL-запросы.
 
 image::4.3.16.png[]
 
-Select any query to see its text and, if plan logging feature is enabled, its plan.
+Выберите любой запрос, чтобы просмотреть его текст и, если функция ведения журнала плана включена, его план.
 
-To follow the execution flow, you can right-click on the query and look for connection and transactions for this query
+Чтобы проследить за ходом выполнения, вы можете щелкнуть запрос правой кнопкой мыши и найти соединение и транзакцию для этого запроса.
 
 image::4.3.17.png[]
 
-LogAnalyzer marks bold queries in the same transaction:
+LogAnalyzer выделяет запросы в одной транзакции жирным шрифтом:
 
 image::4.3.18.png[]
 
-You can sort queries and, for example, find query with the longest execution time:
+Вы можете отсортировать запросы и, например, найти запрос с наибольшим временем выполнения:
 
 image::4.3.19.png[]
 
-To know more about this query -- double-click on it and see more details
+Чтобы узнать больше об этом запросе, дважды щелкните его и просмотрите более подробную информацию.
 
 image::4.3.20.png[]
 
-=== How to track 10054 errors, disconnects and failed login attempts?
+=== Как отслеживать ошибки 10054, отключения и неудачные попытки входа в систему?
 
-FBScanner automatically logs all 10054 errors, disconnects and failed login attempts with detailed description in the `FBScanner.log` file, which is in FBScanner main directory.
+FBScanner автоматически регистрирует все 10054 ошибки, отключения и неудачные попытки входа в систему с подробным описанием в файле `FBScanner.log`, который находится в главном каталоге FBScanner.
 
 [listing]
 ----
@@ -763,68 +759,68 @@ FBScanner automatically logs all 10054 errors, disconnects and failed login atte
 Ask your database administrator to set up a Firebird login.]
 ----
 
-=== Backup/restore and mass load operations
+=== Операции Backup/restore и массовой загрузки
 
-To perform operations which do not require monitoring or debugging, like backup and restore or mass load of records (in billing systems) we recommend bypassing FBScanner service.
+Для выполнения операций, не требующих мониторинга или отладки, таких как резервное копирование и восстановление или массовая загрузка записей (в биллинговых системах), мы рекомендуем обходить сервис FBScanner.
 
-If FBScanner is installed in default recommended configuration, i.e., on port 3050 and Firebird is on port 3053, connection strings should be like this
+Если FBScanner установлен в рекомендуемой конфигурации по умолчанию, т. е. на порту 3050, а Firebird -- на порте 3053, строки подключения должны быть такими:
 
 [listing]
 ----
 server_name/3053:Disk:\Path\database.fdb
 ----
 
-example of connection string
+пример строки подключения
 
 [listing]
 ----
 connect "localhost/3053:C:\TEMP\database.fdb" user "SYSDBA" password "masterkey";
 ----
 
-Example of using backup command
+Пример использования команды резервного копирования
 
 [listing]
 ----
 gbak.exe -b -g -v -user SYSDBA -pass masterkey localhost/3053:C:\TEMP\database.fdb C:\temp\backup.gbk
 ----
 
-and, of course, using local connection string will always bypass FBScanner:
+Конечно же, использование локальной строки подключения всегда будет обходить FBScanner:
 
 [listing]
 ----
 gbak.exe -b -g -v -user SYSDBA -pass masterkey C:\TEMP\database.fdb C:\temp\backup.gbk
 ----
 
-=== Real-Time Monitoring: FBScanner Viewer
+=== Мониторинг в реальном времени: FBScanner Viewer
 
-To monitor connections, queries and transaction in real-time FBScanner includes special tool namely FBScanner Viewer.
+Для мониторинга соединений, запросов и транзакций в режиме реального времени FBScanner включает в себя специальный инструмент, а именно FBScanner Viewer.
 
-FBScanner Viewer shows momentary snapshot of SQL traffic between Firebird and monitored client applications.
+FBScanner Viewer показывает мгновенный снимок SQL-трафика между Firebird и контролируемыми клиентскими приложениями.
 
 image::4.3.21.png[]
 
-In the first column we can see type of record -- connection, statements or transaction.
+В первом столбце мы видим тип записи -- connection, statement или transaction.
 
-In the table below you can find description of all columns at main page of FBScanner Viewer (some columns are hidden by default, use menu Columns to turn them on/off):
+В таблице ниже вы можете найти описание всех столбцов на главной странице FBScanner Viewer (некоторые столбцы по умолчанию скрыты, используйте меню "`Columns`" чтобы включить/выключить их):
 
 [cols="1,1", options="header"]
 |===
-| Column title
-| Column description
+| Наименование столбца
+| Описание
 
 
-|! (first column)
-|Indicates type of record in FBScanner Viewer -- there are separate set of values for SQL statements, transactions and connections.
-They are described in the next table below.
+|! (первый столбец)
+|Указывает тип записи в FBScanner Viewer -- для операторов SQL, транзакций и соединений имеется отдельный набор значений.
+Они описаны в следующей таблице ниже.
 
-Sign "`!`" in the title of this column means active filter -- click on the triangle at right side of sign "`!`" to adjust it.
+Знак "`!`" в заголовке этого столбца означает активный фильтр -- нажмите на треугольник справа от знака "`!`", чтобы настроить его.
 
 |Tag
-a|Green/red background shows CPU Usage in % (red -- Kernel, green -- Firebird).
+a|Зеленый/красный фон показывает загрузку ЦП в % (красный -- ядро, зеленый -- Firebird).
 
-Text is shows tags value (if it was specified in SQL query).
+В тексте отображается значение тега (если оно было указано в SQL-запросе).
 
-Example how to set tag values:
+Пример установки значений тегов:
 
 [listing]
 ----
@@ -834,64 +830,64 @@ FBSCANNER$TR_NAME=MyTransaction;
 FBSCANNER$ST_NAME=SomeImportantQuery; */;
 ----
 
-Also in this column you will see execution of `gbak` and `gfix` tools.
+Также в этом столбце вы увидите выполнение инструментов `gbak` и `gfix`.
 
 |Transaction Count
-|Applicable for connection row.
-Number of active transactions in the connection is shown.
+|Применимо для строки типа подключение.
+Отображается количество активных транзакций в соединении.
 
-It's very useful to find applications with auto-commit and other ineffective transaction management issues.
+Очень полезно найти приложения с автоматической фиксацией и другими неэффективными проблемами управления транзакциями.
 
 |PID
-|Process ID for Firebird. Only for Classic Architecture
+|Идентификатор процесса Firebird. Только для архитектуры Classic.
 
 |Client IP
-|IP of connection
+|IP соединения
 
 |Client Name
-|DNS of connection (if possible to resolve)
+|DNS подключения (если возможно разрешить)
 
 |Client Process Name
-|Starting from Firebird 2.1, `fbclient.dll` shows name of client application. For example, `C:\Program Files\Firebird\Firebird_2_1\bin\isql.exe`
+|Начиная с Firebird 2.1, `fbclient.dll` показывает имя клиентского приложения. Например, `C:\Program Files\Firebird\Firebird_2_1\bin\isql.exe`
 
 |Priority
-|Priority of Firebird instance (Classic only)
+|Приоритет экземпляра Firebird (только Classic)
 
 |Database
-|Database name or its alias, as it appears in the connection string
+|Имя базы данных или ее псевдоним, как указано в строке подключения.
 
 |User
-|Users name -- for example, SYSDBA (it does not supported Trusted Authentication)
+|Имя пользователя -- например, SYSDBA (не поддерживается для Trusted Authentication)
 
 |Role
-|Role of user
+|Роль пользователя
 
 |Start
-|For connection row -- connection time, for transaction -- start time of transaction, for statement -- query start time.
+|Для строки соединения -- время соединения, для транзакции -- время начала транзакции, для оператора -- время начала запроса.
 
 |Time
-|'NOW' -- Start; Time from the start moment
+|`'NOW' - Start`; Время сначала старта
 
 |Last Activity
-|Time of last action for current connect/transaction/statement.
+|Время последнего действия для текущего соединения/транзакции/оператора.
 
 |Inactive
-|'NOW' -- Last Activity; Period of inactivity
+|`'NOW' - Last Activity`; Период бездействия
 
 |Latest Retaining
-|Time of the most recent "`COMMIT RETAINING`" or "`ROLLBACK RETAINING`" in the current transaction
+|Время последнего "`COMMIT RETAINING`" или "`ROLLBACK RETAINING`" в текущей транзакции.
 
 |Retaining
-|'NOW' -- Latest Retaining
+|`'NOW' - Latest Retaining`
 
 |Received
-|Bytes, received by client
+|Байты, полученные клиентом
 
 |Sent
-|Bytes, sent by client
+|Байты, отправленные клиентом
 
 |CPU Time
-|Shows overall time consumed in connection/transaction/query. If there is more than 1 query in transactions, execution time of all queries will be summarized. The same rule is for connection time calculation.
+|Показывает общее время, затраченное на соединение/транзакцию/запрос. Если в транзакциях более 1 запроса, время выполнения всех запросов будет суммироваться. То же правило применяется и для расчета времени соединения.
 
 |Prepare Time
 |
@@ -900,36 +896,36 @@ It's very useful to find applications with auto-commit and other ineffective tra
 |
 
 |Fetch Count
-|Applicable only for statements. Number of rows, as it's reported by `fbclient.dll`
+|Применимо только для statements. Количество записей, как сообщает `fbclient.dll`
 
 |Protocol
-|Firebird protocol version for current session.
+|Версия протокола Firebird для текущей сессии.
 
 |Version
-|Version of `fbclient.dll`/`gds32.dll`.
+|Версия `fbclient.dll`/`gds32.dll`.
 
-Version detection is not 100% correct: minor versions are considered as the same, JayBird and .NET Provider are considered as the same, InterBase 8.x = InterBase 9.x
+Определение версии не на 100 % верно: второстепенные версии считаются одинаковыми, JayBird и .NET Provider считаются одинаковыми, InterBase 8.x = InterBase 9.x
 |===
 
-In the following table you can see details for the values appeared in the first column in FBScanner Viewer for SQL statements rows:
+В следующей таблице вы можете увидеть подробную информацию о значениях, отображаемых в первом столбце в строках FBScanner Viewer для SQL запросов:
 
 [cols="1,1", options="header"]
 |===
-| Flag
-| Description
+| Флаг
+| Описание
 
 
 |A
-|Allocated. Initial phase of SQL query life cycle
+|Allocated. Начальная фаза жизненного цикла SQL-запроса
 
 |P
-|Prepared. Indicates that statement was prepared
+|Prepared. Указывает, что запрос был подготовлен
 
 |E
-|Execute. Query is being executing at the moment
+|Execute. В данный момент запрос выполняется
 
 |C
-|Closed statement. Execution is finished
+|Closed statement. Выполнение завершено
 
 |D
 |Dropped statement.
@@ -938,17 +934,17 @@ In the following table you can see details for the values appeared in the first 
 |Fetching is in progress
 
 |f
-|Fetching is in progress, but suspended at the moment (recordset is not fetched)
+|Fetching is in progress, но в данный момент приостановлено (набор записей не получен)
 
 |c
-|Closed cursor. All data was fetched.
+|Closed cursor. Все данные были получены.
 |===
 
-==== Tags
+==== Теги
 
-Tags allow assigning readable identifiers (names) to Connections, Queries and Transactions.
+Теги позволяют назначать читаемые идентификаторы (имена) соединениям, запросам и транзакциям.
 
-You just need to add these commentaries:
+Вам просто нужно добавить эти комментарии:
 
 [listing]
 ----
@@ -958,24 +954,21 @@ SELECT COUNT(*) FROM RDB$DATABASE
    FBSCANNER$ST_NAME=Customers_list_query; */
 ----
 
-* FBSCANNER$CON_NAME= sets the name of connection. After the first assignment this name will be kept during the whole connection life.
-* FBSCANNER$TR_NAME= sets the name of transaction. After the first assignment this name will be used during the whole life of transaction.
-* FBSCANNER$ST_NAME= sets the name of query.
+* FBSCANNER$CON_NAME= задает имя соединения. После первого назначения это имя будет сохраняться в течение всего срока действия соединения.
+* FBSCANNER$TR_NAME= задает имя транзакции. После первого присвоения это имя будет использоваться в течение всего срока действия транзакции.
+* FBSCANNER$ST_NAME= задает имя запроса.
 
-Tags are showed in the first column in FBScanner Viewer grid, and it's possible to filter tags by their names.
+Теги отображаются в первом столбце таблицы FBScanner Viewer, и теги можно фильтровать по их именам.
 
-Tags are useful to quickly answer the following frequent questions:
+Теги полезны для быстрого ответа на следующие частые вопросы:
 
-What program has launched this query? (developers need to mark with FBSCANNER$CON_NAME tag each database connection)
+* Какая программа запустила этот запрос? (разработчикам необходимо пометить тегом FBSCANNER$CON_NAME каждое подключение к базе данных)
+* Какова транзакция для этого запроса? (разработчикам необходимо использовать тег FBSCANNER$TR_NAME для обозначения транзакций)
+* Что это за очень длительный запрос? (разработчик может помечать длительные запросы читаемыми именами, например "`Annual report`").
 
-What is the transaction for this query? (developers need to use FBSCANNER$TR_NAME tag to mark transactions)
+==== Меню FBScanner Viewer
 
-* What is this very long query? (developer can mark long queries with readable names like "`Annual report`").
-
-
-==== FBScanner Viewer Menu
-
-FBScanner Viewer offers wide range of options to make debugging and optimization easier, which are accessible through its menu:
+FBScanner Viewer предлагает широкий спектр опций, упрощающих отладку и оптимизацию, которые доступны через его меню:
 
 * *Server*
 +

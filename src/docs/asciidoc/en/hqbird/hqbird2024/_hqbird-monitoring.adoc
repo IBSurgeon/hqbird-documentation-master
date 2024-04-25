@@ -288,7 +288,7 @@ Some statements have no associated transaction id (=0): these queries are prepar
 
 Advanced Monitor Viewer allows graphical display of additional performance counters. They are based on both trace data and data from monitoring tables, plus additional system utilities such as wmic (Windows) are used.
 
-To launch the "Advanced Monitor Viewer" click on the corresponding item of the Start menu "IBSurgeon/HQbird Server Side 2024/Advanced Monitor Viewer" or run the script `AVM/quick_start.cmd`.
+To launch the "`Advanced Monitor Viewer`" click on the corresponding item of the Start menu menu:IBSurgeon[HQbird Server Side 2024 > Advanced Monitor Viewer] or run the script `AVM/quick_start.cmd`.
 
 After successful launch, the page `http://127.0.0.1:8083` will open in your default browser.
 
@@ -300,9 +300,7 @@ The default login and password are the same as for DataGuard: "admin / strong pa
 
 After successful authentication, a page will open with a panel on which various graphs are located, displaying the system load at different points in time.
 
-On the left side of the page, you will see two buttons: "Properties" and "Databases". The first one opens a context menu for selecting counters that will be displayed on the charts.
-
-On the left side of the page, you will see two buttons: "Properties" and "Databases". The first one opens a context menu for selecting counters that will be displayed on the charts. The second, opens the context menu in which you can select the database for which these counters are displayed. The database must be registered for monitoring with DataGuard.
+On the left side of the page, you will see two buttons: "`Properties`" and "`Databases`". The first one opens a context menu for selecting counters that will be displayed on the charts. The second, opens the context menu in which you can select the database for which these counters are displayed. The database must be registered for monitoring with DataGuard.
 
 image::4.4.1-1.png[]
 
@@ -312,7 +310,7 @@ image::4.4.2.png[]
 
 The following counters can be displayed graphically:
 
-=== FetchesReadsWritesMarks
+=== Fetches, Reads, Writes, Marks
 
 The graph displays the performance counters Fetches, Reads, Writes, Marks based on monitoring tables. You can drill down to each time point by clicking on it or selecting "Data for time" from the list.
 
@@ -370,7 +368,7 @@ FBScanner can log all SQL traffic to text files and external Firebird database, 
 
 FBScanner can be used to profile database applications, monitor user activity, and manage database connections (including client disconnects on Classic, SuperClassic and SuperServer architectures). It`'s also ideal for troubleshooting INET errors, as well as auditing existing applications and performance tuning.
 
-FBScanner supports Firebird (V1.x, V2.0, V2.1 and V.2.5), InterBase (V4.0 to 2009/XE3). It is a useful tool for analyzing production databases, especially if the application has been developed by third-party and there is no source code available.
+FBScanner supports Firebird (V1.x, V2.0, V2.1 and V2.5), InterBase (V4.0 to 2009/XE3). It is a useful tool for analyzing production databases, especially if the application has been developed by third-party and there is no source code available.
 
 FBScanner is transparent as far as the database application is concerned and does not require any changes in application or database source code, logic or configuration.
 
@@ -394,8 +392,7 @@ FBScanner consume approximately 50-150Mb of memory (for 30-100 active clients), 
 
 To configure FBScanner start "`FBScanner Service Settings`" from Start menu (`IBSurgeon\HQbird Server Side\Firebird SQL Scanner\`).This tool will help you to setup both basic and advanced configuration parameters for FBScanner.
 
-The basic configuration parameters are shown at the main screen of "`FBScanner Configuration`".
-It scans Windows registry for installed Firebird services and show them in the grid.
+The basic configuration parameters are shown at the main screen of "`FBScanner Configuration`". It scans Windows registry for installed Firebird services and show them in the grid.
 
 image::4.3.1.png[]
 
@@ -464,7 +461,7 @@ Click "`Ok`" to confirm new settings, and FBScanner will route SQL requests to t
 
 [IMPORTANT]
 ====
-If you need to pass SQL traffic from client applications through remote FBScanner, please change Firebird appropriate connection string. For example, if originally client applications have connected with "`*myserver1:C:\Database\data.fdb*`", in order to pass SQL traffic through FBScanner in this example you need to change connection string to "`*computer1:C:\Database\data.fdb*`" (where computer1 is the network name of the computer where FBScanner works).
+If you need to pass SQL traffic from client applications through remote FBScanner, please change Firebird appropriate connection string. For example, if originally client applications have connected with "`*myserver1:C:\Database\data.fdb*`", in order to pass SQL traffic through FBScanner in this example you need to change connection string to "`*computer1:C:\Database\data.fdb*`" (where `computer1` is the network name of the computer where FBScanner works).
 ====
 
 === How to setup logging?
@@ -503,7 +500,7 @@ Enabling logging will require restart of FBScanner Service, so all current conne
 
 ==== Example of text file logging
 
-For the following isql commands
+For the following `isql` commands
 
 [listing]
 ----
@@ -661,7 +658,7 @@ FBScanner can gather information about transactions markers (in the same way lik
 
 For this purpose, FBScanner runs separate connect, which requires Login, Password and path to the appropriate client dll (if you track Firebird 1.5 with FBScanner, `fbclient.dll` from 1.5 will be required).
 
-If you decide to gather transactions markers information, mark checkbox "`Collect transactions counters info`" and fill out Login, Password and Client DLL fields.
+If you decide to gather transactions markers information, mark checkbox "`Collect transactions counters info`" and fill out "`Login`", "`Password`" and "`Client DLL`" fields.
 
 ==== Using Embedded Firebird 2.5 for SQL log
 
@@ -872,19 +869,19 @@ It's very useful to find applications with auto-commit and other ineffective tra
 |For connection row -- connection time, for transaction -- start time of transaction, for statement -- query start time.
 
 |Time
-|'NOW' -- Start; Time from the start moment
+|`'NOW' - Start`; Time from the start moment
 
 |Last Activity
 |Time of last action for current connect/transaction/statement.
 
 |Inactive
-|'NOW' -- Last Activity; Period of inactivity
+|`'NOW' - Last Activity`; Period of inactivity
 
 |Latest Retaining
 |Time of the most recent "`COMMIT RETAINING`" or "`ROLLBACK RETAINING`" in the current transaction
 
 |Retaining
-|'NOW' -- Latest Retaining
+|`'NOW' - Latest Retaining`
 
 |Received
 |Bytes, received by client
@@ -968,12 +965,9 @@ Tags are showed in the first column in FBScanner Viewer grid, and it`'s possible
 
 Tags are useful to quickly answer the following frequent questions:
 
-What program has launched this query? (developers need to mark with FBSCANNER$CON_NAME tag each database connection)
-
-What is the transaction for this query? (developers need to use FBSCANNER$TR_NAME tag to mark transactions)
-
+* What program has launched this query? (developers need to mark with FBSCANNER$CON_NAME tag each database connection)
+* What is the transaction for this query? (developers need to use FBSCANNER$TR_NAME tag to mark transactions)
 * What is this very long query? (developer can mark long queries with readable names like "`Annual report`").
-
 
 ==== FBScanner Viewer Menu
 
