@@ -1,6 +1,16 @@
-== Monitoring with HQbird FBScanner
+= Monitoring with HQbird FBScanner
+1.0, by 2024-04-26
+:doctype: book
+:sectnums:
+:sectanchors:
+:toc: left
+:toclevels: 3
+:outlinelevels: 6:0
+:icons: font
+:experimental:
+:imagesdir: images
 
-=== What is FBScanner?
+== What is FBScanner?
 
 FBScanner (Firebird Scanner) is a tool included in HQbird advanced distribution of Firebird, which can monitor and view all traffic between Firebird and InterBase servers and their client applications.
 
@@ -18,7 +28,7 @@ FBScanner supports Firebird (V1.x, V2.0, V2.1 and V2.5), InterBase (V4.0 to 2009
 
 FBScanner is transparent as far as the database application is concerned and does not require any changes in application or database source code, logic or configuration.
 
-=== Issues that FBScanner can help to resolve
+== Issues that FBScanner can help to resolve
 
 * Real-time monitoring of connections. FBScanner shows all connections to the selected database server: the IP/DNS name of connected client, database and connection time.
 * Real-time monitoring of SQL queries. For each connection FBScanner shows all the currently running SQL queries along with their transaction parameters.
@@ -28,13 +38,13 @@ FBScanner is transparent as far as the database application is concerned and doe
 * You can log SQL queries. For debugging or for security FBScanner can log all the selected traffic to a special database for further analysis. FBScanner includes LogAnalyzer tool to find bad queries and ineffective SQL plans.
 
 
-=== Performance Impact
+== Performance Impact
 
 FBScanner does not change anything in transferred SQL traffic and works simply like a transparent proxy, so all applications will work normally.
 
 FBScanner consume approximately 50-150Mb of memory (for 30-100 active clients), it is known that FBScanner adds approximately 150ms for every SQL statement.
 
-=== How to configure FBScanner for local computer?
+== How to configure FBScanner for local computer?
 
 To configure FBScanner start "`FBScanner Service Settings`" from Start menu (`IBSurgeon\HQbird Server Side\Firebird SQL Scanner\`).This tool will help you to setup both basic and advanced configuration parameters for FBScanner.
 
@@ -61,7 +71,7 @@ To approve the changes, click "`Ok`", otherwise "`Cancel`".
 If FBScanner settings were changed, FBScanner Service will be restarted, and all existing Firebird connections will be dropped! Be careful with changing FBScanner settings in production environment. FBScanner will ask your permission to restart, please decide carefully.
 ====
 
-=== How to setup FBScanner for remote computer?
+== How to setup FBScanner for remote computer?
 
 FBScanner can route SQL traffic not only as local proxy, but from another computer too. To understand the difference and discover consequences, let's walk though details.
 
@@ -110,7 +120,7 @@ Click "`Ok`" to confirm new settings, and FBScanner will route SQL requests to t
 If you need to pass SQL traffic from client applications through remote FBScanner, please change Firebird appropriate connection string. For example, if originally client applications have connected with "`*myserver1:C:\Database\data.fdb*`", in order to pass SQL traffic through FBScanner in this example you need to change connection string to "`*computer1:C:\Database\data.fdb*`" (where `computer1` is the network name of the computer where FBScanner works).
 ====
 
-=== How to setup logging?
+== How to setup logging?
 
 From Start menu run "`Firebird Scanner\FBScanner Settings`", then click button "`Advanced options`" (in the right bottom of the main screen).
 
@@ -129,7 +139,7 @@ It's important to understand that logging to SQL database will write all SQL ope
 
 There are 2 options for logging -- to file and to Firebird log database.
 
-==== Logging to text files
+=== Logging to text files
 
 File logging creates text file for each connection where FBScanner writes SQL and transactions operators. We recommend file logging for debug purposes and during development -- it's suitable to investigate linear SQL code. If there are a lot of connections, file logging becomes not very suitable.
 
@@ -144,7 +154,7 @@ Then click "`Ok`".
 Enabling logging will require restart of FBScanner Service, so all current connections will be dropped. FBScanner will ask your permission to do it immediately.
 ====
 
-==== Example of text file logging
+=== Example of text file logging
 
 For the following `isql` commands
 
@@ -263,7 +273,7 @@ COMMIT;
 
 As you can see, file log is useful to understand how SQL commands were run inside the single connect.
 
-==== Logging to Firebird database
+=== Logging to Firebird database
 
 Before you start with SQL log, it's necessary to understand some implementation details, which can be important for production systems.
 
@@ -298,7 +308,7 @@ Test connection with log database -- click "`Test connection`".
 
 Click "`Ok`" to save settings.
 
-==== Transactions markers
+=== Transactions markers
 
 FBScanner can gather information about transactions markers (in the same way like IBSurgeon Transaction Monitors does). Gathered information will be shown as graphs in FBScanner Log Analyzer.
 
@@ -306,7 +316,7 @@ For this purpose, FBScanner runs separate connect, which requires Login, Passwor
 
 If you decide to gather transactions markers information, mark checkbox "`Collect transactions counters info`" and fill out "`Login`", "`Password`" and "`Client DLL`" fields.
 
-==== Using Embedded Firebird 2.5 for SQL log
+=== Using Embedded Firebird 2.5 for SQL log
 
 If you need to use SQL log at the computer where old Firebird is used (1.0, 1.5, 2.0, 2.1 or even InterBase), it's recommended to use Firebird 2.5 Embedded to store log.
 
@@ -328,7 +338,7 @@ In Embedded Firebird `fbclient.dll` represents the whole engine.
 It works inside the process of FBScanner and there is no interaction with other installed Firebird instances, both full and embedded.
 ====
 
-=== How to analyze FBScanner log?
+== How to analyze FBScanner log?
 
 Many users told us that they did not realize how many queries, transactions and other operations are performed by their software. As you remember, FBScanner stores all information into the single table. It uses self-links to reduce the amount of stored information and it makes raw log hard to read and understand.
 
@@ -379,7 +389,7 @@ To know more about this query -- double-click on it and see more details
 
 image::4.3.20.png[]
 
-=== How to track 10054 errors, disconnects and failed login attempts?
+== How to track 10054 errors, disconnects and failed login attempts?
 
 FBScanner automatically logs all 10054 errors, disconnects and failed login attempts with detailed description in the `FBScanner.log` file, which is in FBScanner main directory.
 
@@ -408,7 +418,7 @@ FBScanner automatically logs all 10054 errors, disconnects and failed login atte
 Ask your database administrator to set up a Firebird login.]
 ----
 
-=== Backup/restore and mass load operations
+== Backup/restore and mass load operations
 
 To perform operations which do not require monitoring or debugging, like backup and restore or mass load of records (in billing systems) we recommend bypassing FBScanner service.
 
@@ -440,7 +450,7 @@ and, of course, using local connection string will always bypass FBScanner:
 gbak.exe -b -g -v -user SYSDBA -pass masterkey C:\TEMP\database.fdb C:\temp\backup.gbk
 ----
 
-=== Real-Time Monitoring: FBScanner Viewer
+== Real-Time Monitoring: FBScanner Viewer
 
 To monitor connections, queries and transaction in real-time FBScanner includes special tool namely FBScanner Viewer.
 
@@ -589,7 +599,7 @@ In the following table you can see details for the values appeared in the first 
 |Closed cursor. All data was fetched.
 |===
 
-==== Tags
+=== Tags
 
 Tags allow assigning readable identifiers (names) to Connections, Queries and Transactions.
 
@@ -615,7 +625,7 @@ Tags are useful to quickly answer the following frequent questions:
 * What is the transaction for this query? (developers need to use FBSCANNER$TR_NAME tag to mark transactions)
 * What is this very long query? (developer can mark long queries with readable names like "`Annual report`").
 
-==== FBScanner Viewer Menu
+=== FBScanner Viewer Menu
 
 FBScanner Viewer offers wide range of options to make debugging and optimization easier, which are accessible through its menu:
 
@@ -653,7 +663,7 @@ FBScanner Viewer offers wide range of options to make debugging and optimization
 * *Help*
 
 
-==== Server
+=== Server
 
 To connect to the FBScanner Service select Service\Connect To.
 
@@ -676,7 +686,7 @@ To setup passwords for FBScanner Viewer access you need to go to "`FBScanner Con
 
 *Exit* closes FBScanner Viewer.
 
-==== Connections
+=== Connections
 
 "`Disconnect`", "`Disconnect clients`" and "`Kill Process`" menu options are available only when connected to FBScanner Service with administrative rights.
 
@@ -727,11 +737,11 @@ It enables to set process priority for Classic instances.
 "`*Extract plans*`" starts plan extracting for selected connect. Extracted plans are shown in the grid, and also stored in the SQL (or text) log.
 If logging is not enabled, nothing happens. To enable plan extraction for all connects, use appropriate setting in "`FBScanner Configuration`".
 
-==== Transactions
+=== Transactions
 
 The single option *Transactions\OAT* will put selection in the grid to the oldest active transaction.
 
-==== Tools
+=== Tools
 
 In menu "`Tools`" we can see several options.
 
@@ -757,7 +767,7 @@ image::4.3.29.png[]
 
 Please consider appropriate session of this guide for details of FBScanner Service Configuration.
 
-==== SQL log structure
+=== SQL log structure
 
 FBScanner stores SQL traffic in the following table:
 
@@ -794,7 +804,7 @@ CREATE TABLE FBSCANNER$LOG
 );
 ----
 
-==== Logical structure
+=== Logical structure
 
 There are 3 levels of hierarchy in this table:
 
@@ -802,7 +812,7 @@ There are 3 levels of hierarchy in this table:
 * `IDATTACHMENT` and `IDTRANSACTION` -- foreign keys referenced to FBSCANNER$LOG.ID
 * `ROW_TYPE` -- hierarchy level (0, 1, 2 )
 
-.Level 1. Connection.ROW_TYPE = 0
+.Level 1. Connection. ROW_TYPE = 0
 [cols="1,1", frame="all"]
 |===
 |PID
@@ -840,7 +850,7 @@ There are 3 levels of hierarchy in this table:
 |===
 
 
-.Level 2. Connection.ROW_TYPE = 1
+.Level 2. Transaction. ROW_TYPE = 1
 [cols="1,1", frame="all"]
 |===
 |IDATTACHMENT
@@ -876,7 +886,7 @@ There are 3 levels of hierarchy in this table:
 
 
 
-.Level 2. Connection.ROW_TYPE = 2
+.Level 3. Statement. ROW_TYPE = 2
 [cols="1,1", frame="all"]
 |===
 |IDATTACHMENT
@@ -925,13 +935,13 @@ There are 3 levels of hierarchy in this table:
 |Query execution time
 |===
 
-==== Indices in the log
+=== Indices in the log
 
 Initially log database contains only primary key index.
 
 FBScanner Log Analyzer creates necessary indices at the first connect.
 
-=== FBScanner Feature Matrix
+== FBScanner Feature Matrix
 
 [cols="1,4,1,1"]
 |===
