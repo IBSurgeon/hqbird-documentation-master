@@ -1152,9 +1152,9 @@ CREATE TABLE FBSCANNER$LOG
 
 There are 3 levels of hierarchy in this table:
 
-* ID -- primary key
-* IDATTACHMENT and IDTRANSACTION -- foreign keys referenced to FBSCANNER$LOG.ID
-* ROW_TYPE -- hierarchy level (0, 1, 2 )
+* `ID` -- primary key
+* `IDATTACHMENT` and `IDTRANSACTION` -- foreign keys referenced to FBSCANNER$LOG.ID
+* `ROW_TYPE` -- hierarchy level (0, 1, 2 )
 
 .Level 1. Connection.ROW_TYPE = 0
 [cols="1,1", frame="all"]
@@ -1396,13 +1396,13 @@ h| Remote
 |Automatic priority settings for Firebird with Classic architecture.
 In FBScanner configuration administrator can set up automatic correspondence:
 
-Specified IP or subnet of IPs – set priority X
+Specified IP or subnet of IPs -- set priority X
 
-Specified hostname – set priority X
+Specified hostname -- set priority X
 
-Specified database name – set priority X
+Specified database name -- set priority X
 
-Specified user login name – set priority X
+Specified user login name -- set priority X
 |X
 |
 
@@ -1442,7 +1442,7 @@ Specified user login name – set priority X
 |
 
 |
-|Detection of old/incorrect versions of fbclient.dll/gds32.dll
+|Detection of old/incorrect versions of `fbclient.dll`/`gds32.dll`
 |X
 |X
 
@@ -1465,9 +1465,9 @@ Client application was closed improperly (for instance, application was closed b
 
 Connection was closed by time-out (it`'s possible to set forced disconnect in FBScanner to close connect by time-out too)
 
-Server crashed (fbserver or fb_inet_server crashed)
+Server crashed (`fbserver` or `fb_inet_server` crashed)
 
-Server process (fbserver or fb_inet_server) was killed from the FBScanner
+Server process (`fbserver` or `fb_inet_server`) was killed from the FBScanner
 
 Disconnect of connections from FBScanner Viewer
 
@@ -1543,7 +1543,7 @@ This is very useful feature to find and eliminate 10054 errors.
 |X
 
 |
-|If query PREPARE or execution caused error, FBScanner writes SQLCODE to the log (for example, primary key violation)
+|If query PREPARE or execution caused error, FBScanner writes `SQLCODE` to the log (for example, "`primary key violation`")
 |
 |
 
@@ -1553,9 +1553,7 @@ This is very useful feature to find and eliminate 10054 errors.
 |
 
 |
-|
-
-Ad-hoc plan extraction for queries
+|Ad-hoc plan extraction for queries
 
 Can be performed for all connections (should be set ON in FBScanner configuration utility)
 
@@ -1585,17 +1583,17 @@ FBSCANNER$ST_NAME=Customers_list_query; */
 |X
 
 |
-|FBSCANNER$CON_NAME= sets the name of connection. After the first assignment this name will be kept during the whole connection life.
+|`FBSCANNER$CON_NAME=` sets the name of connection. After the first assignment this name will be kept during the whole connection life.
 |X
 |X
 
 |
-|FBSCANNER$TR_NAME= sets the name of transaction. After the first assignment this name will be used during the whole life of transaction
+|`FBSCANNER$TR_NAME=` sets the name of transaction. After the first assignment this name will be used during the whole life of transaction
 |X
 |X
 
 |
-|FBSCANNER$ST_NAME= sets the name of query.
+|`FBSCANNER$ST_NAME=` sets the name of query.
 |
 |
 
@@ -1610,15 +1608,11 @@ FBSCANNER$ST_NAME=Customers_list_query; */
 |X
 
 |
-|
+a|Tags are useful to quickly answer the following frequent questions:
 
-Tags are useful to quickly answer the following frequent questions:
-
-What program has launched this query? (developers need to mark with FBSCANNER$CON_NAME tag each database connection)
-
-What is the transaction for this query? (developers need to use FBSCANNER$TR_NAME tag to mark transactions)
-
-What is this very long query? (developer can mark long queries with readable names like "`Annual report`")
+* What program has launched this query? (developers need to mark with FBSCANNER$CON_NAME tag each database connection)
+* What is the transaction for this query? (developers need to use FBSCANNER$TR_NAME tag to mark transactions)
+* What is this very long query? (developer can mark long queries with readable names like "`Annual report`")
 |X
 |X
 
@@ -1648,7 +1642,7 @@ What is this very long query? (developer can mark long queries with readable nam
 |X
 
 |
-|All transactions are logged, even rolled back. Transaction log record has column RESULT which shows was transaction committed or rolled back.
+|All transactions are logged, even rolled back. Transaction log record has column `RESULT` which shows was transaction committed or rolled back.
 |X
 |X
 

@@ -1021,21 +1021,21 @@ image::4.3.23.png[]
 Чтобы настроить пароли для доступа к FBScanner Viewer, вам необходимо перейти в "`FBScanner Configuration`" -- "`Advanced Settings`".
 ====
 
-*Server\Disconnect* отключает FBScanner Viewer от службы FBScanner.
+*Сервер\Отключить* отключает FBScanner Viewer от службы FBScanner.
 
-*Server\Recent Servers* показывает список последних служб FBScanner, к которым подключался FBScanner Viewer.
+*Сервер\Последние сервера* показывает список последних служб FBScanner, к которым подключался FBScanner Viewer.
 
-*Exit* закрывает FBScanner Viewer.
+*Выход* закрывает FBScanner Viewer.
 
-==== Connections
+==== Подключения
 
-Пункты меню "`Disconnect`", "`Disconnect clients`" и "`Kill Process`" доступны только при подключении к службе FBScanner с правами администратора.
+Пункты меню "`Отключить`", "`Отключение клиентов...`" и "`Завершить процесс...`" доступны только при подключении к службе FBScanner с правами администратора.
 
-*Disconnect* предложит закрыть текущее соединение (выделено в основной таблицы FBScanner Viewer):
+*Отключить* предложит закрыть текущее соединение (выделено в основной таблицы FBScanner Viewer):
 
 image::4.3.24.png[]
 
-"`*Disconnect clients*`" запускает следующий диалог:
+"`*Отключение клиентов...*`" запускает следующий диалог:
 
 image::4.3.25.png[]
 
@@ -1045,17 +1045,17 @@ image::4.3.25.png[]
 
 Отключение будет выполнено путем эмуляции ошибки 10054 -- соответствующие записи будут в `firebird.log` (`interbase.log`) и в `FBScanner.log`.
 
-==== Kill
+==== Завершить процесс...
 
 Есть несколько случаев, когда вам нужно завершить процесс Firebird, но мы не рекомендуем это делать.
 
-"`Kill process...`" запрашивает явное завершение процесса Firebird и работает только на локальном FBScanner и с архитектурой Classic:
+"`Завершить процесс....`" запрашивает явное завершение процесса Firebird и работает только на локальном FBScanner и с архитектурой Classic:
 
 image::4.3.26.png[]
 
 Он не будет работать с архитектурами SuperServer и SuperClassic.
 
-"`*Latest Queries*`" показывает список из 20 последних запросов в выбранном соединении:
+"`*Последние запросы*`" показывает список из 20 последних запросов в выбранном соединении:
 
 image::4.3.27.png[]
 
@@ -1066,51 +1066,50 @@ image::4.3.27.png[]
 Для полноценной регистрации SQL-трафика включите функцию регистрации SQL в службе FBScanner и используйте FBScanner LogAnalyzer для просмотра журнала.
 ====
 
-"`*Oldest Connection*`" -- показывает самое старое соединение в таблице.
+"`*Старейшее подключение*`" -- показывает самое старое соединение в таблице.
 
-"`*Process Priority*`" -- применим только для локальной установки FBScanner с классической архитектурой.
+"`*Приоритет процесса...*`" -- применим только для локальной установки FBScanner с классической архитектурой.
 Это позволяет установить приоритет процесса для экземпляров Classic.
 
-"`*Ping Client*`" -- позволяет проверить -- активно ли выбранное соединение?
+"`*Ping*`" -- позволяет проверить -- активно ли выбранное соединение?
 
-"`*Ping All Clients*`" -- проверяет все соединения тем же способом.
+"`*Ping всех*`" -- проверяет все соединения тем же способом.
 
-"`*Extract plans*`" запускает извлечение планов для выбранного подключения. Извлеченные планы отображаются в таблице, а также сохраняются в журнале SQL (или текстовом журнале).
-Если ведение журнала не включено, ничего не происходит. Чтобы включить извлечение плана для всех подключений, используйте соответствующий параметр в "`FBScanner Configuration`".
+"`*Извлекать планы запросов*`" -- запускает извлечение планов для выбранного подключения. Извлеченные планы отображаются в таблице, а также сохраняются в журнале SQL (или текстовом журнале). Если ведение журнала не включено, ничего не происходит. Чтобы включить извлечение плана для всех подключений, используйте соответствующий параметр в "`FBScanner Configuration`".
 
-==== Transactions
+==== Транзакции
 
-The single option *Transactions\OAT* will put selection in the grid to the oldest active transaction.
+Единственная опция *Транзакции\OAT* выделит в таблице самую старую активную транзакцию.
 
-==== Tools
+==== Инструменты
 
-В меню "`Tools`" мы видим несколько опций.
+В меню "`Инструменты`" мы видим несколько опций.
 
-With "`*View Style*`" user can select the most suitable representation of grid data:
+С помощью "`*Визуализация*`" пользователь может выбрать наиболее подходящее представление данных таблицы:
 
-* Database Administrator (connections only)
-* Database Developer (without transactions)
-* Database Developer (with transactions)
+* Администратор СУБД (только подключения)
+* Разработчик СУБД (без транзакций)
+* Разработчик СУБД (детально)
 
-FBScanner Viewer is localized in 4 languages.
+FBScanner Viewer локализован на 4 языках.
 
-Use *Tools\Language* to switch between languages:
+С помощью *Инструменты\Язык* вы можете переключаться между языками:
 
 image::4.3.28.png[]
 
-"`*Plugins*`" option enables plugins.
+"`*Дополнения*`" включает плагины.
 
-For more information please contact link:mailto:support@ib-aid.com[support@ib-aid.com]
+Для получения дополнительной информации свяжитесь link:mailto:support@ib-aid.com[support@ib-aid.com]
 
-"`*Options*`" is another way to change some of FBScanner Service parameters.
+"`*Настройки*`" -- это еще один способ изменить некоторые параметры службы FBScanner.
 
 image::4.3.29.png[]
 
-Please consider appropriate session of this guide for details of FBScanner Service Configuration.
+Пожалуйста, ознакомьтесь с соответствующим разделом этого руководства для получения подробной информации о настройке службы FBScanner.
 
-==== SQL log structure
+==== Структура журнала SQL
 
-FBScanner stores SQL traffic in the following table:
+FBScanner сохраняет SQL-трафик в следующей таблице:
 
 [source,sql]
 ----
@@ -1145,157 +1144,157 @@ CREATE TABLE FBSCANNER$LOG
 );
 ----
 
-==== Logical structure
+==== Логическая структура
 
-There are 3 levels of hierarchy in this table:
+В этой таблице есть 3 уровня иерархии:
 
-* ID -- primary key
-* IDATTACHMENT and IDTRANSACTION -- foreign keys referenced to FBSCANNER$LOG.ID
-* ROW_TYPE -- hierarchy level (0, 1, 2 )
+* `ID` -- первичный ключ
+* `IDATTACHMENT` и `IDTRANSACTION` -- внешние ключи, ссылающиеся на FBSCANNER$LOG.ID
+* `ROW_TYPE` -- уровень иерархии (0, 1, 2 )
 
-.Level 1. Connection.ROW_TYPE = 0
+.Уровень 1. Соединение. ROW_TYPE = 0
 [cols="1,1", frame="all"]
 |===
 |PID
-|Process ID (only for local FBScanner)
+|Идентификатор процесса (только для локального FBScanner)
 
 |ROW_TYPE
 |0
 
 |CLIENT_IP
-|IP address of client
+|IP-адрес клиента
 
 |CLIENT_NAME
-|DNS name
+|DNS-имя
 
 |CUSTOM_NAME
-|Connection tag (if assigned in query text)
+|Тег соединения (если задан в тексте запроса)
 
 |SUBNET_NAME
-|Logical name of subnet. See file `FBScanner.subnets`
+|Логическое имя подсети. Смотри файл `FBScanner.subnets`
 
 |DB_FILENAME
-|Database alias or full database path
+|Псевдоним базы данных или полный путь к базе данных
 
 |DB_USER
-|User name
+|Имя пользователя
 
 |DB_ROLE
-|User role
+|Роль пользователя
 
 |START_TIME
-|Start of connection
+|Время начала соединения
 
 |END_TIME
-|End of connection
+|Время завершения соединения
 |===
 
 
-.Level 2. Connection.ROW_TYPE = 1
+.Уровень 2. Транзакция. ROW_TYPE = 1
 [cols="1,1", frame="all"]
 |===
 |IDATTACHMENT
-|Connection ID
+|Идентификатор соединения
 
 |ROW_TYPE
 |1
 
 |CUSTOM_NAME
-|Transaction tag (if assigned)
+|Тег транзакции (если назначен)
 
 |START_TIME
-|Transaction start time
+|Время начала транзакции
 
 |END_TIME
-|Transaction end time
+|Время окончания транзакции
 
 |LAST_RETAINING
-|Time of most recent commit retaining or rollback retaining
+|Время последнего commit retaining или rollback retaining
 
 |RESULT
 |
 
-0 – transaction is active
+0 – транзакция активна
 
 1 – Commit
 
 2 – Rollback
 
 |SQL_TEXT
-|Transaction flags
+|Флаги транзакции
 |===
 
 
 
-.Level 2. Connection.ROW_TYPE = 2
+.Уровень 3. Запрос. ROW_TYPE = 2
 [cols="1,1", frame="all"]
 |===
 |IDATTACHMENT
-|Connection ID
+|Идентификатор соединения
 
 |IDTRANSACTION
-|Transaction ID
+|Идентификатор транзакции
 
 |ROW_TYPE
 |2
 
 |CUSTOM_NAME
-|Query tag (if assigned)
+|Тег запроса (если назначен)
 
 |START_TIME
-|Query start time
+|Время начала запроса
 
 |WORK_TIME
-|Time till the answer from server
+|Время до ответа от сервера
 
 |CPU_TIME_USER
-|CPU Time (local only)
+|Время процессора (только локально)
 
 |CPU_TIME_PRIVILEGED
-|CPU Kernel Time (local only)
+|Время ядра ЦП (только локально)
 
 |FETCH_COUNT
-|Number of records, returned by query
+|Количество записей, возвращаемых запросом
 
 |RESULT
-|0 -- query executed successfully, otherwise this field contains SQLCODE of error
+|0 -- запрос выполнен успешно, иначе это поле содержит SQLCODE ошибки
 
 |SQL_TEXT
-|Query text (with parameters)
+|Текст запроса (с параметрами)
 
 |SQL_TEXT2
-|Original query text(NULL if equal to SQL_TEXT)
+|Исходный текст запроса (NULL, если равен SQL_TEXT)
 
 |SQL_PLAN
-|Query execution plan (if "`Extract plans`" setting is enabled)
+|План выполнения запроса (если включена настройка  "`Извлекать планы`")
 
 |**PREPARE_TIME**
-|Prepare time
+|Время подготовки
 
 |**EXECUTE_TIME**
-|Query execution time
+|Время выполнения запроса
 |===
 
-==== Indices in the log
+==== Индексы в журнале
 
-Initially log database contains only primary key index.
+Первоначально база данных журналов содержит только индекс первичного ключа.
 
-FBScanner Log Analyzer creates necessary indices at the first connect.
+FBScanner Log Analyzer создает необходимые индексы при первом подключении.
 
-=== FBScanner Feature Matrix
+=== Матрица функций FBScanner
 
 [cols="1,4,1,1"]
 |===
 .2+h| #
-.2+h| Feature
-2+h|FBScanner mode
+.2+h| Функция
+2+h|Режим FBScanner
 
-h| Agent
-h| Remote
+h| Агент
+h| Удаленный
 
 
 |
-|Operation Systems Support
+|Поддержка операционных систем
 |
 |
 
@@ -1310,255 +1309,251 @@ h| Remote
 |X
 
 |
-|Firebird and InterBase versions supported
+|Поддерживаемые версии Firebird и InterBase
 |
 |
 
 |
-|Firebird 1.0, Yaffil 1.0 (including logging)
+|Firebird 1.0, Yaffil 1.0 (включая ведение журнала)
 |X
 |X
 
 |
-|Firebird 1.5 (including logging)
+|Firebird 1.5 (включая ведение журнала)
 |X
 |X
 
 |
-|Firebird 2.0 (including logging)
+|Firebird 2.0 (включая ведение журнала)
 |X
 |X
 
 |
-|Firebird 2.1 (including logging)
+|Firebird 2.1 (включая ведение журнала)
 |X
 |X
 
 |
-|Firebird 2.5 (including logging + SuperClassic support)
+|Firebird 2.5 (включая ведение журнала + поддержка SuperClassic)
 |X
 |X
 
 |
-|InterBase 6.0-2009/XE (including logging)
+|InterBase 6.0-2009/XE (включая ведение журнала)
 |X
 |X
 
 |**1**
-|**Connections**
+|**Соединения**
 |
 |
 
 |**__1.1__**
-|**__Information about established connections in the FBScanner Viewer:__**
+|**__Информация об установленных соединениях в FBScanner Viewer:__**
 |
 |
 
 |
-|Firebird/InterBase user login
+|Firebird/InterBase логин пользователя
 |X
 |X
 
 |
-|IP-address or computer name
+|IP-адрес или имя компьютера
 |X
 |X
 
 |
-|Connection time and time of the latest activity
+|Время подключения и время последней активности
 |X
 |X
 
 |
-|Priority of processes (only for Classic architecture)
+|Приоритет процессов (только для классической архитектуры)
 |X
 |
 
 |**__1.2__**
-|**__Connection management (requires logging to FBScanner Viewer with Admin rights)__**
+|**__Управление подключением (требуется вход в FBScanner Viewer с правами администратора)__**
 |
 |
 
 |
-|Safe disconnect of one or several connections using TCP/IP connection interruption (imitation of 10054 error)
+|Безопасное отключение одного или нескольких соединений с использованием прерывания соединения TCP/IP (имитация ошибки 10054)
 |X
 |X
 
 |
-|Changing of processes priority in Classic architecture (for example, to adjust priority of long running report or something like this. Using tags administrator can recognize connection where report is working -- see below in "`Tags`").
+|Изменение приоритета процессов в классической архитектуре (например, чтобы настроить приоритет долго выполняющегося отчета или что-то в этом роде. С помощью тегов администратор может распознать соединение, на котором работает отчет - см. "`Tags`").
 |X
 |
 
 |
-|Automatic priority settings for Firebird with Classic architecture.
-In FBScanner configuration administrator can set up automatic correspondence:
+|Автоматическая настройка приоритетов для Firebird с классической архитектурой.
+В конфигурации FBScanner администратор может настроить автоматическую соответствие для:
 
-Specified IP or subnet of IPs – set priority X
+Указанный IP или подсеть IP -- установите приоритет X
 
-Specified hostname – set priority X
+Указанное имя хоста – установить приоритет X
 
-Specified database name – set priority X
+Указанное имя базы данных – установите приоритет X
 
-Specified user login name – set priority X
+Указанное имя пользователя – установить приоритет X
 |X
 |
 
 |
-|Killing of Classic processes, not recommended to use, but sometimes it is helpful
+|Уничтожение Classic процессов, использовать не рекомендуется, но иногда полезно.
 |X
 |
 
 |
-|Ability to restrict all connections (to perform some operations which require exclusive access)
+|Возможность ограничить все соединения (для выполнения некоторых операций, требующих монопольного доступа)
 |X
 |X
 
 |
-|Filtering connections viewing using all connections parameters (except time information)
+|Фильтрация просмотра соединений по всем параметрам соединений (кроме информации о времени)
 |X
 |X
 
 |
-|White and black list of databases to connect
+|Белый и черный список баз данных для подключения
 |X
 |X
 
 |
-|White and black list of IP addresses (clients)
+|Белый и черный список IP-адресов (клиентов)
 |X
 |X
 
 |
-|Restriction of connections # -- administrator can limit the number of connections
+|Ограничение подключений # -- администратор может ограничить количество подключений
 |X
 |X
 
 |
-|Emulation of "`Wrong login/password`" error for denied connections
+|Эмуляция ошибки "`Wrong login/password`" для запрещенных подключений
 |X
 |
 
 |
-|Detection of old/incorrect versions of fbclient.dll/gds32.dll
+|Обнаружение старых/неправильных версий `fbclient.dll`/`gds32.dll`
 |X
 |X
 
 |**__1.3__**
-|**__Logging events related with connections__**
+|**__Регистрация событий, связанных с соединениями__**
 |X
 |X
 
 |
-|FBScanner logs unsuccessful login attempts in the `FBScanner.log`. For each unsuccessful login attempt FBScanner writes the following information: IP-address, login name, database and time of login attempt.
+|FBScanner регистрирует неудачные попытки входа в систему в файле `FBScanner.log`. Для каждой неудачной попытки входа FBScanner записывает следующую информацию: IP-адрес, имя пользователя, базу данных и время попытки входа.
 |X
 |X
 
 |
-|
+|Если соединение было прервано (ошибка 10054), FBScanner определяет и протоколирует один из 5 типов разрывов соединения:
 
-If connection was broken (10054 error), FBScanner determines and logs one of the 5 type of disconnects:
+Клиентское приложение было закрыто неправильно (например, приложение было закрыто диспетчером задач)
 
-Client application was closed improperly (for instance, application was closed by Task Manager)
+Соединение было закрыто по тайм-ауту (в FBScanner можно также настроить принудительное отключение, чтобы закрыть соединение по тайм-ауту)
 
-Connection was closed by time-out (it's possible to set forced disconnect in FBScanner to close connect by time-out too)
+Сбой сервера (сбой `fbserver` или `fb_inet_server`)
 
-Server crashed (fbserver or fb_inet_server crashed)
+Серверный процесс (`fbserver` или `fb_inet_server`) был уничтожен с помощью FBScanner.
 
-Server process (fbserver or fb_inet_server) was killed from the FBScanner
+Отключение соединений от FBScanner Viewer
 
-Disconnect of connections from FBScanner Viewer
-
-For all cases above FBScanner writes the IP-address of disconnected client(s) and the reason of disconnect.
-This is very useful feature to find and eliminate 10054 errors.
+Во всех вышеперечисленных случаях FBScanner записывает IP-адрес отключенного клиента(ов) и причину отключения.
+Это очень полезная функция для поиска и устранения ошибок 10054.
 |X
 |X
 
 
 |**2.**
-|**Transactions**
+|**Транзакции**
 |
 |
 
 |**__2.1.__**
-|**__Transactions are shown inside appropriate connections__**
+|**__Транзакции отображаются внутри соответствующих соединений__**
 |
 |
 
 |
-|Transactions' flags
+|Флаги транзакций
 |X
 |X
 
 |
-|Lifetime of transactions
+|Время жизни транзакций
 |X
 |X
 
 |
-|Using OAT button you can find the oldest active transaction in real-time and review related connection/queries.
+|Используя кнопку OAT, вы можете найти самую старую активную транзакцию в режиме реального времени и просмотреть связанные соединения/запросы.
 |X
 |X
 
 |**3.**
-|**Queries (statements)**
+|**Запросы**
 |
 |
 
 |**__3.1__**
-|**__Information about queries(statements)__**
+|**__Информация о запросах__**
 |
 |
 
 |
-|Start time
+|Время начала
 |X
 |X
 
 |
-|Query text
+|Текст запроса
 |X
 |X
 
 |
-|Transaction of the query
+|Транзакция запроса
 |X
 |X
 
 |
-|Status (prepare/execute/...)
+|Статус (prepare/execute/...)
 |X
 |X
 
 |
-|Filtering by statement status (by default Closed statements are hidden)
+|Фильтрация по статусу запроса (по умолчанию закрытые запросы скрыты)
 |X
 |X
 
 |
-|Instant CPU load indicator
+|Мгновенный индикатор загрузки процессора
 |X
 |X
 
 |
-|If query PREPARE or execution caused error, FBScanner writes SQLCODE to the log (for example, primary key violation)
+|Если подготовка или выполнение запроса вызвало ошибку, FBScanner записывает в журнал `SQLCODE` (например, "`primary key violation`").
 |
 |
 
 |**__3.2__**
-|**__Additional operations with queries__**
+|**__Дополнительные операции с запросами__**
 |
 |
 
 |
-|
+|Извлечение плана для запросов.
 
-Ad-hoc plan extraction for queries
+Может выполняться для всех подключений (должно быть включено в утилите настройки FBScanner).
 
-Can be performed for all connections (should be set ON in FBScanner configuration utility)
+Можно включить/выключить для выбранного соединения только в FBScanner Viewer.
 
-Can be turned ON/OFF for selected connection only in the FBScanner Viewer
-
-In both cases plans will be logged to the overall log if logging is ON.
+В обоих случаях планы будут регистрироваться в общем журнале, если ведение журнала включено.
 |X
 |X
 
@@ -1568,7 +1563,7 @@ In both cases plans will be logged to the overall log if logging is ON.
 |
 
 |
-a|Tags allow assigning readable identifiers (names) to Connections, Queries and Transactions. You just need to add these commentaries:
+a|Теги позволяют назначать читаемые идентификаторы (имена) соединениям, запросам и транзакциям. Вам просто нужно добавить эти комментарии:
 
 [source]
 ----
@@ -1582,85 +1577,81 @@ FBSCANNER$ST_NAME=Customers_list_query; */
 |X
 
 |
-|FBSCANNER$CON_NAME= sets the name of connection. After the first assignment this name will be kept during the whole connection life.
+|`FBSCANNER$CON_NAME=` -- задает имя соединения. После первого назначения это имя будет сохраняться в течение всего срока действия соединения.
 |X
 |X
 
 |
-|FBSCANNER$TR_NAME= sets the name of transaction. After the first assignment this name will be used during the whole life of transaction
+|`FBSCANNER$TR_NAME=` -- задает имя транзакции. После первого присвоения это имя будет использоваться на протяжении всей транзакции.
 |X
 |X
 
 |
-|FBSCANNER$ST_NAME= sets the name of query.
+|`FBSCANNER$ST_NAME=` -- задает имя запроса.
 |
 |
 
 |
-|Tags are showed in special column in FBScanner Viewer
+|Теги отображаются в специальном столбце в FBScanner Viewer.
 |X
 |X
 
 |
-|It's possible to filter tags by their names
+|Можно фильтровать теги по их именам.
 |X
 |X
 
 |
-|
+a|Теги полезны для быстрого ответа на следующие частые вопросы:
 
-Tags are useful to quickly answer the following frequent questions:
-
-What program has launched this query? (developers need to mark with FBSCANNER$CON_NAME tag each database connection)
-
-What is the transaction for this query? (developers need to use FBSCANNER$TR_NAME tag to mark transactions)
-
-What is this very long query? (developer can mark long queries with readable names like "`Annual report`")
+* Какая программа запустила этот запрос? (разработчикам необходимо пометить тегом `FBSCANNER$CON_NAME` каждое подключение к базе данных).
+* Какова транзакция для этого запроса? (разработчикам необходимо использовать тег `FBSCANNER$TR_NAME` для обозначения транзакций)
+* Что это за очень длинный запрос? (разработчик может помечать длительные запросы читаемыми именами, например  "`Годовой отчет`")
 |X
 |X
 
 |**5.**
-|**Logging**
+|**Логирование**
 |
 |
 
 |
-|Logging allows intercepting all queries and writing them to the external Firebird database. FYI, logging cannot be replaced with Firebird 2.1 or InterBase system tables, because they provide only snapshots of programs.
+|Логирование позволяет перехватывать все запросы и записывать их во внешнюю базу данных Firebird. К вашему сведению, ведение журналов нельзя заменить системными таблицами Firebird 2.1 или InterBase, поскольку они предоставляют только снимки программ.
 |X
 |X
 
 |
-|Connections, queries and transactions are logged
+|Логирование соединений, запросов и транзакций
 |X
 |X
 
 |
-|All executed queries are logged (only prepared quires skipped)
+|Протоколирование всех выполненных запросов (пропускаются только подготовленные запросы).
 |X
 |X
 
 |
-|Queries are stored with information about their connection and transaction
+|Сохранение запросов с информацией об их подключении и транзакции.
 |X
 |X
 
 |
-|All transactions are logged, even rolled back. Transaction log record has column RESULT which shows was transaction committed or rolled back.
+|Все транзакции протоколируются, даже отменённые. Запись журнала транзакций имеет столбец RESULT, который показывает, была ли транзакция зафиксирована или отменена.
 |X
 |X
 
 |
-|If plan extraction is on, queries plans are logged too
+|Если извлечение плана включено, планы запросов также регистрируются.
 |X
 |X
 
 |
-|Automatic creation of database for logging
+|Автоматическое создание базы данных для логирования.
 |X
 |X
 
 |
-|Automatic creation of tables to logging in any Firebird database
+|Автоматическое создание таблиц для логирования для любой базы данных Firebird.
 |X
 |X
 |===
