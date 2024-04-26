@@ -41,7 +41,7 @@ Each event in the MongoDB database is stored as a document in the `events` colle
 * the `fb_streaming` service analyzes the replication log directory set for the task for unprocessed files;
 * for unprocessed replication files, the following events are analyzed:
 ** start of transaction. Allocates a structure in memory to store savepoints;
-** сreate a savepoint. A structure in memory is allocated for storing documents;
+** create a savepoint. A structure in memory is allocated for storing documents;
 ** release the savepoint. Documents saved in this savepoint are copied to a higher-level savepoint;
 ** rollback savepoint. The savepoint is destroyed along with all documents;
 ** commit the transaction. Documents created in the `INSERT`, `UPDATE`, `DELETE` and `EXECUTE SQL` events are written to the MongoDB database;

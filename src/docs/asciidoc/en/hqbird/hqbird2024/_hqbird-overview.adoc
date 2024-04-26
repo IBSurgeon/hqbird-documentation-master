@@ -53,7 +53,7 @@ In addition, HQbird 2024 still offers advanced replication features, external co
 
 == Feature matrix
 
-Ниже представлена матрица функций и уровень их поддержки в различных версиях Firebird, поставляемых в составе HQBird.
+Below is a matrix of features and their level of support in the various versions of Firebird included with HQBird.
 
 [cols="1,4,1,1,1,1,2", frame="all", options="header"]
 |===

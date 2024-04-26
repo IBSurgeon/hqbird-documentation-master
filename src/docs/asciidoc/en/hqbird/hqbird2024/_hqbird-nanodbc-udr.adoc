@@ -1628,7 +1628,7 @@ BEGIN
   sql_txt2 = 'insert into t2(id, name) values(?, ?)';
 
   -- initialize nanodbc
-  -- this function can be called in the ON CONNECT triggerре
+  -- this function can be called in the ON CONNECT trigger
   nano$udr.initialize();
 
   BEGIN

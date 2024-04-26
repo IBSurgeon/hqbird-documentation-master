@@ -55,7 +55,7 @@ Optional parameters for the silent installation of HQbird:
 ** `/REGEMAIL=youremail@company.com` - email to perform the automatic registration of HQBird
 ** `/REGPASS=yourpassword` – password from IBSurgeon Deploy Center account to register HQbird
 ** `/REGTYPE=R|M|T` == Replica, Master, Trial – license type, must be specified if you need to register HQbird during the installation
-* Оffline registration (incompatible with REG **)
+* Offline registration (incompatible with REG **)
 ** `/REGUIK=<uik filename>`
 ** `/REGUNLOCK=<unlock filename>`
 

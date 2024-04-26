@@ -160,12 +160,12 @@ The structure of the `fb_streaming.conf` configuration file looks like this:
 
 task = <sourceDir_1>
 {
-# другие параметры задачи 1
+# other parameters of task 1
 }
 
 task = <sourceDir_2>
 {
-# другие параметры задачи 2
+# other parameters of task 2
 }
 ----
 
