@@ -280,6 +280,17 @@ FBDataGuard checks both values and raises alert for the first threshold. If you 
 
 image::3.2.10.png[]
 
+=== Server: Group sweep
+
+image::3.1.13.png[]
+
+image::3.1.14.png[]
+
+=== Server: Group master replication
+
+image::3.1.15.png[]
+
+image::3.1.16.png[]
 
 == Database configuration in FBDataGuard
 
@@ -287,12 +298,12 @@ image::3.2.10.png[]
 
 The list of databases monitored by FBDataGuard is in the "`Databases`" section.
 
-image::3.1.5-0.png[]
+image::3.1.5.png[]
 
 To register database in FBDataGuard, you need to click at the symbol "`Plus`" in the right corner of "`Databases`" (there will be a hint "`Add database`") and fill the following form:
 
 .Add database to monitoring.
-image::3.1.5.png[]
+image::3.1.6.png[]
 
 * "`*Database nick name*`" is for your convenience, it is used to refer this database in alerts and email messages.
 * "`*DB alias*`" is a database alias from `aliases.conf` or in `databases.conf`. If you specify both "`DB Alias`" and "`Path to database`", "`DB Alias`" will be used.
@@ -309,12 +320,12 @@ You can specify exact absolute locations for backups and statistics later in app
 You can see the list of databases available for registration or their aliases by clicking on the link **View database aliases**.
 
 .Available database aliases.
-image::3.1.5-1.png[]
+image::3.1.7.png[]
 
 After registration, FBDataGuard will populate database configuration with default values and then show web-console with registered database:
 
 .HQbird FBDataGuard web console after adding a database.
-image::3.1.6.png[]
+image::3.1.8.png[]
 
 You can adjust database settings later; now let's proceed with alerts setup.
 
@@ -1030,11 +1041,11 @@ FBDataGuard can send alerts by email to administrator(s): such alerts contain in
 
 General properties for notifications can be set by clicking on the server name (or computer name) at the top of the web-console:
 
-image::3.1.7-0.png[]
+image::3.1.9.png[]
 
 After that you will see the configuration dialog for common alerts settings:
 
-image::3.1.7-1.png[]
+image::3.1.10.png[]
 
 Descriptions of some of the properties you can set here:
 
@@ -1044,12 +1055,12 @@ Descriptions of some of the properties you can set here:
 
 It's a good idea to enable setup email alerts. To do this you need to click on the envelope button in the top of the web-console:
 
-image::3.1.7.png[]
+image::3.1.11.png[]
 
 After that you will see the configuration dialog for alerts:
 
 .Email alerts configuration dialog in FBDataGuard.
-image::3.1.8.png[]
+image::3.1.12.png[]
 
 First of all, you need to enable alerts sending by enabling checkbox "`Send alerts by e-mail`".
 
