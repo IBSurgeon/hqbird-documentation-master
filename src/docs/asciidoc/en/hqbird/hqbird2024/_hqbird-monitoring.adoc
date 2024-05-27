@@ -157,7 +157,7 @@ If FBDataGuard reports long-running active transaction (Next-OAT), it is necessa
 
 If stuck of oldest interesting transaction is reported, database administrator must plan an explicit sweep to clean uncollected garbage with FBDataGuard sweep job (if it is necessary) and then plan tracking of forced rollbacks with Performance Monitoring in FBDataGuard.
 
-If users report slowness problem with some queries, Perfusion or FBScanner should be used.
+If users report slowness problem with some queries, it is necessary to configure Performance Monitoring and use Advanced Performance Monitoring.
 
 The problems with general database performance and occasional or periodic slowness require an analysis of database structure, which can be done only with HQbird Database Analyst.
 
@@ -171,7 +171,7 @@ HQbird MonLogger is a tool to analyze monitoring tables output in Firebird and f
 
 MonLogger can connect to Firebird database with performance problems and identify what is the reason of slowness: is it some user attachment, slow SQL query or long-running transaction?
 
-MonLogger supports Firebird 2.1, 2.5, 3.0, 4.0 and 5.0 -- for older Firebird versions or InterBase please use FBScanner.
+MonLogger supports Firebird 2.1, 2.5, 3.0, 4.0 and 5.0 -- for older Firebird versions or InterBase please use FBScanner (it is not included in HQbird, should be purchased separately).
 
 MonLogger can show you:
 
@@ -273,7 +273,7 @@ Sort on "`started at`" column and look for old transactions, marked in red: all 
 
 image::4.2.5.png[]
 
-Tab "`Statements`" shows statements active at the moment of snapshot: if you need to catch all statements FBPerfMon or FBScanner should be used (all these tools are part of IBSurgeon Optimization Pack).
+Tab "`Statements`" shows statements active at the moment of snapshot: if you need to catch all statements, configure Performance Monitoring and use Advanced Performance Monitoring.
 
 If "`Link to selected attachment`" is enabled, only statements for specific attachment will be shown, otherwise all active statements are in the list.
 

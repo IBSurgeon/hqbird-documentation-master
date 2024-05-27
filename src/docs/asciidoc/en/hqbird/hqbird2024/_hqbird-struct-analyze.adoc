@@ -321,7 +321,7 @@ At this screenshot you can see that some transaction is active for a long time, 
 IBAnalyst marks such transaction's state by red, because this transaction may prevent accumulated versions to be considered as garbage by server, and so, to be garbage collected.
 This is a possible reason of slowness: the more versions exist for some record, the more time it will takes to read it.
 
-In order to find this long-running transaction you can use MON$Logger module of FBScanner, or perform direct query of `MON$` tables.
+In order to find this long-running transaction you can use MON$Logger, or perform direct query of `MON$` tables.
 Then, to find out which tables were affected by long running transactions (tables with a lot of record versions) you need to go to "`Tables`" view of IBAnalyst.
 
 === Tables view

@@ -3,7 +3,7 @@
 
 == What is HQbird
 
-HQbird is a distribution of the Firebird DBMS for enterprises from IBSurgeon Software (www.ibaid.com), which includes additional functions that mainly improve performance for large and highly loaded databases, and a set of tools for organizing a full cycle of database maintenance without a DBA (including tools for performance optimization, monitoring, local and cloud backups, and recovery in case of failures).
+HQbird is a distribution of the Firebird DBMS for enterprises from IBSurgeon Software (www.ib-aid.com[https://www.ib-aid.com]), which includes additional functions that mainly improve performance for large and highly loaded databases, and a set of tools for organizing a full cycle of database maintenance without a DBA (including tools for performance optimization, monitoring, local and cloud backups, and recovery in case of failures).
 
 HQbird speeds up the performance of large databases (from 50 GB to 2 TB) and enables companies to manage large databases without requiring a dedicated database administrator for a few servers, or lowering support expenses for many (hundreds and thousands) Firebird servers. The minimal hardware requirements for HQbird are 8Gb RAM and 4 cores. 
 
@@ -543,7 +543,7 @@ HQbird MonLogger is a tool to analyze monitoring tables output in Firebird and f
 
 MonLogger can connect to Firebird database with performance problems and identify what is the reason of slowness: is it some user attachment, slow SQL query or long-running transaction?
 
-MonLogger supports Firebird 2.1, 2.5, 3.0, 4.0 and 5.0 -- for older Firebird versions or InterBase please use FBScanner.
+MonLogger supports Firebird 2.1, 2.5, 3.0, 4.0 and 5.0 -- for older Firebird versions or InterBase please use FBScanner  (it is not included in HQbird, should be purchased separately).
 
 MonLogger can show you:
 
