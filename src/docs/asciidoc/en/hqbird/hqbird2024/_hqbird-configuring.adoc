@@ -284,7 +284,18 @@ image::3.2.10.png[]
 
 image::3.1.13.png[]
 
+The "`Group sweep`" task is useful if there are many databases running on one server. In this case, the "`Group sweep`" task allows you to perform an intelligent sweep for all databases located along the specified path, including subfolders.
+
+In the dialog "`Group sweep`" it is possible to specify where databases are situated, configure  include and/or exclude mask to perform sweep only for intended databases, and configure time when the process should start.
+
 image::3.1.14.png[]
+
+The "`Group sweep`" job has the same parameters as <<hqbird-config-sweep>>, plus the following additional parameters:
+
+* "`Database root dir`" -- specifies the root directory in which to search for databases to perform sweep.
+* "`Recursive search`" -- if this checkbox is checked, then the database search occurs recursively in all subfolders of the root folder.
+* "`Include file mask`" -- regular expression for including a database file in the group sweep list.
+* "`Exclude file mask`" is a regular expression for excluding a database file from the group sweep list.
 
 === Server: Group master replication
 
