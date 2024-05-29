@@ -296,8 +296,13 @@ image::3.1.14.png[]
 
 image::3.1.15.png[]
 
-
 image::3.1.16.png[]
+
+image::3.1.17.png[]
+
+image::3.1.18.png[]
+
+image::3.1.19.png[]
 
 == Конфигурация базы данных в FBDataGuard
 
