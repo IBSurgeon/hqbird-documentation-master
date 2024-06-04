@@ -299,13 +299,41 @@ The "`Group sweep`" job has the same parameters as <<hqbird-config-sweep>>, plus
 
 === Server: Group master replication
 
+The "`Group master replication`" task is intended to simplify the setup of replication of many databases (can reach several hundred). This set of databases (as a group) is integrated into DataGuard, preserving the current functionality of DataGuard and its individual database settings (their individual replication settings and maintenance tasks). "`Individual`" databases registered with DataGuard are considered to be "`very important databases`" (VID), and for databases registered with "Group master replication" only the tasks of transferring replication segments to other servers are performed.
+
+One of the reasons for creating a separate "`Group master replication`" task is that the current implementation of DataGuard has limitations on the number of databases it can process. This limitation is mainly due to limitations in the browser handling web console logic. No such restriction was found for "`Group master replication`". Another reason is the complexity of setting up multiple databases when registering them individually.
+
+Setting up the "`Group master replication`" task consists of several parts.
+
 image::3.1.15.png[]
+
+First of all, you need to set general parameters for all tasks: where the databases are located, what template to use to search for suitable databases, where and how to send their segments (sending protocol, addresses, encryption) and how often to scan directories with segments.
 
 image::3.1.16.png[]
 
+You can specify up to five different nodes -- for each node, typical parameters (as in the task of sending segments) are specified:
+
+image::3.1.16-0.png[]
+
+Notes:
+
+* There can be one replica node, and several master servers. Therefore, in order to avoid overwriting segments with absolutely identical paths and database names, but coming from different master nodes on the replica, the root download folder for the master node is selected and created (by default) as the agent name (macro substitution). The administrator is free to change it, but must take into account the need to preserve uniqueness if there are several master nodes.
+
+* DataGuard multi-replica can itself "`resolve`" multiple sources in its FTP/Socket directory and can pull in and automatically register newly appeared databases (to facilitate subsequent maintenance, also using the sending node name identifier).
+
+* DataGuard multi-master for each database sent will create files on the replica nodes in accordance with the location of the source databases, and if the database file on the master has the same name, but is located in different directories, this will not create a problem.
+
+As with a regular database, if FTP upload is not configured (but the database is already in the wizard, which means it generates segments), then the restriction filter comes into effect -- how many "`unsent`" segments are allowed to be stored on disk. Segments over the limit will be deleted at each iteration of the task. This is done so that you can turn on the database as a master without fear of the disk being full, and then configure unloading (and finally re-initialize it to send it to a replica).
+
+To obtain the initial list of databases for batch processing, click the button "`Rescan folders and recreate databases list and replication config`".
+
 image::3.1.17.png[]
 
+DataGuard traverses the directory and reconstructs the list of databases (in accordance with the task settings -- patterns, excludes, recursion). The list includes only those databases that are not registered in DataGuard as "`individual`" (VID). If the user has registered a database in DataGuard, then it does not need to be included in the task exclusion template; it will be excluded automatically.
+
 image::3.1.18.png[]
+
+In the same section there are additional buttons for group reinitialization of *all* registered databases and for setting publishing flags for all databases (relevant for Firebird versions 4.0 and higher).
 
 image::3.1.19.png[]
 
