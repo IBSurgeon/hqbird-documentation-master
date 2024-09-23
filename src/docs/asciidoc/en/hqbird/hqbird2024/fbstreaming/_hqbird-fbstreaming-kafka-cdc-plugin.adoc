@@ -879,6 +879,7 @@ task = d:\fbdata\5.0\replication\test\kafka_source
     kafka_topic_prefix = fb_streaming
     kafka_topic_cdc_event = $[topicPrefix].cdc
     kafka_topic_transaction = $[topicPrefix].transaction
+    key_cdc_events_enable = true
     key_converter_schemas_enable = true
     value_converter_schemas_enable = true
     transaction_metadata_enable = true
@@ -901,6 +902,7 @@ task = /mnt/d/fbdata/5.0/replication/test/kafka_source
     kafka_topic_prefix = fb_streaming
     kafka_topic_cdc_event = $[topicPrefix].cdc
     kafka_topic_transaction = $[topicPrefix].transaction
+    key_cdc_events_enable = true
     key_converter_schemas_enable = true
     value_converter_schemas_enable = true
     transaction_metadata_enable = true
@@ -924,6 +926,7 @@ The `task` parameter describes the task to be performed by the `fb_streaming` se
 - `kafka_topic_prefix` -- Kafka topic prefix. It specifies a macro substitution `$[topicPrefix]` that can be used for topic names; 
 - `kafka_topic_cdc_event` -- the name of the Kafka topic(s) in which data change events are stored. Macro substitutions `$[topicPrefix]` and `$[tableName]` can be used;
 - `kafka_topic_transaction` is the name of the Kafka topic in which transaction metadata is stored. Macro substitution `$[topicPrefix]` can be used;
+- `key_cdc_events_enable` - if this option is set to `true`, each data change event contains key information, otherwise the event key will be `null`. This can be useful because Kafka uses the event key for partitioning.
 - `key_converter_schemas_enable` -- whether to include a schema in the data update event key;
 - `value_converter_schemas_enable` -- whether to include the schema in the data update event value;
 - `transaction_metadata_enable` -- whether to send transaction start and end events (transaction metadata).

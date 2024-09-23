@@ -881,6 +881,7 @@ task = d:\fbdata\5.0\replication\test\kafka_source
     kafka_topic_prefix = fb_streaming
     kafka_topic_cdc_event = $[topicPrefix].cdc
     kafka_topic_transaction = $[topicPrefix].transaction
+    key_cdc_events_enable = true
     key_converter_schemas_enable = true
     value_converter_schemas_enable = true
     transaction_metadata_enable = true
@@ -903,6 +904,7 @@ task = /mnt/d/fbdata/5.0/replication/test/kafka_source
     kafka_topic_prefix = fb_streaming
     kafka_topic_cdc_event = $[topicPrefix].cdc
     kafka_topic_transaction = $[topicPrefix].transaction
+    key_cdc_events_enable = true
     key_converter_schemas_enable = true
     value_converter_schemas_enable = true
     transaction_metadata_enable = true
@@ -926,6 +928,7 @@ task = /mnt/d/fbdata/5.0/replication/test/kafka_source
 - `kafka_topic_prefix` -- префикс топиков Kafka. Он задаёт макроподстановку `$[topicPrefix]`, которая может использоваться для имён топиков; 
 - `kafka_topic_cdc_event` -- имя топика(ов) Kafka, в которой сохраняются события изменения данных. Могут использоваться макроподстановки `$[topicPrefix]` и `$[tableName]`;
 - `kafka_topic_transaction` -- имя топика Kafka, в которой сохраняются метаданные транзакций. Может использоваться макроподстановка `$[topicPrefix]`;
+- `key_cdc_events_enable` - если эта опция установлена в `true`, то каждое событие изменения данных содержит информацию о ключе, в противном случае ключ события будет равен `null`. Это может быть полезно, поскольку Kafka использует ключ события для секционирования;
 - `key_converter_schemas_enable` -- включать ли в ключ события обновления данных схему;
 - `value_converter_schemas_enable` -- включать ли в значение события обновления данных схему;
 - `transaction_metadata_enable` -- отправлять ли события старта и завершения транзакции.
