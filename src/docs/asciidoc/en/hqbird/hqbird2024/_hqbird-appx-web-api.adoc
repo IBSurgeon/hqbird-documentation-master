@@ -44,6 +44,12 @@ The following parameters are required to run tasks:
 The `src` source must have only the full form of the task path, examples:
 
 ----
+/agent/jobs/check-agent-space
+----
+
+or
+
+----
 /agent/servers/hqbirdsrv/jobs/check-server-log
 ----
 
@@ -55,9 +61,9 @@ or
 
 Depending on the content of the source (parameter `src`) determines the task level:
 
-* if the source is of the form `/agent/servers/hqbirdsrv/databases/<database_guid>/jobs/...`, where `<database_guid>` is the database identifier, then it is a database-level task;
+* if the source is of the form `/agent/servers/hqbirdsrv/databases/<database_guid>/jobs/...`, where `<database_guid>` is the database identifier, then it is a database-level task. In the example above, the database has the ID `a8005009-c850-42ec-8def-133bd8405253`. The database ID can be found by the corresponding directory name in the DataGuard configuration file tree;
 * if the source is of the form `/agent/servers/hqbirdsrv/jobs/...`, then it is a server-level task;
-* if the source is of the form `/agent/servers/jobs/...`, then this is an agent level task.
+* if the source is of the form `/agent/jobs/...`, then this is an agent level task.
 
 
 Here are some examples of running tasks on demand. These examples assume that FBDataGuard is running on node `127.0.0.1:8082`.
@@ -174,3 +180,5 @@ http://localhost:8082/static/config.html#hqbirdsrv
 ----
 http://localhost:8082/agent/
 ----
+
+The service page can be opened (opens in a new tab) directly from the FbDataGuard console web window by left-clicking with the `Ctrl` key pressed on the DataGuard version text in the lower left corner of the page.
