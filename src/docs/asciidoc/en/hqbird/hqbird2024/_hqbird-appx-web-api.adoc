@@ -1,0 +1,176 @@
+:sectnums!:
+
+[appendix]
+[[hqbird-appx-web-api]]
+= HQbird web API
+
+HQbird FBDataGuard allows you to automate many administration tasks, run them on a schedule or on demand from the DataGuard Web console.
+
+In some cases, applications need to run administrative tasks that are already implemented in HQbird FBDataGuard. For developers of such applications, HQbird FBDataGuard provides a Web API to run tasks configured in FBDataGuard.
+
+Tasks to be run can be agent, server or database level. To run a task successfully it must be "enabled" (enabled in the configuration). For database level tasks, you need to know the database registration ID.
+
+All tasks are launched through the same handler, which is a Web API via the HTTP protocol using the GET method. The URL of this handler is as follows:
+
+----
+<schema>://<host>:<port>/agent/runnow?<parameters>
+
+<parameters> ::= <parameter>[&<parameter> [&<parameter> ...]]
+
+<parameter> ::= <param_name>=<param_value>
+----
+
+Здесь 
+
+- `<schema>` - scheme (in our case, the http or https protocol);
+- `<host>` - host name or IP address where HQbird FBDataGuard is running;
+- `<port>` - port number on which the HQbird FBDataGuard service run;
+- `<param_name>` - parameter name;
+- `<param_value>` - the parameter value, which must be URL-encoded using the encoding described in RFC 3986.
+
+For the default configuration, this URL takes the following form:
+
+----
+http://127.0.0.1:8082/agent/runnow?<parameters>
+----
+
+The following parameters are required to run tasks:
+
+- `src` - source (task level);
+- `job` - task name;
+- additional task-specific parameters, such as `lvl=1`;
+- an optional parameter, which is some unique integer (timestamp) - which prevents browsers from caching the result.
+
+The `src` source must have only the full form of the task path, examples:
+
+----
+/agent/servers/hqbirdsrv/jobs/check-server-log
+----
+
+or
+
+----
+/agent/servers/hqbirdsrv/databases/a8005009-c850-42ec-8def-133bd8405253/jobs/lockprint
+----
+
+Depending on the content of the source (parameter `src`) determines the task level:
+
+* if the source is of the form `/agent/servers/hqbirdsrv/databases/<database_guid>/jobs/...`, where `<database_guid>` is the database identifier, then it is a database-level task;
+* if the source is of the form `/agent/servers/hqbirdsrv/jobs/...`, then it is a server-level task;
+* if the source is of the form `/agent/servers/jobs/...`, then this is an agent level task.
+
+
+Here are some examples of running tasks on demand. These examples assume that FBDataGuard is running on node `127.0.0.1:8082`.
+
+.Run server log check task
+[example]
+====
+Task URL:
+
+----
+http://127.0.0.1:8082/agent/runnow?r=1727043834949&src=%2Fagent%2Fservers%2Fhqbirdsrv%2Fjobs%2Fcheck-server-log&job=check-server-log
+----
+
+Where
+
+- `src=/agent/servers/hqbirdsrv/jobs/check-server-log`
+- `job=check-server-log`
+- `r=1727043834949` - parameter to prevent the browser from caching repeated requests.
+
+The server will return a json string in response indicating the time, tag, path to the task configuration file, and a possible error message.
+
+Example of response:
+
+[source%autofit,json]
+----
+{
+    "Queried": "1727044250754",
+    "Tag": "check-server-log@[ hqbirdsrv / * ]",
+    "JobConfigFile": "E:\\HQBirdData\\config\\agent\\servers\\hqbirdsrv\\jobs\\check-server-log\\job.properties",
+    "ErrorMessage": ""
+}
+----
+
+Example of a response with an error message when trying to start a disabled task:
+
+[source%autofit,json]
+----
+{
+    "Queried":"1727044440296",
+    "Tag":"check-replica-log@[ hqbirdsrv / * ]",
+    "JobConfigFile":"E:\\HQBirdData\\config\\agent\\servers\\hqbirdsrv\\jobs\\check-replica-log\\job.properties",
+    "ErrorMessage":"Disabled job cannot be started! Enable job first! \nJob id: \"check-replica-log@[ hqbirdsrv / * ]\""
+}
+----
+====
+
+
+Below are examples of running a task for a database registered in Dataguard under the Dataguard ID: 2409230136_EMPLOYEE3_FDB.
+
+.Run sweep on a database
+[example]
+====
+Task URL:
+
+----
+http://127.0.0.1:8082/agent/runnow?r=1727044656798&src=%2Fagent%2Fservers%2Fhqbirdsrv%2Fdatabases%2F2409230136_EMPLOYEE3_FDB%2Fjobs%2Fcronsweep&job=cronsweep
+----
+
+Where
+
+- `src=/agent/servers/hqbirdsrv/databases/2409230136_EMPLOYEE3_FDB/jobs/cronsweep`
+- `job=cronsweep`
+====
+
+.Run nbackup task (simple version) level 2
+[example]
+====
+Task URL:
+
+----
+http://127.0.0.1:8082/agent/runnow?r=1727045317158&src=%2Fagent%2Fservers%2Fhqbirdsrv%2Fdatabases%2F2409230136_EMPLOYEE3_FDB%2Fjobs%2Fnbackup&job=nbackup&lvl=2
+----
+
+Where
+
+- `src=/agent/servers/hqbirdsrv/databases/2409230136_EMPLOYEE3_FDB/jobs/nbackup`
+- `job=nbackup`
+- `lvl=2` - sets the backup level (2).
+====
+
+.Run nbackup task (advanced version) level 3
+[example]
+====
+Task URL:
+
+----
+http://127.0.0.1:8082/agent/runnow?r=1727045751740&src=%2Fagent%2Fservers%2Fhqbirdsrv%2Fdatabases%2F2409230136_EMPLOYEE3_FDB%2Fjobs%2Fnbackup3&job=nbackup3&lvl=3
+----
+
+Where
+
+- `src=/agent/servers/hqbirdsrv/databases/2409230136_EMPLOYEE3_FDB/jobs/nbackup3`
+- `job=nbackup3`
+- `lvl=3` - sets the backup level (3). It is somewhat redundant, transmitted by the browser/web console, but is not used by the server and can be skipped, since
+advanced nbackup levels are implemented by separate streams with unique names, i.e. tasks nbackup0..nbackup4 - and for them the levels in lvl must match the level in the path/name.
+====
+
+On-demand task launches are logged in the FBDataGuard log.
+
+The full list of task paths/names can be reconstructed from the catalog of the current version of DataGuard configuration -- they may differ in different versions of DataGuard because tasks have changed, been deleted, or new ones have been added.
+
+== How to debug
+
+The following URLs can help with debigging of commands:
+
+* Run commands
++
+----
+http://localhost:8082/static/config.html#hqbirdsrv
+----
+
+* View representation of API in raw format
++
+----
+http://localhost:8082/agent/
+----

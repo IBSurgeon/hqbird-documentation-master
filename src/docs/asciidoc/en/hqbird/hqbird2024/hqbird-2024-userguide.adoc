@@ -1,6 +1,6 @@
 [[hqbird]]
 = HQbird 2024 User Guide
-1.0.3, by 2024-09-23
+1.0.3, by 2024-09-24
 :doctype: book
 :sectnums:
 :sectanchors:
@@ -50,6 +50,8 @@ include::_hqbird-http-client-udr.adoc[leveloffset=1]
 include::_hqbird-fbstreaming.adoc[leveloffset=1]
 
 include::_hqbird-appx-cron-expr.adoc[leveloffset=1]
+
+include::_hqbird-appx-web-api.adoc[leveloffset=1]
 
 :sectnums!:
 
