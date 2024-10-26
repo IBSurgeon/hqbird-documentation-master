@@ -337,6 +337,32 @@ In the same section there are additional buttons for group reinitialization of *
 
 image::3.1.19.png[]
 
+=== Server: Group database backup
+
+image::3.1.20.png[]
+
+image::3.1.21.png[]
+
+image::3.1.22.png[]
+
+=== Server: Group replica job
+
+image::3.1.23.png[]
+
+image::3.1.24.png[]
+
+=== Server: Group dump backup
+
+image::3.1.25.png[]
+
+image::3.1.26.png[]
+
+=== Server: Group Update Indexes Statistics
+
+image::3.1.27.png[]
+
+image::3.1.28.png[]
+
 == Database configuration in FBDataGuard
 
 === Firebird database registration
