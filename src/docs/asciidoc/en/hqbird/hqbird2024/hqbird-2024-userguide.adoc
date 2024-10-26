@@ -1,6 +1,6 @@
 [[hqbird]]
-= HQbird 2024 User Guide
-1.0.3, by 2024-09-24
+= HQbird 2024 R2 User Guide
+1.0.4, by 2024-10-26
 :doctype: book
 :sectnums:
 :sectanchors:
