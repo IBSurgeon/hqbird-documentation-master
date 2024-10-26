@@ -280,89 +280,6 @@ FBDataGuard checks both values and raises alert for the first threshold. If you 
 
 image::3.2.10.png[]
 
-=== Server: Group sweep
-
-image::3.1.13.png[]
-
-The "`Group sweep`" task is useful if there are many databases running on one server. In this case, the "`Group sweep`" task allows you to perform an intelligent sweep for all databases located along the specified path, including subfolders.
-
-In the dialog "`Group sweep`" it is possible to specify where databases are situated, configure  include and/or exclude mask to perform sweep only for intended databases, and configure time when the process should start.
-
-image::3.1.14.png[]
-
-The "`Group sweep`" job has the same parameters as <<hqbird-config-sweep>>, plus the following additional parameters:
-
-* "`Database root dir`" -- specifies the root directory in which to search for databases to perform sweep.
-* "`Recursive search`" -- if this checkbox is checked, then the database search occurs recursively in all subfolders of the root folder.
-* "`Include file mask`" -- regular expression for including a database file in the group sweep list.
-* "`Exclude file mask`" is a regular expression for excluding a database file from the group sweep list.
-
-=== Server: Group master replication
-
-The "`Group master replication`" task is intended to simplify the setup of replication of many databases (can reach several hundred). This set of databases (as a group) is integrated into DataGuard, preserving the current functionality of DataGuard and its individual database settings (their individual replication settings and maintenance tasks). "`Individual`" databases registered with DataGuard are considered to be "`very important databases`" (VID), and for databases registered with "Group master replication" only the tasks of transferring replication segments to other servers are performed.
-
-One of the reasons for creating a separate "`Group master replication`" task is that the current implementation of DataGuard has limitations on the number of databases it can process. This limitation is mainly due to limitations in the browser handling web console logic. No such restriction was found for "`Group master replication`". Another reason is the complexity of setting up multiple databases when registering them individually.
-
-Setting up the "`Group master replication`" task consists of several parts.
-
-image::3.1.15.png[]
-
-First of all, you need to set general parameters for all tasks: where the databases are located, what template to use to search for suitable databases, where and how to send their segments (sending protocol, addresses, encryption) and how often to scan directories with segments.
-
-image::3.1.16.png[]
-
-You can specify up to five different nodes -- for each node, typical parameters (as in the task of sending segments) are specified:
-
-image::3.1.16-0.png[]
-
-Notes:
-
-* There can be one replica node, and several master servers. Therefore, in order to avoid overwriting segments with absolutely identical paths and database names, but coming from different master nodes on the replica, the root download folder for the master node is selected and created (by default) as the agent name (macro substitution). The administrator is free to change it, but must take into account the need to preserve uniqueness if there are several master nodes.
-
-* DataGuard multi-replica can itself "`resolve`" multiple sources in its FTP/Socket directory and can pull in and automatically register newly appeared databases (to facilitate subsequent maintenance, also using the sending node name identifier).
-
-* DataGuard multi-master for each database sent will create files on the replica nodes in accordance with the location of the source databases, and if the database file on the master has the same name, but is located in different directories, this will not create a problem.
-
-As with a regular database, if FTP upload is not configured (but the database is already in the wizard, which means it generates segments), then the restriction filter comes into effect -- how many "`unsent`" segments are allowed to be stored on disk. Segments over the limit will be deleted at each iteration of the task. This is done so that you can turn on the database as a master without fear of the disk being full, and then configure unloading (and finally re-initialize it to send it to a replica).
-
-To obtain the initial list of databases for batch processing, click the button "`Rescan folders and recreate databases list and replication config`".
-
-image::3.1.17.png[]
-
-DataGuard traverses the directory and reconstructs the list of databases (in accordance with the task settings -- patterns, excludes, recursion). The list includes only those databases that are not registered in DataGuard as "`individual`" (VID). If the user has registered a database in DataGuard, then it does not need to be included in the task exclusion template; it will be excluded automatically.
-
-image::3.1.18.png[]
-
-In the same section there are additional buttons for group reinitialization of *all* registered databases and for setting publishing flags for all databases (relevant for Firebird versions 4.0 and higher).
-
-image::3.1.19.png[]
-
-=== Server: Group database backup
-
-image::3.1.20.png[]
-
-image::3.1.21.png[]
-
-image::3.1.22.png[]
-
-=== Server: Group replica job
-
-image::3.1.23.png[]
-
-image::3.1.24.png[]
-
-=== Server: Group dump backup
-
-image::3.1.25.png[]
-
-image::3.1.26.png[]
-
-=== Server: Group Update Indexes Statistics
-
-image::3.1.27.png[]
-
-image::3.1.28.png[]
-
 == Database configuration in FBDataGuard
 
 === Firebird database registration
@@ -1103,6 +1020,137 @@ image::3.2.68.png[]
 As you can see, the dialog closely mirrors that of an immediate backup-restore.
 However, it additionally incorporates steps for the automatic reinitialization of replicas post-restore. This is essential due to the change in database GUID upon restoration. With active replication in place, HQbird will seamlessly reinitialize replicas following a successful restore.
 
+
+<<<
+
+[[hqbird-config-group]]
+== Group jobs
+
+Group jobs are useful when a single server handles multiple databases. In this case, instead of setting up individual jobs for each database, you can set up common jobs for all databases located in a specific directory and its subdirectories.
+
+[[hqbird-config-group-sweep]]
+=== Server: Group sweep
+
+image::3.1.13.png[]
+
+The "`Group sweep`" task allows you to perform an intelligent sweep for all databases located along the specified path, including subfolders.
+
+In the dialog "`Group sweep`" it is possible to specify where databases are situated, configure  include and/or exclude mask to perform sweep only for intended databases, and configure time when the process should start.
+
+image::3.1.14.png[]
+
+The "`Group sweep`" job has the same parameters as <<hqbird-config-sweep>>, plus the following additional parameters:
+
+* "`Database root dir`" -- specifies the root directory in which to search for databases to perform sweep.
+* "`Recursive search`" -- if this checkbox is checked, then the database search occurs recursively in all subfolders of the root folder.
+* "`Include file mask`" -- regular expression for including a database file in the group sweep list.
+* "`Exclude file mask`" is a regular expression for excluding a database file from the group sweep list.
+
+[[hqbird-config-group-master]]
+=== Server: Group master replication
+
+The "`Group master replication`" task is intended to simplify the setup of replication of many databases (can reach several hundred). This set of databases (as a group) is integrated into DataGuard, preserving the current functionality of DataGuard and its individual database settings (their individual replication settings and maintenance tasks). "`Individual`" databases registered with DataGuard are considered to be "`very important databases`" (VID), and for databases registered with "Group master replication" only the tasks of transferring replication segments to other servers are performed.
+
+One of the reasons for creating a separate "`Group master replication`" task is that the current implementation of DataGuard has limitations on the number of databases it can process. This limitation is mainly due to limitations in the browser handling web console logic. No such restriction was found for "`Group master replication`". Another reason is the complexity of setting up multiple databases when registering them individually.
+
+Setting up the "`Group master replication`" task consists of several parts.
+
+image::3.1.15.png[]
+
+First of all, you need to set general parameters for all tasks: where the databases are located, what template to use to search for suitable databases, where and how to send their segments (sending protocol, addresses, encryption) and how often to scan directories with segments.
+
+image::3.1.16.png[]
+
+You can specify up to five different nodes -- for each node, typical parameters (as in the task of sending segments) are specified:
+
+image::3.1.16-0.png[]
+
+Notes:
+
+* There can be one replica node, and several master servers. Therefore, in order to avoid overwriting segments with absolutely identical paths and database names, but coming from different master nodes on the replica, the root download folder for the master node is selected and created (by default) as the agent name (macro substitution). The administrator is free to change it, but must take into account the need to preserve uniqueness if there are several master nodes.
+
+* DataGuard multi-replica can itself "`resolve`" multiple sources in its FTP/Socket directory and can pull in and automatically register newly appeared databases (to facilitate subsequent maintenance, also using the sending node name identifier).
+
+* DataGuard multi-master for each database sent will create files on the replica nodes in accordance with the location of the source databases, and if the database file on the master has the same name, but is located in different directories, this will not create a problem.
+
+As with a regular database, if FTP upload is not configured (but the database is already in the wizard, which means it generates segments), then the restriction filter comes into effect -- how many "`unsent`" segments are allowed to be stored on disk. Segments over the limit will be deleted at each iteration of the task. This is done so that you can turn on the database as a master without fear of the disk being full, and then configure unloading (and finally re-initialize it to send it to a replica).
+
+To obtain the initial list of databases for batch processing, click the button "`Rescan folders and recreate databases list and replication config`".
+
+image::3.1.17.png[]
+
+DataGuard traverses the directory and reconstructs the list of databases (in accordance with the task settings -- patterns, excludes, recursion). The list includes only those databases that are not registered in DataGuard as "`individual`" (VID). If the user has registered a database in DataGuard, then it does not need to be included in the task exclusion template; it will be excluded automatically.
+
+image::3.1.18.png[]
+
+In the same section there are additional buttons for group reinitialization of *all* registered databases and for setting publishing flags for all databases (relevant for Firebird versions 4.0 and higher).
+
+image::3.1.19.png[]
+
+[[hqbird-config-group-verified-backup]]
+=== Server: Group database backup
+
+The "`Group verified backup`" task allows you to perform backup and test recovery for all databases located at the specified path, including subfolders.
+
+In the dialog "`Group verified backup`" it is possible to specify where databases are situated, configure  include and/or exclude mask to perform backup only for intended databases, and configure time when the process should start.
+
+image::3.1.20.png[]
+
+The "`Group verified backup`" job has the same parameters as <<hqbird-config-verified-backup>>, plus the following additional parameters:
+
+* "`Database root dir`" -- specifies the root directory in which to search for databases to perform backup.
+* "`Recursive search`" -- if this checkbox is checked, then the database search occurs recursively in all subfolders of the root folder.
+* "`Include file mask`" -- regular expression for including a database file in the group backup list.
+* "`Exclude file mask`" is a regular expression for excluding a database file from the group backup list.
+
+image::3.1.21.png[]
+
+If you click the btn:[More&gt;&gt;] button, advanced backup options will appear:
+
+image::3.1.22.png[]
+
+[[hqbird-config-group-replica]]
+=== Server: Group replica job
+
+image::3.1.23.png[]
+
+image::3.1.24.png[]
+
+[[hqbird-config-group-dump-backup]]
+=== Server: Group dump backup
+
+The "`Group dump backup`" task allows you to perform backup for all databases located at the specified path, including subfolders.
+
+In the dialog "`Group dump backup`" it is possible to specify where databases are situated, configure  include and/or exclude mask to perform backup only for intended databases, and configure time when the process should start.
+
+image::3.1.25.png[]
+
+The "`Group dump backup`" job has the same parameters as <<hqbird-config-db-dump-backup>>, plus the following additional parameters:
+
+* "`Database root dir`" -- specifies the root directory in which to search for databases to perform backup.
+* "`Recursive search`" -- if this checkbox is checked, then the database search occurs recursively in all subfolders of the root folder.
+* "`Include file mask`" -- regular expression for including a database file in the group backup list.
+* "`Exclude file mask`" is a regular expression for excluding a database file from the group backup list.
+
+image::3.1.26.png[]
+
+[[hqbird-config-group-update-stat]]
+=== Server: Group Update Indexes Statistics
+
+The "`Group Update Indexes Statistics`" task allows you to update index statistics for all databases located at the specified path, including subfolders.
+
+In the dialog "`Group Update Indexes Statistics`" it is possible to specify where databases are situated, configure  include and/or exclude mask to perform backup only for intended databases, and configure time when the process should start.
+
+image::3.1.27.png[]
+
+The "`Group Update Indexes Statistics`" job has the same parameters as <<hqbird-config-db-update-stat>>, plus the following additional parameters:
+
+* "`Database root dir`" -- specifies the root directory in which to search for databases to perform update index statistics.
+* "`Recursive search`" -- if this checkbox is checked, then the database search occurs recursively in all subfolders of the root folder.
+* "`Include file mask`" -- regular expression for including a database file in the group update index statistics list.
+* "`Exclude file mask`" is a regular expression for excluding a database file from the group update index statistics list.
+
+image::3.1.28.png[]
 
 <<<
 

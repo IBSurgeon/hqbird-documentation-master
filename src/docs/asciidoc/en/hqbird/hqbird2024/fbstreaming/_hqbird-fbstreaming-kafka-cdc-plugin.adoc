@@ -912,24 +912,115 @@ task = /mnt/d/fbdata/5.0/replication/test/kafka_source
 The `task` parameter describes the task to be performed by the `fb_streaming` service. It specifies the folder where the replication segment files are located for the plugin to process. There may be several such tasks. This parameter is complex and itself describes the configuration of a specific task. Let's describe the parameters available for the task performed by the `kafka_cdc_plugin` plugin:
 
 - `controlFileDir` -- the directory in which the control file will be created (by default, the same directory as `sourceDir`);
+
 - `database` -- database connection string (required);
+
 - `username` -- user name for connecting to the database;
+
 - `password` -- password for connecting to the database;
+
 - `plugin` -- plugin that processes events that occur during the analysis of the replication log (required);
+
 - `deleteProcessedFile` -- whether to delete the log file after processing (`true` by default). It is useful to set this parameter to `false` for debugging, when the same logs need to be processed multiple times without deleting them;
+
 - `warn_tnx_not_found` -- generate a warning instead of an error if the transaction is not found in the replication segments. If this parameter is set to `true`, then an appropriate warning will be written to the `fb_streaming` log, the contents of the lost transaction will be ignored, and the plugin will continue to work. Default is `false`;
+
 - `errorTimeout` -- timeout after an error, in seconds. After this timeout expires, the segments will be re-scanned and the task will be restarted. Default is 60 seconds;
+
 - `include_tables` -- a regular expression that defines the names of the tables for which events need to be tracked;
+
 - `exclude_tables` -- a regular expression that defines the names of tables for which events do not need to be tracked;
+
 - `dumpBlobs` -- whether to publish new BLOB field values (default `false`);
+
 - `kafka_brokers` -- addresses of Kafka brokers. You can specify multiple addresses. Addresses are separated by commas;
-- `kafka_topic_prefix` -- Kafka topic prefix. It specifies a macro substitution `$[topicPrefix]` that can be used for topic names; 
+
+- `kafka_topic_prefix` -- Kafka topic prefix. It specifies a macro substitution `$[topicPrefix]` that can be used for topic names;
+
 - `kafka_topic_cdc_event` -- the name of the Kafka topic(s) in which data change events are stored. Macro substitutions `$[topicPrefix]` and `$[tableName]` can be used;
+
 - `kafka_topic_transaction` is the name of the Kafka topic in which transaction metadata is stored. Macro substitution `$[topicPrefix]` can be used;
+
+- `async_producer` -- if you set this parameter to `true`, then messages in Kafka will be sent asynchronously, that is, `fb_streaming` will not wait for confirmation that the message was successfully sent, but will immediately proceed to processing the next message. Messages are sent asynchronously until the internal buffer of unsent messages is full. By default, the size of this buffer is 500;
+
 - `key_cdc_events_enable` - if this option is set to `true`, each data change event contains key information, otherwise the event key will be `null`. This can be useful because Kafka uses the event key for partitioning.
+
 - `key_converter_schemas_enable` -- whether to include a schema in the data update event key;
+
 - `value_converter_schemas_enable` -- whether to include the schema in the data update event value;
+
 - `transaction_metadata_enable` -- whether to send transaction start and end events (transaction metadata).
+
+The following describes the parameters of the LibRdKafka library used by this plugin. Each parameter is prefixed with `kafka_`. Dots inside the parameter are replaced with underscores `_`. See: https://docs.confluent.io/platform/current/clients/librdkafka/html/md_CONFIGURATION.html[https://docs.confluent.io/platform/current/clients/librdkafka/html/md_CONFIGURATION.html].
+
+- `kafka_security_protocol` - Protocol used to communicate with brokers. Valid values are: `plaintext`, `ssl`, `sasl_plaintext`, `sasl_ssl`. In the `LibRdKafka` library, this parameter has the name `security.protocol`. Default value: `plaintext`.
+
+- `kafka_ssl_cipher_suites` - A list of cipher suites. This is a named combination of authentication, encryption, MAC  and key exchange algorithm used to negotiate the security settings for a network connection using TLS or SSL network protocol. By default all the available cipher suites are supported. In the `LibRdKafka` library, this parameter has the name `ssl.cipher.suites`.
+
+- `kafka_ssl_curves_list` - The supported-curves extension in the TLS ClientHello message specifies the curves (standard/named, or explicit GF(2^k) or GF(p)) the client is willing to have the server use. See manual page for SSL_CTX_set1_curves_list(3). OpenSSL >= 1.0.2 required. In the `LibRdKafka` library, this parameter has the name `ssl.curves.list`.
+
+- `kafka_ssl_sigalgs_list` - The client uses the TLS ClientHello signature_algorithms extension to indicate to the server which signature/hash algorithm pairs may be used in digital signatures. See manual page for SSL_CTX_set1_sigalgs_list(3). OpenSSL >= 1.0.2 required. In the `LibRdKafka` library, this parameter has the name `ssl.sigalgs.list`.
+
+- `kafka_ssl_key_location` - Path to client's private key (PEM) used for authentication. In the `LibRdKafka` library, this parameter has the name `ssl.key.location`.
+
+- `kafka_ssl_key_password` - Private key passphrase (for use with `ssl.key.location` and `set_ssl_cert()`).  In the `LibRdKafka` library, this parameter has the name `ssl.key.password`.
+
+- `kafka_ssl_certificate_location` - Path to client's public key (PEM) used for authentication. In the `LibRdKafka` library, this parameter has the name `ssl.certificate.location`.
+
+- `kafka_ssl_ca_location` - File or directory path to CA certificate(s) for verifying the broker's key. Defaults: On Windows the system's CA certificates are automatically looked up in the Windows Root certificate store. On Mac OSX this configuration defaults to probe. It is recommended to install openssl using Homebrew, to provide CA certificates. On Linux install the distribution's ca-certificates package. If OpenSSL is statically linked or `ssl.ca.location` is set to probe a list of standard paths will be probed and the first one found will be used as the default CA certificate location path. If OpenSSL is dynamically linked the OpenSSL library's default path will be used (see `OPENSSLDIR` in openssl version `-a`). In the `LibRdKafka` library, this parameter has the name `ssl.ca.location`.
+
+- `kafka_ssl_ca_certificate_stores` - Comma-separated list of Windows Certificate stores to load CA certificates from. Certificates will be loaded in the same order as stores are specified. If no certificates can be loaded from any of the specified stores an error is logged and the OpenSSL library's default CA location is used instead. Store names are typically one or more of: MY, Root, Trust, CA. In the `LibRdKafka` library, this parameter has the name `ssl.ca.certificate.stores`. Default value: `Root`.
+
+- `kafka_ssl_crl_location` - Path to CRL for verifying broker's certificate validity. In the `LibRdKafka` library, this parameter has the name `ssl.crl.location`.
+- `kafka_ssl_keystore_location` - Path to client's keystore (PKCS#12) used for authentication. In the `LibRdKafka` library, this parameter has the name `ssl.keystore.location`.
+
+- `kafka_ssl_keystore_password` - Client's keystore (PKCS#12) password. In the `LibRdKafka` library, this parameter has the name `ssl.keystore.password`.
+
+- `kafka_ssl_providers` - Comma-separated list of OpenSSL 3.0.x implementation providers. E.g., `default,legacy`. In the `LibRdKafka` library, this parameter has the name `ssl.providers`.
+
+- `kafka_ssl_engine_id` - OpenSSL engine id is the name used for loading engine. In the `LibRdKafka` library, this parameter has the name `ssl.engine.id`. Default value: `dynamic`.
+
+- `kafka_enable_ssl_certificate_verification` - Enable OpenSSL's builtin broker (server) certificate verification. Valid values are: `true`, `false`. In the `LibRdKafka` library, this parameter has the name `enable.ssl.certificate.verification`. Default value: `true`.
+
+- `kafka_ssl_endpoint_identification_algorithm` - Endpoint identification algorithm to validate broker hostname using broker certificate. Valid values are: `none`, `https`. `https` - Server (broker) hostname verification as specified in RFC2818. `none` - No endpoint verification. OpenSSL >= 1.0.2 required.  In the `LibRdKafka` library, this parameter has the name `ssl.endpoint.identification.algorithm`. Default value: `https`.
+
+- `kafka_sasl_mechanism` - SASL mechanism to use for authentication. Supported: `GSSAPI`, `PLAIN`, `SCRAM-SHA-256`, `SCRAM-SHA-512`, `OAUTHBEARER`. NOTE: Despite the name only one mechanism must be configured. In the `LibRdKafka` library, this parameter has the name `sasl.mechanism`. Default value: `GSSAPI`.
+
+- `kafka_sasl_username` - SASL username for use with the `PLAIN` and `SASL-SCRAM-..` mechanisms. In the `LibRdKafka` library, this parameter has the name `sasl.username`.
+
+- `kafka_sasl_password` - SASL password for use with the `PLAIN` and `SASL-SCRAM-..` mechanisms. In the `LibRdKafka` library, this parameter has the name `sasl.password`.
+
+- `kafka_sasl_kerberos_service_name` - Kerberos principal name that Kafka runs as, not including `/hostname@REALM`. In the `LibRdKafka` library, this parameter has the name `sasl.kerberos.service.name`. Default value: `kafka`.
+
+- `kafka_sasl_kerberos_principal` - This client's Kerberos principal name. (Not supported on Windows, will use the logon user's principal). In the `LibRdKafka` library, this parameter has the name `sasl.kerberos.principal`. Default value: `kafkaclient`.
+
+- `kafka_sasl_oauthbearer_config` - SASL/OAUTHBEARER configuration. The format is implementation-dependent and must be parsed accordingly. The default unsecured token implementation (see https://tools.ietf.org/html/rfc7515#appendix-A.5[https://tools.ietf.org/html/rfc7515#appendix-A.5]) recognizes space-separated `name=value` pairs with valid names including `principalClaimName`, `principal`, `scopeClaimName`, `scope`, and `lifeSeconds`. The default value for `principalClaimName` is `sub`, the default value for `scopeClaimName` is `scope`, and the default value for `lifeSeconds` is `3600`. The scope value is CSV format with the default value being no/empty scope. For example:
+
++
+----
+principalClaimName=azp principal=admin scopeClaimName=roles scope=role1,role2 lifeSeconds=600
+----
++
+In addition, SASL extensions can be communicated to the broker via `extension_NAME=value`. For example:
+
++
+----
+principal=admin extension_traceId=123
+----
++
+In the `LibRdKafka` library, this parameter has the name `sasl.oauthbearer.config`.
+
+- `kafka_sasl_oauthbearer_method` - Set to `default` or `oidc` to control which login method to be used. If set to `oidc`, the following properties must also be be specified: `kafka_sasl_oauthbearer_client_id`, `kafka_sasl_oauthbearer_client_secret` and `kafka_sasl_oauthbearer_token_endpoint_url` (`sasl.oauthbearer.client.id`, `sasl.oauthbearer.client.secret`, and `sasl.oauthbearer.token.endpoint.url`). In the `LibRdKafka` library, this parameter has the name `sasl.oauthbearer.method`. Default value: `default`.
+
+- `kafka_sasl_oauthbearer_client_id` - Public identifier for the application. Must be unique across all clients that the authorization server handles. Only used when `kafka_sasl_oauthbearer_method` (`sasl.oauthbearer.method`) is set to `oidc`. In the `LibRdKafka` library, this parameter has the name `sasl.oauthbearer.client.id`.
+
+- `kafka_sasl_oauthbearer_client_secret` - Client secret only known to the application and the authorization server. This should be a sufficiently random string that is not guessable. Only used when `kafka_sasl_oauthbearer_method` (`sasl.oauthbearer.method`) is set to `oidc`. In the `LibRdKafka` library, this parameter has the name `sasl.oauthbearer.client.secret`.
+
+- `kafka_sasl_oauthbearer_scope` - Client use this to specify the scope of the access request to the broker. Only used when `kafka_sasl_oauthbearer_method` (`sasl.oauthbearer.method`) is set to `oidc`. In the `LibRdKafka` library, this parameter has the name `sasl.oauthbearer.scope`.
+
+- `kafka_sasl_oauthbearer_extensions` - Allow additional information to be provided to the broker. Comma-separated list of `key=value` pairs. E.g., `supportFeatureX=true,organizationId=sales-emea`. Only used when `kafka_sasl_oauthbearer_method` (`sasl.oauthbearer.method`) is set to `oidc`. In the `LibRdKafka` library, this parameter has the name `sasl.oauthbearer.extensions`.
+
+- `kafka_sasl_oauthbearer_token_endpoint_url` - OAuth/OIDC issuer token endpoint HTTP(S) URI used to retrieve token. Only used when `kafka_sasl_oauthbearer_method` (`sasl.oauthbearer.method`) is set to `oidc`. In the `LibRdKafka` library, this parameter has the name `sasl.oauthbearer.token.endpoint.url`.
 
 === Launch Kafka
 
