@@ -1112,9 +1112,46 @@ image::3.1.22.png[]
 [[hqbird-config-group-replica]]
 === Server: Group replica job
 
+The task "`Group replica job`" is intended to provide the administrator, on the "Replica`" node, with automatic registration of incoming (from new masters) databases, automate the delivery/unpacking of segments and the implementation of reinitialization processes.
+
 image::3.1.23.png[]
 
+In the "`Group replica job`" settings dialog, you can specify where the replica databases are located, the directory for receiving replication segments, and the interval for checking the directory for segments.
+
 image::3.1.24.png[]
+
+"`Unpack password`" is an optional parameter, it is required if a password for packing replication segments was set on the master side. This password must be the same for all master servers.
+
+The algorithm of operation is as follows. Recursively browsing the "`Incoming segments root dir`", the group monitoring task searches for files of databases prepared for reinitialization (from the master). If such a file is found, the replica node checks whether this directory is assigned to any existing replica on it. If the registration (relationship DBReplica--Incoming_subdirectory) exists, then it is necessary to reinitialize the already existing replica database. If there is no such connection, then a new database was sent to the replica node from the master. The replica node must register it (with itself), add it to the server replication (FB) config, reinitialize it, and start delivering segments for this database. The new database will be located in an individual subdirectory of the directory specified in the "`Root folder for replicas`" configuration parameter.
+
+Along with the database transferred from the master, a "`journal`" file is transferred, which contains accompanying information, such as the need to perform fix icu, check the checksum, and also contains the name of the master node and the path to the database -- based on this information, a path will be created along which the new database will be saved as a "`replica`". In older versions of DataGuard, the host name was not specified in this file, so the "`Name for unknown host`" parameter was added to the task options. The node name is necessary because different master nodes can have completely identical database file names. In addition, grouping by host names will make it easier to maintain replica databases.
+
+The "`Verbose`" option in the task settings replicates (for newly registered databases) the option of the same name in the replication configuration (see <<hqbird-config-cloud-backup-receiver>>).
+
+This solves the first part of the problem: automatic registration of databases on replicas and their reinitialization.
+
+The second part of the task is to deliver segments from the "`Incoming segments root dir`" to the desired database. After the monitoring algorithm scans all directories for new reinitializations, a pass will be performed for all matched paths. which unpacks and moves the incoming segment files. At the same time, a check will be performed for the number of these files and their age, and if it is exceeded, a notification about the excess will be sent, which means that there are problems with absorption/replication for this replica.
+
+[IMPORTANT]
+====
+After auto-reinitialization and adding new replica files, a "`manual`" restart of the Firebird server is required!
+====
+
+Information about already registered replica bases is located at the bottom of the web console widgets.
+
+image::3.1.24-1.png[]
+
+In this case, the path for monitoring incoming files is specified, the time of the last analysis is [1]: "`c:\fbdata\hqbird\5.0\segments`". Table with a list of registered replica databases (to reduce unnecessary information, the path to the file is truncated, only the name of the database file is shown (it is long -- it corresponds to the path location on the master).
+
+The table of registered replica bases, in addition to the name, shows the status of the previous reinitialization and segment delivery operation, the name of the newest file, the verification date, the number of segment files in the subdirectory, the path to the directory of incoming files (in this case, it is missing), the sizes of the files and the database, the date of its modification (from the file date), and its GUID.
+
+In this same table, there is an option then register the database (by deleting it from the replication config).
+
+The "`Load report as JSON`" button allows you to download the entire table data as json for subsequent analysis (if required).
+
+The "`Register existing database as replica`" button allows you to perform the corresponding action and configure the registration parameters in the dialog.
+
+image::3.1.24-2.png[]
 
 [[hqbird-config-group-dump-backup]]
 === Server: Group dump backup
