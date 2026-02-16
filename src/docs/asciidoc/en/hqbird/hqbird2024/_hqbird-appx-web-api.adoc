@@ -20,7 +20,7 @@ All tasks are launched through the same handler, which is a Web API via the HTTP
 <parameter> ::= <param_name>=<param_value>
 ----
 
-Здесь 
+Здесь
 
 - `<schema>` - scheme (in our case, the http or https protocol);
 - `<host>` - host name or IP address where HQbird FBDataGuard is running;

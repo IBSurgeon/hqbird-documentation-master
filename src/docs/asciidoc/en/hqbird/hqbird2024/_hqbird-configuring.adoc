@@ -43,11 +43,9 @@ Default username/password for HQbird FBDataGuard is "**admin"/"strong password**
 
 === Auto discovery feature of FBDataGuard
 
-At the first launch FBDataGuard will check computer for installed Firebird servers.
-FBDataGuard for Windows search registry for Firebird records, FBDataGuard for Linux checks default locations of Firebird installations.
+At the first launch FBDataGuard will check computer for installed Firebird servers. FBDataGuard for Windows search registry for Firebird records, FBDataGuard for Linux checks default locations of Firebird installations.
 
-FBDataGuard will show the list of all Firebird copies installed, but only the one instance of Firebird can be monitored by FBDataGuard.
-Choose it by clicking btn:[Add Firebird engine to monitoring >>]
+FBDataGuard will show the list of all Firebird copies installed, but only the one instance of Firebird can be monitored by FBDataGuard. Choose it by clicking btn:[Add Firebird engine to monitoring >>]
 
 If you don't see Firebird instance in auto discovery list, you can choose btn:[Add custom >>] and configure instance parameters manually.
 
@@ -329,8 +327,7 @@ image::3.2.22.png[]
 
 FBDataGuard checks the validity of path to database and it does not allow specifying the wrong path.
 
-Also, for HQbird Enterprise, in the database widget you can see status of the replication and configure replication by clicking on the icon.
-Please read more details in the replication configuration section.
+Also, for HQbird Enterprise, in the database widget you can see status of the replication and configure replication by clicking on the icon. Please read more details in the replication configuration section.
 
 Since HQbird 2020, the database widget in HQbird also shows the encryption status of the database.
 
@@ -344,7 +341,7 @@ image::3.2.23.png[]
 
 These logs can be analyzed to get helpful insight regarding database performance and application quality (see more information here http://ib-aid.com/en/articles/ibanalyst-what-you-can-see-at-summary-view/[]).
 
-This job also monitors the implementation limit in Firebird: maximum transactions number in Firebird versions before 3.0 should be less than 2^31^-1. Near this number database should be backup and restored. It will throw an alert if transaction number will be close to the restrictions. 
+This job also monitors the implementation limit in Firebird: maximum transactions number in Firebird versions before 3.0 should be less than 2^31^-1. Near this number database should be backup and restored. It will throw an alert if transaction number will be close to the restrictions.
 
 Also, the transaction dynamics is shown on the tab "`Graphs gallery`":
 

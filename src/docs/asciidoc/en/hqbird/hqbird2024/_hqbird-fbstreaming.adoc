@@ -156,7 +156,7 @@ The structure of the `fb_streaming.conf` configuration file looks like this:
 ----
 # logLevel = info
 
-# pluginDir = $(root)/stream_plugins 
+# pluginDir = $(root)/stream_plugins
 
 task = <sourceDir_1>
 {

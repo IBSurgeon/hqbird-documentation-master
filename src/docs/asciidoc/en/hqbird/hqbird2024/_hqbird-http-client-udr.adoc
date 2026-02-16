@@ -2,11 +2,9 @@
 = HTTP Client UDR
 
 The IBSurgeon HTTP Client UDR library is designed to work with HTTP services, for example, via the REST-API.
-To implement the HTTP client, the open source library https://curl.se/libcurl/[libcurl] is used, which provides interaction with Web services via the HTTP protocol using the 'GET', 'HEAD', 'POST', ' PUT', 'PATCH', 'DELETE', 'OPTIONS', 'TRACE'.
-In addition, additional procedures and functions are provided for parsing HTTP headers, as well as parsing and constructing URLs.
+To implement the HTTP client, the open source library https://curl.se/libcurl/[libcurl] is used, which provides interaction with Web services via the HTTP protocol using the 'GET', 'HEAD', 'POST', ' PUT', 'PATCH', 'DELETE', 'OPTIONS', 'TRACE'. In addition, additional procedures and functions are provided for parsing HTTP headers, as well as parsing and constructing URLs.
 
-The HTTP Client UDR is 100% free and open source, licensed under https://www.firebirdsql.org/en/initial-developer-s-public-license-version-1-0/[IDPL].
-The library source code is available at https://github.com/IBSurgeon/http_client_udr
+The HTTP Client UDR is 100% free and open source, licensed under https://www.firebirdsql.org/en/initial-developer-s-public-license-version-1-0/[IDPL]. The library source code is available at https://github.com/IBSurgeon/http_client_udr
 
 Versions for Windows and Linux are available: for Windows we have ready-to-use binaries, and for Linux we need to build UDR from source depending on the specific distribution (we have a simple build instruction).
 
@@ -91,11 +89,7 @@ Output parameters:
 * `RESPONSE_BODY` - response body.
 * `RESPONSE_HEADERS` - response headers.
 
-The `HTTP_UTILS.HTTP_REQUEST` procedure is the main procedure by which communication with web services takes place.
-Procedures `HTTP_UTILS.HTTP_GET`, `HTTP_UTILS.HTTP_HEAD`, `HTTP_UTILS.HTTP_POST`, `HTTP_UTILS.HTTP_PUT`, `HTTP_UTILS.HTTP_PATCH`,
-`HTTP_UTILS.HTTP_DELETE`, `HTTP_UTILS.HTTP_OPTIONS`, `HTTP_UTILS.HTTP_TRACE` are derived from `HTTP_UTILS.HTTP_REQUEST`.
-Inside, they call `HTTP_UTILS.HTTP_REQUEST` with the `METHOD` parameter filled in, and unnecessary input and output parameters are removed, which
-simplifies access to a web resource by a specific HTTP method.
+The `HTTP_UTILS.HTTP_REQUEST` procedure is the main procedure by which communication with web services takes place. Procedures `HTTP_UTILS.HTTP_GET`, `HTTP_UTILS.HTTP_HEAD`, `HTTP_UTILS.HTTP_POST`, `HTTP_UTILS.HTTP_PUT`, `HTTP_UTILS.HTTP_PATCH`, `HTTP_UTILS.HTTP_DELETE`, `HTTP_UTILS.HTTP_OPTIONS`, `HTTP_UTILS.HTTP_TRACE` are derived from `HTTP_UTILS.HTTP_REQUEST`. Inside, they call `HTTP_UTILS.HTTP_REQUEST` with the `METHOD` parameter filled in, and unnecessary input and output parameters are removed, which simplifies access to a web resource by a specific HTTP method.
 
 The first two parameters of the `HTTP_UTILS.HTTP_REQUEST` procedure are mandatory.
 
@@ -162,9 +156,9 @@ SELECT
 FROM HTTP_UTILS.HTTP_REQUEST (
   'GET',
   'https://yandex.ru',
-  NULL, 
-  NULL, 
-  NULL, 
+  NULL,
+  NULL,
+  NULL,
   q'{
 CURLOPT_FOLLOWLOCATION=0
 CURLOPT_USERAGENT=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 OPR/98.0.0.0
@@ -549,8 +543,7 @@ FROM RDB$DATABASE;
 
 === Procedure `HTTP_UTILS.PARSE_URL`
 
-The `HTTP_UTILS.PARSE_URL` procedure is designed to parse a URL into its component parts,
-according to the specification https://tools.ietf.org/html/rfc3986[RFC 3986].
+The `HTTP_UTILS.PARSE_URL` procedure is designed to parse a URL into its component parts, according to the specification https://tools.ietf.org/html/rfc3986[RFC 3986].
 
 Requirement: minimum version of `libcurl` is 7.62.0.
 
@@ -590,7 +583,7 @@ Usage example:
 
 [source,sql]
 ----
-SELECT   
+SELECT
     URL_SCHEME,
     URL_USER,
     URL_PASSWORD,
@@ -634,8 +627,7 @@ Input parameters:
 * `URL_QUERY` - query (parameters).
 * `URL_FRAGMENT` - fragment (anchor).
 
-Result: URL string according to the specification https://tools.ietf.org/html/rfc3986[RFC 3986], i.e. in the format
-`&lt;URL&gt; ::= &lt;scheme&gt;:[//[&lt;user&gt;:&lt;password&gt;@]&lt;host&gt;[:&lt;port&gt;]][/]&lt;path&gt;[?&lt;query&gt;][#&lt;fragment&gt;]`.
+Result: URL string according to the specification https://tools.ietf.org/html/rfc3986[RFC 3986], i.e. in the format `&lt;URL&gt; ::= &lt;scheme&gt;:[//[&lt;user&gt;:&lt;password&gt;@]&lt;host&gt;[:&lt;port&gt;]][/]&lt;path&gt;[?&lt;query&gt;][#&lt;fragment&gt;]`.
 
 Usage example:
 
@@ -645,7 +637,7 @@ SELECT
   HTTP_UTILS.BUILD_URL(
     'https',
     NULL,
-    NULL, 
+    NULL,
     'localhost',
     8080,
     '/',
@@ -657,8 +649,7 @@ FROM RDB$DATABASE;
 
 === Function `HTTP_UTILS.URL_APPEND_QUERY`
 
-The `HTTP_UTILS.URL_APPEND_QUERY` function is designed to add parameters to the URL address, while previously
-the existing QUERY part of the URL is preserved.
+The `HTTP_UTILS.URL_APPEND_QUERY` function is designed to add parameters to the URL address, while previously the existing QUERY part of the URL is preserved.
 
 Requirement: The minimum version of `libcurl` is 7.62.0.
 
@@ -701,9 +692,7 @@ The result will be a URL `https://example.com/?shoes=2&amp;hat=1&amp;candy=N%26N
 
 === Function `HTTP_UTILS.APPEND_QUERY`
 
-The `HTTP_UTILS.APPEND_QUERY` function collects parameter values into a single string.
-Further, this string can be added to the URL as parameters or passed to the request body if the request is sent using the POST method with
-`Content-Type: application/x-www-form-urlencoded`.
+The `HTTP_UTILS.APPEND_QUERY` function collects parameter values into a single string. Further, this string can be added to the URL as parameters or passed to the request body if the request is sent using the POST method with `Content-Type: application/x-www-form-urlencoded`.
 
 Requirement: The minimum version of `libcurl` is 7.62.0.
 
@@ -746,9 +735,7 @@ The result will be the string `shoes=2&amp;hat=1&amp;candy=N%26N`.
 
 === Procedure `HTTP_UTILS.PARSE_HEADERS`
 
-The `HTTP_UTILS.PARSE_HEADERS` procedure is designed to parse headers returned in an HTTP response.
-The procedure returns each header as a separate entry in the `HEADER_LINE` parameter. If the header is of the form `&lt;header name&gt;: &lt;header value&gt;`,
-then the header name is returned in the `HEADER_NAME` parameter, and the value is `HEADER_VALUE`.
+The `HTTP_UTILS.PARSE_HEADERS` procedure is designed to parse headers returned in an HTTP response. The procedure returns each header as a separate entry in the `HEADER_LINE` parameter. If the header is of the form `&lt;header name&gt;: &lt;header value&gt;`, then the header name is returned in the `HEADER_NAME` parameter, and the value is `HEADER_VALUE`.
 
 [source,sql]
 ----
@@ -776,7 +763,7 @@ Usage example:
 
 [source,sql]
 ----
-WITH 
+WITH
   T AS (
     SELECT
       RESPONSE_HEADERS
@@ -788,7 +775,7 @@ SELECT
   H.HEADER_LINE,
   H.HEADER_NAME,
   H.HEADER_VALUE
-FROM 
+FROM
   T
   LEFT JOIN HTTP_UTILS.PARSE_HEADERS(T.RESPONSE_HEADERS) H ON TRUE;
 ----
@@ -817,7 +804,7 @@ Usage example:
 
 [source,sql]
 ----
-WITH 
+WITH
   T AS (
     SELECT
       RESPONSE_HEADERS

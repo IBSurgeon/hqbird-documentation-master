@@ -1,8 +1,7 @@
 [[hqbird-install]]
 = Installation of HQbird
 
-HQbird contains 2 parts: Server and Admin.
-Let's consider how to install them.
+HQbird contains 2 parts: Server and Admin. Let's consider how to install them.
 
 == Installing HQbird Server on Windows
 
@@ -12,9 +11,7 @@ It is mandatory to install Firebird bundled with HQbird Server installer, if you
 
 Optionally you can choose to not install Firebird binaries shipped with HQbird – in this case, make sure that installed version is compatible (2.5.x, 3.0.x, 4.0.x, 5.0.x).
 
-Please note, that only Firebird 2.5, 3.0, 4.0 and 5.0 are fully supported in HQbird.
-We offer the comprehensive https://ib-aid.com/en/firebird-database-migration/[Firebird migration service] with guaranteed
-and fast result to migrate Firebird to the latest version.
+Please note, that only Firebird 2.5, 3.0, 4.0 and 5.0 are fully supported in HQbird. We offer the comprehensive https://ib-aid.com/en/firebird-database-migration/[Firebird migration service] with guaranteed and fast result to migrate Firebird to the latest version.
 
 [[hqbird-install-silent]]
 === Silent installation on Windows
@@ -144,8 +141,8 @@ All HQbird modules are installed in the inactive mode and do not affect the oper
 
 If you choose to install HQbird with Firebird, by default each version of Firebird will be installed in a subfolder of the HQbird installation. By default for each version of Firebird:
 
-- `C:\HQbird\Firebird25` 
-- `C:\HQbird\Firebird30` 
+- `C:\HQbird\Firebird25`
+- `C:\HQbird\Firebird30`
 - `C:\HQbird\Firebird40`
 - `C:\HQbird\Firebird50`
 
@@ -542,7 +539,7 @@ We always recommend to start with balanced `firebird.conf`.
 Then we recommend to measure actual ratio between reads and writes using HQbird MonLogger tool (tab "`Aggregated
 Performance Statistics`"). In 90% of cases there are much more reads than writes, so the next step is to try read-optimized firebird configuration file.
 
-Firebird configuration greatly depends on the hardware, so if you want to tune Firebird properly, please also 
+Firebird configuration greatly depends on the hardware, so if you want to tune Firebird properly, please also
 read "`http://ib-aid.com/en/articles/firebird-hardware-guide/[Firebird Hardware Guide]`", it will help you to understand what parameters must be tuned.
 
 For the deep tuning of high-load Firebird databases IBSurgeon offers Firebird Database Optimization Service: https://ib-aid.com/en/firebird-interbase-performance-optimization-service/

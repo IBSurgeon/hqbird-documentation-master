@@ -1,14 +1,12 @@
 [[hqbird-split-udr]]
 = SPLIT-UDR -- procedures to splitting strings by separator
 
-HQbird includes SPLIT-UDR which contains the set of useful stored procedures.
-These procedures can be useful to splitting string  (stored as VARCHAR or BLOB) by separator.
+HQbird includes SPLIT-UDR which contains the set of useful stored procedures. These procedures can be useful to splitting string  (stored as VARCHAR or BLOB) by separator.
 
 .Please note!
 [NOTE]
 ====
-To use SPLIT-UDR functions, you need to register them in your database with an appropriate SQL script.
-The script is available in `plugin/UDR/split-udr.sql`
+To use SPLIT-UDR functions, you need to register them in your database with an appropriate SQL script. The script is available in `plugin/UDR/split-udr.sql`
 ====
 
 For convenience, procedures for splitting text by separator are packed in the `SPLIT_UTILS` package.
@@ -49,8 +47,7 @@ Let's consider procedures from this library and examples their usage.
 
 |===
 
-The first argument of these procedures is a `BLOB` with subtype `TEXT`, the second is a string of type `VARCHAR(10)`.
-The output type depends on the name of the procedure.
+The first argument of these procedures is a `BLOB` with subtype `TEXT`, the second is a string of type `VARCHAR(10)`. The output type depends on the name of the procedure.
 
 Let's look at simple examples of how to use these procedures.
 

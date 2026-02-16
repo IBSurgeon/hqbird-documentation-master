@@ -30,12 +30,9 @@ pages are usually 200-300 ppi. The minimum value is 70.';
 ====
 Pay attention to the `EXTERNAL NAME` in it after the module name and entry point with "!" the name of the dictionary is indicated.
 
-Where is `eng` a dictionary from `tessdata` catalog, which is used for recognition.
-Several dictionaries can be listed here, for example `rus+eng`. If absent, then the dictionary `eng` is used.
+Where is `eng` a dictionary from `tessdata` catalog, which is used for recognition. Several dictionaries can be listed here, for example `rus+eng`. If absent, then the dictionary `eng` is used.
 
-The set contains a limited number of dictionaries.
-A complete list of dictionaries is available at: https://github.com/tesseract-ocr/tessdata_best[] (high recognition quality)
-or https://github.com/tesseract-ocr/tessdata_fast[] (high recognition speed).
+The set contains a limited number of dictionaries. A complete list of dictionaries is available at: https://github.com/tesseract-ocr/tessdata_best[] (high recognition quality) or https://github.com/tesseract-ocr/tessdata_fast[] (high recognition speed).
 ====
 
 The library supports text recognition from images in PNG, JPEG, GIF formats.

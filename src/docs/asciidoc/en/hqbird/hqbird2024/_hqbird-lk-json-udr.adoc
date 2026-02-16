@@ -1,23 +1,15 @@
 [[hqbird-lk-json-udr]]
 = LK-JSON-UDR -- building and parsing JSON
 
-HQbird includes UDR library udr-lkJSON for building and parsing JSON on the server side.
-The library is distributed open source under the MIT license and is free to use.
-It is written in Free Pascal.
-Source code is available at https://github.com/mnf71/udr-lkJSON[]
+HQbird includes UDR library udr-lkJSON for building and parsing JSON on the server side. The library is distributed open source under the MIT license and is free to use. It is written in Free Pascal. Source code is available at https://github.com/mnf71/udr-lkJSON[]
 
 == Install UDR lkJSON
 
-To use the UDR lkJSON library, you need to register it in your database.
-To do this, run one of the scripts `plugin/UDR/udrJSON.sql` or `plugin/UDR/udrJSON-utf8.sql`, depending on the encoding of your database
-(the first will work for any single-byte encoding).
+To use the UDR lkJSON library, you need to register it in your database. To do this, run one of the scripts `plugin/UDR/udrJSON.sql` or `plugin/UDR/udrJSON-utf8.sql`, depending on the encoding of your database (the first will work for any single-byte encoding).
 
 After installing the UDR, it can be verified using the https://github.com/mnf71/udr-lkJSON/blob/main/verify.sql[] script.
 
-The script calls a function to parse the JSON and build it back into a string.
-If the original JSON is the same as the newly assembled JSON, then everything is in order.
-In reality, the strings will not completely match, since the JSON is assembled without taking into account the beautiful formatting.
-But the content must be identical.
+The script calls a function to parse the JSON and build it back into a string. If the original JSON is the same as the newly assembled JSON, then everything is in order. In reality, the strings will not completely match, since the JSON is assembled without taking into account the beautiful formatting. But the content must be identical.
 
 Verification occurs for two sets (procedure + function):
 
@@ -26,13 +18,9 @@ Verification occurs for two sets (procedure + function):
 
 == How it works?
 
-The udr-lkJSON library is based on the free lkJSON library for generating and parsing JSON.
-Therefore, in order to have a good idea of how to work with UDR-lkJSON, it is advisable to familiarize yourself with the
-lkjson library (see https://sourceforge.net/projects/lkjson/[]).
+The udr-lkJSON library is based on the free lkJSON library for generating and parsing JSON. Therefore, in order to have a good idea of how to work with UDR-lkJSON, it is advisable to familiarize yourself with the lkjson library (see https://sourceforge.net/projects/lkjson/[]).
 
-When parsing JSON, some elements can be simple types that exist in Firebird (`INTEGER`, `DOUBLE PRECISION`,
-`VARCHAR (N)`, `BOOLEAN`), and some complex ones are objects and arrays. Complex objects are returned as a pointer to
-an internal object from the lkJSON library. The pointer maps to the `TY$POINTER` domain. This domain is defined as follows:
+When parsing JSON, some elements can be simple types that exist in Firebird (`INTEGER`, `DOUBLE PRECISION`, `VARCHAR (N)`, `BOOLEAN`), and some complex ones are objects and arrays. Complex objects are returned as a pointer to an internal object from the lkJSON library. The pointer maps to the `TY$POINTER` domain. This domain is defined as follows:
 
 [source,sql]
 ----
@@ -40,9 +28,7 @@ CREATE DOMAIN TY$POINTER AS
 CHAR(8) CHARACTER SET OCTETS;
 ----
 
-In addition, if NULL is encountered in JSON, then it will not be returned to simple types! You will have to recognize
-this value separately. This is because the UDR-lkJSON library simply copies the methods of the lkJSON library classes
-into PSQL packages. And as you know, simple types in Pascal do not have a separate state for NULL.
+In addition, if NULL is encountered in JSON, then it will not be returned to simple types! You will have to recognize this value separately. This is because the UDR-lkJSON library simply copies the methods of the lkJSON library classes into PSQL packages. And as you know, simple types in Pascal do not have a separate state for NULL.
 
 == Description of PSQL packages from UDR-lkJSON
 
@@ -77,29 +63,19 @@ END
 
 As you can see from the comment, this package is a blueprint for the `TlkJSONbase` class. It contains basic functionality for working with JSON.
 
-The `Dispose` function is designed to release a pointer to a JSON object. Pointers to be forcibly freed are the
-result of parsing or JSON generation. You should not call it on intermediate objects when parsing or assembling JSON.
-It is only required for the top-level object.
+The `Dispose` function is designed to release a pointer to a JSON object. Pointers to be forcibly freed are the result of parsing or JSON generation. You should not call it on intermediate objects when parsing or assembling JSON. It is only required for the top-level object.
 
-The `Field` function returns a pointer to an object field. The first parameter is a pointer to the object,
-the second is the field name. If the field does not exist, then the function will return a null pointer
-(This is not NULL, but `x'0000000000000000'`).
+The `Field` function returns a pointer to an object field. The first parameter is a pointer to the object, the second is the field name. If the field does not exist, then the function will return a null pointer (This is not NULL, but `x'0000000000000000'`).
 
-The `Count_` function returns the number of items in a list or fields in an object. A pointer to an object or a list
-is specified as a parameter.
+The `Count_` function returns the number of items in a list or fields in an object. A pointer to an object or a list is specified as a parameter.
 
-The `Child` function returns or sets the value for the element at index `Idx` in the `Self` object or list.
-If the `Obj` parameter is not specified, then it returns a pointer to the element from the `Idx` indices.
-If `Obj` is specified, then sets its value to the element with indices `Idx`. Note `Obj` is a pointer to one of the `TlkJSONbase` descendants.
+The `Child` function returns or sets the value for the element at index `Idx` in the `Self` object or list. If the `Obj` parameter is not specified, then it returns a pointer to the element from the `Idx` indices. If `Obj` is specified, then sets its value to the element with indices `Idx`. Note `Obj` is a pointer to one of the `TlkJSONbase` descendants.
 
-The `Value_` function returns or sets in the form of a JSON string (`VARCHAR`) the value for the object specified
-in the `Self` parameter. If the `Val` parameter is not specified, then the value is returned; otherwise, it is set.
+The `Value_` function returns or sets in the form of a JSON string (`VARCHAR`) the value for the object specified in the `Self` parameter. If the `Val` parameter is not specified, then the value is returned; otherwise, it is set.
 
-The `WideValue_` function returns or sets as a JSON string (`BLOB SUB_TYPE TEXT`) the value for the object specified
-in the `Self` parameter. If the `Val` parameter is not specified, then the value is returned; otherwise, it is set.
+The `WideValue_` function returns or sets as a JSON string (`BLOB SUB_TYPE TEXT`) the value for the object specified in the `Self` parameter. If the `Val` parameter is not specified, then the value is returned; otherwise, it is set.
 
-The `SelfType` function returns the type of the object for the pointer specified in the `Self` parameter.
-The object type is returned as a number, where
+The `SelfType` function returns the type of the object for the pointer specified in the `Self` parameter. The object type is returned as a number, where
 
 * 0 -- jsBase
 * 1 -- jsNumber
@@ -111,8 +87,7 @@ The object type is returned as a number, where
 
 If the `Self` parameter is not specified, it will return 0.
 
-The `SelfTypeName` function returns the object type for the pointer specified in the `Self` parameter.
-The object type is returned as a string. If the `Self` parameter is not specified, it will return `'jsBase'`.
+The `SelfTypeName` function returns the object type for the pointer specified in the `Self` parameter. The object type is returned as a string. If the `Self` parameter is not specified, it will return `'jsBase'`.
 
 === `JS$BOOL` package
 
@@ -135,22 +110,15 @@ BEGIN
 END
 ----
 
-As you can see from the comment, this package is a blueprint for the `TlkJSONboolean` class.
-It is designed to work with the `BOOLEAN` datatype.
+As you can see from the comment, this package is a blueprint for the `TlkJSONboolean` class. It is designed to work with the `BOOLEAN` datatype.
 
-The `Value_` function returns or sets to a boolean value for the object specified in the `Self` parameter.
-If the `Bool` parameter is not specified, then the value will be returned, if specified -- set.
-Note that `NULL` is not returned and cannot be set by this method, there is a separate `JS$NULL` package for this.
+The `Value_` function returns or sets to a boolean value for the object specified in the `Self` parameter. If the `Bool` parameter is not specified, then the value will be returned, if specified -- set. Note that `NULL` is not returned and cannot be set by this method, there is a separate `JS$NULL` package for this.
 
-The `Generate` function returns a pointer to a new `TlkJSONboolean` object, which is a Boolean value in JSON.
-The `Self` parameter is a pointer to the JSON object on the basis of which the `TlkJSONboolean` object is created.
-The boolean value is specified in the `Bool` parameter.
+The `Generate` function returns a pointer to a new `TlkJSONboolean` object, which is a Boolean value in JSON. The `Self` parameter is a pointer to the JSON object on the basis of which the `TlkJSONboolean` object is created. The boolean value is specified in the `Bool` parameter.
 
-The `SelfType` function returns the type of the object for the pointer specified in the `Self` parameter.
-The object type is returned as a number. If the `Self` parameter is not specified, it will return 3.
+The `SelfType` function returns the type of the object for the pointer specified in the `Self` parameter. The object type is returned as a number. If the `Self` parameter is not specified, it will return 3.
 
-The `SelfTypeName` function returns the object type for the pointer specified in the Self parameter.
-The object type is returned as a string. If the `Self` parameter is not specified, it will return `'jsBoolean'`.
+The `SelfTypeName` function returns the object type for the pointer specified in the Self parameter. The object type is returned as a string. If the `Self` parameter is not specified, it will return `'jsBoolean'`.
 
 === `JS$CUSTLIST` package
 
@@ -179,25 +147,19 @@ BEGIN
 END
 ----
 
-As you can see from the comment, this package is a blueprint for the `TlkJSONcustomlist` class.
-This type is basic when working with objects and lists. All procedures and functions of this package can be used
-as JSON of the object type, and JSON of the list type.
+As you can see from the comment, this package is a blueprint for the `TlkJSONcustomlist` class. This type is basic when working with objects and lists. All procedures and functions of this package can be used as JSON of the object type, and JSON of the list type.
 
-The `ForEach` procedure retrieves each list item or each object field from the JSON pointer specified in `Self`.
-The following values are returned:
+The `ForEach` procedure retrieves each list item or each object field from the JSON pointer specified in `Self`. The following values are returned:
 
 * `Idx` -- the index of the list item or the number of the field in the object. Starts at 0.
 * `Name` -- the name of the next field, if `Self` is an object. Or the index of the list item, starting at 0, if `Self` is a list.
 * `Obj` is a pointer to the next element of the list or object field.
 
-The `Field` function returns a pointer to a field by its name from the object specified in `Self`.
-Instead of a field name, you can specify the item number in the list or the field number. Numbering starts from 0.
+The `Field` function returns a pointer to a field by its name from the object specified in `Self`. Instead of a field name, you can specify the item number in the list or the field number. Numbering starts from 0.
 
 The `Count_` function returns the number of items in a list or fields in an object specified in the `Self` parameter.
 
-The `Child` function returns or sets the value for the element at index `Idx` in the `Self` object or list.
-Indexing starts from 0. If the `Obj` parameter is not specified, then it returns a pointer to the element from the `Idx` indices.
-If `Obj` is specified, then sets its value to the element with indices `Idx`. Note `Obj` is a pointer to one of the `TlkJSONbase` descendants.
+The `Child` function returns or sets the value for the element at index `Idx` in the `Self` object or list. Indexing starts from 0. If the `Obj` parameter is not specified, then it returns a pointer to the element from the `Idx` indices. If `Obj` is specified, then sets its value to the element with indices `Idx`. Note `Obj` is a pointer to one of the `TlkJSONbase` descendants.
 
 The `GetBoolean` function returns the boolean value of an object field or array element with index `Idx`. Indexing starts at 0.
 
@@ -211,8 +173,7 @@ The `GetWideString` function returns the `BLOB SUB_TYPE TEXT` of an object field
 
 [NOTE]
 ====
-The functions `GetBoolean`, `GetDouble`, `GetInteger`, `GetString`, `GetWideString` cannot return NULL.
-There is a separate set of functions for handling NULL values in the `JS$NULL` package.
+The functions `GetBoolean`, `GetDouble`, `GetInteger`, `GetString`, `GetWideString` cannot return NULL. There is a separate set of functions for handling NULL values in the `JS$NULL` package.
 ====
 
 === `JS$FUNC` package
@@ -237,28 +198,19 @@ END
 
 This package contains a set of functions for parsing JSON or converting JSON to string.
 
-The `ParseText` function parses JSON specified as a string of `BLOB SUB_TYPE TEXT` type in the `Text` parameter.
-If you pass TRUE in the `Conv` parameter, then the JSON text of the string will be converted from UTF8 encoding to general.
+The `ParseText` function parses JSON specified as a string of `BLOB SUB_TYPE TEXT` type in the `Text` parameter. If you pass TRUE in the `Conv` parameter, then the JSON text of the string will be converted from UTF8 encoding to general.
 
-The `ParseString` function parses the JSON specified as a `VARCHAR (N)` string in the `String` parameter.
-If you pass TRUE in the `Conv` parameter, then the JSON text of the string will be converted from UTF8 encoding to general.
+The `ParseString` function parses the JSON specified as a `VARCHAR (N)` string in the `String` parameter. If you pass TRUE in the `Conv` parameter, then the JSON text of the string will be converted from UTF8 encoding to general.
 
-The `GenerateText` function returns JSON as a `BLOB SUB_TYPE TEXT` string. If TRUE is passed in the `Conv` parameter,
-then the text returned by this function will be converted to UTF8.
+The `GenerateText` function returns JSON as a `BLOB SUB_TYPE TEXT` string. If `TRUE` is passed in the `Conv` parameter, then the text returned by this function will be converted to UTF8.
 
-The `GenerateString` function returns JSON as a `VARCHAR (N)` string.
-If TRUE is passed in the `Conv` parameter, then the text returned by this function will be converted to UTF8.
+The `GenerateString` function returns JSON as a `VARCHAR (N)` string. If `TRUE` is passed in the `Conv` parameter, then the text returned by this function will be converted to UTF8.
 
-The `ReadableText` function returns JSON as a human-readable string of type `BLOB SUB_TYPE TEXT`.
-The `Level` parameter sets the number of indents for the first level.
-This is required if the generated string is part of another JSON. If TRUE is passed in the `Conv` parameter,
-then the text returned by this function will be converted to UTF8.
+The `ReadableText` function returns JSON as a human-readable string of type `BLOB SUB_TYPE TEXT`. The `Level` parameter sets the number of indents for the first level. This is required if the generated string is part of another JSON. If TRUE is passed in the `Conv` parameter, then the text returned by this function will be converted to UTF8.
 
 [NOTE]
 ====
-Use of the `Conv` parameter set to TRUE is left for compatibility with the original lkJSON library.
-There is no special need for it, since external services independently know how to convert the source string into
-the format required for the DBMS and vice versa.
+Use of the `Conv` parameter set to `TRUE` is left for compatibility with the original lkJSON library. There is no special need for it, since external services independently know how to convert the source string into the format required for the DBMS and vice versa.
 ====
 
 === `JS$LIST` package
@@ -300,51 +252,37 @@ END
 
 As you can see from the comment, this package is a blueprint for the `TlkJSONlist` class. It is designed to work with a list.
 
-The `ForEach` procedure retrieves each list item or each object field from the JSON pointer specified in Self.
-The following values are returned:
+The `ForEach` procedure retrieves each list item or each object field from the JSON pointer specified in `Self`. The following values are returned:
 
 * `Idx` -- the index of the list item or the number of the field in the object. Starts at 0.
 * `Name` -- the name of the next field, if `Self` is an object. Or the index of the list item, starting at 0, if `Self` is a list.
 * `Obj` is a pointer to the next element of the list or object field.
 
-The `Add_` function adds a new item to the end of the list, the pointer to which is specified in the `Self` parameter.
-The element to add is specified in the `Obj` parameter, which must be a pointer to one of the `TlkJSONbase` descendants.
-The function returns the index of the newly added element.
+The `Add_` function adds a new item to the end of the list, the pointer to which is specified in the `Self` parameter. The element to add is specified in the `Obj` parameter, which must be a pointer to one of the `TlkJSONbase` descendants. The function returns the index of the newly added element.
 
-The `AddBoolean` function adds a new boolean element to the end of the list pointed to by the `Self` parameter.
-The function returns the index of the newly added element.
+The `AddBoolean` function adds a new boolean element to the end of the list pointed to by the `Self` parameter. The function returns the index of the newly added element.
 
-The `AddDouble` function adds a new element of real type to the end of the list, the pointer to which is specified
-in the `Self` parameter. The function returns the index of the newly added element.
+The `AddDouble` function adds a new element of real type to the end of the list, the pointer to which is specified in the `Self` parameter. The function returns the index of the newly added element.
 
-The `AddInteger` function adds a new integer element to the end of the list pointed to by the `Self` parameter.
-The function returns the index of the newly added element.
+The `AddInteger` function adds a new integer element to the end of the list pointed to by the `Self` parameter. The function returns the index of the newly added element.
 
-The `AddString` function adds a new element of string type (`VARCHAR (N)`) to the end of the list pointed to
-by the `Self` parameter. The function returns the index of the newly added element.
+The `AddString` function adds a new element of string type (`VARCHAR (N)`) to the end of the list pointed to by the `Self` parameter. The function returns the index of the newly added element.
 
-The `AddWideString` function adds a new `BLOB SUB_TYPE TEXT` to the end of the list pointed to by the `Self` parameter.
-The function returns the index of the newly added element.
+The `AddWideString` function adds a new `BLOB SUB_TYPE TEXT` to the end of the list pointed to by the `Self` parameter. The function returns the index of the newly added element.
 
 The `Delete_` function removes an element from the list with index `Idx`. The function returns 0.
 
-The `IndexOfObject` function returns the index of an item in a list. The pointer to the list is specified in the `Self` parameter.
-The `Obj` parameter specifies a pointer to the element whose index is being defined.
+The `IndexOfObject` function returns the index of an item in a list. The pointer to the list is specified in the `Self` parameter. The `Obj` parameter specifies a pointer to the element whose index is being defined.
 
-The `Field` function returns a pointer to a field by its name from the object specified in `Self`.
-Instead of a field name, you can specify the item number in the list or the field number. Numbering starts from 0.
+The `Field` function returns a pointer to a field by its name from the object specified in `Self`. Instead of a field name, you can specify the item number in the list or the field number. Numbering starts from 0.
 
 The `Count_` function returns the number of items in a list or fields in an object specified in the `Self` parameter.
 
-The `Child` function returns or sets the value for the element at index `Idx` in the `Self` object or list.
-Indexing starts from 0. If the `Obj` parameter is not specified, then it returns a pointer to the element from the `Idx` indices.
-If `Obj` is specified, then sets its value to the element with indices `Idx`. Note `Obj` is a pointer to one of the `TlkJSONbase` descendants.
+The `Child` function returns or sets the value for the element at index `Idx` in the `Self` object or list. Indexing starts from 0. If the `Obj` parameter is not specified, then it returns a pointer to the element from the `Idx` indices. If `Obj` is specified, then sets its value to the element with indices `Idx`. Note `Obj` is a pointer to one of the `TlkJSONbase` descendants.
 
-The `Generate` function returns a pointer to a new `TlkJSONlist` object, which is an empty list.
-The `Self` parameter is a pointer to the JSON object on the basis of which the `TlkJSONlist` is created.
+The `Generate` function returns a pointer to a new `TlkJSONlist` object, which is an empty list. The `Self` parameter is a pointer to the JSON object on the basis of which the `TlkJSONlist` is created.
 
-The `SelfType` function returns the type of the object for the pointer specified in the `Self` parameter.
-The object type is returned as a number. If the `Self` parameter is not specified, it will return 5.
+The `SelfType` function returns the type of the object for the pointer specified in the `Self` parameter. The object type is returned as a number. If the `Self` parameter is not specified, it will return 5.
 
 === `JS$METH` package
 
@@ -369,11 +307,9 @@ As you can see from the comment, this package is a blueprint for the `TlkJSONobj
 
 The `MethodObjValue` function returns a pointer to the value from the key-value pair specified in the `Self` parameter.
 
-The `MethodName` function returns or sets the key name for the key-value pair specified in the `Self` parameter.
-If the `Name` parameter is not specified, then returns the name of the key, if specified, then sets the new name of the key.
+The `MethodName` function returns or sets the key name for the key-value pair specified in the `Self` parameter. If the `Name` parameter is not specified, then returns the name of the key, if specified, then sets the new name of the key.
 
-The `MethodGenerate` function creates a new key-value pair and returns a pointer to it. The `Name` parameter specifies
-the name of the key, and the `Obj` parameter specifies a pointer to the key value.
+The `MethodGenerate` function creates a new key-value pair and returns a pointer to it. The `Name` parameter specifies the name of the key, and the `Obj` parameter specifies a pointer to the key value.
 
 === `JS$NULL` package
 
@@ -400,14 +336,11 @@ As you can see from the comment, this package is a blueprint for the `TlkJSONnul
 
 `Value_` returns 0 if the value of the object in Self is null (`jsNull`), and 1 otherwise.
 
-The `Generate` function returns a pointer to a new `TlkJSONnull` object, which is null.
-The `Self` parameter is a pointer to the JSON object on the basis of which `TlkJSONnull` is created.
+The `Generate` function returns a pointer to a new `TlkJSONnull` object, which is null. The `Self` parameter is a pointer to the JSON object on the basis of which `TlkJSONnull` is created.
 
-The `SelfType` function returns the type of the object for the pointer specified in the `Self` parameter.
-The object type is returned as a number. If the `Self` parameter is not specified, it will return 4.
+The `SelfType` function returns the type of the object for the pointer specified in the `Self` parameter. The object type is returned as a number. If the `Self` parameter is not specified, it will return 4.
 
-The `SelfTypeName` function returns the object type for the pointer specified in the `Self` parameter.
-The object type is returned as a string. If the `Self` parameter is not specified, it will return `'jsNull'`.
+The `SelfTypeName` function returns the object type for the pointer specified in the `Self` parameter. The object type is returned as a string. If the `Self` parameter is not specified, it will return `'jsNull'`.
 
 === `JS$NUM` package
 
@@ -432,19 +365,13 @@ END
 
 As you can see from the comment, this package is a blueprint for the `TlkJSONnumber` class. It is designed to handle numeric values.
 
-The `Value_` function returns or sets to a value of a numeric type for the object specified in the `Self` parameter.
-If the `Num` parameter is not specified, then the value will be returned, if specified -- set.
-Note that `NULL` is not returned and cannot be set by this method, there is a separate `JS$NULL` package for this.
+The `Value_` function returns or sets to a value of a numeric type for the object specified in the `Self` parameter. If the `Num` parameter is not specified, then the value will be returned, if specified -- set. Note that `NULL` is not returned and cannot be set by this method, there is a separate `JS$NULL` package for this.
 
-The `Generate` function returns a pointer to a `TlkJSONnumber` object, which is a JSON numeric value.
-The `Self` parameter is a pointer to the JSON object on the basis of which the `TlkJSONnumber` object is created.
-The `Num` parameter is a numeric value.
+The `Generate` function returns a pointer to a `TlkJSONnumber` object, which is a JSON numeric value. The `Self` parameter is a pointer to the JSON object on the basis of which the `TlkJSONnumber` object is created. The `Num` parameter is a numeric value.
 
-The `SelfType` function returns the type of the object for the pointer specified in the `Self` parameter.
-The object type is returned as a number. If the `Self` parameter is not specified, it will return 1.
+The `SelfType` function returns the type of the object for the pointer specified in the `Self` parameter. The object type is returned as a number. If the `Self` parameter is not specified, it will return 1.
 
-The `SelfTypeName` function returns the object type for the pointer specified in the `Self` parameter.
-The object type is returned as a string. If the `Self` parameter is not specified, it will return `'jsNumber'`.
+The `SelfTypeName` function returns the object type for the pointer specified in the `Self` parameter. The object type is returned as a string. If the `Self` parameter is not specified, it will return `'jsNumber'`.
 
 === `JS$OBJ` package
 
@@ -503,13 +430,9 @@ END
 
 As you can see from the comment, this package is a blueprint for the `TlkJSONobject` class. It is designed to handle object values.
 
-The `New_` function creates and returns a pointer to a new empty object.
-If `UseHash` is set to TRUE (the default value), then the HASH table will be used to search for fields within the object,
-otherwise the search will be performed by simple iteration.
+The `New_` function creates and returns a pointer to a new empty object. If `UseHash` is set to TRUE (the default value), then the HASH table will be used to search for fields within the object, otherwise the search will be performed by simple iteration.
 
-The `Dispose` function is designed to release a pointer to a JSON object.
-Pointers to be forcibly freed are the result of parsing or JSON generation.
-You should not call it on intermediate objects when parsing or assembling JSON. It is only required for the top-level object.
+The `Dispose` function is designed to release a pointer to a JSON object. Pointers to be forcibly freed are the result of parsing or JSON generation. You should not call it on intermediate objects when parsing or assembling JSON. It is only required for the top-level object.
 
 The `ForEach` procedure retrieves each object field from the JSON pointer specified in `Self`. The following values are returned:
 
@@ -517,68 +440,40 @@ The `ForEach` procedure retrieves each object field from the JSON pointer specif
 * `Name` -- the name of the next field, if `Self` is an object. Or the index of the list item, starting at 0, if `Self` is a list.
 * `Obj` is a pointer to a key-value pair (to handle such a pair, you must use the `JS$METH` package).
 
-The `Add_` function adds a new field to the object, the pointer to which is specified in the `Self` parameter.
-The element to add is specified in the `Obj` parameter, which must be a pointer to one of the `TlkJSONbase` descendants.
-The field name is specified in the `Name` parameter. The function returns the index of the newly added field.
+The `Add_` function adds a new field to the object, the pointer to which is specified in the `Self` parameter. The element to add is specified in the `Obj` parameter, which must be a pointer to one of the `TlkJSONbase` descendants. The field name is specified in the `Name` parameter. The function returns the index of the newly added field.
 
-The `AddBoolean` function adds a new boolean field to the object pointed to by the `Self` parameter.
-The field name is specified in the `Name` parameter. The field value is specified in the `Bool` parameter.
-The function returns the index of the newly added field.
+The `AddBoolean` function adds a new boolean field to the object pointed to by the `Self` parameter. The field name is specified in the `Name` parameter. The field value is specified in the `Bool` parameter. The function returns the index of the newly added field.
 
-The `AddDouble` function adds a new field of real type to the object, the pointer to which is specified in the `Self` parameter.
-The field name is specified in the `Name` parameter. The field value is specified in the `Dbl` parameter.
-The function returns the index of the newly added field.
+The `AddDouble` function adds a new field of real type to the object, the pointer to which is specified in the `Self` parameter. The field name is specified in the `Name` parameter. The field value is specified in the `Dbl` parameter. The function returns the index of the newly added field.
 
-The `AddInteger` function adds a new integer field to the object pointed to by the `Self` parameter.
-The field name is specified in the `Name` parameter.
-The field value is specified in the `Int_` parameter. The function returns the index of the newly added field.
+The `AddInteger` function adds a new integer field to the object pointed to by the `Self` parameter. The field name is specified in the `Name` parameter. The field value is specified in the `Int_` parameter. The function returns the index of the newly added field.
 
-The `AddString` function adds a new field of string type (`VARCHAR (N)`) to the object pointed to by the `Self` parameter.
-The field name is specified in the `Name` parameter. The field value is specified in the `Int_` parameter.
-The function returns the index of the newly added field.
+The `AddString` function adds a new field of string type (`VARCHAR (N)`) to the object pointed to by the `Self` parameter. The field name is specified in the `Name` parameter. The field value is specified in the `Int_` parameter. The function returns the index of the newly added field.
 
-The `AddWideString` function adds a new `BLOB SUB_TYPE TEXT` field to the object pointed to by the `Self` parameter.
-The field name is specified in the `Name` parameter. The field value is specified in the `Int_` parameter.
-The function returns the index of the newly added field.
+The `AddWideString` function adds a new `BLOB SUB_TYPE TEXT` field to the object pointed to by the `Self` parameter. The field name is specified in the `Name` parameter. The field value is specified in the `Int_` parameter. The function returns the index of the newly added field.
 
 The `Delete_` function removes a field from the object with the `Idx` index. The function returns 0.
 
-The `IndexOfName` function returns the index of a field by its name.
-A pointer to an object is specified in the `Self` parameter. The `Obj` parameter specifies a pointer to the element whose index is being defined.
+The `IndexOfName` function returns the index of a field by its name. A pointer to an object is specified in the `Self` parameter. The `Obj` parameter specifies a pointer to the element whose index is being defined.
 
-The `IndexOfObject` function returns the index of a field value in an object.
-A pointer to an object is specified in the `Self` parameter.
-The `Obj` parameter specifies a pointer to the values of the field whose index is being determined.
+The `IndexOfObject` function returns the index of a field value in an object. A pointer to an object is specified in the `Self` parameter. The `Obj` parameter specifies a pointer to the values of the field whose index is being determined.
 
-The `Field` function returns or sets the value of a field by its name. A pointer to an object is specified in the `Self` parameter.
-The field name is specified in the `Name` parameter. Instead of a field name, you can specify the item number in the list or the field number.
-Numbering starts from 0. If a value other than NULL is specified in the `Obj` parameter, then the new value
-will be written in the field, otherwise the function will return a pointer to the field value.
+The `Field` function returns or sets the value of a field by its name. A pointer to an object is specified in the `Self` parameter. The field name is specified in the `Name` parameter. Instead of a field name, you can specify the item number in the list or the field number. Numbering starts from 0. If a value other than NULL is specified in the `Obj` parameter, then the new value will be written in the field, otherwise the function will return a pointer to the field value.
 
 The `Count_` function returns the number of fields in the object specified in the `Self` parameter.
 
-The `Child` function returns or sets the value for the element at index Idx in the `Self` object.
-Indexing starts from 0. If the `Obj` parameter is not specified, then it returns a pointer to the element from the `Idx` indices.
-If `Obj` is specified, then sets its value to the element with indices Idx. Note `Obj` is a pointer to one of the `TlkJSONbase` descendants.
+The `Child` function returns or sets the value for the element at index Idx in the `Self` object. Indexing starts from 0. If the `Obj` parameter is not specified, then it returns a pointer to the element from the `Idx` indices. If `Obj` is specified, then sets its value to the element with indices Idx. Note `Obj` is a pointer to one of the `TlkJSONbase` descendants.
 
-The `Generate` function returns a pointer to a `TlkJSONobject`, which is a JSON object. If `UseHash` is set to TRUE (the default value),
-then the HASH table will be used to search for fields within the object, otherwise the search will be performed
-by simple iteration. In the `Self` parameter, a pointer to the object is passed on the basis of which a new object
-of the `TlkJSONobject` type is created.
+The `Generate` function returns a pointer to a `TlkJSONobject`, which is a JSON object. If `UseHash` is set to TRUE (the default value), then the HASH table will be used to search for fields within the object, otherwise the search will be performed by simple iteration. In the `Self` parameter, a pointer to the object is passed on the basis of which a new object of the `TlkJSONobject` type is created.
 
-The `SelfType` function returns the object type for the pointer specified in the `Self` parameter.
-The object type is returned as a number. If the `Self` parameter is not specified, it will return 6.
+The `SelfType` function returns the object type for the pointer specified in the `Self` parameter. The object type is returned as a number. If the `Self` parameter is not specified, it will return 6.
 
-The `SelfTypeName` function returns the object type for the pointer specified in the `Self` parameter.
-The object type is returned as a string. If the `Self` parameter is not specified, it will return `'jsObject'`.
+The `SelfTypeName` function returns the object type for the pointer specified in the `Self` parameter. The object type is returned as a string. If the `Self` parameter is not specified, it will return `'jsObject'`.
 
-The `FieldByIndex` function returns or sets the property as a key-value pair at the specified `Idx` index.
-A pointer to an object is specified in the `Self` parameter. You must use the `JS$METH` package to handle the key-value pair.
-If a value other than NULL is specified in the `Obj` parameter, then the new value will be written to the field at the
+The `FieldByIndex` function returns or sets the property as a key-value pair at the specified `Idx` index. A pointer to an object is specified in the `Self` parameter. You must use the `JS$METH` package to handle the key-value pair. If a value other than NULL is specified in the `Obj` parameter, then the new value will be written to the field at the
 specified index, otherwise the function will return a pointer to the field.
 
-The `NameOf` function returns the name of the field at its index specified in the `Idx` parameter.
-A pointer to an object is specified in the `Self` parameter.
+The `NameOf` function returns the name of the field at its index specified in the `Idx` parameter. A pointer to an object is specified in the `Self` parameter.
 
 The `GetBoolean` function returns the boolean value of the object field with the `Idx` index. Indexing starts at 0.
 
@@ -623,24 +518,15 @@ END
 
 This package helps keep track of pointers that occur when creating JSON objects.
 
-The `New_` function creates and returns a pointer to a new empty object.
-If the value `'Tra'` is passed to the `UsePtr` parameter, then the pointer will be attached to the transaction,
-and upon its completion it will be automatically deleted. If the `'Att'` value is passed to the `UsePtr` parameter,
-then the pointer will be attached to the connection, and when it is closed, it will be automatically deleted.
-If `UseHash` is set to TRUE (the default value), then the HASH table will be used to search for fields within the object,
-otherwise the search will be performed by simple iteration.
+The `New_` function creates and returns a pointer to a new empty object. If the value `'Tra'` is passed to the `UsePtr` parameter, then the pointer will be attached to the transaction, and upon its completion it will be automatically deleted. If the `'Att'` value is passed to the `UsePtr` parameter, then the pointer will be attached to the connection, and when it is closed, it will be automatically deleted. If `UseHash` is set to TRUE (the default value), then the HASH table will be used to search for fields within the object, otherwise the search will be performed by simple iteration.
 
-The `Dispose` function removes a pointer to a JSON object bound to a transaction or connection.
-If the `'Tra'` value is passed to the `UsePtr` parameter, the pointer associated with the transaction will be deleted.
-If the `'Att'` value is passed to the `UsePtr` parameter, then the pointer bound to the connection will be deleted.
+The `Dispose` function removes a pointer to a JSON object bound to a transaction or connection. If the `'Tra'` value is passed to the `UsePtr` parameter, the pointer associated with the transaction will be deleted. If the `'Att'` value is passed to the `UsePtr` parameter, then the pointer bound to the connection will be deleted.
 
 The `Tra` function returns the pointer associated with the transaction.
 
 The `Att` function returns the pointer attached to the connection.
 
-The `isNull` function checks if the pointer is not null (with a null address).
-A null pointer returns the functions `js$func.ParseText` and `js$func.ParseString` in case of incorrect JSON input,
-access to a nonexistent field through the `Field` method, and more. This function can be used to detect such errors.
+The `isNull` function checks if the pointer is not null (with a null address). A null pointer returns the functions `js$func.ParseText` and `js$func.ParseString` in case of incorrect JSON input, access to a nonexistent field through the `Field` method, and more. This function can be used to detect such errors.
 
 === `JS$STR` package
 
@@ -667,28 +553,20 @@ END
 
 As you can see from the comment, this package is a blueprint for the `TlkJSONstring` class. It is designed to handle string values.
 
-The `Value_` function returns or sets to a value of a string type (`VARCHAR (N)`) for the object specified in the `Self` parameter.
-If the `Str` parameter is not specified, then the value will be returned, if specified -- set.
+The `Value_` function returns or sets to a value of a string type (`VARCHAR (N)`) for the object specified in the `Self` parameter. If the `Str` parameter is not specified, then the value will be returned, if specified -- set.
 Note that NULL is not returned and cannot be set by this method, there is a separate `JS$NULL` package for this.
 
-The `WideValue_` function returns or sets to a value of the `BLOB SUB_TYPE TEXT` type for the object specified in the `Self` parameter.
-If the `Str` parameter is not specified, then the value will be returned, if specified -- set.
+The `WideValue_` function returns or sets to a value of the `BLOB SUB_TYPE TEXT` type for the object specified in the `Self` parameter. If the `Str` parameter is not specified, then the value will be returned, if specified -- set.
 Note that NULL is not returned and cannot be set by this method, there is a separate `JS$NULL` package for this.
 
-The `Generate` function returns a pointer to a` TlkJSONstring` object, which is a JSON string value.
-The `Self` parameter is a pointer to a JSON object on the basis of which a new `TlkJSONstring` object is created.
+The `Generate` function returns a pointer to a` TlkJSONstring` object, which is a JSON string value. The `Self` parameter is a pointer to a JSON object on the basis of which a new `TlkJSONstring` object is created.
 The string value is specified in the `Str` parameter.
 
-The `WideGenerate` function returns a pointer to the `TlkJSONstring` object, which is a JSON string value.
-The `Self` parameter is a pointer to a JSON object for which a long string value (`BLOB SUB_TYPE TEXT`) is set
-in the `Str` parameter. The value of the `Self` parameter will be returned by the function if it is non-NULL,
-otherwise it will return a pointer to a new `TlkJSONstring` object.
+The `WideGenerate` function returns a pointer to the `TlkJSONstring` object, which is a JSON string value. The `Self` parameter is a pointer to a JSON object for which a long string value (`BLOB SUB_TYPE TEXT`) is set in the `Str` parameter. The value of the `Self` parameter will be returned by the function if it is non-NULL, otherwise it will return a pointer to a new `TlkJSONstring` object.
 
-The `SelfType` function returns the object type for the pointer specified in the `Self` parameter.
-The object type is returned as a number. If the `Self` parameter is not specified, it will return 2.
+The `SelfType` function returns the object type for the pointer specified in the `Self` parameter. The object type is returned as a number. If the `Self` parameter is not specified, it will return 2.
 
-The `SelfTypeName` function returns the object type for the pointer specified in the `Self` parameter.
-The object type is returned as a string. If the `Self` parameter is not specified, it will return `'jsString'`.
+The `SelfTypeName` function returns the object type for the pointer specified in the `Self` parameter. The object type is returned as a string. If the `Self` parameter is not specified, it will return `'jsString'`.
 
 == Examples
 
@@ -794,30 +672,21 @@ BEGIN
 END
 ----
 
-Here's a trick: at the very top level of the recursive statement, a pointer to a previously created JSON root object is used.
-In the recursive part of the query, we output a JSON object for the parent departure PARENT_JSON and a JSON object for the current departure PARENT_JSON.
-Thus, we always know in which JSON object to add the departure.
+Here's a trick: at the very top level of the recursive statement, a pointer to a previously created JSON root object is used. In the recursive part of the query, we output a JSON object for the parent departure PARENT_JSON and a JSON object for the current departure PARENT_JSON. Thus, we always know in which JSON object to add the departure.
 
-Then we loop through the cursor and add field values for the current departure at each iteration.
-Note that in order to add a NULL value, you have to use the `JS$NULL.GENERATE()` call.
-If you don't, then when you call `JS$OBJ.ADDSTRING (C_DEP.JSON, 'head_dept', C_DEP.HEAD_DEPT)` when `C_DEP.HEAD_DEPT` is NULL,
-the head_dept field will simply not be added.
+Then we loop through the cursor and add field values for the current departure at each iteration. Note that in order to add a NULL value, you have to use the `JS$NULL.GENERATE()` call. If you don't, then when you call `JS$OBJ.ADDSTRING (C_DEP.JSON, 'head_dept', C_DEP.HEAD_DEPT)` when `C_DEP.HEAD_DEPT` is NULL, the head_dept field will simply not be added.
 
 Also, for each department, you need to add a JSON list to which subordinate departments will be added.
 
-If the JSON object of the parent unit is not NULL, then we get the list added for it differently using the
-`JS$OBJ.FIELD` function and add the current JSON object to it.
+If the JSON object of the parent unit is not NULL, then we get the list added for it differently using the `JS$OBJ.FIELD` function and add the current JSON object to it.
 
-Further, the JSON of the object of the highest level, you can generate the text, after which we no longer need the object
-itself and we need to clear the pointer allocated for it using the `JS$OBJ.DISPOSE` function.
+Further, the JSON of the object of the highest level, you can generate the text, after which we no longer need the object itself and we need to clear the pointer allocated for it using the `JS$OBJ.DISPOSE` function.
 
 Pay attention to the `WHEN ANY DO` exception handling block. It is required, because even when it happens, we need to free the pointer to avoid a memory leak.
 
-
 === Parse JSON
 
-Parsing JSON is somewhat more difficult than collecting it. The fact is that you need to take into account that incorrect
-JSON may be received at the input, not only by itself, but also with a structure that does not correspond to your logic.
+Parsing JSON is somewhat more difficult than collecting it. The fact is that you need to take into account that incorrect JSON may be received at the input, not only by itself, but also with a structure that does not correspond to your logic.
 
 Suppose you have a JSON that contains a list of people with their characteristics.
 
@@ -910,27 +779,17 @@ select id, name
 from parse_peoples_json( '[{"id": 1, "name": "John"}, {"id": 2, "name": null}]' )
 ----
 
-Let's take a closer look at the JSON parsing script. The first feature is that the `js$func.parsetext` function
-will not throw an exception if any other string is input instead of JSON. It will just return a null pointer.
-But, this is not NULL as you thought, but a pointer with the content `x'0000000000000000'`.
-Therefore, after executing this function, you need to check what was returned to you,
-otherwise the calls of the subsequent functions will return an "Access violation" error.
+Let's take a closer look at the JSON parsing script. The first feature is that the `js$func.parsetext` function will not throw an exception if any other string is input instead of JSON. It will just return a null pointer. But, this is not NULL as you thought, but a pointer with the content `x'0000000000000000'`. Therefore, after executing this function, you need to check what was returned to you, otherwise the calls of the subsequent functions will return an "Access violation" error.
 
-Next, it is important to check what type of JSON object was returned.
-If an object or any other type appears in the input instead of a list, then the `js$list.foreach` call will cause an "Access violation".
-The same will happen if you call any other function that expects a pointer to a different type that is not intended for it.
+Next, it is important to check what type of JSON object was returned. If an object or any other type appears in the input instead of a list, then the `js$list.foreach` call will cause an "Access violation". The same will happen if you call any other function that expects a pointer to a different type that is not intended for it.
 
-The next feature is that you should always check for the presence of fields (object properties).
-If there is no field with the specified name, then in some cases an incorrect value may be returned
-(as in the case of `js$obj.GetIntegerByName`), in others it will lead to a type conversion error.
+The next feature is that you should always check for the presence of fields (object properties). If there is no field with the specified name, then in some cases an incorrect value may be returned (as in the case of `js$obj.GetIntegerByName`), in others it will lead to a type conversion error.
 
-Note that functions like `js$obj.GetIntegerByName` or `js$obj.GetSrtingByName` cannot return NULL.
-To recognize a null value, you need to check the field type with the `js$base.selftypename` function.
+Note that functions like `js$obj.GetIntegerByName` or `js$obj.GetSrtingByName` cannot return NULL. To recognize a null value, you need to check the field type with the `js$base.selftypename` function.
 
 As with the JSON assembly, remember to free the top-level JSON pointer and also do this in the `WHEN ANY DO` exception handling block.
 
-Below is an example of parsing JSON that was collected by the `MAKE_JSON_DEPARTMENT_TREE` function in the example above.
-The text of the example contains comments explaining the principle of parsing.
+Below is an example of parsing JSON that was collected by the `MAKE_JSON_DEPARTMENT_TREE` function in the example above. The text of the example contains comments explaining the principle of parsing.
 
 [source,sql]
 ----

@@ -10,11 +10,6 @@ HQbird User Guide contains detailed description of functions and features of HQb
 
 == About IBSurgeon
 
-IBSurgeon (https://www.ib-aid.com[]) was founded in 2002 with the idea to provide InterBase and Firebird developers and administrator with services and tools focused on databases safety, performance and availability.
-In Russia, IBSurgeon is mostly known as iBase.ru, famous by its Russian InterBase and Firebird portal http://www.ibase.ru[www.ibase.ru].
-IBSurgeon is a member of Firebird Foundation and, as a member of Technical Task Group, has strong relationship with Firebird Project, with direct representatives in Firebird-Admins and in Firebird Foundation Committee.
-Today, IBSurgeon serves thousands of companies worldwide with emergency, optimization and maintenance tools and various services.
-Our clients are medical institutions, financial organizations and ISVs in Germany, Brazil, Russia and other countries, and all who have applications based on Firebird and/or InterBase.
-The flagship project of IBSurgeon is HQbird, the advanced distribution of FirebirdSQL for big databases with enterprise features. 
+IBSurgeon (https://www.ib-aid.com[]) was founded in 2002 with the idea to provide InterBase and Firebird developers and administrator with services and tools focused on databases safety, performance and availability. In Russia, IBSurgeon is mostly known as iBase.ru, famous by its Russian InterBase and Firebird portal http://www.ibase.ru[www.ibase.ru]. IBSurgeon is a member of Firebird Foundation and, as a member of Technical Task Group, has strong relationship with Firebird Project, with direct representatives in Firebird-Admins and in Firebird Foundation Committee. Today, IBSurgeon serves thousands of companies worldwide with emergency, optimization and maintenance tools and various services. Our clients are medical institutions, financial organizations and ISVs in Germany, Brazil, Russia and other countries, and all who have applications based on Firebird and/or InterBase. The flagship project of IBSurgeon is HQbird, the advanced distribution of FirebirdSQL for big databases with enterprise features.
 
 :sectnums:

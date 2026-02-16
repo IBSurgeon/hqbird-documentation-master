@@ -458,7 +458,7 @@ gfix replica_path_name –replica <replica_mode> –user SYSDBA –pass masterke
 
 === What is {DATABASEGUID}?
 
-Database GUID is the unique identifier of a master database. 
+Database GUID is the unique identifier of a master database.
 
 To find out {DATABASEGUIDE}, run command `gstat –h`:
 

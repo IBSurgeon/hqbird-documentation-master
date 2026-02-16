@@ -115,8 +115,7 @@ administrator to set up a Firebird login.
 ----
 ====
 
-You can create as many mapping as you need.
-Existing mapping can be found in the table `RDB$AUTH_MAPPING` with the following query:
+You can create as many mapping as you need. Existing mapping can be found in the table `RDB$AUTH_MAPPING` with the following query:
 
 ----
  SQL> select rdb$map_name, rdb$map_from, rdb$map_to from RDB$AUTH_MAPPING

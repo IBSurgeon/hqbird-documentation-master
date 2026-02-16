@@ -160,7 +160,7 @@ The `NANO$CONN` package contains functions for setting up an ODBC data source an
 
 The `connection()` function establishes a connection to an ODBC data source. If more than one parameter is not specified, the function will return a pointer to the "connection" object. The actual connection to the ODBC data source can be made later using the `connect_()` function.
 
-Function parameters: 
+Function parameters:
 -  `attr` specifies the connection string or the so-called DSN;
 -  `user_` specifies the username;
 -  `pass` sets the password;
@@ -184,7 +184,7 @@ The `txn_repeatable_read()` function returns a numeric constant required to set 
 
 The `txn_serializable()` function returns the numeric constant required to set the transaction isolation level to `SERIALIZABLE`.
 
-The `isolation_level()` function sets the isolation level for new transactions. 
+The `isolation_level()` function sets the isolation level for new transactions.
 
 Function parameters:
 
@@ -536,7 +536,7 @@ The `cancel()` function cancels the execution of the request.
 
 The `closed()` function returns whether the request is closed.
 
-The `prepare_direct()` function prepares an SQL statement and binds it to the specified connection. 
+The `prepare_direct()` function prepares an SQL statement and binds it to the specified connection.
 
 Parameters:
 
@@ -565,7 +565,7 @@ Parameters:
 The `timeout()` function sets the timeout for the SQL query.
 
 The `execute_direct()` function prepares and executes an SQL statement. The function returns a pointer to a data set (cursor), which can be processed using
-the functions of the `NANO$RSLT` package. 
+the functions of the `NANO$RSLT` package.
 
 Parameters:
 
@@ -586,7 +586,7 @@ Parameters:
 - `batch_operations` -- the number of batch operations. The default is 1;
 - `timeout` -- SQL statement timeout.
 
-The `execute_()` function executes the prepared SQL statement. The function returns a pointer to a data set (cursor), which can be processed using the functions of the `NANO$RSLT` package. 
+The `execute_()` function executes the prepared SQL statement. The function returns a pointer to a data set (cursor), which can be processed using the functions of the `NANO$RSLT` package.
 
 Parameters:
 
@@ -595,7 +595,7 @@ Parameters:
 - `timeout` -- SQL statement timeout.
 
 
-The `just_execute()` function executes the prepared SQL statement. The function is designed to execute SQL statements that do not return data (do not open a cursor). 
+The `just_execute()` function executes the prepared SQL statement. The function is designed to execute SQL statements that do not return data (do not open a cursor).
 
 Parameters:
 
@@ -1309,7 +1309,7 @@ The `NANO$FUNC` package contains functions for working with SQL queries. This pa
 functions performed have inherited the behavior of NANODBC without changes and their own modifications of the UDR in terms of the exchange of parameters and values.
 Possible direction of use: performing ODBC connection settings through executing SQL commands (`just_execute` ...), if supported, event logging, etc. simple operations.
 
-The `execute_conn()` function prepares and executes an SQL statement. The function returns a pointer to a data set (cursor), which can be processed using the functions of the `NANO$RSLT` package. 
+The `execute_conn()` function prepares and executes an SQL statement. The function returns a pointer to a data set (cursor), which can be processed using the functions of the `NANO$RSLT` package.
 
 Parameters:
 
@@ -1319,7 +1319,7 @@ Parameters:
 - `timeout` - SQL statement timeout.
 
 The `just_execute_conn()` function prepares and executes the SQL statement. The function is designed to execute SQL statements that do not return data (do not open
-a cursor). A pointer to the SQL query object is not created. 
+a cursor). A pointer to the SQL query object is not created.
 
 Parameters:
 
@@ -1328,21 +1328,21 @@ Parameters:
 - `batch_operations` - the number of batch operations. The default is 1;
 - `timeout` - SQL statement timeout.
 
-The `execute_stmt()` function executes the prepared SQL statement. The function returns a pointer to a data set (cursor), which can be processed using the functions of the `NANO$RSLT` package. 
+The `execute_stmt()` function executes the prepared SQL statement. The function returns a pointer to a data set (cursor), which can be processed using the functions of the `NANO$RSLT` package.
 
 Parameters:
 
 - `stmt` - a pointer to a prepared statement;
 - `batch_operations` - the number of batch operations. The default is 1.
 
-The `transact_stmt()` function - executes a previously prepared SQL statement, starting and ending its own (autonomous) transaction. The function returns a pointer to a data set (cursor), which can be processed using the functions of the `NANO$RSLT` package. 
+The `transact_stmt()` function - executes a previously prepared SQL statement, starting and ending its own (autonomous) transaction. The function returns a pointer to a data set (cursor), which can be processed using the functions of the `NANO$RSLT` package.
 
 Parameters:
 
 - `stmt` - a pointer to a prepared statement;
 - `batch_operations` - the number of batch operations. The default is 1.
 
-Function `just_transact_stmt()` - executes a previously prepared SQL statement, starting and ending its own (autonomous) transaction. The function is designed to execute SQL statements that do not return data (do not open a cursor). 
+Function `just_transact_stmt()` - executes a previously prepared SQL statement, starting and ending its own (autonomous) transaction. The function is designed to execute SQL statements that do not return data (do not open a cursor).
 
 Parameters:
 
