@@ -1,26 +1,76 @@
 [[hqbird-eds-other-dbms]]
-= Working with external data sources (other DBMS)
+= Working with External Data Sources (Other DBMS)
 
-In HQBird for Firebird 4.0 or higher, it became possible to work with external data sources, that is, not only with other Firebird DBMS databases, but also with other DBMS. The following plugins are used for this:
+In HQbird for Firebird 4.0 and above, the ability to work with external data sources has appeared, meaning not only with other Firebird databases but also with other DBMS. The following plugins are used for this:
 
-* `MySQLEngine` to work with MySQL and MariaDB;
-* `ODBCEngine` to work with any data source through the appropriate ODBC driver.
+* `MySQLEngine` for working with MySQL and MariaDB;
+* `ODBCEngine` for working with any data source through a corresponding ODBC driver.
 
-This feature is currently only available for Windows.
+Currently, it is only available on Windows.
 
 [[hqbird-eds-other-dbms-mysql]]
 == MySQLEngine
 
-The `MySQLEngine` plugin is designed to access MySQL and MariaDB databases.
+The `MySQLEngine` plugin is designed for accessing MySQL and MariaDB databases.
 
-In order for the plugin to be known to Firebird, you need to edit the `firebird.conf` configuration file by adding the `MySQLEngine` plugin to the list of providers (the `Providers` parameter):
+For Firebird to recognize the plugin, you need to edit the `firebird.conf` configuration file, adding the `MySQLEngine` plugin to the provider list (`Providers` parameter):
+
+[source,conf]
+----
+Providers = MySQLEngine,Remote,Engine13,Loopback
+----
+
+or
 
 [source,conf]
 ----
 Providers = Remote,Engine13,MySQLEngine,Loopback
 ----
 
-Now you can try to execute the simplest query on the MySQL database
+The first option is preferable as it allows passing the username to EDS in the usual way.
+
+=== Connection String Format
+
+The connection string for the MySQLEngine plugin must start with the prefix `:mysql:` or `mysql://` followed by connection parameters in the form `<param>=<value>` separated by semicolons.
+
+.Important
+[IMPORTANT]
+====
+For the connection to work using the `mysql://` prefix, the `MySQLEngine` provider must be specified in the `Providers` parameter of the `firebird.conf` configuration file before the `Remote` provider.
+====
+
+Possible parameters:
+
+* host -- the host or IP address where the MySQL server is located;
+* port -- the port number the MySQL server listens on. Can be omitted if the default port (3306) is used;
+* database -- the name of the database where queries will be executed;
+* user -- the username;
+* password -- the password.
+
+Let's look at examples of executing queries against a MySQL database.
+
+[source,sql]
+----
+execute block
+returns (i integer)
+as
+  declare dsn_mysql varchar(128);
+begin
+  dsn_mysql = 'mysql://host=localhost;port=3306;database=employees';
+
+  for
+    execute statement 'select 1'
+    on external dsn_mysql
+    as user 'root' password 'sa'
+    into i
+  do
+    suspend;
+end
+----
+
+In this case, the connection string uses the `mysql://` prefix, meaning the `MySQLEngine` provider must be specified before the `Remote` provider in the `Providers` configuration parameter.
+
+Let's look at an example with a different connection prefix:
 
 [source,sql]
 ----
@@ -41,42 +91,35 @@ begin
 end
 ----
 
-=== Connection string format
+In this case, the connection string uses the `:mysql:` prefix, meaning the `MySQLEngine` provider must be specified after the `Remote` provider in the `Providers` configuration parameter.
 
-The connection string for the MySQLEngine plugin must begin with the prefix `:mysql:` followed by the connection parameters as `<param>=<value>` separated by semicolons.
+Connecting using the `:mysql:` prefix has the following limitations:
+* It is impossible to pass the username using the `USER` keyword; instead, specify `NULL` or an empty string in `USER`, and pass the username itself in the connection string as shown above.
 
-Possible options:
-
-* host -- host or IP address where the MySQL server is located;
-* port is the port number that the MySQL server is listening on. Can be omitted if the default port (3306) is used;
-* database -- the name of the database in which queries will be executed;
-* user -- username;
-* password -- password.
-
-.Notes
+.Remarks
 [NOTE]
 ====
-* Do not specify the user's password in the connection string (this is not safe), it is better to pass it using the `password` keyword;
-* Do not specify a username with the `user` keyword (leave `NULL` or an empty string) as this does not work with the `Remote` provider.
+Do not specify the user password in the connection string (this is not secure); it's better to pass it using the `password` keyword.
 ====
 
-=== Supported statement types
+Since using the `:mysql:` prefix makes working with the EDS subsystem unfamiliar, in all subsequent examples we will use the `mysql://` prefix.
 
-The MySQLEngine plugin supports the following types of queries:
+=== Supported Query Types
+
+The MySQLEngine plugin supports the following query types:
 
 * `SELECT`
 * `INSERT`, `UPDATE`, `DELETE`
 * `CALL procedure(<params>)`
 
+=== Query Output Parameters
 
-=== Output parameters of SQL queries
-
-Data types returned from a SQL queries
+Data types returned from a query
 
 [cols="<2,<2",options="header",stripes="none"]
 |===
-^|MySQL data type
-^|Firebird data type
+^|MySQL Data Type
+^|Firebird Data Type
 
 | `TINYINT`
 | `SMALLINT`
@@ -126,7 +169,7 @@ Data types returned from a SQL queries
 | `TINYTEXT`, `TEXT`, `MEDIUMTEXT`, `LONGTEXT`
 | `BLOB SUB_TYPE TEXT`
 
-| `TYNYBLOB`, `BLOB`, `MEDIUMBLOB`, `LONGBLOB`
+| `TINYBLOB`, `BLOB`, `MEDIUMBLOB`, `LONGBLOB`
 | `BLOB SUB_TYPE BINARY`
 
 | `JSON`
@@ -136,7 +179,7 @@ Data types returned from a SQL queries
 | `VARBINARY(N)`
 |===
 
-Sample query with multiple fields:
+Example query with multiple fields:
 
 [source,sql]
 ----
@@ -152,23 +195,22 @@ returns (
 as
   declare dsn_mysql varchar(128);
 begin
-  dsn_mysql = ':mysql:host=localhost;port=3306;database=employees;user=root';
+  dsn_mysql = 'mysql://host=localhost;port=3306;database=employees';
 
   for
     execute statement q'{
-      select
-        emp_no,
-        birth_date,
-        first_name,
-        last_name,
-        gender,
-        hire_date
-      from employees
-      order by birth_date desc 
-      limit 5
+    select
+      emp_no,
+      birth_date,
+      first_name,
+      last_name,
+      gender,
+      hire_date
+    from employees
+    order by birth_date desc limit 5
     }'
     on external dsn_mysql
-    as user null password 'sa'
+    as user 'root' password 'sa'
     into
       emp_no, birth_date, first_name, last_name, gender, hire_date
   do
@@ -176,16 +218,16 @@ begin
 end
 ----
 
-A `SELECT` statement always returns a cursor.
+A `SELECT` query always returns a cursor.
 
-In MySQL, `CALL` statements can return values through parameters of type `OUT` and `INOUT`. The Firebird parser knows nothing about the `CALL` operator, so returning parameters of `OUT` and `INOUT` types is not supported.
+In MySQL, `CALL` queries can return values through `OUT` and `INOUT` parameters. Firebird's syntactic analyzer knows nothing about the `CALL` statement, so returning `OUT` and `INOUT` parameters is not supported.
 
 [NOTE]
 ====
 This may change in the future. Firebird 6.0 added the ability to call stored procedures using the `CALL` statement.
 ====
 
-However, you can return `OUT` and `INOUT` parameters using local variables and executing multiple queries in sequence.
+However, you can return `OUT` and `INOUT` parameters using local variables and sequential execution of multiple queries.
 
 Suppose you have the following stored procedure:
 
@@ -205,49 +247,50 @@ BEGIN
 END
 ----
 
-Then the result of such a procedure can be returned as follows:
+Then the result of the procedure execution can be returned as follows:
 
 [source,sql]
 ----
 execute block
 returns (
-  c int
+    c int
 )
 as
-  declare dsn_mysql varchar(128);
-  declare psw_mysql varchar(25);
+    declare dsn_mysql varchar(128);
+    declare user_mysql varchar(25);
+    declare psw_mysql varchar(25);
 begin
-  dsn_mysql = ':mysql:host=localhost;port=3306;database=employees;user=root';
-  psw_mysql = 'sa';
+    dsn_mysql = 'mysql://host=localhost;port=3306;database=employees';
+    user_mysql = 'root';
+    psw_mysql = 'sa';
 
-  execute statement 'SET @C=NULL'
-  on external dsn_mysql
-  as user null password psw_mysql;
+    execute statement 'SET @C=NULL'
+    on external dsn_mysql
+    as user user_mysql password psw_mysql;
 
-  execute statement
-  ('CALL sp_test_add(?, ?, @C)')
-  (1, 2)
-  on external dsn_mysql
-  as user null password psw_mysql;
+    execute statement
+    ('CALL sp_test_add(?, ?, @C)')
+    (1, 2)
+    on external dsn_mysql
+    as user user_mysql password psw_mysql;
 
-  execute statement
-  'SELECT @C'
-  on external dsn_mysql
-  as user null password psw_mysql
-  into c;
+    execute statement
+    'SELECT @C'
+    on external dsn_mysql
+    as user user_mysql password psw_mysql
+    into c;
 
-  suspend;
+    suspend;
 end
 ----
 
-`CALL` statements can also return a cursor or multiple cursors. Cursor return from `CALL` statements is not supported in the current version. Working with multiple datasets using the `EXECUTE STATEMENT ... ON EXTERNAL` statement is not supported.
+`CALL` queries can also return a cursor or multiple cursors. In the current version, returning a cursor from `CALL` queries is not supported. Working with multiple datasets using the `EXECUTE STATEMENT ... ON EXTERNAL` statement is not supported.
 
+=== Query Input Parameters
 
-=== Input parameters of SQL queries
+The `MySQLEngine` plugin supports the use of parameters in queries. Parameters can be unnamed (positional) or named.
 
-The MySQLEngine plugin supports the use of parameters in SQL queries. Parameters can be unnamed (positional) or named.
-
-An example of using unnamed parameters:
+Example of using unnamed parameters:
 
 [source,sql]
 ----
@@ -263,23 +306,22 @@ returns (
 as
   declare dsn_mysql varchar(128);
 begin
-  dsn_mysql = ':mysql:host=localhost;port=3306;database=employees;user=root';
+  dsn_mysql = 'mysql://host=localhost;port=3306;database=employees';
 
   for
     execute statement (q'{
-      select
-        emp_no,
-        birth_date,
-        first_name,
-        last_name,
-        gender,
-        hire_date
-        from employees
-      where emp_no = ?
-    }') 
-    (10020)
+    select
+      emp_no,
+      birth_date,
+      first_name,
+      last_name,
+      gender,
+      hire_date
+    from employees
+    where emp_no = ?
+    }') (10020)
     on external dsn_mysql
-    as user null password 'sa'
+    as user 'root' password 'sa'
     into
       emp_no, birth_date, first_name, last_name, gender, hire_date
   do
@@ -287,7 +329,7 @@ begin
 end
 ----
 
-An example of using named parameters:
+Example of using named parameters:
 
 [source,sql]
 ----
@@ -303,23 +345,23 @@ returns (
 as
   declare dsn_mysql varchar(128);
 begin
-  dsn_mysql = ':mysql:host=localhost;port=3306;database=employees;user=root';
+  dsn_mysql = 'mysql://host=localhost;port=3306;database=employees';
 
   for
     execute statement (q'{
-      select
-        emp_no,
-        birth_date,
-        first_name,
-        last_name,
-        gender,
-        hire_date
-      from employees
-      where emp_no = :emp_no
+    select
+      emp_no,
+      birth_date,
+      first_name,
+      last_name,
+      gender,
+      hire_date
+    from employees
+    where emp_no = :emp_no
     }')
     (emp_no := 10020)
     on external dsn_mysql
-    as user null password 'sa'
+    as user 'root' password 'sa'
     into
       emp_no, birth_date, first_name, last_name, gender, hire_date
   do
@@ -327,10 +369,9 @@ begin
 end
 ----
 
+=== Limitation on Using Input Parameters
 
-=== Restricting the use of input parameters
-
-For named parameters to work, the EDS (EXTERNAL DATA SOURCE) subsystem uses an internal preparser of queries, which replaces all parameters of the form `:<name>` with `?` and retains the binding of the parameter name and its number. Therefore, this only works for queries whose syntax is similar to Firebird's. For example, for `CALL` statements, named parameters will not work. In this case, you must use unnamed parameters.
+For named parameters to work, the EDS subsystem uses an internal preliminary query parser, which replaces all parameters of the form `:<name>` with `?` and saves the binding of the parameter name to its number. Therefore, this only works for queries whose syntax is similar to Firebird's syntax. For example, named parameters will not work for `CALL` queries. In this case, you must use unnamed parameters.
 
 [source,sql]
 ----
@@ -340,17 +381,15 @@ execute block
 as
   declare dsn_mysql varchar(128);
 begin
-  dsn_mysql = ':mysql:host=localhost;port=3306;database=employees;user=root';
+  dsn_mysql = 'mysql://host=localhost;port=3306;database=employees';
 
   execute statement
-  ('CALL sp_conn_audit(:A_CONN_ID, :A_USER, :A_DT)')
-  (
-    A_CONN_ID := current_connection,
-    A_USER := current_user,
-    A_DT := localtimestamp
-  )
+    ('CALL sp_conn_audit(:A_CONN_ID, :A_USER, :A_DT)')
+    (A_CONN_ID := current_connection,
+     A_USER := current_user,
+     A_DT := localtimestamp)
   on external dsn_mysql
-  as user null password 'sa';
+  as user 'root' password 'sa';
 end#
 ----
 
@@ -364,7 +403,7 @@ Data source : Firebird:::mysql:host=localhost;port=3306;database=employees;user=
 -At block line: 7, col: 3
 ----
 
-If you replace the named parameters with unnamed ones, then the query will successfully complete
+If you replace the named parameters with positional ones, the query will execute successfully.
 
 [source,sql]
 ----
@@ -372,13 +411,13 @@ execute block
 as
   declare dsn_mysql varchar(128);
 begin
-  dsn_mysql = ':mysql:host=localhost;port=3306;database=employees;user=root';
+  dsn_mysql = 'mysql://host=localhost;port=3306;database=employees';
 
   execute statement
     ('CALL sp_conn_audit(?, ?, ?)')
     (current_connection, current_user, localtimestamp)
   on external dsn_mysql
-  as user null password 'sa';
+  as user 'root' password 'sa';
 end#
 ----
 
@@ -387,37 +426,76 @@ end#
 This may change in the future. Firebird 6.0 added the ability to call stored procedures using the `CALL` statement.
 ====
 
-When executing `prepare`, Firebird obtains the types, sizes, and other properties of input and output query parameters. Further, based on these data, input and output messages are built, buffers for data exchange are allocated. MySQL is able to return the types, sizes, and properties of output parameters (columns), but for input parameters, only their total number is returned. The MySQL C-API is designed so that the types, sizes, and other attributes for input parameters are set by the client application. However, in the Firebird API it is not possible to fully define the input message on its own, it is only possible to convert the input message returned after `prepare` to another message (type compatible).
+When Firebird executes `prepare`, it receives the types, sizes, and other properties of the query's input and output parameters. Then, based on this data, input and output messages are constructed, and buffers for data exchange are allocated. MySQL can return the types, sizes, and properties of output parameters (columns), but for input parameters, only their total number is returned. The MySQL C-API is designed so that the types, sizes, and other attributes for input parameters are set by the client application. However, in the Firebird API, it is impossible to completely define the input message on your own; it is only possible to transform the input message returned after `prepare` into another message (compatible in terms of types).
 
-Since it is impossible to know the types of input parameters, all parameters are assumed to be of type `VARCHAR(8191) CHARACTER SET UTF8`. Most Firebird types can be converted to and from a string. However, you cannot pass binary data (types `BINARY(N)`, `VARBINARY(N)`, and `BLOB SUB_TYPE BINARY`) to such parameters, as they will be malformed. Also, you cannot pass `BLOB SUB_TYPE TEXT` as parameters if the text is longer than 8191 characters.
+Since it's impossible to know the types of input parameters, we assign all parameters the type `VARCHAR(8191) CHARACTER SET UTF8`. Most Firebird types can be converted to a string and back. However, you cannot pass binary data (types `BINARY(N)`, `VARBINARY(N)` and `BLOB SUB_TYPE BINARY`) to such parameters, as they will be distorted. Furthermore, you cannot pass `BLOB SUB_TYPE TEXT` as parameters if the text exceeds 8191 characters in length.
 
 [[hqbird-eds-other-dbms-odbc]]
 == ODBCEngine
 
-The `ODBCEngine` plugin is designed to access various databases through the ODBC interface.
+The `ODBCEngine` plugin is designed for accessing various databases through the ODBC interface.
 
-In order for the plugin to be known to Firebird, you need to edit the `firebird.conf` configuration file by adding the `ODBCEngine` plugin to the list of providers (the `Providers` parameter):
+For Firebird to recognize the plugin, you need to edit the `firebird.conf` configuration file, adding the `ODBCEngine` plugin to the provider list (`Providers` parameter):
+
+[source,conf]
+----
+Providers = ODBCEngine,Remote,Engine13,Loopback
+----
+
+or
 
 [source,conf]
 ----
 Providers = Remote,Engine13,ODBCEngine,Loopback
 ----
 
-=== Connection string format
+The first option is preferable as it allows passing the username to EDS in the usual way.
 
-The connection string for an `ODBCEngine` plugin must begin with the prefix `:odbc:` followed by the connection parameters. There are two options for connecting to the database: using DNS or using the full connection string for the specified driver.
+=== Connection String Format
 
-Possible connection string options:
+The connection string for the ODBCEngine plugin must start with the prefix `odbc://` or `:odbc:` followed by the connection parameters. There are two ways to connect to a database: using a DSN or using a full connection string for the specified driver.
 
-* DSN -- DSN of the data source (required if there is no DRIVER);
-* DRIVER -- ODBC driver name (required if there is no DSN);
-* UID or USER -- username;
-* PWD or PASSWORD -- password;
-* other parameters specific to the selected driver.
+[IMPORTANT]
+====
+For the connection to work using the `odbc://` prefix, the `ODBCEngine` provider must be specified in the `Providers` parameter of the `firebird.conf` configuration file before the `Remote` provider.
+====
 
-On Windows, if Firebird is running as a service, only *system* DSNs are visible.
+Possible connection string parameters:
 
-Here are examples of connecting to a MySQL database. Let's say you configured a system DSN named `test_dsn`, then the connection string would look like this:
+* DSN -- the DSN of the data source (required if DRIVER is not present);
+* DRIVER -- the name of the ODBC driver (required if DSN is not present);
+* UID or USER -- the username;
+* PWD or PASSWORD -- the password;
+* other parameters specific to the chosen driver.
+
+On Windows, if Firebird runs as a service, only *system* DSNs are visible.
+
+Here are examples of connecting to a MySQL database. Suppose you have configured a system DSN named `test_dsn`, then the connection string would look like this:
+
+[source,sql]
+----
+execute block
+returns (
+  i integer
+)
+as
+begin
+  for
+    execute statement q'{
+       select 1
+    }'
+    on external 'odbc://dsn=test_dsn'
+    as user 'root' password '12345'
+    into
+      i
+  do
+    suspend;
+end
+----
+
+In this case, the connection string uses the `odbc://` prefix, meaning the `ODBCEngine` provider must be specified before the `Remote` provider in the `Providers` configuration parameter.
+
+Or using the `:odbc:` prefix:
 
 [source,sql]
 ----
@@ -440,7 +518,21 @@ begin
 end
 ----
 
-Another option is to connect to the same database using the full connection string. The set of valid parameters in the connection string depends on the selected driver.
+In this case, the connection string uses the `:odbc:` prefix, meaning the `ODBCEngine` provider must be specified after the `Remote` provider in the `Providers` configuration parameter.
+
+Connecting using the `:odbc:` prefix has the following limitations:
+* It is impossible to pass the username using the `USER` keyword; instead, specify `NULL` or an empty string in `USER`, and pass the username itself in the connection string as shown above.
+
+[NOTE]
+====
+Do not specify the user password in the connection string (this is not secure); it's better to pass it using the `password` keyword.
+====
+
+Since using the `:odbc:` prefix makes working with the EDS subsystem unfamiliar, in all subsequent examples we will use the `odbc://` prefix.
+
+==== DSN-less Connection String
+
+Another option is to connect to the same database using a full connection string. The set of valid parameters in the connection string depends on the chosen driver.
 
 For example, for the MariaDB driver, the connection would look like this:
 
@@ -451,52 +543,50 @@ execute block returns (
 )
 as
 begin
-  for 
-    execute statement 'select 1' 
-    on external ':odbc:DRIVER={MariaDB ODBC 3.1 Driver};SERVER=127.0.0.1;PORT=3306;DATABASE=test;TCPIP=1;CHARSET=utf8mb4;UID=root' 
-    as user null password '12345'
-    into i 
-  do 
+  for
+    execute statement 'select 1'
+    on external 'odbc://DRIVER={MariaDB ODBC 3.1 Driver};SERVER=127.0.0.1;PORT=3306;DATABASE=test;CHARSET=utf8mb4'
+    as user 'root' password '12345'
+    into i
+  do
     suspend;
 end
 ----
 
-.Notes
 [NOTE]
 ====
-* Do not specify the user's password in the connection string (this is not safe), it is better to pass it using the `password` keyword;
-* Do not specify a username with the `user` keyword (leave `NULL` or an empty string) as this does not work with the `Remote` provider.
-* To work correctly with non-ASCII strings, always specify a connection character set compatible with UTF8 in the DSN. This is done differently in different ODBC drivers.
+* Do not specify the user password in the connection string (this is not secure); it's better to pass it using the `password` keyword;
+* Passing the username using the `USER` keyword in EDS will only work if you use the `odbc://` prefix; otherwise, pass the username in the connection string and specify `NULL` or an empty string in `USER`;
+* For correct work with non-ASCII strings, always specify a connection character set compatible with UTF8 in the DSN. This is done differently in different ODBC drivers.
 ====
 
-
-=== Correspondence table of data types between ODBC and Firebird
+=== Data Type Mapping Between ODBC and Firebird
 
 [cols="<2,<2",options="header",stripes="none"]
 |===
-|ODBC data type
-|Firebird data type
+|ODBC Data Type
+|Firebird Data Type
 
-|`SQL_CHAR`, `SQL_WCHAR` 
-|`VARCHAR(N)`, if length does not exceed 32765 bytes, otherwise `BLOB SUB_TYPE TEXT`
+|`SQL_CHAR`, `SQL_WCHAR`
+|`VARCHAR(N)` if the length does not exceed 32765 bytes, otherwise `BLOB SUB_TYPE TEXT`
 
 |`SQL_VARCHAR`, `SQL_WVARCHAR`
-|`VARCHAR(N)`, if length does not exceed 32765 bytes, otherwise `BLOB SUB_TYPE TEXT`
+|`VARCHAR(N)` if the length does not exceed 32765 bytes, otherwise `BLOB SUB_TYPE TEXT`
 
 |`SQL_BINARY`
-|`VARBINARY(N)`, if length does not exceed 32765 bytes, otherwise `BLOB SUB_TYPE BINARY`
+|`VARBINARY(N)` if the length does not exceed 32765 bytes, otherwise `BLOB SUB_TYPE BINARY`
 
 |`SQL_VARBINARY`
-|`VARBINARY(N)`, if length does not exceed 32765 bytes, otherwise `BLOB SUB_TYPE BINARY`
+|`VARBINARY(N)` if the length does not exceed 32765 bytes, otherwise `BLOB SUB_TYPE BINARY`
 
 |`SQL_TINYINT`, `SQL_SMALLINT`
 |`SMALLINT`. If `SQL_SMALLINT` is unsigned, then `INTEGER`.
 
 |`SQL_INTEGER`
-|`INTEGER`. If `SQL_SMALLINT` is unsigned, then `BIGINT`.
+|`INTEGER`. If `SQL_INTEGER` is unsigned, then `BIGINT`.
 
 |`SQL_BIGINT`
-|`BIGINT`. If `SQL_SMALLINT` is unsigned, then `VARCHAR(20)`.
+|`BIGINT`. If `SQL_BIGINT` is unsigned, then `VARCHAR(20)`.
 
 |`SQL_REAL`
 |`FLOAT`
@@ -535,27 +625,26 @@ end
 |`VARBINARY(16)`
 |===
 
-
-=== SQL query types
+=== Query Types
 
 A `SELECT` query always returns a cursor.
 
-`CALL` statements can return values through parameters of type `OUT` and `INOUT`. The Firebird parser knows nothing about the `CALL` operator, so returning parameters of `OUT` and `INOUT` types is not supported.
+`CALL` queries can return values through `OUT` and `INOUT` parameters. Firebird's syntactic analyzer knows nothing about the `CALL` statement, so returning `OUT` and `INOUT` parameters is not supported.
 
 [NOTE]
 ====
 This may change in the future. Firebird 6.0 added the ability to call stored procedures using the `CALL` statement.
 ====
 
-`CALL` statements can also return a cursor or multiple cursors. Cursor return from `CALL` statements is not supported in the current version. Working with multiple datasets using the `EXECUTE STATEMENT ... ON EXTERNAL` statement is not supported.
+`CALL` queries can also return a cursor or multiple cursors. In the current version, returning a cursor from `CALL` queries is not supported. Working with multiple datasets using the `EXECUTE STATEMENT ... ON EXTERNAL` statement is not supported.
 
-Queries like `INSERT`, `UPDATE`, `DELETE` usually return no data unless a `RETURNING` clause is specified, otherwise a cursor is returned.
+Queries of type `INSERT`, `UPDATE`, `DELETE` usually do not return data unless a `RETURNING` clause is specified; otherwise, a cursor is returned.
 
-An example of executing a `SELECT` query.
+Example of executing a `SELECT` query.
 
 [source,sql]
 ----
-execute block 
+execute block
 returns (
   id     integer,
   title  varchar(255),
@@ -566,37 +655,36 @@ as
 declare sql varchar(8191);
 begin
   sql = Q'{
-    SELECT 
+SELECT
+  id,
+  title,
+  body,
+  bydate
+FROM article
+}';
+  for
+    execute statement (:sql)
+    on external 'odbc://DRIVER={MariaDB ODBC 3.1 Driver};SERVER=127.0.0.1;PORT=3306;DATABASE=articles;CHARSET=utf8mb4'
+    as user 'root' password 'root'
+    into
       id,
       title,
       body,
       bydate
-    FROM article  
-  }';
-  for 
-    execute statement (:sql) 
-    on external ':odbc:DRIVER={MariaDB ODBC 3.1 Driver};SERVER=127.0.0.1;PORT=3306;DATABASE=test;TCPIP=1;CHARSET=utf8mb4;UID=root' 
-    as user null password 'root'
-    into 
-      id,
-      title,
-      body,
-      bydate	  
-  do 
+  do
     suspend;
 end
 ----
 
-
-=== Input parameters of SQL queries
+=== Query Input Parameters
 
 The `ODBCEngine` plugin supports the use of parameters in queries. Parameters can be unnamed (positional) or named.
 
-An example of using anonymous parameters:
+Example of using unnamed parameters:
 
 [source,sql]
 ----
-execute block 
+execute block
 returns(
    CODE_SEX INTEGER,
    NAME VARCHAR(70),
@@ -607,29 +695,29 @@ declare xSQL varchar(8191);
 declare xCODE_SEX INT = 1;
 begin
   xSQL = '
-SELECT 
+SELECT
   CODE_SEX,
   NAME,
   NAME_EN
-FROM sex  
+FROM sex
 WHERE CODE_SEX = ?
 ';
-  for 
+  for
     execute statement (:xSQL)
     (xCODE_SEX)
-    on external ':odbc:DRIVER={MariaDB ODBC 3.1 Driver};SERVER=127.0.0.1;PORT=3306;DATABASE=test;TCPIP=1;CHARSET=utf8mb4;UID=test' 
-    as user null password '12345'
+    on external 'odbc://DRIVER={MariaDB ODBC 3.1 Driver};SERVER=127.0.0.1;PORT=3306;DATABASE=test;CHARSET=utf8mb4'
+    as user 'test' password '12345'
     into CODE_SEX, NAME, NAME_EN
-  do 
+  do
     suspend;
 end
 ----
 
-An example of using named parameters:
+Example of using named parameters:
 
 [source,sql]
 ----
-execute block 
+execute block
 returns(
    CODE_SEX INTEGER,
    NAME VARCHAR(70),
@@ -640,29 +728,28 @@ declare xSQL varchar(8191);
 declare xCODE_SEX INT = 1;
 begin
   xSQL = '
-SELECT 
+SELECT
   CODE_SEX,
   NAME,
   NAME_EN
-FROM sex  
+FROM sex
 WHERE CODE_SEX = :A_CODE_SEX
 ';
-  for 
+  for
     execute statement (:xSQL)
     (A_CODE_SEX := xCODE_SEX)
-    on external ':odbc:DRIVER={MariaDB ODBC 3.1 Driver};SERVER=127.0.0.1;PORT=3306;DATABASE=test;TCPIP=1;CHARSET=utf8mb4;UID=test' 
-    as user null password '12345'
+    on external 'odbc://DRIVER={MariaDB ODBC 3.1 Driver};SERVER=127.0.0.1;PORT=3306;DATABASE=test;CHARSET=utf8mb4'
+    as user 'test' password '12345'
     into CODE_SEX, NAME, NAME_EN
-  do 
+  do
     suspend;
 end
 ----
 
+=== Limitation on Using Input Parameters
 
-=== Restricting the use of input parameters
+For named parameters to work, the EDS subsystem uses an internal preliminary query analysis, which replaces all parameters of the form `:<name>` with `?` and saves the binding of the parameter name to its number. Therefore, this only works for queries whose syntax is similar to Firebird's syntax. For example, named parameters will not work for `CALL` queries. In this case, you must use unnamed parameters.
 
-For named parameters to work, the EDS (EXTERNAL DATA SOURCE) subsystem uses an internal preparser of queries, which replaces all parameters of the form `:&lt;name&gt;` with `?` and retains the binding of the parameter name and its number. Therefore, this only works for queries whose syntax is similar to Firebird's. For example, for `CALL` statements, named parameters will not work. In this case, you must use unnamed parameters.
+When Firebird executes `prepare`, it receives the types, sizes, and other properties of the query's input and output parameters. Then, based on this data, input and output messages are constructed, and buffers for data exchange are allocated.
 
-When executing `prepare`, Firebird obtains the types, sizes, and other properties of input and output query parameters. Further, based on these data, input and output messages are built, buffers for data exchange are allocated.
-
-Not all ODBC drivers support describing input parameters with the `SQLDescribeParam` function. Some ODBC drivers formally support this function, but in fact the description does not correspond to reality. For example ODBC driver for MySQL for all parameters returns type `SQL_VARCHAR` with a length of 255 characters.
+Not all ODBC drivers support describing input parameters with the `SQLDescribeParam` function. Some ODBC drivers formally support this function, but in reality, the description does not correspond to reality. For example, the ODBC driver for MySQL returns the type `SQL_VARCHAR` with a length of 255 characters for all input parameters.
