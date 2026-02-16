@@ -147,8 +147,8 @@ image::2.1.7.png[]
 
 Если вы выберете установку HQbird с Firebird, по умолчанию каждая версия Firebird будет установлен в подпапку установки HQbird. По умолчанию для каждой из версий Firebird:
 
-- `C:\HQbird\Firebird25` 
-- `C:\HQbird\Firebird30` 
+- `C:\HQbird\Firebird25`
+- `C:\HQbird\Firebird30`
 - `C:\HQbird\Firebird40`
 - `C:\HQbird\Firebird50`
 

@@ -1,10 +1,8 @@
 [[hqbird-http-client-udr]]
 = HTTP Client UDR
 
-Библиотека IBSurgeon HTTP Client UDR предназначена для работы с HTTP сервисами, например через REST-API.
-Для реализации HTTP клиента используется библиотека с открытыми исходными кодами https://curl.se/libcurl/[libcurl], которая
-обеспечивает взаимодействие c Web-сервисами по протоколу HTTP методами 'GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'TRACE'.
-Кроме того, предоставляются дополнительные процедуры и функции для разбора HTTP заголовков, а также разбора на составные части URL адресов и их построения.
+Библиотека IBSurgeon HTTP Client UDR предназначена для работы с HTTP сервисами, например через REST-API. Для реализации HTTP клиента используется библиотека с открытыми исходными кодами https://curl.se/libcurl/[libcurl], которая
+обеспечивает взаимодействие c Web-сервисами по протоколу HTTP методами 'GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'TRACE'. Кроме того, предоставляются дополнительные процедуры и функции для разбора HTTP заголовков, а также разбора на составные части URL адресов и их построения.
 
 HTTP Client UDR является 100% бесплатной и с открытым исходным кодом, с лицензией https://www.firebirdsql.org/en/initial-developer-s-public-license-version-1-0/[IDPL].
 
@@ -92,11 +90,7 @@ sudo make install
 * `RESPONSE_BODY` - тело ответа.
 * `RESPONSE_HEADERS` - заголовки ответа.
 
-Процедура `HTTP_UTILS.HTTP_REQUEST` является основной процедурой с помощью которой происходит общение с web-сервисами.
-Процедуры `HTTP_UTILS.HTTP_GET`, `HTTP_UTILS.HTTP_HEAD`, `HTTP_UTILS.HTTP_POST`, `HTTP_UTILS.HTTP_PUT`, `HTTP_UTILS.HTTP_PATCH`,
-`HTTP_UTILS.HTTP_DELETE`, `HTTP_UTILS.HTTP_OPTIONS`, `HTTP_UTILS.HTTP_TRACE` являются производными от `HTTP_UTILS.HTTP_REQUEST`.
-Внутри они вызывают `HTTP_UTILS.HTTP_REQUEST` с заполненным параметром `METHOD`, а также убираются лишние входные и выходные параметры, что
-упрощает обращение к web-ресурсу определённым HTTP методом.
+Процедура `HTTP_UTILS.HTTP_REQUEST` является основной процедурой с помощью которой происходит общение с web-сервисами. Процедуры `HTTP_UTILS.HTTP_GET`, `HTTP_UTILS.HTTP_HEAD`, `HTTP_UTILS.HTTP_POST`, `HTTP_UTILS.HTTP_PUT`, `HTTP_UTILS.HTTP_PATCH`, `HTTP_UTILS.HTTP_DELETE`, `HTTP_UTILS.HTTP_OPTIONS`, `HTTP_UTILS.HTTP_TRACE` являются производными от `HTTP_UTILS.HTTP_REQUEST`. Внутри они вызывают `HTTP_UTILS.HTTP_REQUEST` с заполненным параметром `METHOD`, а также убираются лишние входные и выходные параметры, что упрощает обращение к web-ресурсу определённым HTTP методом.
 
 Первые два параметра процедуры `HTTP_UTILS.HTTP_REQUEST` являются обязательными.
 
@@ -163,9 +157,9 @@ SELECT
 FROM HTTP_UTILS.HTTP_REQUEST (
   'GET',
   'https://yandex.ru',
-  NULL, 
-  NULL, 
-  NULL, 
+  NULL,
+  NULL,
+  NULL,
   q'{
 CURLOPT_FOLLOWLOCATION=0
 CURLOPT_USERAGENT=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 OPR/98.0.0.0
@@ -550,8 +544,7 @@ FROM RDB$DATABASE;
 
 === Процедура `HTTP_UTILS.PARSE_URL`
 
-Процедура `HTTP_UTILS.PARSE_URL` предназначена для разбора URL на составные части,
-согласно спецификации https://tools.ietf.org/html/rfc3986[RFC 3986].
+Процедура `HTTP_UTILS.PARSE_URL` предназначена для разбора URL на составные части, согласно спецификации https://tools.ietf.org/html/rfc3986[RFC 3986].
 
 Требование: минимальная версия `libcurl` 7.62.0.
 
@@ -574,7 +567,7 @@ FROM RDB$DATABASE;
 
 Входные параметры:
 
-* `URL` - URL адрес, в формате 
+* `URL` - URL адрес, в формате
 +
 [listing]
 ----
@@ -596,7 +589,7 @@ FROM RDB$DATABASE;
 
 [source,sql]
 ----
-SELECT   
+SELECT
     URL_SCHEME,
     URL_USER,
     URL_PASSWORD,
@@ -655,7 +648,7 @@ SELECT
   HTTP_UTILS.BUILD_URL(
     'https',
     NULL,
-    NULL, 
+    NULL,
     'localhost',
     8080,
     '/',
@@ -667,8 +660,7 @@ FROM RDB$DATABASE;
 
 === Функция `HTTP_UTILS.URL_APPEND_QUERY`
 
-Функция `HTTP_UTILS.URL_APPEND_QUERY` предназначена для добавление параметров к URL адресу, при этом ранее
-существующая QUERY часть URL адреса сохраняется.
+Функция `HTTP_UTILS.URL_APPEND_QUERY` предназначена для добавление параметров к URL адресу, при этом ранее существующая QUERY часть URL адреса сохраняется.
 
 Требование: минимальная версия `libcurl` 7.62.0.
 
@@ -711,9 +703,7 @@ END
 
 === Функция `HTTP_UTILS.APPEND_QUERY`
 
-Функция `HTTP_UTILS.APPEND_QUERY` сборки значений параметров в единую строку.
-Далее эта строка может быть добавлена в URL адрес как параметры или передана в тело запроса, если запрос отправляется методом POST с
-`Content-Type: application/x-www-form-urlencoded`.
+Функция `HTTP_UTILS.APPEND_QUERY` сборки значений параметров в единую строку. Далее эта строка может быть добавлена в URL адрес как параметры или передана в тело запроса, если запрос отправляется методом POST с `Content-Type: application/x-www-form-urlencoded`.
 
 Требование: минимальная версия libcurl 7.62.0.
 
@@ -756,9 +746,7 @@ END
 
 === Процедура `HTTP_UTILS.PARSE_HEADERS`
 
-Процедура `HTTP_UTILS.PARSE_HEADERS` предназначена для анализа заголовков возвращаемых в HTTP ответе.
-Каждый заголовок процедура возвращает отдельной записью в параметре `HEADER_LINE`. Если заголовок имеет вид `&lt;header name&gt;: &lt;header value&gt;`, то
-наименование заголовка возвращается в параметре `HEADER_NAME`, а значение - `HEADER_VALUE`.
+Процедура `HTTP_UTILS.PARSE_HEADERS` предназначена для анализа заголовков возвращаемых в HTTP ответе. Каждый заголовок процедура возвращает отдельной записью в параметре `HEADER_LINE`. Если заголовок имеет вид `&lt;header name&gt;: &lt;header value&gt;`, то наименование заголовка возвращается в параметре `HEADER_NAME`, а значение - `HEADER_VALUE`.
 
 [source,sql]
 ----
@@ -786,7 +774,7 @@ END
 
 [source,sql]
 ----
-WITH 
+WITH
   T AS (
     SELECT
       RESPONSE_HEADERS
@@ -798,7 +786,7 @@ SELECT
   H.HEADER_LINE,
   H.HEADER_NAME,
   H.HEADER_VALUE
-FROM 
+FROM
   T
   LEFT JOIN HTTP_UTILS.PARSE_HEADERS(T.RESPONSE_HEADERS) H ON TRUE;
 ----
@@ -827,7 +815,7 @@ FROM
 
 [source,sql]
 ----
-WITH 
+WITH
   T AS (
     SELECT
       RESPONSE_HEADERS

@@ -51,7 +51,7 @@ KeyHolderPlugin = KeyHolder
 +
 или просто скопируйте `firebird.conf` на шаге 2 (см. ниже).
 
-. Убедитесь, что в `server/plugins` скопированы следующие файлы из папки `WinSrv64Bit_ServerPart\plugins`  
+. Убедитесь, что в `server/plugins` скопированы следующие файлы из папки `WinSrv64Bit_ServerPart\plugins`
 +
 * `DbCrypt.dll`
 * `DbCrypt.conf`
