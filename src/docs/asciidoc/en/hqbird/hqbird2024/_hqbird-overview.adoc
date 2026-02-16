@@ -5,13 +5,13 @@
 
 HQbird is a distribution of the Firebird DBMS for enterprises from IBSurgeon Software (www.ib-aid.com[https://www.ib-aid.com]), which includes additional functions that mainly improve performance for large and highly loaded databases, and a set of tools for organizing a full cycle of database maintenance without a DBA (including tools for performance optimization, monitoring, local and cloud backups, and recovery in case of failures).
 
-HQbird speeds up the performance of large databases (from 50 GB to 2 TB) and enables companies to manage large databases without requiring a dedicated database administrator for a few servers, or lowering support expenses for many (hundreds and thousands) Firebird servers. The minimal hardware requirements for HQbird are 8Gb RAM and 4 cores. 
+HQbird speeds up the performance of large databases (from 50 GB to 2 TB) and enables companies to manage large databases without requiring a dedicated database administrator for a few servers, or lowering support expenses for many (hundreds and thousands) Firebird servers. The minimal hardware requirements for HQbird are 8Gb RAM and 4 cores.
 
 The first version of HQbird was released in 2015, the current version is HQbird 2024.
 
 == How is Firebird related to HQbird?
 
-To put it simply, HQbird is an enterprise version of the open-source Firebird DBMS. In keeping with the tradition of open-source projects, we call Firebird the “vanilla” version: in the same way, there is a "`vanilla`" version of PostgreSQL and commercial versions of EnterpriseDB, PostgresPro, etc.
+To put it simply, HQbird is an enterprise version of the open-source Firebird DBMS. In keeping with the tradition of open-source projects, we call Firebird the "`vanilla`" version: in the same way, there is a "`vanilla`" version of PostgreSQL and commercial versions of EnterpriseDB, PostgresPro, etc.
 
 HQbird is not a "`different`" database in terms of compatibility with Firebird: there is no need to make a backup-restore when switching between HQbird and Firebird, no need to rewrite SQLs or change client applications.
 
@@ -317,7 +317,7 @@ returns (
 as
   declare dsn_mysql varchar(128);
 begin
-  dsn_mysql = ':mysql:host=localhost;port=3306;database=employees;user=root';
+  dsn_mysql = 'mysql//:host=localhost;port=3306;database=employees';
   for
     execute statement q'{
 select
@@ -331,9 +331,9 @@ from employees
 order by birth_date desc limit 5
 }'
     on external dsn_mysql
-    as user null password 'sa'
+    as user 'root' password 'sa'
     into
-      emp_no, birth_date, first_name, 
+      emp_no, birth_date, first_name,
       last_name, gender, hire_date
   do
     suspend;
@@ -364,7 +364,7 @@ To activate this feature, change the `LeftJoinConversion` setting in `firebird.c
 
 ==== SortDataStorageThreshold / InlineSortThreshold
 
-HQbird can optimize queries that involve large sorting operations. In versions 2.5 and 3.0, you can use the `SortDataStorageThreshold` setting to activate the `Refetch` plan for this purpose. 
+HQbird can optimize queries that involve large sorting operations. In versions 2.5 and 3.0, you can use the `SortDataStorageThreshold` setting to activate the `Refetch` plan for this purpose.
 
 In the vanilla version 4.0, this setting is renamed as `InlineSortThreshold`. Usually, we recommend to set `SortDataStorageThreshold` to 8192 or 16384 bytes.
 
@@ -561,7 +561,7 @@ It uses its layer for low-level database access without using the InterBase or F
 
 === Optimized configurations
 
-HQbird comes with the optimized configuration by default to make the best use of resources of powerful servers and Virtual Machines. To improve HQbird configuration, you can use Cofiguration Calculator for Firebird, where you can choose "`HQbird`", to obtain the basic optimized configuration for your system here: https://cc.ib-aid.com/democalc.html[].
+HQbird comes with the optimized configuration by default to make the best use of resources of powerful servers and Virtual Machines. To improve HQbird configuration, you can use Configuration Calculator for Firebird, where you can choose "`HQbird`", to obtain the basic optimized configuration for your system here: https://cc.ib-aid.com/democalc.html[].
 
 Please note that Calculator produces conservative configurations, and to create customized configuration, you need to monitor and analyze performance logs.
 IBSurgeon can assist you to create the ideal configuration in the context of Optimization/Configuration/Audit Incident for Firebird: https://ib-aid.com/en/firebird-interbase-performance-optimization-service/[]

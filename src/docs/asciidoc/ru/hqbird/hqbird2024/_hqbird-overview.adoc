@@ -316,7 +316,7 @@ returns (
 as
   declare dsn_mysql varchar(128);
 begin
-  dsn_mysql = ':mysql:host=localhost;port=3306;database=employees;user=root';
+  dsn_mysql = 'mysql//:host=localhost;port=3306;database=employees';
   for
     execute statement q'{
 select
@@ -330,9 +330,9 @@ from employees
 order by birth_date desc limit 5
 }'
     on external dsn_mysql
-    as user null password 'sa'
+    as user 'root' password 'sa'
     into
-      emp_no, birth_date, first_name, 
+      emp_no, birth_date, first_name,
       last_name, gender, hire_date
   do
     suspend;
@@ -363,7 +363,7 @@ HQbird может автоматически преобразовывать не
 
 ==== SortDataStorageThreshold / InlineSortThreshold
 
-HQbird может оптимизировать запросы, включающие большие операции сортировки. В версиях 2.5 и 3.0 вы можете использовать параметр SortDataStorageThreshold, для активации метода доступа `Refetch`. 
+HQbird может оптимизировать запросы, включающие большие операции сортировки. В версиях 2.5 и 3.0 вы можете использовать параметр SortDataStorageThreshold, для активации метода доступа `Refetch`.
 
 В "`ванильной`" версии Firebird 4.0 этот параметр переименован в `InlineSortThreshold`. Обычно мы рекомендуем установить для `SortDataStorageThreshold` значение 8192 или 16384 байта.
 
