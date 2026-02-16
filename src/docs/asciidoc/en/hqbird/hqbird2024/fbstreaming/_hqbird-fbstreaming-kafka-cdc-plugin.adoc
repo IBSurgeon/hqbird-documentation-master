@@ -5,6 +5,38 @@ The `kafka_cdc_plugin` plugin is designed to register data change events in Fire
 
 Each event is a document in JSON format, which is as close as possible to the https://debezium.io/documentation/reference/2.5/index.html[debezium] event format. In the next version it is planned to add the ability to serialize events in AVRO format.
 
+== Requirements
+
+The plugin requires the `librdkafka` and `liblz4` libraries. On Windows, they are included in the distribution. On Linux, you must install them manually.
+
+Installation on Debian:
+
+[source,bash]
+----
+sudo apt install librdkafka1
+
+sudo apt install liblz4-1
+----
+
+== fb_streaming + kafka_cdc_plugin files and folders on Windows
+
+- `fb_streaming.exe` - fb_streaming service;
+- `fbclient.dll` - Firebird client library (version 4.0 and higher);
+- `icudt63.dll`, `icuin63.dll`, `icuuc63.dll`, `icudt63l.dat` - ICU library files. On some Windows versions, the system ICU library is already installed, in which case these files are optional;
+- `fb_streaming.conf` - fb_streaming service configuration file;
+- `fb_streaming.log` - fb_streaming service log (created manually);
+- `zlib1.dll`, `zstd.dll`, `lz4.dll` - data and traffic compression libraries required by the `kafka_cdc_plugin` plugin;
+- `libssl-3-x64.dll`, `libcrypto-3-x64.dll` - OpenSSL encryption libraries for Windows-x64, `libssl-3.dll`, `libcrypto-3.dll`, required by the `kafka_cdc_plugin` plugin;
+- `libssl-3.dll`, `libcrypto-3.dll` - OpenSSL encryption libraries for Windows-x86, required by the `kafka_cdc_plugin` plugin;
+- `doc` - Documentation folder;
+- `stream_plugins` - Folder for plugin library files;
+- `stream_plugins/kafka_cdc_plugin.dll` - Kafka_cdc_plugin plugin library.
+
+[NOTE]
+====
+SASL is only supported in the 64-bit build.
+====
+
 == How it works
 
 The `fb_streaming` service (daemon) checks the contents of the directory specified for the task in the `fb_streaming.conf` configuration file, and if this directory contains unprocessed replication log files, then it analyzes them and generates appropriate events that are processed by the specified plugin. The last replication segment number processed is written to a control file named `<database guid>`. The location of this file can be specified in the `lockDir` configuration parameter. If this parameter is not specified, then by default the control file `<database guid>` will be created in the directory specified as the archive log directory for the task.
@@ -410,7 +442,7 @@ The following example shows part of the change event value that `fb_streaming` g
                 "type": "int64",
                 "optional": true,
                 "field": "ts_ms"
-            }     
+            }
         ],
         "optional": false,
         "name": "fbstreaming.CUSTOMERS.Envelope" <4>
@@ -497,9 +529,9 @@ a|Mandatory string that describes the type of operation that caused the connecto
 
 |10
 |`ts_ms`
-a|Displays the time at which `fbstreaming` recorded the event in Kafka. 
+a|Displays the time at which `fbstreaming` recorded the event in Kafka.
 
-In the `source` object, the value `ts_ms` indicates the time of the last modification of the replication log segment file (to some approximation, this time can be considered the time the event occurred in the database). By comparing the value of `payload.source.ts_ms` with the value of `payload.ts_ms`, you can determine the delay between the source database update and `fbstreaming`. 
+In the `source` object, the value `ts_ms` indicates the time of the last modification of the replication log segment file (to some approximation, this time can be considered the time the event occurred in the database). By comparing the value of `payload.source.ts_ms` with the value of `payload.ts_ms`, you can determine the delay between the source database update and `fbstreaming`.
 |===
 
 === Update events
@@ -569,9 +601,9 @@ a|Mandatory field that describes the source metadata for the event. This field c
 
 |5
 |`ts_ms`
-a|Displays the time at which `fbstreaming` recorded the event in Kafka. 
+a|Displays the time at which `fbstreaming` recorded the event in Kafka.
 
-In the `source` object, the value `ts_ms` indicates the time of the last modification of the replication log segment file (to some approximation, this time can be considered the time the event occurred in the database). By comparing the value of `payload.source.ts_ms` with the value of `payload.ts_ms`, you can determine the delay between the source database update and `fbstreaming`. 
+In the `source` object, the value `ts_ms` indicates the time of the last modification of the replication log segment file (to some approximation, this time can be considered the time the event occurred in the database). By comparing the value of `payload.source.ts_ms` with the value of `payload.ts_ms`, you can determine the delay between the source database update and `fbstreaming`.
 |===
 
 === Delete events
@@ -634,9 +666,9 @@ a|Mandatory field that describes the source metadata for the event. This field c
 
 |5
 |`ts_ms`
-a|Displays the time at which `fbstreaming` recorded the event in Kafka. 
+a|Displays the time at which `fbstreaming` recorded the event in Kafka.
 
-In the `source` object, the value `ts_ms` indicates the time of the last modification of the replication log segment file (to some approximation, this time can be considered the time the event occurred in the database). By comparing the value of `payload.source.ts_ms` with the value of `payload.ts_ms`, you can determine the delay between the source database update and `fbstreaming`. 
+In the `source` object, the value `ts_ms` indicates the time of the last modification of the replication log segment file (to some approximation, this time can be considered the time the event occurred in the database). By comparing the value of `payload.source.ts_ms` with the value of `payload.ts_ms`, you can determine the delay between the source database update and `fbstreaming`.
 |===
 
 == Data type mappings
@@ -668,11 +700,11 @@ In the `source` object, the value `ts_ms` indicates the time of the last modific
 |
 
 |FLOAT
-|float32
+|float
 |
 
 |DOUBLE PRECISION
-|float64
+|double
 |
 
 |NUMERIC(N,M)
@@ -932,6 +964,8 @@ The `task` parameter describes the task to be performed by the `fb_streaming` se
 - `exclude_tables` -- a regular expression that defines the names of tables for which events do not need to be tracked;
 
 - `dumpBlobs` -- whether to publish new BLOB field values (default `false`);
+
+- `charset_for_none_fields` -- character set used for converting data from string fields with the character set type `NONE`. Typically, data in string fields with the `NONE` character set is stored "as is," meaning in the original encoding used by the application when saving it. Firebird does not re-encode such strings. The JSON format requires all strings to be in `UTF-8` encoding. To correctly convert strings from `NONE` fields to `UTF8`, the system needs to know the original encoding of the data. This is precisely what the `charset_for_none_fields` parameter specifies;
 
 - `kafka_brokers` -- addresses of Kafka brokers. You can specify multiple addresses. Addresses are separated by commas;
 

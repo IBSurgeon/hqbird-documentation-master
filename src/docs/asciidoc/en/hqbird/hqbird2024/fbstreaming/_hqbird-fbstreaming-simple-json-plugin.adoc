@@ -120,8 +120,8 @@ task = d:\fbdata\4.0\replication\testdb\archive
 	register_ddl_events = true
 	register_sequence_events = true
 	outputDir = d:\fbdata\4.0\replication\testdb\json_archive
-	# include_tables = 
-	# exclude_tables = 
+	# include_tables =
+	# exclude_tables =
 }
 ----
 
@@ -138,4 +138,5 @@ Description of parameters:
 * `register_ddl_events` -- whether to register DDL events (`true` by default);
 * `register_sequence_events` -- whether to register sequence value setting events (`true` by default);
 * `include_tables` -- a regular expression that defines the names of tables for which you want to track events;
-* `exclude_tables` -- a regular expression that defines the names of tables for which events should not be tracked.
+* `exclude_tables` -- a regular expression that defines the names of tables for which events should not be tracked;
+* `charset_for_none_fields` - character set used for converting data from string fields with the character set type `NONE`. Typically, data in string fields with the `NONE` character set is stored "as is," meaning in the original encoding used by the application when saving it. Firebird does not re-encode such strings. The JSON format requires all strings to be in `UTF-8` encoding. To correctly convert strings from `NONE` fields to `UTF8`, the system needs to know the original encoding of the data. This is precisely what the `charset_for_none_fields` parameter specifies.

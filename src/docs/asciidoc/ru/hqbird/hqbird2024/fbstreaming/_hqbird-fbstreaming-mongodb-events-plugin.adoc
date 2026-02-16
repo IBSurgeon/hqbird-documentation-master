@@ -3,7 +3,7 @@
 
 Плагин `mongodb_events_plugin` предназначен для регистрации событий в базе данных Firebird и их запись в NoSQL СУБД MongoDB.
 
-Каждое событие представляет собой документ в коллекции `events`. 
+Каждое событие представляет собой документ в коллекции `events`.
 
 В событии содержаться следующие сведения:
 
@@ -38,7 +38,7 @@
 
 Каждое событие в базе данных MongoDB сохраняется как документ в коллекцию `events`.
 
-* служба `fb_streaming` анализирует директорию с журналами репликации, установленную для задачи, на наличие необработанных файлов; 
+* служба `fb_streaming` анализирует директорию с журналами репликации, установленную для задачи, на наличие необработанных файлов;
 * для ещё необработанных файлов репликации анализируются следующие события:
 ** старт транзакции. Выделяется структура в памяти для хранения точек сохранения;
 ** создание точки сохранения. Выделяется структура в памяти для хранения документов;
@@ -50,7 +50,7 @@
 ** установка нового значения последовательности (`SET SEQUENCE`). Создаётся новый документ и немедленно записываются в базу данных MongoDB. В документе сохраняются имя последовательности, тип события и новое значение последовательности;
 ** события `INSERT`, `UPDATE` и `DELETE`. Проверяется имя таблицы в фильтрах `include_tables` и `exclude_tables`, и если имя таблицы удовлетворяет критериям фильтрации, то создаётся новый документ и сохраняется в список документов для точки сохранения. В документе сохраняются имя таблицы, тип события, номер транзакции, старые и новые значения полей.
 * после обработки файла, его номер фиксируется в контрольном файле.
- 
+
 Остальные события репликации игнорируются.
 
 == Настройка плагина mongodb_events_plugin
@@ -83,7 +83,7 @@ ALTER DATABASE ENABLE PUBLICATION;
 ----
 task = d:\fbdata\4.0\replication\horses\archive_mongo
 {
-   database = inet://localhost:3054/d:\fbdata\4.0\horses.fdb             
+   database = inet://localhost:3054/d:\fbdata\4.0\horses.fdb
    username = SYSDBA
    password = masterkey
    plugin = mongodb_events_plugin
@@ -92,8 +92,8 @@ task = d:\fbdata\4.0\replication\horses\archive_mongo
    dumpBlobs = true
    register_ddl_events = true
    register_sequence_events = true
-   # include_tables = 
-   # exclude_tables = 
+   # include_tables =
+   # exclude_tables =
 }
 ----
 
@@ -105,7 +105,8 @@ task = d:\fbdata\4.0\replication\horses\archive_mongo
 - `register_ddl_events` -- регистрировать ли DDL события (по умолчанию `true`);
 - `register_sequence_events` -- регистрировать ли события установки значения последовательности (по умолчанию `true`);
 - `include_tables` -- регулярное выражение, определяющие имена таблиц для которых необходимо отслеживать события;
-- `exclude_tables` -- регулярное выражение, определяющие имена таблиц для которых не надо отслеживать события.
+- `exclude_tables` -- регулярное выражение, определяющие имена таблиц для которых не надо отслеживать события;
+- `charset_for_none_fields` - это набор символов, который используется для преобразования данных из строковых полей с типом кодировки `NONE`. Обычно данные в строковых полях с набором символов `NONE` хранятся "как есть", то есть в исходной кодировке, которую использовало приложение при сохранении. Firebird не перекодирует такие строки. Формат JSON требует, чтобы все строки были в кодировке `UTF8`. Чтобы корректно конвертировать строки из полей `NONE` в `UTF8`, системе необходимо знать исходную кодировку данных. Именно её и задает параметр `charset_for_none_fields`.
 
 [NOTE]
 ====
@@ -186,7 +187,7 @@ db.events.find();
   table: 'COLOR',
   tnx: 11771,
   changedFields: [ 'NAME_DE' ],
-  oldRecord: 
+  oldRecord:
    { NAME_EN: 'dun',
      NAME: 'мышастая',
      CODE_COLOR: 14,
@@ -194,7 +195,7 @@ db.events.find();
      NAME_DE: '',
      SHORTNAME_EN: 'dun',
      SHORTNAME: 'мыш.' },
-  record: 
+  record:
    { NAME_EN: 'dun',
      NAME: 'мышастая',
      CODE_COLOR: 14,
@@ -207,7 +208,7 @@ db.events.find();
   table: 'COLOR',
   tnx: 11790,
   changedFields: [ 'NAME_DE' ],
-  oldRecord: 
+  oldRecord:
    { NAME_EN: 'dun',
      NAME: 'мышастая',
      CODE_COLOR: 14,
@@ -215,7 +216,7 @@ db.events.find();
      NAME_DE: 'g',
      SHORTNAME_EN: 'dun',
      SHORTNAME: 'мыш.' },
-  record: 
+  record:
    { NAME_EN: 'dun',
      NAME: 'мышастая',
      CODE_COLOR: 14,
@@ -227,7 +228,7 @@ db.events.find();
   event: 'INSERT',
   table: 'CLIP',
   tnx: 11821,
-  record: 
+  record:
    { AVALUE: 44,
      CODE_CLIP: 1,
      CODE_CLIPTYPE: 1,
@@ -237,7 +238,7 @@ db.events.find();
   event: 'DELETE',
   table: 'CLIP',
   tnx: 11849,
-  record: 
+  record:
    { AVALUE: 44,
      CODE_CLIP: 1,
      CODE_CLIPTYPE: 1,
@@ -248,7 +249,7 @@ db.events.find();
   table: 'BREED',
   tnx: 11891,
   changedFields: [ 'MARK' ],
-  oldRecord: 
+  oldRecord:
    { NAME: 'орловская рысистая',
      CODE_DEPARTURE: 15,
      CODE_BREED: 55,
@@ -257,7 +258,7 @@ db.events.find();
      SHORTNAME_EN: 'orl. trot.',
      SHORTNAME: 'орл.рыс.',
      MARK: '' },
-  record: 
+  record:
    { NAME: 'орловская рысистая',
      CODE_DEPARTURE: 15,
      CODE_BREED: 55,
@@ -270,7 +271,7 @@ db.events.find();
   event: 'INSERT',
   table: 'CLIP',
   tnx: 11913,
-  record: 
+  record:
    { AVALUE: 1,
      CODE_CLIP: 2,
      CODE_CLIPTYPE: 1,
@@ -280,7 +281,7 @@ db.events.find();
   event: 'DELETE',
   table: 'CLIP',
   tnx: 11942,
-  record: 
+  record:
    { AVALUE: 1,
      CODE_CLIP: 2,
      CODE_CLIPTYPE: 1,
@@ -290,7 +291,7 @@ db.events.find();
   event: 'INSERT',
   table: 'CLIP',
   tnx: 12001,
-  record: 
+  record:
    { AVALUE: 3,
      CODE_CLIP: 5,
      CODE_CLIPTYPE: 1,
@@ -300,7 +301,7 @@ db.events.find();
   event: 'DELETE',
   table: 'CLIP',
   tnx: 12039,
-  record: 
+  record:
    { AVALUE: 3,
      CODE_CLIP: 5,
      CODE_CLIPTYPE: 1,
@@ -311,7 +312,7 @@ db.events.find();
   table: 'COLOR',
   tnx: 11799,
   changedFields: [ 'NAME_DE' ],
-  oldRecord: 
+  oldRecord:
    { NAME_EN: 'clay with mixed hairs',
      NAME: 'бурая в седине',
      CODE_COLOR: 118,
@@ -319,7 +320,7 @@ db.events.find();
      NAME_DE: '',
      SHORTNAME_EN: 'c.m.h.',
      SHORTNAME: 'бур. в сед.' },
-  record: 
+  record:
    { NAME_EN: 'clay with mixed hairs',
      NAME: 'бурая в седине',
      CODE_COLOR: 118,
@@ -331,7 +332,7 @@ db.events.find();
   event: 'INSERT',
   table: 'CLIP',
   tnx: 12087,
-  record: 
+  record:
    { AVALUE: 1,
      CODE_CLIP: 6,
      CODE_CLIPTYPE: 1,
@@ -341,7 +342,7 @@ db.events.find();
   event: 'INSERT',
   table: 'CLIP',
   tnx: 12087,
-  record: 
+  record:
    { AVALUE: 3,
      CODE_CLIP: 7,
      CODE_CLIPTYPE: 1,
@@ -352,7 +353,7 @@ db.events.find();
   table: 'BREED',
   tnx: 12197,
   changedFields: [ 'MARK' ],
-  oldRecord: 
+  oldRecord:
    { NAME: 'русская рысистая',
      CODE_DEPARTURE: 17,
      CODE_BREED: 58,
@@ -361,7 +362,7 @@ db.events.find();
      SHORTNAME_EN: 'rus.rys.',
      SHORTNAME: 'рус.рыс.',
      MARK: '' },
-  record: 
+  record:
    { NAME: 'русская рысистая',
      CODE_DEPARTURE: 17,
      CODE_BREED: 58,
@@ -375,7 +376,7 @@ db.events.find();
   table: 'COLOR',
   tnx: 12218,
   changedFields: [ 'NAME_DE', 'SHORTNAME_EN' ],
-  oldRecord: 
+  oldRecord:
    { NAME_EN: 'red grey',
      NAME: 'красно-серая',
      CODE_COLOR: 3,
@@ -383,7 +384,7 @@ db.events.find();
      NAME_DE: '',
      SHORTNAME_EN: '2',
      SHORTNAME: 'кр.-сер.' },
-  record: 
+  record:
    { NAME_EN: 'red grey',
      NAME: 'красно-серая',
      CODE_COLOR: 3,
@@ -395,7 +396,7 @@ db.events.find();
   event: 'INSERT',
   table: 'CLIP',
   tnx: 12287,
-  record: 
+  record:
    { AVALUE: 0,
      CODE_CLIP: 8,
      CODE_CLIPTYPE: 1,
@@ -406,13 +407,13 @@ db.events.find();
   table: 'CLIP',
   tnx: 12287,
   changedFields: [ 'REMARK' ],
-  oldRecord: 
+  oldRecord:
    { AVALUE: 3,
      CODE_CLIP: 7,
      CODE_CLIPTYPE: 1,
      CODE_RECORD: 3,
      REMARK: 'Странный' },
-  record: 
+  record:
    { AVALUE: 3,
      CODE_CLIP: 7,
      CODE_CLIPTYPE: 1,
@@ -422,7 +423,7 @@ db.events.find();
   event: 'DELETE',
   table: 'CLIP',
   tnx: 12287,
-  record: 
+  record:
    { AVALUE: 1,
      CODE_CLIP: 6,
      CODE_CLIPTYPE: 1,

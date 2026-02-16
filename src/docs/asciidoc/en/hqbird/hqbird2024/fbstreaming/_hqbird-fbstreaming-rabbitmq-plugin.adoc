@@ -21,9 +21,9 @@ The event contains the following information:
 ** the number of the transaction in which this event occurred;
 ** SQL query text.
 
-Only new field values are present in the `INSERT` event. 
+Only new field values are present in the `INSERT` event.
 
-The `UPDATE` event contains both old and new field values. 
+The `UPDATE` event contains both old and new field values.
 
 Only the old field values are present in the `DELETE` event.
 
@@ -108,7 +108,7 @@ On Linux, this configuration will look like this:
 [listing]
 ----
 task = /mnt/d/fbdata/4.0/replication/horses/archive
-{    
+{
     database = inet://192.168.1.48:3054/horses
     username = SYSDBA
     password = masterkey
@@ -123,7 +123,7 @@ task = /mnt/d/fbdata/4.0/replication/horses/archive
     exchange_name = horses
     exchange_type = direct
     queue_name = horses_events
-    routing_key = 123	
+    routing_key = 123
 }
 ----
 
@@ -138,7 +138,8 @@ There are a number of additional settings for this plugin:
 - `register_ddl_events` -- whether to register DDL events (`true` by default);
 - `register_sequence_events` -- whether to register sequence value setting events (`true` by default);
 - `include_tables` -- a regular expression that defines the names of tables for which it is necessary to track events;
-- `exclude_tables` -- a regular expression that defines the names of tables for which events should not be tracked.
+- `exclude_tables` -- a regular expression that defines the names of tables for which events should not be tracked;
+- `charset_for_none_fields` - character set used for converting data from string fields with the character set type `NONE`. Typically, data in string fields with the `NONE` character set is stored "as is," meaning in the original encoding used by the application when saving it. Firebird does not re-encode such strings. The JSON format requires all strings to be in `UTF-8` encoding. To correctly convert strings from `NONE` fields to `UTF8`, the system needs to know the original encoding of the data. This is precisely what the `charset_for_none_fields` parameter specifies.
 
 Now you can install and start the service:
 
@@ -167,89 +168,89 @@ The content of the messages will be something like this:
 
 [source,json]
 ----
-{ 
+{
   "event": "EXECUTE SQL",
   "sql": "CREATE SEQUENCE SEQ1",
-  "tnx": 6590 
+  "tnx": 6590
 }
-{ 
+{
   "event": "EXECUTE SQL",
   "sql": "CREATE TABLE TABLE1 (\r\n  ID INT NOT NULL,\r\n  S VARCHAR(10),\r\n  PRIMARY KEY(ID)\r\n)",
-  "tnx": 6591 
+  "tnx": 6591
 }
-{ 
+{
   "event": "EXECUTE SQL",
   "sql": "ALTER TABLE TABLE1\r\nENABLE PUBLICATION",
-  "tnx": 6594 
+  "tnx": 6594
 }
-{ 
+{
   "event": "SET SEQUENCE",
   "sequence": "SEQ1",
-  "value": 1 
+  "value": 1
 }
-{ 
+{
   "event": "INSERT",
   "table": "TABLE1",
   "tnx": 6597,
-  "record": { 
-    "ID": 1, 
-    "S": "Hello" 
-  } 
+  "record": {
+    "ID": 1,
+    "S": "Hello"
+  }
 }
-{ 
+{
   "event": "UPDATE",
   "table": "COLOR",
   "tnx": 11771,
   "changedFields": [ "NAME_DE" ],
-  "oldRecord": { 
+  "oldRecord": {
      "NAME_EN": "dun",
      "NAME": "dun",
      "CODE_COLOR": 14,
      "CODE_SENDER": 1,
      "NAME_DE": "",
      "SHORTNAME_EN": "dun",
-     "SHORTNAME": "d." 
+     "SHORTNAME": "d."
   },
-  "record": { 
+  "record": {
      "NAME_EN": "dun",
      "NAME": "dun",
      "CODE_COLOR": 14,
      "CODE_SENDER": 1,
      "NAME_DE": "g",
      "SHORTNAME_EN": "dun",
-     "SHORTNAME": "d." 
-  } 
+     "SHORTNAME": "d."
+  }
 }
-{ 
+{
   "event": "INSERT",
   "table": "CLIP",
   "tnx": 11821,
-  "record": { 
+  "record": {
      "AVALUE": 44,
      "CODE_CLIP": 1,
      "CODE_CLIPTYPE": 1,
      "CODE_RECORD": 345,
-     "REMARK": null 
-  } 
+     "REMARK": null
+  }
 }
-{ 
+{
   "event": "DELETE",
   "table": "CLIP",
   "tnx": 11849,
-  "record": { 
+  "record": {
      "AVALUE": 44,
      "CODE_CLIP": 1,
      "CODE_CLIPTYPE": 1,
      "CODE_RECORD": 345,
-     "REMARK": null 
-  } 
+     "REMARK": null
+  }
 }
-{ 
+{
   "event": "UPDATE",
   "table": "BREED",
   "tnx": 11891,
   "changedFields": [ "MARK" ],
-  "oldRecord": { 
+  "oldRecord": {
      "NAME": "Orlov trotter",
      "CODE_DEPARTURE": 15,
      "CODE_BREED": 55,
@@ -257,9 +258,9 @@ The content of the messages will be something like this:
      "NAME_EN": "Orlov trotter",
      "SHORTNAME_EN": "orl. trot.",
      "SHORTNAME": "orl.trot.",
-     "MARK": "" 
+     "MARK": ""
   },
-  "record": { 
+  "record": {
      "NAME": "Orlov trotter",
      "CODE_DEPARTURE": 15,
      "CODE_BREED": 55,
@@ -267,8 +268,8 @@ The content of the messages will be something like this:
      "NAME_EN": "Orlov trotter",
      "SHORTNAME_EN": "orl. trot.",
      "SHORTNAME": "orl.trot.",
-     "MARK": "5" 
-  } 
+     "MARK": "5"
+  }
 }
 ----
 

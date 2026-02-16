@@ -84,7 +84,7 @@ Next, configure `fb_streaming.conf` so that `fb_streaming` automatically logs ev
 ----
 task = d:\fbdata\4.0\replication\horses\archive_mongo
 {
-   database = inet://localhost:3054/d:\fbdata\4.0\horses.fdb             
+   database = inet://localhost:3054/d:\fbdata\4.0\horses.fdb
    username = SYSDBA
    password = masterkey
    plugin = mongodb_events_plugin
@@ -93,8 +93,8 @@ task = d:\fbdata\4.0\replication\horses\archive_mongo
    dumpBlobs = true
    register_ddl_events = true
    register_sequence_events = true
-   # include_tables = 
-   # exclude_tables = 
+   # include_tables =
+   # exclude_tables =
 }
 ----
 
@@ -106,7 +106,8 @@ There are a number of additional settings for this plugin:
 - `register_ddl_events` -- whether to register DDL events (`true` by default);
 - `register_sequence_events` -- whether to register sequence value setting events (`true` by default);
 - `include_tables` -- a regular expression that defines the names of tables for which it is necessary to track events;
-- `exclude_tables` -- a regular expression that defines the names of tables for which events should not be tracked.
+- `exclude_tables` -- a regular expression that defines the names of tables for which events should not be tracked;
+- `charset_for_none_fields` - character set used for converting data from string fields with the character set type `NONE`. Typically, data in string fields with the `NONE` character set is stored "as is," meaning in the original encoding used by the application when saving it. Firebird does not re-encode such strings. The JSON format requires all strings to be in `UTF-8` encoding. To correctly convert strings from `NONE` fields to `UTF8`, the system needs to know the original encoding of the data. This is precisely what the `charset_for_none_fields` parameter specifies.
 
 [NOTE]
 ====
@@ -187,13 +188,13 @@ The content of the collection looks like this:
   table: 'COLOR',
   tnx: 11771,
   changedFields: [ 'NAME_DE' ],
-  oldRecord: 
+  oldRecord:
    { NAME: 'dun',
      CODE_COLOR: 14,
      CODE_SENDER: 1,
      NAME_DE: '',
      SHORTNAME: 'dun' },
-  record: 
+  record:
    { NAME: 'dun',
      CODE_COLOR: 14,
      CODE_SENDER: 1,
@@ -204,13 +205,13 @@ The content of the collection looks like this:
   table: 'COLOR',
   tnx: 11790,
   changedFields: [ 'NAME_DE' ],
-  oldRecord: 
+  oldRecord:
    { NAME: 'dun',
      CODE_COLOR: 14,
      CODE_SENDER: 1,
      NAME_DE: 'g',
      SHORTNAME: 'dun' },
-  record: 
+  record:
    { NAME: 'dun',
      CODE_COLOR: 14,
      CODE_SENDER: 1,
@@ -220,7 +221,7 @@ The content of the collection looks like this:
   event: 'INSERT',
   table: 'CLIP',
   tnx: 11821,
-  record: 
+  record:
    { AVALUE: 44,
      CODE_CLIP: 1,
      CODE_CLIPTYPE: 1,
@@ -230,7 +231,7 @@ The content of the collection looks like this:
   event: 'DELETE',
   table: 'CLIP',
   tnx: 11849,
-  record: 
+  record:
    { AVALUE: 44,
      CODE_CLIP: 1,
      CODE_CLIPTYPE: 1,
@@ -241,14 +242,14 @@ The content of the collection looks like this:
   table: 'BREED',
   tnx: 11891,
   changedFields: [ 'MARK' ],
-  oldRecord: 
+  oldRecord:
    { CODE_DEPARTURE: 15,
      CODE_BREED: 55,
      CODE_SENDER: 1,
      NAME: 'Orlov trotter',
      SHORTNAME: 'orl. trot.'
      MARK: '' },
-  record: 
+  record:
    { CODE_DEPARTURE: 15,
      CODE_BREED: 55,
      CODE_SENDER: 1,
@@ -259,7 +260,7 @@ The content of the collection looks like this:
   event: 'INSERT',
   table: 'CLIP',
   tnx: 11913,
-  record: 
+  record:
    { AVALUE: 1,
      CODE_CLIP: 2,
      CODE_CLIPTYPE: 1,
@@ -269,7 +270,7 @@ The content of the collection looks like this:
   event: 'DELETE',
   table: 'CLIP',
   tnx: 11942,
-  record: 
+  record:
    { AVALUE: 1,
      CODE_CLIP: 2,
      CODE_CLIPTYPE: 1,
@@ -279,7 +280,7 @@ The content of the collection looks like this:
   event: 'INSERT',
   table: 'CLIP',
   tnx: 12001,
-  record: 
+  record:
    { AVALUE: 3,
      CODE_CLIP: 5,
      CODE_CLIPTYPE: 1,
@@ -289,7 +290,7 @@ The content of the collection looks like this:
   event: 'DELETE',
   table: 'CLIP',
   tnx: 12039,
-  record: 
+  record:
    { AVALUE: 3,
      CODE_CLIP: 5,
      CODE_CLIPTYPE: 1,
@@ -300,13 +301,13 @@ The content of the collection looks like this:
   table: 'COLOR',
   tnx: 11799,
   changedFields: [ 'NAME_DE' ],
-  oldRecord: 
+  oldRecord:
    { NAME: 'clay with mixed hairs',
      CODE_COLOR: 118,
      CODE_SENDER: 1,
      NAME_DE: '',
      SHORTNAME: 'c.m.h.' },
-  record: 
+  record:
    { NAME: 'clay with mixed hairs',
      CODE_COLOR: 118,
      CODE_SENDER: 1,
@@ -316,7 +317,7 @@ The content of the collection looks like this:
   event: 'INSERT',
   table: 'CLIP',
   tnx: 12087,
-  record: 
+  record:
    { AVALUE: 1,
      CODE_CLIP: 6,
      CODE_CLIPTYPE: 1,
@@ -326,7 +327,7 @@ The content of the collection looks like this:
   event: 'INSERT',
   table: 'CLIP',
   tnx: 12087,
-  record: 
+  record:
    { AVALUE: 3,
      CODE_CLIP: 7,
      CODE_CLIPTYPE: 1,
@@ -337,14 +338,14 @@ The content of the collection looks like this:
   table: 'BREED',
   tnx: 12197,
   changedFields: [ 'MARK' ],
-  oldRecord: 
+  oldRecord:
    { CODE_DEPARTURE: 17,
      CODE_BREED: 58,
      CODE_SENDER: 1,
      NAME: 'Trotter',
      SHORTNAME: 'rus.rys.',
      MARK: '' },
-  record: 
+  record:
    { CODE_DEPARTURE: 17,
      CODE_BREED: 58,
      CODE_SENDER: 1,
@@ -356,13 +357,13 @@ The content of the collection looks like this:
   table: 'COLOR',
   tnx: 12218,
   changedFields: [ 'NAME_DE', 'SHORTNAME' ],
-  oldRecord: 
+  oldRecord:
    { NAME: 'red grey',
      CODE_COLOR: 3,
      CODE_SENDER: 1,
      NAME_DE: '',
      SHORTNAME: '' },
-  record: 
+  record:
    { NAME: 'red grey',
      CODE_COLOR: 3,
      CODE_SENDER: 1,
@@ -372,7 +373,7 @@ The content of the collection looks like this:
   event: 'INSERT',
   table: 'CLIP',
   tnx: 12287,
-  record: 
+  record:
    { AVALUE: 0,
      CODE_CLIP: 8,
      CODE_CLIPTYPE: 1,
@@ -383,13 +384,13 @@ The content of the collection looks like this:
   table: 'CLIP',
   tnx: 12287,
   changedFields: [ 'REMARK' ],
-  oldRecord: 
+  oldRecord:
    { AVALUE: 3,
      CODE_CLIP: 7,
      CODE_CLIPTYPE: 1,
      CODE_RECORD: 3,
      REMARK: 'Other' },
-  record: 
+  record:
    { AVALUE: 3,
      CODE_CLIP: 7,
      CODE_CLIPTYPE: 1,
@@ -399,7 +400,7 @@ The content of the collection looks like this:
   event: 'DELETE',
   table: 'CLIP',
   tnx: 12287,
-  record: 
+  record:
    { AVALUE: 1,
      CODE_CLIP: 6,
      CODE_CLIPTYPE: 1,
