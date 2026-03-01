@@ -91,6 +91,8 @@ Make sure that HQbird installer is signed with valid IBSurgeon certificate («iB
 .Confirmation to start the installation process
 image::2.1.1.png[]
 
+Next, you can select the language in which the settings and installation steps will be displayed.
+
 .Choose installation language
 image::2.1.2.png[]
 
