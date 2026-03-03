@@ -1,21 +1,19 @@
 [[hqbird-fbstreaming]]
 = Firebird Streaming
 
-Firebird streaming -- это технология асинхронной публикации событий возникающих в процессе анализа журнала репликации.
+Firebird streaming -- это технология асинхронной публикации событий возникающих в процессе анализа журнала репликации. Firebird Streaming разработана для работы с журналами репликации с форматом Firebird 4.0 и выше. С сегментами репликации Firebird 2.5 и 3.0 она работать не будет.
 
-Для обработки событий используется служба (демон) `fb_streaming`. Служба отслеживает новые файлы журнала репликации, анализирует их, и генерирует события, которые обрабатываются одним из плагинов.
+Для обработки событий используется служба (демон) `fb_streaming`. Служба `fb_streaming` входит в штатный дистрибутив HQBird 2024 R2. Служба отслеживает новые файлы журнала репликации, анализирует их, и генерирует события, которые обрабатываются одним из плагинов.
 
 Доступные плагины:
 
-* `kafka_cdc_plugin` -- публикация CDC (Change Data Capture) событий в Kafka;
+* `kafka_cdc_plugin` -- публикация CDC (Change Data Capture) событий в Kafka (входит в состав дистрибутива HQBird 2024 R2);
 * `rabbitmq_plugin` -- публикация событий репликации в RabbitMQ;
 * `mongodb_events_plugin` -- сохранение событий репликации в MongoDB;
 * `fts_lucene_plugin` -- автоматическое обновление полнотекстовых индексов без триггеров (IBSurgeon Full Text Search UDR);
-* `simple_json_plugin` -- сохранение журналов репликации в формате JSON.
+* `simple_json_plugin` -- сохранение журналов репликации в формате JSON (входит в состав дистрибутива HQBird 2024 R2).
 
-Технология Firebird Streaming разработана для работы с журналами репликации с форматом Firebird 4.0 и выше. С сегментами репликации Firebird 2.5 и 3.0 она работать не будет.
-
-Служба `fb_streaming` и её плагины не входит в штатный дистрибутив HQBird 2024. Они могут быть предоставлена нашим клиентам по отдельному запросу.
+Плагины не входящие в дистрибутив, могут быть предоставлены заказчикам по требованию.
 
 == Принцип работы fb_streaming
 
@@ -77,7 +75,7 @@ fb_streaming help
 ================================================================================
  Firebird streaming service
 
- Copyright (c) 2023 IBSurgeon ltd.
+ Copyright (c) 2025 IBSurgeon ltd.
 ================================================================================
 
 usage: fb_streaming <command> [service_name]
@@ -92,10 +90,10 @@ Possible commands are:
 
 [listing]
 ----
-c:\streaming>fb_streaming install
+c:\HQbird\fbstreaming>fb_streaming install
 Success install service!
 
-c:\streaming>fb_streaming start
+c:\HQbird\fbstreaming>fb_streaming start
 Service start pending...
 Service started successfully.
 ----
@@ -106,10 +104,10 @@ Service started successfully.
 
 [listing]
 ----
-c:\streaming>fb_streaming stop
+c:\HQbird\fbstreaming>fb_streaming stop
 Service is already stopped.
 
-c:\streaming>fb_streaming remove
+c:\HQbird\fbstreaming>fb_streaming remove
 Service deleted successfully
 ----
 
@@ -156,7 +154,7 @@ sudo systemctl disable fb_streaming
 ----
 # logLevel = info
 
-# pluginDir = $(root)/stream_plugins 
+# pluginDir = $(root)/stream_plugins
 
 task = <sourceDir_1>
 {
@@ -174,7 +172,7 @@ task = <sourceDir_2>
 - `logLevel` -- уровень журналирования (по умолчанию info). Допускаются уровни журналирования: trace, debug, info, warning, error, critical, off.
 - `pluginDir` -- директория, где размещаются плагины `fb_streaming`. По умолчанию `$(root)/stream_plugins`. Макроподстановка `$(root)` обозначает корневую директорию службы (демона).
 
-Далее следуют конфигурации задач. Один экземпляр службы может обслуживать сразу несколько задач. Каждая задача работает в своём потоке. 
+Далее следуют конфигурации задач. Один экземпляр службы может обслуживать сразу несколько задач. Каждая задача работает в своём потоке.
 На каждый каталог с файлами журнала репликации создаётся своя задача.
 
 Здесь `sourceDir_N` -- директория с файлами журнала репликации. Эти директории должны быть уникальны. Одну и ту же директорию нельзя обрабатывать более чем одной задачей.
@@ -187,7 +185,7 @@ task = <sourceDir_2>
 - `username` -- имя пользователя для подключения к базе данных;
 - `password` -- пароль для подключения к базе данных;
 - `plugin` -- плагин, который обрабатывает события, возникающие в процессе анализа журнала репликации (обязательный);
-- `deleteProcessedFile` -- удалять ли файл журнала после обработки (по умолчанию `true`). 
+- `deleteProcessedFile` -- удалять ли файл журнала после обработки (по умолчанию `true`).
 
 Задача может содержать также другие параметры, специфичные для используемого плагина.
 
