@@ -1,6 +1,6 @@
 [[hqbird]]
 = Руководство пользователя HQbird 2024 R2
-1.0.6, от 23.02.2026
+1.0.7, от 11.03.2026
 :doctype: book
 :sectnums:
 :sectanchors:
