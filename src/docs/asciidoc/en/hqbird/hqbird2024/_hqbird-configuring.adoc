@@ -130,9 +130,6 @@ Let's consider what can you see in the Server dialog (and, normally, you don't n
 [horizontal]
 Installed in:: Firebird installation folder
 Binary folder:: Firebird bin folder (for Firebird 3 or higher on Windows Binary folder is the same as the installation folder)
-Log:: location of `firebird.log`
-Configuration file:: location of `firebird.conf`
-Aliases:: location of `aliases.conf` or, for Firebird 3, `databases.conf` ( *please change it manually, if needed* )
 Host:: name of the server, usually `localhost`
 Port:: network port for Firebird, according `firebird.conf` settings
 Use trusted auth:: use trusted authentication, by default it is off
@@ -142,7 +139,6 @@ User for Services API::
 Password for Services API user::
 Server authentication plugin list::
 Output directory:: Folder where backups, statistics and gathered logs will be stored
-
 
 .Register server in HQbird FBDataGuard.
 image::3.1.3.png[]
@@ -397,7 +393,7 @@ SELECTED is the recommended mode. It allows choosing of indices which should be 
 
 To include indices into the list of recomputed, you need to specify indices names (divided by comma), and to exclude – perform the same in the appropriate field.
 
-As you can see at configuration dialog screenshot, there are fields to enable/disable job, to set update mode, and to include or exclude indices. "`DB size to switch, bytes`" is to set limit where AUTO mode is working. "`Check index activity`" switch should be always on, until you are not performing special manipulations with inactive indices.
+As you can see at configuration dialog screenshot, there are fields to enable/disable job, to set update mode, and to include or exclude indices. "`Check index activity`" switch should be always on, until you are not performing special manipulations with inactive indices.
 
 [[hqbird-config-verified-backup]]
 === Database: Verified Backup
@@ -464,7 +460,6 @@ image::3.2.35.png[]
 * *"`Optional path to gbak executable`"* -- it is possible to specify other gbak tool than standard `gbak`.
 * *"`Backups option for gbak`"* -- if you need to add some specific options, add them here.
 * *"`Restore options for gbak`"* -- if you need to add specific options for test restore, add them here.
-
 
 [TIP]
 ====
@@ -738,6 +733,10 @@ image::3.2.49-4.png[]
 
 To use FTP over SSH with private key authentication, please specify the full path to it in "`Key store file`", other parameters are similar to usual FTP.
 
+===== Socket
+
+image::3.2.49-5.png[]
+
 ==== Sending verified and incremental backups through Cloud Backups
 
 Cloud Backup also can be used to send any files to FTP/FTPS/etc. For example, you can setup Cloud Backup to look for FBK files, produces by Verified Backup Job, and schedule to upload to the remote FTP server.
@@ -784,7 +783,7 @@ In general, "`File Receiver`" is designed to decompress files from zip archives,
 
 "`File Receiver`" checks files in the folder specified in "`*Watch for incoming files in*`", with interval equal to "`*Check periods, seconds*`". Its checks only files with specified mask according "`*Filename template*`" (`*.journal**` by default) and specified extension (`.replpacked` by default). If it encounters such files, it decompresses and decrypts them with the password, specified in "`*Decrypt password*`", and copies to the folder, specified in "`*Unpack to directory*`".
 
-If the `*Monitor for reinitialization*` parameter is enabled, then the `File Listener` will also monitor files intended for replica reinitialization, such files have the prefix specified in "`Prefix for incoming reini- files`".
+If the `*Monitor for reinitialization*` parameter is enabled, then the `File Listener` will also monitor files intended for replica reinitialization.
 
 image::3.2.50.png[]
 
@@ -847,7 +846,6 @@ The third purpose is to warn administrator about too many formats for each table
 There is an implementation limit in Firebird to have 256 formats per table, however even several formats can greatly increase a chance of hard corruption and can slow down the performance. It is recommended do not change tables structure at production database and keep only one format per each table. If it's not possible, administrator should try to perform backup/restore more often to transform all formats into the single one.
 
 image::3.2.52.png[]
-
 
 === Database: Validate DB
 
@@ -1058,9 +1056,13 @@ First of all, you need to set general parameters for all tasks: where the databa
 
 image::3.1.16.png[]
 
-You can specify up to five different nodes -- for each node, typical parameters (as in the task of sending segments) are specified:
+If we will click on button btn:[More>>], the advanced replication options will appear:
 
 image::3.1.16-0.png[]
+
+You can specify up to five different nodes -- for each node, typical parameters (as in the task of sending segments) are specified:
+
+image::3.1.16-1.png[]
 
 Notes:
 
