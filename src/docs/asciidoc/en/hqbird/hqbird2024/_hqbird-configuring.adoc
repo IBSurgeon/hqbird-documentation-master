@@ -1209,6 +1209,18 @@ The "`Group Update Indexes Statistics`" job has the same parameters as <<hqbird-
 
 image::3.1.28.png[]
 
+=== Server: Group Transaction Monitor
+
+// TODO: Написать
+
+=== Server: Group Incremental backup
+
+// TODO: Написать
+
+=== Server: Group file pump job
+
+// TODO: Написать
+
 <<<
 
 == Email alerts in HQbird FBDataGuard
