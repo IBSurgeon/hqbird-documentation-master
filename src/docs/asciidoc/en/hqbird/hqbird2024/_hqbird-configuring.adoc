@@ -1015,6 +1015,27 @@ image::3.2.68.png[]
 As you can see, the dialog closely mirrors that of an immediate backup-restore.
 However, it additionally incorporates steps for the automatic reinitialization of replicas post-restore. This is essential due to the change in database GUID upon restoration. With active replication in place, HQbird will seamlessly reinitialize replicas following a successful restore.
 
+=== Database: Client Version Checks
+
+The "`Client Version Checks`" job is designed to check client versions when connecting using the `fbclient` library. Applications often connect using an older version of the library. This isn't an error, but an older version of `fbclient` can't take full advantage of a new server version because it doesn't support the required network protocol version. For example, Firebird 5.0.3 introduced the ability to transfer small BLOBs more efficiently (immediately upon writing, rather than deferred). `fbclient` version 5.0.2 can't use this feature.
+
+image::3.2.69.png[]
+
+If you want DataGuard to track which library versions your applications are using, you need to enable the "`Client Version Checks`" job.
+
+image::3.2.70.png[]
+
+If the `fbclient` version is older than the server version, the "`Client Version Checks`" job will issue a corresponding warning.
+
+image::3.2.71.png[]
+
+To view the list of active connections, click on the icon next to the database name.
+
+image::3.2.72.png[]
+
+This will display a list of connections to the current database. The connection with the problematic client will be highlighted in red.
+
+image::3.2.73.png[]
 
 <<<
 
