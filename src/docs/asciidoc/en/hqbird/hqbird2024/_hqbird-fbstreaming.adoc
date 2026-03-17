@@ -3,19 +3,17 @@
 
 Firebird streaming is a technology for asynchronously publishing events that occur during the analysis of the replication log.
 
-The service (daemon) `fb_streaming` is used for event processing. The service monitors for new replication log files, analyzes them and generates events that are processed by one of the plugins.
+The `fb_streaming` service (daemon) is used to process events. The `fb_streaming` service is included in the standard HQBird 2024 R2 distribution. The service monitors new replication log files, analyzes them, and generates events that are processed by one of the plugins.
 
 Available plugins:
 
-* `kafka_cdc_plugin` -- publishing CDC (Change Data Capture) events in Kafka;
-* `rabbitmq_plugin` -- publishing replication events in RabbitMQ;
-* `mongodb_events_plugin` -- saving replication events in MongoDB;
+* `kafka_cdc_plugin` -- publishing CDC (Change Data Capture) events to Kafka (included in the HQBird 2024 R2 distribution);
+* `rabbitmq_plugin` -- publishing replication events to RabbitMQ;
+* `mongodb_events_plugin` -- storing replication events in MongoDB;
 * `fts_lucene_plugin` -- automatic updating of full-text indexes without triggers (IBSurgeon Full Text Search UDR);
-* `simple_json_plugin` -- saving replication logs in JSON format.
+* `simple_json_plugin` -- saving replication logs in JSON format (included in the HQBird 2024 R2 distribution).
 
-Firebird Streaming technology is designed to work with replication logs in Firebird 4.0 format and higher. It will not work with Firebird 2.5 and 3.0 replication segments.
-
-The `fb_streaming` service and its plugins are not included in the HQBird 2024 distribution. They can be provided to our clients upon separate request.
+Plugins not included in the distribution are available upon request.
 
 == How fb_streaming works?
 
@@ -77,7 +75,7 @@ You will be shown information on installing, removing, starting and stopping the
 ================================================================================
  Firebird streaming service
 
- Copyright (c) 2023 IBSurgeon ltd.
+ Copyright (c) 2025 IBSurgeon ltd.
 ================================================================================
 
 usage: fb_streaming <command> [service_name]
@@ -174,8 +172,7 @@ General parameters of the `fb_streaming` service (daemon):
 - `logLevel` -- logging level (default info). Allowed logging levels: trace, debug, info, warning, error, critical, off.
 - `pluginDir` -- directory where `fb_streaming` plugins are located. Defaults to `$(root)/stream_plugins`. The macro substitution `$(root)` denotes the root directory of the service (daemon).
 
-Next are the task configurations. One service instance can serve several tasks at once. Each task runs in its own thread.
-A separate task is created for each directory with replication log files.
+Next are the task configurations. One service instance can serve several tasks at once. Each task runs in its own thread. A separate task is created for each directory with replication log files.
 
 Here `sourceDir_N` is the directory with replication log files. These directories must be unique. The same directory cannot be processed by more than one task.
 
