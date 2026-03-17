@@ -327,6 +327,7 @@ Also, for HQbird Enterprise, in the database widget you can see status of the re
 
 Since HQbird 2020, the database widget in HQbird also shows the encryption status of the database.
 
+[[hqbird-config-db-tnx]]
 === Database: Transactions
 
 "`Database: Transactions`" job is intended to log transactions activity. It monitors 2 important intervals: difference between Oldest Active Transaction and Next transaction and gap between Oldest Snapshot and Oldest Interesting.
@@ -1211,15 +1212,52 @@ image::3.1.28.png[]
 
 === Server: Group Transaction Monitor
 
-// TODO: Написать
+The "`Group Transaction Monitor`" job is designed to record transaction activity, similar to the <<hqbird-config-db-tnx>> job.
+
+It monitors two important intervals: the difference between the Oldest Active Transaction and the Next Transaction, and the gap between the Oldest Snapshot and the Oldest Interesting Transaction.
+
+If these intervals exceed the specified threshold, this indicates problems with transaction management.
+
+image::3.1.29.png[]
+
+The "`Group Transaction Monitor`" job has the same parameters as <<hqbird-config-db-tnx>>, plus the following additional parameters:
+
+* "`Database root dir`" -- specifies the root directory in which to search for databases for transaction marker checking.
+* "`Recursive search"` -- if this checkbox is checked, the database search is performed recursively in all subfolders of the root directory.
+* "`Include file mask`" -- a regular expression for including a database file in the list of group transaction marker checks.
+* "`Exclusion file mask`" -- a regular expression for excluding a database file from the list of group transaction marker checks.
+
+image::3.1.30.png[]
 
 === Server: Group Incremental backup
 
-// TODO: Написать
+The "`Group Incremental backup`" job is a task for scheduling and managing incremental backups in Firebird for a group of databases.
+
+In the "`Group Incremental backup`" settings dialog, you can specify the database locations, configure inclusion and/or exclusion masks to perform backups only for specific databases, and configure the process start time.
+
+image::3.1.31.png[]
+
+The "`Group Incremental backup`" job has the same parameters as <<hqbird-config-incremental-backup>>, plus the following additional parameters:
+
+* "`Database root dir`" -- specifies the root directory in which to search for databases databases for incremental backups.
+* "`Recursive search`" -- if this checkbox is checked, the database search is performed recursively in all subfolders of the root directory.
+* "`Include file mask`" -- a regular expression for including a database file in the group incremental backup list.
+* "`Exclusion file mask`" -- a regular expression for excluding a database file from the group incremental backup list.
+
+image::3.1.32.png[]
 
 === Server: Group file pump job
 
-// TODO: Написать
+The purpose of the "`Group file pump`" job is to send backup files from the master server to the replica server. In a distributed environment, where the network connection between the master and replica servers is unstable or has high latency, or where the servers are located in different geographic regions, the best method for file transfer is via FTP or FTP over SSH.
+
+image::3.1.33.png[]
+
+The "`Group file pump`" job settings are similar to <<hqbird-config-pump-files>>, but have a number of additional options:
+
+* "`Watch for files in folder`" -- specifies the directory in which to search for files to transfer.
+* "`Recursive search`" -- if checked, the file search is performed recursively in all subfolders of the root folder.
+* "`Filemask to pump`" -- a regular expression for a file to include in the transfer list.
+* "`Exclude file-mask`" -- a regular expression for excluding a file from the transfer list.
 
 <<<
 
