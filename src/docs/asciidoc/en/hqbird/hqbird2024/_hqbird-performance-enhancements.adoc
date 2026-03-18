@@ -775,3 +775,46 @@ If `WarnCountAttachments = 0`, no warnings are issued.
 If `MaxCountAttachments = 0`, connections are not blocked.
 
 For this restriction to work, you must install and configure the lightweight monitoring plugin (see above).
+
+== Settings for Working with Monitoring Tables
+
+When executing a query involving any monitoring table, a so-called system snapshot is taken. This process interrupts all connections and flushes their counters and state to shared memory. Creating a system snapshot isn't free—the more connections and the more active they are, the longer it takes to query the monitoring tables. In Firebird 5.0, monitoring has become even more expensive with the introduction of the new `MON$COMPILED_STATEMENT` table, which essentially stores the contents of a cache of copied queries from all connections.
+
+If the number of connections to the database exceeds 500, queries to the monitoring tables can take a considerable amount of time and place a significant load on the system. However, in most cases, the query is not executed against all monitoring tables, and the cost is the same as if the query were accessing all `MON$` tables. HQbird 2024R2 introduced additional configuration options that allow you to disable the populating of some `MON$` tables, simplifying monitoring queries.
+
+* `FillMonCompiledStatements` -- whether to fill data for the `MON$COMPILED_STATEMENTS` table. The default value is `true`.
+* `FillMonStatements` -- whether to fill data for the `MON$STATEMENTS` table. The default value is `true`.
+* `FillMonCallStack` -- whether to fill data for the `MON$CALL_STACK` table. The default value is `true`.
+
+These settings apply to each database individually, meaning you can set them in both `firebird.conf` and `databases.conf`. They are only available when using Firebird 5.0.
+
+== `CREATE TABLE ... AS (SELECT ...)`
+
+In HQbird 2024R2, when using Firebird 5.0.4, a new DDL statement `CREATE TABLE ... AS (SELECT ...)` is available.
+
+Allows to create table with structure derived from `SELECT` query and, optionally, fill it with data of that query.
+
+.Syntax
+[listing,subs="+quotes,attributes"]
+----
+CREATE [GLOBAL TEMPORARY] TABLE <table_name>
+    [(column_name [, ...])]
+AS (<select>)
+[WITH [NO] DATA]
+[ON COMMIT PRESERVE | DELETE ROWS]
+----
+
+Columns for new table are derived from `<select>` query in the same way as for `CREATE VIEW` statement. Column names could be set explicitly using list of names. The number of item in names list and in `<select>` list should be the same. Only data type and `NOT NULL` attribute is inherited by new columns. Any kind of expression, calculated field, etc, in `<select>` list will be represented as a single persistent field. Identity attribute also ignored.
+
+Optional `WITH [NO] DATA` clause specify if new table should be populated with data rows of `<select>` query. Default is `WITH NO DATA`. Data load happens at the very end stage of transaction commit, after all metadata-related work was done.
+
+For `GLOBAL TEMPORARY TABLE ... ON COMMIT DELETE ROWS` data is not loaded despite of `WITH DATA` clause. `<select>` query is not executed if no data should be loaded.
+
+.Creates copy of table employee and fill it with data
+[example]
+====
+[source,sql]
+----
+CREATE TABLE emp2 AS (SELECT * FROM employee) WITH DATA;
+----
+====
