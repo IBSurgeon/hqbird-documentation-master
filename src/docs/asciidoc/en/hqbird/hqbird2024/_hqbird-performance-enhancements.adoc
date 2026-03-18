@@ -818,3 +818,121 @@ For `GLOBAL TEMPORARY TABLE ... ON COMMIT DELETE ROWS` data is not loaded despit
 CREATE TABLE emp2 AS (SELECT * FROM employee) WITH DATA;
 ----
 ====
+
+== Materialized Views
+
+[NOTE]
+====
+The branch with materialized views functionality is currently in the final stages of development and testing. This feature will be included in HQbird for Firebird 5.0 in a future update.
+====
+
+*Materialized view* (MV) have properties of both persistent table and view. It is defined similar to a view and its source query is used by the engine to populate underlying MV table with data rows. It is not allowed to modify materialize view data using DML statements. The only way to update MV content is to run new `REFRESH` statement (see below). Like a regular table, MV can have indices of any kind. Unlike tables, it is not allowed to create constraints and triggers for MV.
+
+=== Create, alter and drop MV
+
+.Syntax
+[listing,subs="+quotes,attributes"]
+----
+CREATE [OR ALTER] MATERIALIZED VIEW <view_name> [(columns_names)]
+  AS <query>
+  [WITH [NO] DATA]
+
+ALTER MATERIALIZED VIEW <view_name> [(columns_names)]
+  AS <query>
+  [WITH [NO] DATA]
+----
+
+Creates new or modifies existing MV using specified query and optional list of column names. Optional `WITH DATA` clause specify that MV should be filled with data immediately after creation (altering). When `WITH NO DATA` specified, or when this clause is omitted, MV is not populated with data and remains empty. `ALTER` also drops all existing indices of MV. If regular (i.e. not materialized) view with the same name exists, error is raised.
+
+[listing,subs="+quotes,attributes"]
+----
+RECREATE MATERIALIZED VIEW <view_name> [(columns_names)]
+  AS <query>
+  [WITH [NO] DATA]
+----
+
+Drops *materialized* or *regular* view, if it exists, and creates a new *materialized* view.
+
+There is no special command to delete MV, use regular `DROP VIEW` statement to do it.
+
+=== Special commands
+
+[listing,subs="+quotes,attributes"]
+----
+ALTER MATERIALIZED VIEW <view_name> [(columns_names)]
+  AS <query>
+  TO NOT MATERIALIZED
+----
+
+Special kind of `ALTER` statement that converts *materialized* view into *regular* view with the same name. Dependent objects are not affected. All existing indices and data rows of former MV are dropped.
+
+[listing,subs="+quotes,attributes"]
+----
+ALTER  VIEW <view_name> [(columns_names)]
+  AS <query>
+  TO MATERIALIZED
+----
+
+Special kind of `ALTER` statement that converts *regular* view into *materialized* view with the same name. Dependent objects are not affected.
+
+=== Refreshing data of materialized views
+
+To update the data of a materialized view, use the following statement.
+
+[listing,subs="+quotes,attributes"]
+----
+REFRESH MATERIALIZED VIEW <view_name> [CONCURRENTLY | DROP DATA] [CASCADE]
+----
+
+Executes MV query and replaces MV data with query ResultSet. All MV indexes are updated correspondingly. This is DDL command and actual execution is deferred until `COMMIT` of the current transaction. There are few forms of this command:
+
+==== 1. Full reload in exclusive mode
+
+[listing,subs="+quotes,attributes"]
+----
+REFRESH MATERIALIZED VIEW <view_name>
+----
+
+deactivates all active indices, deletes all existing data, fill MV table with rows from MV query and activates all indices that was deactivated before. This is the fastest way of refresh, if there was many changes in tables of MV query. Note, this algorithm requires exclusive reservation of MV table to ensure no other connection attempts to query MV while it is refreshed. This is used also by `CREATE [OR ALTER]` and `RECREATE` statements for initial data load.
+
+==== 2. Update only changed rows in shared mode
+
+[listing,subs="+quotes,attributes"]
+----
+REFRESH MATERIALIZED VIEW <view_name> CONCURRENTLY
+----
+
+This second form doesn't require exclusive reservation and allows concurrent connections to run statements referencing MV while it is refreshed. In this case, engine creates two ordered cursors for MV table data and for MV query ResultSet. Then merge algorithm is used to update changed rows, insert new rows and delete rows that not exists anymore. All changes of MV rows are made under transaction control therefore it provides safe and consistent concurrent access of the MV table. Both cursors are ordered basing on columns list of unique index.
+
+*Unique index* must be built on the MV to allow this algorithm to work. Also, view query text stored in `RDB$VIEW_SOURCE` column should not be nullified as it is used by the engine to create internal merge statement.
+
+This form of `REFRESH` statement should be preferred over first one when concurrent access is required or when there was not much changes in the tables of the MV query since previous refresh.
+
+==== 3. Delete all data (exclusive mode)
+
+[listing,subs="+quotes,attributes"]
+----
+REFRESH MATERIALIZED VIEW <view_name> DROP DATA
+----
+
+This statement deletes data from MV table and indices. It is useful when DBA needs to free space occupied by MV data and indices. EX lock is required as in the first form of `REFRESH` statement.
+
+==== 4. Cascading refresh
+
+Use optional clause `CASCADE` to refresh all materialized views that given MV depends on. The refresh order ensures that each MV is handled after all MVs it depends on.
+
+* Using `CONCURRENTLY` with `CASCADE` requires that all MVs to refresh must have unique index, else error will be raised.
+* Using `DROP DATA` with `CASCADE` will delete data of all affected MVs.
+* The statement put warning with name of each MV that will be handled into status-vector. It allows to know in advance (before commit) list and order of affected MVs.
+
+=== gbak support
+
+*gbak backup* requires no special support. Data of materialized view doesn't go into backup file - same as for regular views.
+
+*gbak restore* refreshes all materialized views at the very end of restore process. MV's are refreshed in correct order, taking into account their dependencies on each other (see cascading refresh).
+
+There is new command-line switch to make `gbak` not refresh MV's : `-NO_MATVIEWS`. It could be shortened up to 4 initial letters: `-NO_M`.
+
+Corresponding option in Services API for `isc_action_svc_restore` action is `isc_spb_res_no_matviews`.
+
+Note, backup with materialized view(s) can't be restored with Firebird version that doesn't supports MV's. To migrate onto such Firebird version, use `ALTER MATERIALIZED  VIEW ... TO NOT MATERIALIZED` statement before backup. This might be improved later.
