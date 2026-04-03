@@ -821,11 +821,6 @@ CREATE TABLE emp2 AS (SELECT * FROM employee) WITH DATA;
 
 == Materialized Views
 
-[NOTE]
-====
-The branch with materialized views functionality is currently in the final stages of development and testing. This feature will be included in HQbird for Firebird 5.0 in a future update.
-====
-
 *Materialized view* (MV) have properties of both persistent table and view. It is defined similar to a view and its source query is used by the engine to populate underlying MV table with data rows. It is not allowed to modify materialize view data using DML statements. The only way to update MV content is to run new `REFRESH` statement (see below). Like a regular table, MV can have indices of any kind. Unlike tables, it is not allowed to create constraints and triggers for MV.
 
 === Create, alter and drop MV
